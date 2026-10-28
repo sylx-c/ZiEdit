@@ -1,0 +1,45 @@
+# 依赖与构建产物（/dist/ 锚定仓库根，避免忽略 public/ 内的随包资产）
+node_modules/
+/dist/
+/src-tauri/target/
+
+# 临时与日志
+/tmp/
+docs/tmp/
+*.log
+
+# 环境与密钥
+.env
+.env.*
+.npmrc
+*.key
+*.pem
+*.p12
+*.pfx
+*.kdbx
+id_rsa*
+id_ed25519*
+.zcode/
+.workbuddy/
+
+# 抓包、崩溃转储与安装包产物
+*.har
+*.pcap
+*.pcapng
+*.dmp
+*.asar
+/webview-dev/
+
+# 工具私有目录
+.claude/
+.omo/
+
+# 浏览器自动化工具残留（审计/走查时生成）
+.playwright-mcp/
+
+tests/gates/__pycache__/
+
+.opencode/
+
+# deepwork 状态（oh-my-opencode-slim）
+.slim/deepwork/

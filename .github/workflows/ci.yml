@@ -1,0 +1,81 @@
+# CI（H-4 正式感外壳）：三平台前端 + Rust 全量门禁。
+# tauri build 仅在 release 分支/tag 触发的完整作业里跑（日常 PR 跑快速门禁）。
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  frontend:
+    name: 前端（tsc + vitest）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+
+  rust:
+    name: Rust（test + clippy -D warnings + fmt）
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - name: 安装 Linux 系统依赖（tauri 构建）
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
+      - run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+      - run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
+
+  build:
+    name: tauri build（三平台安装包）
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    needs: [frontend, rust]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - name: 安装 Linux 系统依赖（tauri 构建）
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - run: npm ci
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      # 渠道（001 规则 30）：CI 产物是正式包，必须显式置 release，否则关于对话框显示「开发版」
+      - run: npx tauri build
+        env:
+          ZIEDIT_CHANNEL: release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ziedit-${{ matrix.os }}
+          path: |
+            src-tauri/target/release/bundle/**
+          if-no-files-found: warn

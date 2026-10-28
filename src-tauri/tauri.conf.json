@@ -1,0 +1,321 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ZiEdit",
+  "version": "0.1.0",
+  "identifier": "dev.ziedit.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data: asset: http://asset.localhost; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' ipc: http://ipc.localhost; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'",
+      "assetProtocol": {
+        "enable": true,
+        "scope": []
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis",
+      "dmg",
+      "app",
+      "appimage",
+      "deb",
+      "rpm"
+    ],
+    "publisher": "ZiEdit",
+    "copyright": "Copyright (c) 2026 ZiEdit Contributors. MIT License.",
+    "category": "DeveloperTool",
+    "shortDescription": "跨平台文件查看与编辑工具",
+    "longDescription": "ZiEdit：跨平台（Windows/macOS/Linux）文件查看与编辑工具。本地文件管理 + 文本/代码/Markdown/Hex 多格式查看与编辑，全程离线运行；仅在用户启用图床功能时访问用户自行配置的 S3 兼容端点。",
+    "licenseFile": "../LICENSE",
+    "resources": {
+      "../LICENSE": "LICENSE",
+      "../THIRD-PARTY-NOTICES.md": "THIRD-PARTY-NOTICES.md"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "languages": [
+          "SimpChinese",
+          "English"
+        ],
+        "displayLanguageSelector": true
+      }
+    },
+    "fileAssociations": [
+      { "ext": ["png"], "name": "PNG Image", "role": "Viewer" },
+      { "ext": ["jpg"], "name": "JPEG Image", "role": "Viewer" },
+      { "ext": ["jpeg"], "name": "JPEG Image", "role": "Viewer" },
+      { "ext": ["gif"], "name": "GIF Image", "role": "Viewer" },
+      { "ext": ["webp"], "name": "WebP Image", "role": "Viewer" },
+      { "ext": ["bmp"], "name": "BMP Image", "role": "Viewer" },
+      { "ext": ["svg"], "name": "SVG Image", "role": "Viewer" },
+      {
+        "ext": [
+          "txt"
+        ],
+        "name": "Plain Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "log"
+        ],
+        "name": "Plain Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "ini"
+        ],
+        "name": "Plain Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "cfg"
+        ],
+        "name": "Plain Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "conf"
+        ],
+        "name": "Plain Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "env"
+        ],
+        "name": "Plain Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "md"
+        ],
+        "name": "Markdown Document",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "markdown"
+        ],
+        "name": "Markdown Document",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "json"
+        ],
+        "name": "Structured Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "jsonc"
+        ],
+        "name": "Structured Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "yaml"
+        ],
+        "name": "Structured Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "yml"
+        ],
+        "name": "Structured Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "toml"
+        ],
+        "name": "Structured Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "xml"
+        ],
+        "name": "Structured Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "csv"
+        ],
+        "name": "Structured Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "tsv"
+        ],
+        "name": "Structured Text",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "c"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "h"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "cpp"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "hpp"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "cc"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "rs"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "go"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "java"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "py"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "js"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "mjs"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "ts"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "tsx"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "jsx"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "css"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "scss"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "sh"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "sql"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "html"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "htm"
+        ],
+        "name": "Source Code",
+        "role": "Editor"
+      }
+    ]
+  }
+}

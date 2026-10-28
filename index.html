@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN" class="th-paper" data-tone="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <title>ZiEdit</title>
+  </head>
+  <body>
+    <!-- 自绘标题栏（001 规则 19，决策 009：decorations:false） -->
+    <div class="titlebar" data-od-id="titlebar" data-tauri-drag-region>
+      <div class="titlebar-icon" data-tauri-drag-region>
+        <svg class="brand" viewBox="0 0 16 16" aria-hidden="true"><rect x="0.5" y="0.5" width="15" height="15" rx="3.5" fill="#1C2027"/><path d="M3.1 4.3h7.5v1.8L6.9 9.9h3.7v1.9H3.1V9.9h1.1L8 6.1H3.1Z" fill="#FFFFFF"/><rect x="11.75" y="4.6" width="1.2" height="6.8" fill="#6FA8E8"/></svg>
+      </div>
+      <span class="titlebar-text" id="titleText" data-tauri-drag-region><b>ZiEdit</b></span>
+      <div class="win-controls">
+        <button class="win-ctrl" id="winMin" title="最小化"><svg class="ic s10" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8h9"/></svg></button>
+        <button class="win-ctrl" id="winMax" title="最大化"><svg class="ic s10" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5h9v9h-9z"/></svg></button>
+        <button class="win-ctrl close" id="winClose" title="关闭"><svg class="ic s10" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+      </div>
+    </div>
+    <div class="menubar" id="menubar" data-od-id="menubar"></div>
+    <div class="toolbar" id="toolbar" data-od-id="toolbar"></div>
+    <div class="main">
+      <div class="sidebar" id="sidebar" data-od-id="sidebar"></div>
+      <div class="resize-handle" id="sbResize" title="拖动调整宽度"></div>
+      <div class="content" data-od-id="content">
+        <div class="tabs" id="tabbar"></div>
+        <div class="editor-row" id="editorRow">
+          <div class="editor-col" id="editorCol">
+            <div class="ruler" data-od-id="ruler"><div class="ruler-marks" id="rulerMarks"></div></div>
+            <div class="view" id="viewarea"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="statusbar" id="statusbar" data-od-id="statusbar"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

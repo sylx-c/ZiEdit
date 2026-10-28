@@ -1,0 +1,63 @@
+[package]
+name = "ziedit"
+version = "0.1.0"
+description = "ZiEdit - 跨平台文件查看与编辑工具"
+authors = ["ziedit"]
+edition = "2024"
+# 分发形态为桌面应用安装包，不作为 crate 发布
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This only seems to be an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "ziedit_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# 错误处理（RUST-01，审计 db528fd W2）：模块错误统一 thiserror 定义，
+# command 边界序列化为可读字符串（前端契约不变——String(err) 展示/contains 哨兵）
+thiserror = "2"
+# tray-icon：系统托盘（ADR 015）——托盘常驻（显示主窗/退出），「退出」emit 交前端同一退出判决
+tauri = { version = "2", features = ["protocol-asset", "tray-icon"] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chardetng = "0.1"
+encoding_rs = "0.8"
+regex = "1"
+sha2 = "0.10"
+sha1 = "0.10"
+md-5 = "0.10"
+crc32fast = "1"
+trash = "5"
+quick-xml = "0.37"
+zip = { version = "8", default-features = false, features = ["deflate-flate2"] }
+tauri-plugin-dialog = "2"
+# 剪贴板（#17）：桌面经插件读剪贴板，避免 WebView2 的浏览器权限弹窗；前端封装见 src/common/clipboard.ts
+tauri-plugin-clipboard-manager = "2"
+# 单实例转发（001 规则 10 v1.3，批 F #6）：再次启动/双击关联文件时把参数转发给既有实例
+tauri-plugin-single-instance = "2"
+# 深度对比批（008，ADR 010）：similar、unicode-normalization
+similar = { version = "2", features = ["bytes"] }
+unicode-normalization = "0.1"
+tauri-plugin-log = "2.10.1"
+log = "0.4"
+# 图床网络例外（009 / ADR 016）：唯一出网通道 s3_put_object / s3_get_image 的 HTTP 载体。
+# default-features 关闭（不带默认 TLS/压缩/gzip），rustls-tls 供 https；客户端禁重定向、
+# 禁代理（例外边界：只访问用户配置地址，见 src/commands/s3.rs）
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+
+
+# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
