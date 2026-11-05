@@ -1,0 +1,19 @@
+Corresponding source: Liberation Sans 1.07.4
+
+ZiEdit redistributes the four unmodified LiberationSans TrueType files included in pdfjs-dist 6.4.299. They are GPL v2 with the Liberation font exception, not SIL OFL (which applies to later Liberation releases). Full license: ../pdfjs-assets/standard_fonts/LICENSE_LIBERATION.
+
+The source archive fonts-liberation_1.07.4.orig.tar.gz is distributed alongside these notices in this directory. It contains upstream source and build materials; no font modifications were made by this task. It is retained rather than requiring recipients to rely only on an external site.
+Source URL: https://deb.debian.org/debian/pool/main/f/fonts-liberation/fonts-liberation_1.07.4.orig.tar.gz
+Version evidence: https://github.com/mozilla/pdf.js/blob/v6.4.299/external/standard_fonts/README.md
+Archive SHA-256: ad98b7498dc2992f7f0868f79b65ce4a720a3acdb63ab3f1f1cb6881117a5406
+Archive size: 2937949 bytes
+Debian signed source description: https://deb.debian.org/debian/pool/main/f/fonts-liberation/fonts-liberation_1.07.4-11.dsc
+Upstream source repository: https://github.com/liberationfonts/liberation-1.7-fonts
+
+Bundled TTF SHA-256:
+LiberationSans-Regular.ttf f8ace1f892b2bd9dc1792ba7f097fa7588f84fed48321480e04de5390828221f
+LiberationSans-Bold.ttf 361c61b82d575c5c35fd9157fda8b0194bcfcd0d88ea8521a4fb5dd53d33dddc
+LiberationSans-Italic.ttf 832b4406dbef23628800d3aaad21048534ac84d7e3ad955be83b8172ed8ef512
+LiberationSans-BoldItalic.ttf a224075ac17495ad0a3af3bc0a419ac0704a8b3fd1095456201fb9b095fc281d
+
+A future publisher must retain this source archive alongside the binary distribution and validate the final release contents. This audit verified archive provenance/hash and source-directory contents; it did not rebuild the fonts bit-for-bit. This notice makes no assertion that the font exception removes the GPL obligations of redistributing the font itself.

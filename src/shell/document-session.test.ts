@@ -1,0 +1,50 @@
+import { describe, expect, it, vi } from 'vitest';
+import { EditorState } from '@codemirror/state';
+import type { MarkdownDocumentClient } from '../markdown-view/document-client';
+import { DocumentSessionStore } from './document-session';
+
+describe('文档状态与生命周期', () => {
+  it('状态按文档归属；改名保留同一编辑状态和版本，关闭使旧回调失效', () => {
+    const store = new DocumentSessionStore();
+    const state = EditorState.create({ doc: 'unpublished', selection: { anchor: 3 } });
+    const buffer = { state, dirty: true, scrollTop: 123 };
+    store.buffers.set('old', buffer);
+    store.dirty.set('old', true);
+    store.encoding.set('old', 'GBK');
+    store.recovery.set('old', { content: 'pending', diskChanged: true });
+    store.readonly.add('old');
+    const ticket = store.capture('old');
+    store.rename('old', 'new');
+    expect(store.get('old')).toBeUndefined();
+    expect(store.buffers.get('new')).toBe(buffer);
+    expect(store.buffers.get('new')?.state.selection.main.head).toBe(3);
+    expect(store.encoding.get('new')).toBe('GBK');
+    expect(store.readonly.has('new')).toBe(true);
+    expect(store.unchanged(ticket)).toBe(true);
+    store.changed(ticket.session);
+    expect(store.unchanged(ticket)).toBe(false);
+    const beforeClose = store.capture('new');
+    store.dispose('new');
+    const reopened = store.ensure('new');
+    expect(store.unchanged(beforeClose)).toBe(false);
+    store.changed(beforeClose.session);
+    expect(reopened.revision).toBe(0);
+    expect(store.recovery.has('new')).toBe(false);
+    expect(store.buffers.has('new')).toBe(false);
+    expect(store.dirty.has('new')).toBe(false);
+  });
+  it('Markdown 客户端懒创建且只销毁一次；保留标签不受其它标签关闭影响', () => {
+    const store = new DocumentSessionStore();
+    const destroy = vi.fn();
+    const create = vi.fn(() => ({ destroy }) as unknown as MarkdownDocumentClient);
+    store.ensure('a'); store.ensure('b');
+    expect(create).not.toHaveBeenCalled();
+    expect(store.markdownFor('a', create)).toBe(store.markdownFor('a', create));
+    expect(create).toHaveBeenCalledTimes(1);
+    store.retain(new Set(['a']));
+    expect(store.get('b')).toBeUndefined();
+    expect(destroy).not.toHaveBeenCalled();
+    store.dispose('a'); store.dispose('a');
+    expect(destroy).toHaveBeenCalledTimes(1);
+  });
+});

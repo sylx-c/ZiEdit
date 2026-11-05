@@ -1,0 +1,39 @@
+/* Settings stays within the existing dialog/workbench scale and all four role palettes. */
+.settings-mask{padding:24px;align-items:center}
+.settings-dialog.ov-box{width:640px;min-width:0;max-width:100%;max-height:calc(100dvh - 48px);margin:0;padding:20px;overflow:hidden}
+.settings-dialog.ov-box>h4{margin:0 36px 10px 0;font-size:15px;line-height:22px}
+.settings-content{display:flex;flex-direction:column;min-height:0;overflow:hidden;font-size:var(--ui-fs-body,12.5px)}
+.settings-intro{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.6;flex-shrink:0}
+.settings-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:2px 6px 2px 2px}
+.settings-form{display:flex;flex-direction:column;gap:14px}
+.settings-group{min-width:0;margin:0;padding:12px 14px 6px;border:1px solid var(--border);border-radius:var(--ui-radius-md,6px);background:var(--surface)}
+.settings-group legend{padding:0 6px;color:var(--fg);font-size:12px;font-weight:600;line-height:18px}
+.settings-group-hint{margin:0 0 8px;color:var(--muted);font-size:11px;line-height:1.6}
+.settings-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(0,1.25fr);gap:12px;align-items:center;padding:8px 0}
+.settings-row+.settings-row{border-top:1px solid var(--border)}
+.settings-label{min-width:0;color:var(--fg);line-height:1.55;cursor:default}
+.settings-controls{display:flex;min-width:0;align-items:center;flex-wrap:wrap;gap:8px}
+.settings-controls input:not([type=checkbox]):not([type=color]),.settings-controls select{min-width:0;max-width:100%;width:100%;height:30px;box-sizing:border-box;padding:4px 8px;border:1px solid var(--border-strong);border-radius:var(--ui-radius-sm,3px);background:var(--bg);color:var(--fg);font:inherit}
+.settings-controls input.settings-number{width:84px}
+.settings-controls input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:var(--accent);cursor:pointer}
+.settings-controls input[type=color]{width:42px;height:28px;padding:2px;border:1px solid var(--border-strong);border-radius:var(--ui-radius-sm,3px);background:var(--bg);cursor:pointer}
+.settings-controls :disabled{opacity:.45;cursor:default}
+.settings-controls input:focus-visible,.settings-controls select:focus-visible,.settings-content button:focus-visible,.settings-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.settings-directory .settings-controls{align-items:flex-start}
+.settings-path{flex:1 0 100%;min-width:0;overflow-wrap:anywhere;color:var(--muted);font:11px/1.6 var(--mono);padding:2px 0}
+.settings-reset{display:flex;justify-content:flex-end;padding:4px 0 8px}
+.settings-footer{display:flex;justify-content:flex-end;gap:8px;flex-shrink:0;padding-top:14px;margin-top:14px;border-top:1px solid var(--border)}
+.settings-content button{font:inherit}
+.settings-content [hidden]{display:none!important}
+@media(max-width:540px){
+  .settings-mask{padding:12px}
+  .settings-dialog.ov-box{padding:16px;max-height:calc(100dvh - 24px)}
+  .settings-row{grid-template-columns:1fr;gap:6px}
+  .settings-group{padding:10px 12px 4px}
+}
+@media(max-height:520px){
+  .settings-mask{padding:12px}
+  .settings-dialog.ov-box{max-height:calc(100dvh - 24px);padding:14px}
+  .settings-intro{margin-bottom:8px}
+  .settings-footer{padding-top:10px;margin-top:10px}
+}

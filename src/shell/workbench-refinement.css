@@ -1,0 +1,18 @@
+/* Only keyboard focus and the button reset remain. Workbench layout, dimensions,
+ * grouping, overflow and visual states are owned by the original styles.css. */
+.tabs .tab:focus-visible,
+.tabs .tab-close:focus-visible,
+.tabs .tab-overflow:focus-visible,
+.statusbar .st-cell.clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* Match the original span close control after changing its semantic tag to button. */
+:where(.tabs) .tab-close {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}

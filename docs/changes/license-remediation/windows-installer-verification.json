@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "platform": "win32",
+  "installerPath": "src-tauri/target/debug/bundle/nsis/ZiEdit_1.0.1_x64-setup.exe",
+  "installerSHA256": "7252e049c062470e866613f7eb6a7d9921a296445d8b21ab4fb2d9f103d01e16",
+  "installerBytes": 101035046,
+  "method": "NSIS archive listing and isolated extraction with 7-Zip; no installer execution. Every readable legal/source payload compared to audited source, runtime EXE compared to build output, installer plugins/artwork matched audited NSIS hashes; unknown members rejected.",
+  "compressor": "Deflate (zlib)",
+  "exeComparison": {
+    "builtSHA256": "f502e2880ec5bcd7cddeefcb0d353ef2923f63a8f43120e2a64596accb6037ad",
+    "packagedSHA256": "27cb257bbd8217afd2a821fb1288af12b6107c27646ac41b55158fac9f8cc963",
+    "exactTauriBundleTypePatch": true,
+    "markerOffset": 74215696
+  },
+  "comparedFiles": 3873,
+  "plugins": [
+    {
+      "path": "LangDLL.dll",
+      "bytes": 5632,
+      "sha256": "3c8b2629048c118e4fcf80188cbcdaad3a668270e49fd95d2809feccc98fe220"
+    },
+    {
+      "path": "modern-wizard.bmp",
+      "bytes": 26494,
+      "sha256": "3ad2dc318056d0a2024af1804ea741146cfc18cc404649a44610cbf8b2056cf2"
+    },
+    {
+      "path": "nsDialogs.dll",
+      "bytes": 9728,
+      "sha256": "9c76f4d53ceee2a471c936e0899688405e1009ce962d140e9acb49ed68d114cb"
+    },
+    {
+      "path": "NSISdl.dll",
+      "bytes": 15360,
+      "sha256": "d3e61c4df837625ac0503cea5b6765a04d37fc35399899a5503b53a3108bfbf6"
+    },
+    {
+      "path": "nsis_tauri_utils.dll",
+      "bytes": 34304,
+      "sha256": "5ba143b5db4a87d32d6e7802e033330aae56cbceabe0d1e3ba41948385ad4709"
+    },
+    {
+      "path": "StartMenu.dll",
+      "bytes": 7680,
+      "sha256": "39870682e7d1c026cd2b33ca25591db28250dde17de7eb1feec404222d534ffc"
+    },
+    {
+      "path": "System.dll",
+      "bytes": 12288,
+      "sha256": "afe032f942e2ed0bf7494ec08ba813f5739fb522c640bde81d30ecaf9f894432"
+    }
+  ],
+  "legalDirectories": [
+    "font-licenses",
+    "third-party-licenses",
+    "third-party-sources",
+    "asset-provenance"
+  ],
+  "webviewBootstrapperBundled": false,
+  "vcRuntimeBundled": false,
+  "status": "passed",
+  "limitations": "Validates this Windows x64 package only; does not run installer or certify macOS/Linux/AppImage contents."
+}

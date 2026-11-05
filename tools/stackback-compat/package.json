@@ -1,0 +1,9 @@
+{
+  "name": "stackback",
+  "version": "0.0.2-ziedit.1",
+  "description": "ZiEdit-owned V8 structured stack adapter for test diagnostics",
+  "main": "index.cjs",
+  "license": "MIT",
+  "private": true,
+  "files": ["index.cjs", "LICENSE", "README.md"]
+}

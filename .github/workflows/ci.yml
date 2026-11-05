@@ -1,0 +1,141 @@
+# CI（H-4 正式感外壳）：三平台前端 + Rust 全量门禁。
+# master push 与全部 PR 均执行检查及三平台安装包构建。
+name: ci
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  frontend:
+    name: 前端（tsc + vitest）
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # (2026-10-29 ac-011) pdfjs-dist 6.4 engines 要求 Node >=22.13 或 >=24。
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+      - run: node --test scripts/build-provenance.test.mjs scripts/release-acceptance.test.mjs scripts/gate-state.test.mjs scripts/publish-release.test.mjs
+
+  rust:
+    name: Rust（test + clippy -D warnings + fmt）
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - name: 安装 Linux 系统依赖（tauri 构建）
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
+      - run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+      - run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
+
+  licenses:
+    name: 版权来源与许可（固定证据及严格门禁）
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - run: cargo fetch --locked --manifest-path src-tauri/Cargo.toml
+      - run: node scripts/sync-pdfjs-assets.mjs
+      - run: npm run license:check
+
+  build:
+    name: tauri build（三平台安装包）
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    needs: [frontend, rust, licenses]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - name: 安装 Linux 系统依赖（tauri 构建）
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - run: npm ci
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      # 渠道（001 规则 30）：CI 产物是正式包，必须显式置 release，否则关于对话框显示「开发版」
+      - run: node scripts/gen-rust-notices.mjs --check
+      - run: node scripts/build-verified.mjs --ci-validated
+        env:
+          ZIEDIT_CHANNEL: release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ziedit-${{ matrix.os }}
+          path: |
+            src-tauri/target/release/bundle/**
+            docs/tmp/phase1/build-manifest.json
+          if-no-files-found: error
+  candidate:
+    name: 草稿 Release（候选包）
+    runs-on: ubuntu-latest
+    needs: [build]
+    # v* 标签：只创建一个草稿 Release 并集中上传三平台产物。
+    # 发布步骤不再放进构建矩阵——修前三平台各自 create，竞态产生过同 tag 的多个空草稿。
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: 创建/复用草稿 Release 并上传候选包
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"
+          state=$(gh release view "$tag" --json isDraft --jq .isDraft 2>/dev/null || echo missing)
+          if [ "$state" = "false" ]; then
+            echo "Release $tag 已公开发布，禁止覆盖资产" >&2
+            exit 1
+          fi
+          if [ "$state" = "missing" ]; then
+            gh release create "$tag" --draft --generate-notes
+          fi
+          find artifacts -type f \( -name '*.exe' -o -name '*.dmg' -o -name '*.AppImage' -o -name '*.deb' -o -name '*.rpm' \) -print0 \
+            | xargs -0 gh release upload "$tag" --clobber
+          manifest=$(find artifacts -path '*ziedit-windows-latest*' -name 'build-manifest.json' | head -1)
+          if [ -n "$manifest" ]; then
+            cp "$manifest" build-manifest.json
+            gh release upload "$tag" build-manifest.json --clobber
+          fi

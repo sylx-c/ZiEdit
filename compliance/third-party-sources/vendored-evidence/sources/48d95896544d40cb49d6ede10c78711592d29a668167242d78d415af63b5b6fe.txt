@@ -1,0 +1,88 @@
+import {
+  labelHelper,
+  updateNodeBounds,
+  getNodeClasses,
+  createPathFromPoints,
+  generateCirclePoints,
+} from './util.js';
+import intersect from '../intersect/index.js';
+import type { Node } from '../../types.js';
+import { styles2String, userNodeOverrides } from './handDrawnShapeStyles.js';
+import rough from 'roughjs';
+import type { D3Selection } from '../../../types.js';
+
+export async function curvedTrapezoid<T extends SVGGraphicsElement>(
+  parent: D3Selection<T>,
+  node: Node
+) {
+  const { labelStyles, nodeStyles } = styles2String(node);
+  node.labelStyle = labelStyles;
+  const nodePadding = node.padding ?? 0;
+  const labelPaddingX = node.look === 'neo' ? 16 : nodePadding;
+  const labelPaddingY = node.look === 'neo' ? 12 : nodePadding;
+  const minWidth = 20,
+    minHeight = 5;
+  const { shapeSvg, bbox } = await labelHelper(parent, node, getNodeClasses(node));
+  const h = Math.max(minHeight, bbox.height + labelPaddingY * 2, node?.height ?? 0);
+  const radius = h / 2;
+  // The label is centred between a chevron of width h/4 and a cap of radius h/2, so reserve
+  // the larger of the two on both sides. The old flat 1.25 multiplier stood in for both and
+  // stopped covering them once the label was tall enough for h to dominate its width.
+  const capClearance = radius - Math.sqrt(Math.max(0, radius ** 2 - (bbox.height / 2) ** 2));
+  const sideClearance = Math.max(h / 4, capClearance);
+  const w = Math.max(
+    minWidth,
+    bbox.width + labelPaddingX * 2 + sideClearance * 2,
+    (bbox.width + labelPaddingX * 2) * 1.25,
+    node?.width ?? 0
+  );
+
+  const { cssStyles } = node;
+  // @ts-expect-error -- Passing a D3.Selection seems to work for some reason
+  const rc = rough.svg(shapeSvg);
+  const options = userNodeOverrides(node, {});
+
+  if (node.look !== 'handDrawn') {
+    options.roughness = 0;
+    options.fillStyle = 'solid';
+  }
+
+  const totalWidth = w,
+    totalHeight = h;
+  const rw = totalWidth - radius;
+  const tw = totalHeight / 4;
+
+  const points = [
+    { x: rw, y: 0 },
+    { x: tw, y: 0 },
+    { x: 0, y: totalHeight / 2 },
+    { x: tw, y: totalHeight },
+    { x: rw, y: totalHeight },
+    ...generateCirclePoints(-rw, -totalHeight / 2, radius, 50, 270, 90),
+  ];
+
+  const pathData = createPathFromPoints(points);
+  const shapeNode = rc.path(pathData, options);
+
+  const polygon = shapeSvg.insert(() => shapeNode, ':first-child');
+  polygon.attr('class', 'basic label-container outer-path');
+
+  if (cssStyles && node.look !== 'handDrawn') {
+    polygon.selectChildren('path').attr('style', cssStyles);
+  }
+
+  if (nodeStyles && node.look !== 'handDrawn') {
+    polygon.selectChildren('path').attr('style', nodeStyles);
+  }
+
+  polygon.attr('transform', `translate(${-w / 2}, ${-h / 2})`);
+
+  updateNodeBounds(node, polygon);
+
+  node.intersect = function (point) {
+    const pos = intersect.polygon(node, points, point);
+    return pos;
+  };
+
+  return shapeSvg;
+}

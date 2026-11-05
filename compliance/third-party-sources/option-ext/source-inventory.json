@@ -1,0 +1,42 @@
+[
+  {
+    "path": ".cargo_vcs_info.json",
+    "bytes": 94,
+    "sha256": "a39230404ac7fee558f4bb1de8449a6aeafcc064d63228bcc32428e0e4366dd8"
+  },
+  {
+    "path": ".gitignore",
+    "bytes": 36,
+    "sha256": "2af33de9c3bbcf406c0258dc6c860f3274508525636089c6356611dc46b5175b"
+  },
+  {
+    "path": "Cargo.toml",
+    "bytes": 866,
+    "sha256": "ecd67cb17a0586f1406b7d494ef93191ed8ebf149db46667a7778052d94e1e6c"
+  },
+  {
+    "path": "Cargo.toml.orig",
+    "bytes": 399,
+    "sha256": "202b034590ddf9857aaa639982f7fa8d0b2d36abc4e8223b0211bcd104e34180"
+  },
+  {
+    "path": "LICENSE.txt",
+    "bytes": 16727,
+    "sha256": "66a3107d5ad6a058aab753eaac2047ccb2ed0e39465dd0fe5844da3e300d5172"
+  },
+  {
+    "path": "README.md",
+    "bytes": 1602,
+    "sha256": "4778f769203e879f816c7b8538f427dd542755fe2efde9ee2193815b199c8648"
+  },
+  {
+    "path": "src/impl.rs",
+    "bytes": 490,
+    "sha256": "2f0b6f0421c4d37b1a8f0412cf71e9720cb8c5ddcec61ac802474e40ab8a3f9b"
+  },
+  {
+    "path": "src/lib.rs",
+    "bytes": 2397,
+    "sha256": "5a0a1fb2ca896a06bcbc32024c8fe64be682170585be6313ba3ff2a87672d1fc"
+  }
+]

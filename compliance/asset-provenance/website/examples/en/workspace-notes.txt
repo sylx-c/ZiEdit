@@ -1,0 +1,36 @@
+WORKSPACE NOTES
+===============
+
+A fresh sample written for the ZiEdit website capture.
+All names and tasks are fictional. No customer or project data is included.
+
+Today's work
+------------
+09:00  Gather short notes in one local file.
+10:30  Review the task list and give each item a clear next step.
+14:00  Check a small code example from input to output.
+16:30  Write useful context back into the document.
+
+Working agreements
+------------------
+[ ] Record facts in short sentences.
+[x] Use plain text for quick notes and Markdown for structured explanations.
+[x] Keep code examples close to the text that explains them.
+[ ] Change one thing at a time so the result is easy to review.
+
+A small inventory
+-----------------
+Category       File                       State
+Notes          workspace-notes.txt        Organized
+Code           task-list.ts               In review
+Guide          writing-guide.md           Updated
+
+These files stay on the local machine.
+The next session can continue from the same place.
+
+When returning
+--------------
+Read the last useful paragraph before adding another section.
+If one sentence explains the point, let it stand on its own.
+
+Leave a little space for an idea that is still taking shape.

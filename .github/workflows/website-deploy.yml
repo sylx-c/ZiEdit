@@ -1,0 +1,32 @@
+# 官网部署：website/ 变更（或手动触发）→ 部署到 gh-pages（GitHub Pages）。
+name: website-deploy
+
+on:
+  push:
+    branches: [master]
+    paths: ['website/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    name: 部署官网到 gh-pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 发布 website/ 到 gh-pages
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tmp=$(mktemp -d)
+          cp -r website "$tmp/site"
+          cd "$tmp/site"
+          rm -f README.md
+          git init -q -b gh-pages .
+          git add -A
+          git -c user.name="${GITHUB_ACTOR}" -c user.email="239706809+sylx-c@users.noreply.github.com" commit -qm "site: deploy website (auto)"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages:gh-pages

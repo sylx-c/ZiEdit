@@ -1,0 +1,32 @@
+[
+  {
+    "path": ".cargo_vcs_info.json",
+    "bytes": 94,
+    "sha256": "5b1c95547aaba08b15aac1a0d0bfdf2c27665d4305e89942c30418ec89d57680"
+  },
+  {
+    "path": "Cargo.toml",
+    "bytes": 1030,
+    "sha256": "f6316d9ba867b8cdcdc39142bcc1690f769cc54e41c4425b96fe33ee442e11b5"
+  },
+  {
+    "path": "Cargo.toml.orig",
+    "bytes": 515,
+    "sha256": "ed114f7b0c4ad0bed69fa6e793d1c89f8d2cc342fc1dc1319683519e6ef27b28"
+  },
+  {
+    "path": "LICENSE",
+    "bytes": 16725,
+    "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+  },
+  {
+    "path": "README.md",
+    "bytes": 366,
+    "sha256": "e1b5c123e213af40f2fd6ae3e138208007827e6ad33bee7321ad8b58a436d0ad"
+  },
+  {
+    "path": "src/lib.rs",
+    "bytes": 6024,
+    "sha256": "3ab8d9a808725e9bc1972cc385be659ebf786bb17c45f7ad2c3b63fd3973b39d"
+  }
+]

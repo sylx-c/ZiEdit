@@ -1,0 +1,362 @@
+{
+  "schema": 1,
+  "scope": "All font files under public plus generated mathematical SVG glyphs; OS-provided fonts are not redistributed.",
+  "readableNotices": [
+    {
+      "path": "public/font-licenses/OFL-JetBrainsMono.txt",
+      "bytes": 4399,
+      "sha256": "30f0c136e3c88e422d0791acd97238870f9054a9729bc34cf2ff0d4ed8cac4ad"
+    },
+    {
+      "path": "public/font-licenses/OFL-STIX.txt",
+      "bytes": 4882,
+      "sha256": "bec17cee6412788db45fd2644b301afbc99cc5d372ddd3345dc4a7bfdefb9f04"
+    },
+    {
+      "path": "public/font-licenses/Apache-MathJax.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "public/font-licenses/NOTICE-MathJax-STIX2.txt",
+      "bytes": 1836,
+      "sha256": "8b03a054210487f0a4e7ba6843beab8c56b2d74a6ad7669cc6fb3d46977c0345"
+    },
+    {
+      "path": "public/font-licenses/BSD-Foxit.txt",
+      "bytes": 1553,
+      "sha256": "b578cdd2345840ada550bd12519533812320d5f1d21cf4c1c7e1b1b0a31c98b7"
+    },
+    {
+      "path": "public/font-licenses/GPL-Liberation.txt",
+      "bytes": 22154,
+      "sha256": "d2c4d5b3e115a519cb58eb691aa64538397e2611f9ebe801392cf9667997e7dc"
+    },
+    {
+      "path": "public/font-licenses/mathjax-stix2-definition.ts.txt",
+      "bytes": 26597,
+      "sha256": "5318dda0e143b8e731e2a65c140a2b0402ef99f2d2bd353804cae163ebe1e156"
+    }
+  ],
+  "groups": [
+    {
+      "name": "JetBrains Mono 2.304 derivatives",
+      "license": "OFL-1.1",
+      "source": "https://github.com/JetBrains/JetBrainsMono/releases/tag/v2.304",
+      "files": [
+        {
+          "path": "public/fonts/JetBrainsMono-Bold.woff2",
+          "bytes": 94588,
+          "sha256": "c503cc5ec5f8b2c7666b7ecda1adf44bd45f2e6579b2eba0fc292150416588a2"
+        },
+        {
+          "path": "public/fonts/JetBrainsMono-Italic.woff2",
+          "bytes": 95864,
+          "sha256": "cb6a1b246318ed3885d7dffa14a2609297fe80e9b8e500bea33b52fa312a36a4"
+        },
+        {
+          "path": "public/fonts/JetBrainsMono-Regular.woff2",
+          "bytes": 92164,
+          "sha256": "a9cb1cd82332b23a47e3a1239d25d13c86d16c4220695e34b243effa999f45f2"
+        }
+      ],
+      "notices": [
+        {
+          "path": "public/fonts/OFL-LICENSE.txt",
+          "bytes": 4399,
+          "sha256": "30f0c136e3c88e422d0791acd97238870f9054a9729bc34cf2ff0d4ed8cac4ad"
+        }
+      ]
+    },
+    {
+      "name": "MathJax STIX2 4.1.3 derived glyphs",
+      "license": "OFL-1.1 (glyphs); Apache-2.0 (code)",
+      "source": "https://registry.npmjs.org/@mathjax/mathjax-stix2-font/4.1.3",
+      "files": [
+        {
+          "path": "public/renderers/font/svg.js",
+          "bytes": 569128,
+          "sha256": "80ac83bb3b2bd40d1a2593ad56805ac2efd34c2262260c9c8859594a76f5a466"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/accents-other.js",
+          "bytes": 67176,
+          "sha256": "d0667a1e4c88a8bf76c894e02763cabae3831bbf47bb3964e91dbb94bb6dd926"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/accents.js",
+          "bytes": 23976,
+          "sha256": "7c34c90b22c33ef00041f36c67614a1aceddfef47f4cfe695ef49b53d777a5f6"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/arrows.js",
+          "bytes": 74027,
+          "sha256": "e2f263bd44384345fe0bd644830f70d6fff64b47f92cb40b0f763b57586ae9b0"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/calligraphic.js",
+          "bytes": 51551,
+          "sha256": "9219e5e1bef6561d0dd62a54847c55b1d4c3fd230f665798aba2d16766f974f9"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/cyrillic.js",
+          "bytes": 170328,
+          "sha256": "02225ce59374c316445b6937afc70ed4b36e100f532fa237383ccbbdde83808d"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/dingbats.js",
+          "bytes": 136706,
+          "sha256": "7b623ac81647cecada495b4a132427a18a70f3049c2c81266168744df398053c"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/double-struck.js",
+          "bytes": 20038,
+          "sha256": "065d0bbf855df571a2ac33258d18301919a0ed06409aef2c4373daeb11ba0549"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/enclosed.js",
+          "bytes": 99854,
+          "sha256": "bb72ffae1208953e9d642c3dff626758cd3d998ec1b435f5be678006faada7a0"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/fraktur.js",
+          "bytes": 55656,
+          "sha256": "7d0ab8696323652129da0812f0210f421a6e09db5fd255063383930374b1ac6f"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/greek.js",
+          "bytes": 48390,
+          "sha256": "73b7193aa05b9edb724cc7fb061236468aa4b8c29aace9775825873d3df2fd5a"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/latin-b.js",
+          "bytes": 202449,
+          "sha256": "2987e7fcbc5b78f30a812d860cfb670bba47e43c5bb732a0105e1376ba27b2ee"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/latin-bi.js",
+          "bytes": 218735,
+          "sha256": "bb83549d0467ba37b54039425c7ab468a0fab8a07b623f4be90537ca69c54e86"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/latin-i.js",
+          "bytes": 218815,
+          "sha256": "4dbf31b8678624c5c2a6927df7b6f653f89a0e2d4efbb62ecd53f33ab3cab13c"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/latin.js",
+          "bytes": 201236,
+          "sha256": "305d8ab3305bd63d7211e8679085e7abd300ae881ffe4e162a990ebe4ead41f9"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/math.js",
+          "bytes": 96899,
+          "sha256": "1797c3aa5ad00b0c2cfe9d37b46f100c08c702fad10c6c4b6a3069b081ede497"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/monospace.js",
+          "bytes": 34724,
+          "sha256": "07c2400122acf1ab7018c48072efb3124f68f4a36168eb0c6eb19b55a629e6a8"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/phonetics.js",
+          "bytes": 173188,
+          "sha256": "301868d543d604494b88904b1c69a0e3942ed3de3c612d9e124e012da8fe3997"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/sans-serif.js",
+          "bytes": 66282,
+          "sha256": "fc6b4956c800aaf4962ff8fc1a7047c5f2e3684ea850fe57296953c6f0b14b2b"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/script.js",
+          "bytes": 65168,
+          "sha256": "ae8d25be76d770543f5c89a7ab99e454a193fb1c8a7e9ac1eeb0d0d7c33c6197"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/shapes.js",
+          "bytes": 233495,
+          "sha256": "056d93d237c2594fe2d2020875c2e7a837894aa6b340b386876e0343504ddd6d"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/stretchy.js",
+          "bytes": 40242,
+          "sha256": "e4e5b0113fddba9989424504fab7b557c1ec62d0e5684a9214289292e3d2490e"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/symbols-other.js",
+          "bytes": 118419,
+          "sha256": "8cfb866f6d30330ce3ba6dc1cf25c8c93d41d5dbd7fc18e83f9a9b01c7d97401"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/symbols.js",
+          "bytes": 119770,
+          "sha256": "c511a02c697f7f535bfc4c0daa4b08c120ecee9ebc06f3566323c9751086acc4"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/upright.js",
+          "bytes": 42076,
+          "sha256": "59bb6af6792f4c874fb1d68bd8b82242ec6e5a3c012d7c7e58b26ca1cd7347ad"
+        },
+        {
+          "path": "public/renderers/font/svg/dynamic/variants.js",
+          "bytes": 25331,
+          "sha256": "29ab646c3a6371484304508058b641c5187138f1fbf4714d20932846e59a743b"
+        }
+      ],
+      "notices": [
+        {
+          "path": "public/renderers/font/LICENSE",
+          "bytes": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "public/renderers/font/OFL-STIX.txt",
+          "bytes": 4882,
+          "sha256": "bec17cee6412788db45fd2644b301afbc99cc5d372ddd3345dc4a7bfdefb9f04"
+        },
+        {
+          "path": "public/renderers/font/NOTICE.txt",
+          "bytes": 1836,
+          "sha256": "8b03a054210487f0a4e7ba6843beab8c56b2d74a6ad7669cc6fb3d46977c0345"
+        }
+      ]
+    },
+    {
+      "name": "PDF Foxit standard fonts",
+      "license": "BSD-3-Clause",
+      "source": "https://github.com/mozilla/pdf.js/tree/v6.4.299/external/standard_fonts",
+      "files": [
+        {
+          "path": "public/pdfjs-assets/standard_fonts/FoxitDingbats.pfb",
+          "bytes": 29513,
+          "sha256": "845c752392b6c914fb989c75a08b7792b88f542d2499042ef2889f8c814a16ed"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/FoxitFixed.pfb",
+          "bytes": 17597,
+          "sha256": "b6c8fe53f134b8b6d4578cd2d544df4cee9624c4efa8d51a560fb40ea296101b"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/FoxitFixedBold.pfb",
+          "bytes": 18055,
+          "sha256": "f1b7159702973f54fc86254ea38bcf3712b2a736eb3a0995751e9f4bb45ad603"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/FoxitFixedBoldItalic.pfb",
+          "bytes": 19151,
+          "sha256": "8a000945843bd31add06aee63bf9fd41b7578b4f3242a4b7cd46349ad9d24d4d"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/FoxitFixedItalic.pfb",
+          "bytes": 18746,
+          "sha256": "5007faf8320fa1fcc08b8894b356ad976f60b992ba29ee5272578bbdebaf3876"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/FoxitSerif.pfb",
+          "bytes": 19469,
+          "sha256": "4f57d2b9d884af8f907bf22df6019b52d86cbf6214fdbd02b1ae05472a543f35"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/FoxitSerifBold.pfb",
+          "bytes": 19395,
+          "sha256": "0bdf4b04e964139818d51eda03d566ba999fc3ba2421b1c6c51f9dc969022e80"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/FoxitSerifBoldItalic.pfb",
+          "bytes": 20733,
+          "sha256": "a406cac82583bf98175cb62c87ed5e95c45fbb34eece63a10b0a13e793cb2e10"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/FoxitSerifItalic.pfb",
+          "bytes": 21227,
+          "sha256": "610ae0687198045c4db5d1a6650fd5e92536631706382eb8b72e38df578d0ae9"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/FoxitSymbol.pfb",
+          "bytes": 16729,
+          "sha256": "47967d055530e7357088a08403115425643ec2cdfd6201ba8af0fbd7116c1539"
+        }
+      ],
+      "notices": [
+        {
+          "path": "public/pdfjs-assets/standard_fonts/LICENSE_FOXIT",
+          "bytes": 1553,
+          "sha256": "b578cdd2345840ada550bd12519533812320d5f1d21cf4c1c7e1b1b0a31c98b7"
+        }
+      ]
+    },
+    {
+      "name": "PDF Liberation Sans 1.07.4",
+      "license": "GPL-2.0 WITH Liberation-font-exception",
+      "source": "https://github.com/mozilla/pdf.js/blob/v6.4.299/external/standard_fonts/README.md",
+      "files": [
+        {
+          "path": "public/pdfjs-assets/standard_fonts/LiberationSans-Bold.ttf",
+          "bytes": 137052,
+          "sha256": "361c61b82d575c5c35fd9157fda8b0194bcfcd0d88ea8521a4fb5dd53d33dddc"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/LiberationSans-BoldItalic.ttf",
+          "bytes": 135124,
+          "sha256": "a224075ac17495ad0a3af3bc0a419ac0704a8b3fd1095456201fb9b095fc281d"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/LiberationSans-Italic.ttf",
+          "bytes": 162036,
+          "sha256": "832b4406dbef23628800d3aaad21048534ac84d7e3ad955be83b8172ed8ef512"
+        },
+        {
+          "path": "public/pdfjs-assets/standard_fonts/LiberationSans-Regular.ttf",
+          "bytes": 139512,
+          "sha256": "f8ace1f892b2bd9dc1792ba7f097fa7588f84fed48321480e04de5390828221f"
+        }
+      ],
+      "notices": [
+        {
+          "path": "public/pdfjs-assets/standard_fonts/LICENSE_LIBERATION",
+          "bytes": 22154,
+          "sha256": "d2c4d5b3e115a519cb58eb691aa64538397e2611f9ebe801392cf9667997e7dc"
+        },
+        {
+          "path": "compliance/third-party-sources/LIBERATION-SOURCE.txt",
+          "bytes": 1891,
+          "sha256": "d7ef02f5e96c75bfe5d8390c6d3f718872043a117c72567792c5338dea1ae5fc"
+        },
+        {
+          "path": "compliance/third-party-sources/fonts-liberation_1.07.4.orig.tar.gz",
+          "bytes": 2937949,
+          "sha256": "ad98b7498dc2992f7f0868f79b65ce4a720a3acdb63ab3f1f1cb6881117a5406"
+        }
+      ]
+    },
+    {
+      "name": "MathJax MJX-ZERO helper 0.1 (embedded)",
+      "license": "Apache-2.0",
+      "source": "https://github.com/mathjax/MathJax-src/blob/4.1.3/ts/output/svg/Wrappers/zero.ts",
+      "payload": {
+        "bytes": 1260,
+        "sha256": "490c6efc4c095ea7c654af1a84e0bc40fd15a9eaa232af94cb2bab6cf9efc63b"
+      },
+      "files": [
+        {
+          "path": "public/renderers/mathjax/output/svg.js",
+          "bytes": 159356,
+          "sha256": "6151d21b8205858c103642484f1ca272e3c9cbbde37d53235ac0572966ce613d"
+        }
+      ],
+      "notices": [
+        {
+          "path": "public/font-licenses/MathJax-zero-source.ts.txt",
+          "bytes": 2733,
+          "sha256": "33989895bdb5332000d5b45dcda8f68db6717ac49992f708dbb9e42cad91479d"
+        },
+        {
+          "path": "public/renderers/font/LICENSE",
+          "bytes": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    }
+  ]
+}

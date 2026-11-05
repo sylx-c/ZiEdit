@@ -1,0 +1,20 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZiEdit menu and settings component check — not a workbench preview</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/shell/menu-refinement.css"></head>
+<body><div class="menubar" id="menubar"></div><main style="padding:24px;color:var(--muted);font-size:12px"><p>菜单与设置组件检查页。此页不构造工具栏、标签栏或状态栏，不代表完整应用布局。</p><button id="settings" class="dlg-btn">设置</button></main>
+<script type="module">
+import { ActionRegistry, buildMenubar, applyTheme } from '/src/shell/chrome.ts';
+import { openContextMenu } from '/src/shell/context-menu.ts';
+import { openSettingsDialog } from '/src/shell/settings.ts';
+import { setLang } from '/src/common/i18n.ts';
+setLang('zh-CN');applyTheme('paper');
+let settings={theme:'paper',fontSize:12,autoSaveSec:15,mdDefaultMode:'ir',columnMarkers:[80,120]};
+const ctx={getSettings:()=>settings,save:value=>{settings=value;applyTheme(value.theme);},switchLanguage:setLang,clearRemembered:()=>{},browseSnapshot:async()=>null};
+const reg=new ActionRegistry();
+for(const [id,label,shortcut] of [['file.newDraft','act.newDraft','Ctrl+N'],['file.openFile','act.openFile','Ctrl+O'],['file.save','act.save','Ctrl+S'],['file.saveAs','act.saveAs','Ctrl+Shift+S']]) reg.add({id,label,shortcut,group:'file',run(){}});
+const long=Array.from({length:48},(_,i)=>({label:`Session ${i+1}`,action:'file.openFile'}));
+const menus=['fileF','editF','searchF','viewF','toolsF','helpF'].map((label,index)=>({label:'menu.'+label,entries:()=>index===0?[...reg.all().map(d=>({action:d.id})),{sep:true},{label:'会话',children:()=>long}]:[]}));
+const menubar=buildMenubar(document.querySelector('#menubar'),menus,reg);
+const contextItems=[['复制',()=>{}],['粘贴',null],'sep',['列操作',()=>{},[['填充',()=>{}],['编号',()=>{}],['求和',null]]],['长菜单',()=>{},Array.from({length:48},(_,i)=>['操作 '+(i+1),()=>{}])]];
+document.querySelector('#settings').onclick=()=>openSettingsDialog(ctx);
+document.addEventListener('contextmenu',e=>{e.preventDefault();openContextMenu(contextItems,e.clientX,e.clientY)});
+window.refinement={menubar,applyTheme,setLang,openSettings:()=>openSettingsDialog(ctx),openContext:(x,y)=>openContextMenu(contextItems,x,y)};
+</script></body></html>

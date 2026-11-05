@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "name": "elkjs",
+  "version": "0.9.3-ziedit-source.1",
+  "license": "EPL-2.0 (ELK/wrapper); original component licenses retained for embedded runtime sources",
+  "status": "SOURCE_BUILD_VERIFIED",
+  "modified": true,
+  "wrapperCommit": "a8304cf79fde75bc2ab1a89d28320f53f8637436",
+  "javaInputCommit": "62d5909f96fad541bc101ad52dabaece6b7eab7e",
+  "javaInputChanges": "Original official ELK PR955 applied; exact patch/source hashes inside archive",
+  "melkCompiler": "org.eclipse.elk:org.eclipse.elk.core.meta:0.9.1",
+  "sourceArchive": "elkjs-0.9.3-ziedit-source.1.source.tar.gz",
+  "sourceArchiveBytes": 23154050,
+  "sourceArchiveSha256": "34803a92f834e40029f5b20840a2968fa5a95b51d650843100c09ff6f4714994",
+  "sourceInventorySha256": "4ae86fbf00ef5fb54e2474150799360c01fb6124091131bbdb0ff434fe606d05",
+  "sourceFileCount": 16028,
+  "runtimeSourceContainers": 35,
+  "sourceBundleSha256": "5b7df2330222dccb754c01b5324de88bc9244cf925492851b4ded3581a02ebf0",
+  "overrideManifest": "override-manifest.json",
+  "runtimeCorrespondence": "New engine must match explicit override hashes; archive/test success alone does not bypass application installation checks.",
+  "originalGeneratedWorkerRedistributed": false,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 6209,
+      "sha256": "5d04a3180117bb0dba12bda14ae81f37d286c5092ffce791ee4117cd0da239aa",
+      "origin": "Local source/build/override provenance and instructions; no old-generated worker byte content"
+    },
+    {
+      "path": "elkjs-0.9.3-ziedit-source.1.source.tar.gz",
+      "bytes": 23154050,
+      "sha256": "34803a92f834e40029f5b20840a2968fa5a95b51d650843100c09ff6f4714994",
+      "origin": "Locally built complete fixed-input corresponding source; exact upstream commits/patches and original sources within archive"
+    },
+    {
+      "path": "layout-comparison.json",
+      "bytes": 3293,
+      "sha256": "f1d18ec98dd6f86ea66cfc1bdbf10cd3b7b06caecb72ea0b7486ce2c98c3e0b2",
+      "origin": "Local source/build/override provenance and instructions; no old-generated worker byte content"
+    },
+    {
+      "path": "override-manifest.json",
+      "bytes": 3280,
+      "sha256": "d2d2630fc10e71b015369e49fa2cbefc86dee3b22c7cd033aff250457e919583",
+      "origin": "Local source/build/override provenance and instructions; no old-generated worker byte content"
+    },
+    {
+      "path": "provenance.json",
+      "bytes": 1348,
+      "sha256": "f48db1d0a9cca1130046a78e52d52a85e0a784726d93a88ba89486bf7f772b1e",
+      "origin": "Local source/build/override provenance and instructions; no old-generated worker byte content"
+    },
+    {
+      "path": "rebuilt-js-inventory.json",
+      "bytes": 1246,
+      "sha256": "7d3768f2bc7716e1509710453ead0b23de083668ced3c3d8b0eb94e54293136b",
+      "origin": "Local source/build/override provenance and instructions; no old-generated worker byte content"
+    },
+    {
+      "path": "rebuild-verification.json",
+      "bytes": 2531,
+      "sha256": "535e428ed2a32eeb9f60c09b494d2cf7769990bdc8e4bde08f26c7f57ad58ce0",
+      "origin": "Actual second rebuild from final public source archive; nine output hashes identical"
+    }
+  ],
+  "unresolved": [],
+  "independentRebuildVerification": "rebuild-verification.json"
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "originalWrapperCommit": "a8304cf79fde75bc2ab1a89d28320f53f8637436",
+  "declaredJavaBaselineCommit": "62d5909f96fad541bc101ad52dabaece6b7eab7e",
+  "originalGeneratedInputStatus": "UNVERIFIED_JAVA_INPUT_SUPERSEDED_BY_NEW_FIXED_SOURCE_BUILD",
+  "originalArchiveHashesOnly": [
+    {
+      "path": "elk-0.9.1-62d5909f96fad541bc101ad52dabaece6b7eab7e.tar.gz",
+      "sha256": "51212e3edb105296e2ec8e288e6097d3fc124d25af98a5a64f09655aa1fca842",
+      "bytes": 9302222,
+      "origin": "https://codeload.github.com/eclipse-elk/elk/tar.gz/62d5909f96fad541bc101ad52dabaece6b7eab7e"
+    },
+    {
+      "path": "elkjs-0.9.3.npm.tgz",
+      "sha256": "b95b224bd1ab71fd40f6d9a6365c28d989745dff6b0d514407bc1eb68f2f561e",
+      "bytes": 1690280,
+      "origin": "https://registry.npmjs.org/elkjs/-/elkjs-0.9.3.tgz"
+    },
+    {
+      "path": "elkjs-a8304cf79fde75bc2ab1a89d28320f53f8637436.tar.gz",
+      "sha256": "850418c89dd35dbd94ea0100a7becbc09d320c153fda4c4ea4a88c67e12121a9",
+      "bytes": 1847454,
+      "origin": "https://codeload.github.com/kieler/elkjs/tar.gz/a8304cf79fde75bc2ab1a89d28320f53f8637436"
+    }
+  ],
+  "historicalEvidenceDistribution": "Original npm and repository archives containing unknown old-generated JS are held only under ignored development docs/tmp history, excluded from public application assets."
+}

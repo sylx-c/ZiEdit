@@ -1,0 +1,3 @@
+# Other renderer original evidence
+
+Run `node scripts/verify-other-renderers.mjs --collect` only after auditing pinned inputs; default/`--check` is offline and rejects asset drift, changed evidence or unresolved review items. MathJax distribution bytes are compared directly to the fixed official archive, and mhchemparser original Apache notice/license are preserved. Highlight custom-build and third-party language evidence is explicit; metadata conflicts and incomplete correspondence are not automatically approved. Original archives and local formatted fragments remain available for independent review. No renderer files are modified.
