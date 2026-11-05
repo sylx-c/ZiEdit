@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "EXPLICIT_AUDITED_ENGINE_REPLACEMENT",
+  "version": "0.9.3-ziedit-source.1",
+  "original": {
+    "path": "public/renderers/mermaid/chunks/mermaid.esm.min/elk-7HBNN7NY.mjs",
+    "sha256": "ae6173b625cc1ad5ac674fb95065c58235d07e9b184ae3265a447d1acf1c91fa"
+  },
+  "replacement": {
+    "path": "public/renderers/mermaid/chunks/mermaid.esm.min/elk-7HBNN7NY.mjs",
+    "sha256": "550467c5b2b15f8701bc4a81149672df15a821db87e71151e69d4aa4fe87ae74",
+    "bytes": 37677
+  },
+  "engine": {
+    "path": "public/renderers/mermaid/chunks/mermaid.esm.min/elk-ziedit-source.mjs",
+    "sha256": "64902545445d8df7c0313000c6f276dd2d30972468b201cdb9984aac5508c64b",
+    "bytes": 1605823
+  },
+  "sourceBundle": {
+    "sha256": "5b7df2330222dccb754c01b5324de88bc9244cf925492851b4ded3581a02ebf0",
+    "archive": "elkjs-0.9.3-ziedit-source.1.source.tar.gz",
+    "archiveSha256": "34803a92f834e40029f5b20840a2968fa5a95b51d650843100c09ff6f4714994"
+  },
+  "removedOriginalDeclaration": {
+    "name": "vfe",
+    "start": 634,
+    "end": 1581203,
+    "characters": 1580569,
+    "sha256": "d001a7bacedef5ea0a4995d0ef07f5c67f187f7f32d05cd2341dfb510ef48b0e",
+    "absentFromReplacementChunk": true,
+    "absentFromReplacementEngine": true
+  },
+  "preservedRenderer": {
+    "prefixBytes": 634,
+    "prefixSha256": "229fa66e6317e5ee3695c90ff2ac9c9bcad4e621d64dc52fd7fc8acbdadcca69",
+    "suffixBytes": 36958,
+    "suffixSha256": "3475e04553b8e9ca29920a19bf71bf19d8dd7b2fcbb4cd3ba7d33576adfaedf6"
+  },
+  "buildMaterials": {
+    "wrapperCommit": "a8304cf79fde75bc2ab1a89d28320f53f8637436",
+    "javaBaselineCommit": "62d5909f96fad541bc101ad52dabaece6b7eab7e",
+    "patchSha256": "7f204a6e304031b7898dca1f09865d4bb6c9b9b58bd185e56f82931ff1551ec3",
+    "modifiedGradleSha256": "1abea52ec952e825596d23003f6cdd4ded97b99dd08037b2aca04a4bd1976705",
+    "npmLockSha256": "45b4450d3fe08956cd94fb0177593ad3076f429e42d6687fd74c044b242154ca",
+    "gradleLockSha256": "e13aada9fb00b6026d42ac92bfd852390a786a8e770ed7c499839dde7f25b745",
+    "dependencyVerificationSha256": "e64012098ee528b0b7c4529a04d2741bdf37081a0fed905d626cb50ff40d3d72",
+    "exactBuildInputSnapshotSha256": "c66fd7313d0f4e6833af794436654a749725f4bb3f0305fd838580068ba23a87"
+  },
+  "functionalValidation": {
+    "algorithmCount": 12,
+    "optionCount": 224,
+    "layoutFixtures": 13,
+    "allFixtureJSONExactlyEqual": true,
+    "upstreamTestsPassing": 43,
+    "testHarnessChanges": "Windows dev-only web-worker path/VM compatibility: same newly compiled source as dataURL; pretty worker IIFE; no engine or assertion changes.",
+    "browserIntegration": {
+      "reportedBy": "Team Lead",
+      "testPage": "docs/tmp/elk-browser.html",
+      "cases": 5,
+      "passed": 5,
+      "scope": [
+        "ELK ordinary graph",
+        "ELK nested/cyclic graph",
+        "default flowchart",
+        "sequence diagram",
+        "class diagram"
+      ],
+      "newEngineActuallyRequested": true
+    }
+  },
+  "sourceManifest": "public/third-party-sources/elkjs/manifest.json",
+  "scope": "Only these two explicitly pinned runtime files may differ from the original Mermaid distribution; every other vendored file remains subject to the normal exact-file verifier.",
+  "status": "SOURCE_BUILD_AND_REPORTED_BROWSER_INTEGRATION_VERIFIED"
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "name": "option-ext",
+  "version": "0.2.0",
+  "license": "MPL-2.0",
+  "status": "SOURCE_FORM_VERIFIED",
+  "modified": false,
+  "sourceArchive": "option-ext-0.2.0.crate",
+  "archiveSha256": "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d",
+  "upstreamCommit": "272f22fc9ea1ac6b08f01704af52c4ac338df4e2",
+  "sourceInventory": "source-inventory.json",
+  "verifiedLocalCacheFileCount": 8,
+  "files": [
+    {
+      "path": "option-ext-0.2.0.crate",
+      "bytes": 7345,
+      "sha256": "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d",
+      "origin": "https://static.crates.io/crates/option-ext/option-ext-0.2.0.crate"
+    },
+    {
+      "path": "registry-metadata.json",
+      "bytes": 1558,
+      "sha256": "47d9feb8bcc4e6e4f0875576929d1ccd2022f1a0888a9be31b7a8071d69cfbac",
+      "origin": "https://crates.io/api/v1/crates/option-ext/0.2.0"
+    },
+    {
+      "path": "source-inventory.json",
+      "bytes": 1093,
+      "sha256": "f3c4a6197138d919c5aed682aadb3ac9796c86ba1f729d4ab7f020f5b4488ce3",
+      "origin": "local provenance and instructions"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3116,
+      "sha256": "92204d75d8ed660afec10d3c5228a6d31d261cfb0f55fb908d3de2aeca4244cb",
+      "origin": "local provenance and instructions"
+    }
+  ],
+  "unresolved": []
+}

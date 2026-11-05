@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "name": "Microsoft.Web.WebView2 loader",
+  "version": "1.0.3800.47",
+  "license": "BSD-3-Clause",
+  "archiveURL": "https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.3800.47/microsoft.web.webview2.1.0.3800.47.nupkg",
+  "archiveSHA256": "56c9f26bdd07916a2d1949fb58a5c7e434dfa1173577dca879206050c4e718db",
+  "archiveBytes": 8973762,
+  "crate": "webview2-com-sys 0.39.1",
+  "crateRevision": "edc2caf886175ccaebe86078c9cfe1ae2a187328",
+  "loaderFiles": [
+    {
+      "architecture": "arm64",
+      "path": "build/native/arm64/WebView2Loader.dll",
+      "cachePath": "arm64/WebView2Loader.dll",
+      "bytes": 146536,
+      "sha256": "a0de1844933a10c898f833771a85f0ab9a0e3c745d4715f63d2d9730f9416025"
+    },
+    {
+      "architecture": "arm64",
+      "path": "build/native/arm64/WebView2LoaderStatic.lib",
+      "cachePath": "arm64/WebView2LoaderStatic.lib",
+      "bytes": 10505262,
+      "sha256": "4a1ca4b518337c508aa0d778b220c6e59558fce21f4fd0d79a6ea944dd9d5208"
+    },
+    {
+      "architecture": "x64",
+      "path": "build/native/x64/WebView2Loader.dll",
+      "cachePath": "x64/WebView2Loader.dll",
+      "bytes": 160880,
+      "sha256": "86545b66cdb0603bc26b626fb9ad610cb6e71f28d468f5ea66df23b03dda96d5"
+    },
+    {
+      "architecture": "x64",
+      "path": "build/native/x64/WebView2LoaderStatic.lib",
+      "cachePath": "x64/WebView2LoaderStatic.lib",
+      "bytes": 10500472,
+      "sha256": "89c6b872783b8f6c3cedbff618adb42082d455c615453ae10cfc753f1e8f25d8"
+    },
+    {
+      "architecture": "x86",
+      "path": "build/native/x86/WebView2Loader.dll",
+      "cachePath": "x86/WebView2Loader.dll",
+      "bytes": 121448,
+      "sha256": "161dc6673084a31f64670ace8e61cb0e1b55af815b6c7c8217a0cdd8503454e2"
+    },
+    {
+      "architecture": "x86",
+      "path": "build/native/x86/WebView2LoaderStatic.lib",
+      "cachePath": "x86/WebView2LoaderStatic.lib",
+      "bytes": 10465074,
+      "sha256": "0513f7e61304321f2d91e1851475be07e091042aa3640597e660608f72521e6c"
+    }
+  ],
+  "files": [
+    {
+      "path": "LICENSE.txt",
+      "bytes": 1487,
+      "sha256": "0af8f1b807512aae39c2ac1aa4d0cae65cabecb6fd554b8439a5162a0d6eca55",
+      "source": "https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.3800.47/microsoft.web.webview2.1.0.3800.47.nupkg#LICENSE.txt"
+    },
+    {
+      "path": "NOTICE.txt",
+      "bytes": 3894,
+      "sha256": "106423785c5b7eba0a8e61d1837f2132e9c828e20ad530f565d981c1df60dd90",
+      "source": "https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.3800.47/microsoft.web.webview2.1.0.3800.47.nupkg#NOTICE.txt"
+    },
+    {
+      "path": "Microsoft.Web.WebView2.nuspec",
+      "bytes": 1367,
+      "sha256": "31e49576d10d4a5abf4318850e6d3fde457800e6228610a5854a4251af56b5ff",
+      "source": "https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.3800.47/microsoft.web.webview2.1.0.3800.47.nupkg#Microsoft.Web.WebView2.nuspec"
+    },
+    {
+      "path": "source-version-evidence.rs.txt",
+      "bytes": 12116,
+      "sha256": "69ff64b5d3612d94a19c4aed43aa923f941e9c947776021ffa9beb2ff8ce0325",
+      "source": "https://github.com/wravery/webview2-rs/blob/edc2caf886175ccaebe86078c9cfe1ae2a187328/crates/update-bindings/src/main.rs"
+    }
+  ],
+  "review": [],
+  "scope": "Exact six SDK loader DLL/static LIB files match the crate. LICENSE and NOTICE cover their free redistribution. This is not a claim that the separate installed WebView2 Runtime or all SDK implementation sources are open source."
+}

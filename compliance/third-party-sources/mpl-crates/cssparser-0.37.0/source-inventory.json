@@ -1,0 +1,122 @@
+[
+  {
+    "path": ".cargo_vcs_info.json",
+    "bytes": 94,
+    "sha256": "f962147af040486a7d5e1159d3724d7e2bd4050cf0265f1e0087a263e2a915e0"
+  },
+  {
+    "path": ".github/workflows/main.yml",
+    "bytes": 1834,
+    "sha256": "a434e6e61ff47b5b4a9460a7a5fb8726ed514bedb2f095ecf4a9bea335518e10"
+  },
+  {
+    "path": ".gitignore",
+    "bytes": 34,
+    "sha256": "0b944a5f5edfe3dca4796907e63f537a0e919630df66dca7945d51ba4e3c8051"
+  },
+  {
+    "path": "Cargo.lock",
+    "bytes": 5818,
+    "sha256": "5513b6d4307ff5b4ea29818a0ac623d8af8f1e9b8240849c45c681b29c3d41dc"
+  },
+  {
+    "path": "Cargo.toml",
+    "bytes": 1887,
+    "sha256": "0ac783c96e15668a9efd9e43c9218953c49bf1441779ea622d065d7b643c7697"
+  },
+  {
+    "path": "Cargo.toml.orig",
+    "bytes": 1295,
+    "sha256": "1b018bdc84c21092d9dfc56f33b722ee0cea01547d59821dd5eec2f3338b90e6"
+  },
+  {
+    "path": "LICENSE",
+    "bytes": 16726,
+    "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+  },
+  {
+    "path": "README.md",
+    "bytes": 2227,
+    "sha256": "95e81e8f22062ba196eb8229a749327c063620ccf31ce1dd01b7ea0529840280"
+  },
+  {
+    "path": "docs/.nojekyll",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "docs/404.html",
+    "bytes": 187,
+    "sha256": "025861f76f8d1f6d67c20ab624c6e418f4f824385e2dd8ad8732c4ea563c6a2e"
+  },
+  {
+    "path": "docs/index.html",
+    "bytes": 187,
+    "sha256": "025861f76f8d1f6d67c20ab624c6e418f4f824385e2dd8ad8732c4ea563c6a2e"
+  },
+  {
+    "path": "src/color.rs",
+    "bytes": 12537,
+    "sha256": "5d6e933cea7b1eaca4f257a682f8c3597f185e21bc64c53cf77f0c91e6ea9b84"
+  },
+  {
+    "path": "src/cow_rc_str.rs",
+    "bytes": 4696,
+    "sha256": "88edf6a4a1b3d4338885a8eacc29a9e7115d4fae0f227c9a81a4d53c5a546693"
+  },
+  {
+    "path": "src/from_bytes.rs",
+    "bytes": 2364,
+    "sha256": "1223c1ccf619735ccf7c28a8d154d516aa117fdbddcf091e2e8952e68fe53a80"
+  },
+  {
+    "path": "src/lib.rs",
+    "bytes": 4581,
+    "sha256": "0ed4b253cac886f3b365958279c5efa094f7b4bfd4e44896b6ebaf32994d6fa9"
+  },
+  {
+    "path": "src/macros.rs",
+    "bytes": 10458,
+    "sha256": "731f263f6a7a1dd41029e522b58f2c8e193ddd3243f814da588635283128cd36"
+  },
+  {
+    "path": "src/nth.rs",
+    "bytes": 4986,
+    "sha256": "86b0a3c19ecaac27ca95a97ee0f9f703b0d21f7b14c3e6d2f2ce12af78cb24a2"
+  },
+  {
+    "path": "src/parser.rs",
+    "bytes": 41309,
+    "sha256": "c6d56e8921b4cb2f02d7b9620044f0d79fc911350d73199c7797ad690b4cc79f"
+  },
+  {
+    "path": "src/rules_and_declarations.rs",
+    "bytes": 21556,
+    "sha256": "b9e2a9b8b6c52b0fc18237f71432ed37276ba274f1c8257570c704bfc05579a3"
+  },
+  {
+    "path": "src/serializer.rs",
+    "bytes": 19311,
+    "sha256": "ccc3f0e44189284b46dfad1d48ca5c21860f2c7e1c00540da5cee77e0c891275"
+  },
+  {
+    "path": "src/size_of_tests.rs",
+    "bytes": 2095,
+    "sha256": "f29de7c5cb681cb36b81d22f6b103df61e3bf1406758fa5606138dbf6b49db58"
+  },
+  {
+    "path": "src/tests.rs",
+    "bytes": 44902,
+    "sha256": "5ed73aa37e42ebb06bccd0860686504d3467ae3ddd75e513812dfaf5a83e926a"
+  },
+  {
+    "path": "src/tokenizer.rs",
+    "bytes": 48086,
+    "sha256": "0be69dc2fb909133a4e3148e1f70b5fae4328175ad49634b465f4126f5351ebd"
+  },
+  {
+    "path": "src/unicode_range.rs",
+    "bytes": 5837,
+    "sha256": "7ea876f64e2c83679e9cecccf9f332bebffe512f487da47a0c06e423c8662110"
+  }
+]

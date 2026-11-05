@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "nsisVersion": "3.13",
+  "nsisSourceCommit": "a4ba28e60bd9e7c271cd2bfc1558889ce3355653",
+  "selectedCompressor": "zlib",
+  "nsisLicense": "Zlib; full upstream COPY includes other compressor licenses, not selected",
+  "pluginVersion": "0.5.3",
+  "pluginSourceCommit": "13d9edd27b69310e108d6fbd49f90992f8a05390",
+  "pluginSelectedLicense": "MIT",
+  "method": "Fixed source COPYING compared after CRLF/LF normalization; both original byte variants retained. official Tauri plugin SHA1 pinned by tauri-cli2.12.2 upstream bundle source. Tool/stub/plugin files separately hashed. Zlib compressor chosen explicitly, no CPL LZMA compressor included.",
+  "files": [
+    {
+      "path": "NSIS-COPYING.txt",
+      "bytes": 15488,
+      "sha256": "6cc665347be5c84b76bf0fd6f85fbb0c33261e89b3408aa3e3e55dbe95e12d89",
+      "sourceURL": "https://raw.githubusercontent.com/nsis-dev/nsis/a4ba28e60bd9e7c271cd2bfc1558889ce3355653/COPYING"
+    },
+    {
+      "path": "tauri-utils-LICENSE_MIT",
+      "bytes": 1110,
+      "sha256": "1c1020fa10a6bf318717e82c911bcc54ebdfb9bb280460ae332bcb2f82f57fbe",
+      "sourceURL": "https://raw.githubusercontent.com/tauri-apps/nsis-tauri-utils/13d9edd27b69310e108d6fbd49f90992f8a05390/LICENSE_MIT"
+    },
+    {
+      "path": "tauri-utils-LICENSE_APACHE-2.0",
+      "bytes": 10174,
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "sourceURL": "https://raw.githubusercontent.com/tauri-apps/nsis-tauri-utils/13d9edd27b69310e108d6fbd49f90992f8a05390/LICENSE_APACHE-2.0"
+    },
+    {
+      "path": "NSIS-COPYING-packaged.txt",
+      "bytes": 15632,
+      "sha256": "388357c1215ff403c5ebde3a5ecd273e68f8b79a579996775245d1ee65442aba",
+      "sourceURL": "local NSIS3.13 distribution; line endings differ only"
+    }
+  ],
+  "tools": [
+    {
+      "path": "makensis.exe",
+      "bytes": 2560,
+      "sha256": "4ec390d0f96f9728507fbc2f4e91311dd90bfc6c8ddfe2159357b3651ae151c0"
+    },
+    {
+      "path": "Stubs/zlib-x86-unicode",
+      "bytes": 39936,
+      "sha256": "577beebf93003432c0104641d8a7e49ca8366253eece062dd5bec8ad2ad87a09"
+    },
+    {
+      "path": "Plugins/x86-unicode/NSISdl.dll",
+      "bytes": 15360,
+      "sha256": "d3e61c4df837625ac0503cea5b6765a04d37fc35399899a5503b53a3108bfbf6"
+    },
+    {
+      "path": "Plugins/x86-unicode/StartMenu.dll",
+      "bytes": 7680,
+      "sha256": "39870682e7d1c026cd2b33ca25591db28250dde17de7eb1feec404222d534ffc"
+    },
+    {
+      "path": "Plugins/x86-unicode/System.dll",
+      "bytes": 12288,
+      "sha256": "afe032f942e2ed0bf7494ec08ba813f5739fb522c640bde81d30ecaf9f894432"
+    },
+    {
+      "path": "Plugins/x86-unicode/nsDialogs.dll",
+      "bytes": 9728,
+      "sha256": "9c76f4d53ceee2a471c936e0899688405e1009ce962d140e9acb49ed68d114cb"
+    },
+    {
+      "path": "Plugins/x86-unicode/additional/nsis_tauri_utils.dll",
+      "bytes": 34304,
+      "sha256": "5ba143b5db4a87d32d6e7802e033330aae56cbceabe0d1e3ba41948385ad4709"
+    },
+    {
+      "path": "Bin/makensis.exe",
+      "bytes": 468992,
+      "sha256": "65343c225ec88393cc4453b0963caf63f763f42f48cb55736d51893ff2e29d4a"
+    },
+    {
+      "path": "Plugins/x86-unicode/LangDLL.dll",
+      "bytes": 5632,
+      "sha256": "3c8b2629048c118e4fcf80188cbcdaad3a668270e49fd95d2809feccc98fe220"
+    },
+    {
+      "path": "Contrib/Graphics/Wizard/win.bmp",
+      "bytes": 26494,
+      "sha256": "3ad2dc318056d0a2024af1804ea741146cfc18cc404649a44610cbf8b2056cf2"
+    }
+  ],
+  "review": []
+}

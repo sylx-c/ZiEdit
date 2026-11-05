@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZiEdit help component verification</title><link rel="stylesheet" href="/src/styles.css"></head>
+<body><div id="menubar" class="menubar"></div><div style="padding:24px;display:flex;gap:12px"><button id="shortcuts">快捷键参考</button><button id="guide">使用说明</button></div>
+<script type="module">
+import { ActionRegistry, buildMenubar, applyTheme } from '/src/shell/chrome.ts';
+import { openShortcuts, openUserGuide } from '/src/shell/help.ts';
+import { setLang } from '/src/common/i18n.ts';
+setLang('zh-CN'); applyTheme('paper');
+const reg = new ActionRegistry();
+// Read literal action metadata from the app so the preview uses its real labels/key bindings.
+const source = await (await fetch('/src/shell/app.ts?raw')).text();
+const raw = JSON.parse(source.match(/export default ("(?:[^"\\]|\\.)*")/s)?.[1] ?? '""');
+for (const match of raw.matchAll(/reg\.add\(\{\s*id:\s*'([^']+)'([\s\S]*?)(?=\n\s*reg\.add\(|\n\s*\/\/ ──)/g)) {
+  const props = match[2];
+  const label = /label:\s*'([^']+)'/.exec(props)?.[1];
+  const group = /group:\s*'(file|edit|find|view|tools|help)'/.exec(props)?.[1];
+  const shortcut = /shortcut:\s*'([^']+)'/.exec(props)?.[1];
+  if (label && group && shortcut) reg.add({ id: match[1], label, group, shortcut, run() {} });
+}
+const menus = ['fileF','editF','searchF','viewF','toolsF','helpF'].map(label => ({label:'menu.'+label,entries:()=>[]}));
+buildMenubar(document.querySelector('#menubar'), menus, reg);
+document.querySelector('#shortcuts').onclick=()=>openShortcuts(reg);
+document.querySelector('#guide').onclick=()=>openUserGuide();
+window.helpPreview = { reg, openShortcuts:()=>openShortcuts(reg), openUserGuide, applyTheme, setLang };
+openShortcuts(reg);
+</script></body></html>

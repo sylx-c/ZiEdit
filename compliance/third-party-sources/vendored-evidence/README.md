@@ -1,0 +1,11 @@
+# Vendored renderer license evidence
+
+See [manifest](manifest.json) for exact embedded package versions and source evidence. Generate with `node scripts/collect-vendored-license-evidence.mjs`; verify offline with `--check`.
+
+Every upstream Mermaid module in the distribution must byte-match its installed original before any source map is trusted, except the two explicitly pinned ELK replacement modules verified by the corresponding-source gate. The ZiEdit integration loader is separately identified. The audited replacement is recorded in `explicitSourceOverride`; the old generated `elk.bundled.js` source-map content is removed from public evidence and retained only under `docs/tmp/license-historical-vendored`, with its old SHA-256 and deprecation reason in the manifest. Complete historical source maps and npm/Mermaid archives containing the old engine are not redistributed. The new engine's exact source/build inputs are distributed under `../elkjs/`.
+
+Sourcemap `.pnpm` version identifiers preserve peer and patch suffixes while selecting the actual published package version. All deduplicated sourcesContent strings for retained implementations are preserved in UTF-8 without editing, with map hash and source index; bundle license tails are also preserved verbatim, including Cytoscape embedded third-party attributions. Nonstandard and source-embedded grants are not replaced by package-level MIT labels. layout-base SVD/JamaJS attribution, modification descriptions and Apache license survive in the retained whole source. Patched fastdom/roughjs source content is explicitly identified.
+
+The PDF.js legacy modules identify core-js 3.50.0; original version and copyright context is retained alongside the exact upstream core-js license. npm archive integrity is verified against official exact-version registry metadata; the application lockfile is intentionally not used to substitute newer dependencies. Registry and archive URLs, archive SHA-256 and original license document SHA-256 are recorded.
+
+Open review items remain in the manifest. Standard source mapping and license collection do not certify complete binary correspondence, source availability obligations, trademarks/patents or rights in every embedded noncode asset. Source evidence is retained in whole files to avoid comment extraction errors caused by JavaScript regular expressions.

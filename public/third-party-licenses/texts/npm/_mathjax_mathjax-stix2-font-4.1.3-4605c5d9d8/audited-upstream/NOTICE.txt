@@ -1,0 +1,30 @@
+MathJax STIX2 4.1.3 — font distribution notice
+
+JavaScript loader/typesetting code: Apache License 2.0 (LICENSE).
+STIX-derived glyph outlines, metrics, and their modified font representations:
+SIL Open Font License 1.1 (OFL-STIX.txt). The Apache package metadata does not
+relicense STIX glyphs. The OFL copyright and conditions remain in force.
+
+Copyright (c) 2022 MathJax, Inc. (www.mathjax.org)
+Upstream STIX copyright and trademark notices are reproduced in OFL-STIX.txt,
+including STIX Fonts Project Authors, MicroPress, Elsevier, and Adobe.
+The Reserved Font Name is "TM Math". The modified font is identified by the
+MathJax name "mathjax-stix2", not that Reserved Font Name.
+
+Artifact: @mathjax/mathjax-stix2-font 4.1.3 (exact version in package-lock.json)
+Official registry: https://registry.npmjs.org/@mathjax/mathjax-stix2-font/4.1.3
+Source definition: https://cdn.jsdelivr.net/npm/@mathjax/mathjax-stix2-font@4.1.3/def/mathjax-stix2.ts
+The pinned definition loads only STIXTwoMath-Regular.otf and STIXTwoText
+Regular/Bold/Italic/BoldItalic. It does not load NewCM or MJX-Extra fonts.
+The generated SVG JS files are copied byte-for-byte from this package.
+
+Upstream OFL: https://github.com/stipub/stixfonts/blob/v2.13/OFL.txt
+The complete historical OFL notice is retained to preserve all upstream
+attribution. This does not assert that MathJax's font inputs are version 2.13;
+OFL is the applicable upstream font license, not a corresponding-source offer.
+No font source is withheld under a GPL exception: the unresolved NewCM-derived
+assets have been removed from the distributed public directory.
+
+The font is bundled as part of ZiEdit, not sold on its own. No upstream author
+or trademark is used to claim endorsement of ZiEdit. Documents rendered with
+the font do not acquire the OFL license by virtue of using the font.

@@ -1,0 +1,33 @@
+CORRESPONDING SOURCE AVAILABILITY NOTICES
+
+elkjs 0.9.3 (npm; EPL-2.0)
+The original unpinned generated ELK input is not distributed. ZiEdit uses the fixed-source 0.9.3-ziedit-source.1 rebuild with complete source, original component licenses, generated Java, exact locks, modifications and reproducibility proof published in the ZiEdit source repository at compliance/third-party-sources/elkjs/ (see repository and source archive URLs below). The npm elkjs entry is an upstream dependency identity, not the redistributed engine binary.
+Source in ZiEdit repository: https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/elkjs/
+Source archive: https://github.com/sylx-c/ZiEdit/blob/master/compliance/third-party-sources/elkjs/elkjs-0.9.3-ziedit-source.1.source.tar.gz
+
+cssparser-macros 0.7.1 (cargo; MPL-2.0)
+The exact Source Code Form of cssparser-macros 0.7.1, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/mpl-crates/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence.
+Source in ZiEdit repository: https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/mpl-crates/
+Source archive: https://static.crates.io/crates/cssparser-macros/cssparser-macros-0.7.1.crate
+
+cssparser 0.37.0 (cargo; MPL-2.0)
+The exact Source Code Form of cssparser 0.37.0, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/mpl-crates/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence.
+Source in ZiEdit repository: https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/mpl-crates/
+Source archive: https://static.crates.io/crates/cssparser/cssparser-0.37.0.crate
+
+dtoa-short 0.3.5 (cargo; MPL-2.0)
+The exact Source Code Form of dtoa-short 0.3.5, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/mpl-crates/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence.
+Source in ZiEdit repository: https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/mpl-crates/
+Source archive: https://static.crates.io/crates/dtoa-short/dtoa-short-0.3.5.crate
+
+option-ext 0.2.0 (cargo; MPL-2.0)
+The exact Source Code Form of option-ext 0.2.0, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/option-ext/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence.
+Source in ZiEdit repository: https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/option-ext/
+Source archive: https://static.crates.io/crates/option-ext/option-ext-0.2.0.crate
+
+selectors 0.38.0 (cargo; MPL-2.0)
+The exact Source Code Form of selectors 0.38.0, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/mpl-crates/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence.
+Source in ZiEdit repository: https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/mpl-crates/
+Source archive: https://static.crates.io/crates/selectors/selectors-0.38.0.crate
+
+These notices provide retrieval information for corresponding source; the complete evidence trees are published in the ZiEdit repository under compliance/. They are not a substitute for supplying any modified covered source or verifying correspondence with the distributed binary. See manifest.json for scope and limitations.

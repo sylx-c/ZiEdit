@@ -1,0 +1,122 @@
+{
+  "reference": "elkjs@0.9.3 original verified npm package",
+  "candidate": "E:\\Project\\ZiEdit\\docs\\tmp\\corresponding-source-build\\sources\\elkjs-a8304cf79fde75bc2ab1a89d28320f53f8637436\\lib\\elk.bundled.js",
+  "algorithms": {
+    "reference": [
+      "org.eclipse.elk.box",
+      "org.eclipse.elk.disco",
+      "org.eclipse.elk.fixed",
+      "org.eclipse.elk.force",
+      "org.eclipse.elk.layered",
+      "org.eclipse.elk.mrtree",
+      "org.eclipse.elk.radial",
+      "org.eclipse.elk.random",
+      "org.eclipse.elk.rectpacking",
+      "org.eclipse.elk.sporeCompaction",
+      "org.eclipse.elk.sporeOverlap",
+      "org.eclipse.elk.stress"
+    ],
+    "candidate": [
+      "org.eclipse.elk.box",
+      "org.eclipse.elk.disco",
+      "org.eclipse.elk.fixed",
+      "org.eclipse.elk.force",
+      "org.eclipse.elk.layered",
+      "org.eclipse.elk.mrtree",
+      "org.eclipse.elk.radial",
+      "org.eclipse.elk.random",
+      "org.eclipse.elk.rectpacking",
+      "org.eclipse.elk.sporeCompaction",
+      "org.eclipse.elk.sporeOverlap",
+      "org.eclipse.elk.stress"
+    ],
+    "equal": true
+  },
+  "options": {
+    "referenceCount": 224,
+    "candidateCount": 224,
+    "equal": true
+  },
+  "cases": [
+    {
+      "name": "layered chain down",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "layered cycle and parallel edges",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "compound with cross-boundary edges",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "fixed sided ports",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "disconnected graph",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "labels and edge labels",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "algorithm force",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "algorithm mrtree",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "algorithm rectpacking",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "algorithm radial",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "algorithm disco",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "algorithm sporeOverlap",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    },
+    {
+      "name": "algorithm sporeCompaction",
+      "referenceAccepted": true,
+      "candidateAccepted": true,
+      "exactOutputMatch": true
+    }
+  ],
+  "referenceShutdownError": "this.worker.terminate is not a function",
+  "candidateShutdownError": "this.worker.terminate is not a function"
+}

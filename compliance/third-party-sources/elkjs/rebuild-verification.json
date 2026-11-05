@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "status": "INDEPENDENT_PUBLIC_ARCHIVE_REBUILD_VERIFIED",
+  "sourceArchive": "elkjs-0.9.3-ziedit-source.1.source.tar.gz",
+  "sourceArchiveSha256": "34803a92f834e40029f5b20840a2968fa5a95b51d650843100c09ff6f4714994",
+  "method": "Extract final public archive into a new directory; npm ci --offline --ignore-scripts; exact verified Gradle7.2 lib --offline --dependency-verification strict; execute archive build-scripts/build-js.mjs from extracted root without source edits.",
+  "toolchain": {
+    "java": "Temurin17.0.21+9",
+    "gradle": "7.2",
+    "node": "v24.21.0"
+  },
+  "dependencyVerification": "strict",
+  "initialBuildOutputInventorySha256": "7d3768f2bc7716e1509710453ead0b23de083668ced3c3d8b0eb94e54293136b",
+  "independentBuildOutputInventorySha256": "7d3768f2bc7716e1509710453ead0b23de083668ced3c3d8b0eb94e54293136b",
+  "allNineOutputsByteIdentical": true,
+  "outputs": [
+    {
+      "path": "elk-api.d.ts",
+      "bytes": 3152,
+      "sha256": "12a419bf30c7b35e43b348d2b8d047a01a14a701767405d49aadcb53fc69927c"
+    },
+    {
+      "path": "elk-api.js",
+      "bytes": 8591,
+      "sha256": "b5866a7495d7d4731d4ec66342e2a090061f95fe9c80817846e807f0bb38a785"
+    },
+    {
+      "path": "elk-worker.d.ts",
+      "bytes": 28,
+      "sha256": "cfd7e67195b610f808ebab6ba1065cc2b1709af17309a1975a70f52f814459cc"
+    },
+    {
+      "path": "elk-worker.js",
+      "bytes": 4772726,
+      "sha256": "f4fcc4788141086356789f3f06392636952752d461e7c41fc307d231e939db32"
+    },
+    {
+      "path": "elk-worker.min.js",
+      "bytes": 1594360,
+      "sha256": "6f74524cdc1d586ea676aedcd6938f4fa76ac34cc1fd32b519f27168aeb11021"
+    },
+    {
+      "path": "elk.bundled.d.ts",
+      "bytes": 534,
+      "sha256": "e2540f67a80eed487a4851a05a8c7d89542e68bae4f2a0090c1f5e318f1e5ff9"
+    },
+    {
+      "path": "elk.bundled.js",
+      "bytes": 1605650,
+      "sha256": "5b7df2330222dccb754c01b5324de88bc9244cf925492851b4ded3581a02ebf0"
+    },
+    {
+      "path": "main.d.ts",
+      "bytes": 534,
+      "sha256": "e2540f67a80eed487a4851a05a8c7d89542e68bae4f2a0090c1f5e318f1e5ff9"
+    },
+    {
+      "path": "main.js",
+      "bytes": 2861,
+      "sha256": "f96e2e5ed6ebe8fa6f42e3e8609deed937034aa615f3e67096e3a105aed09ef8"
+    }
+  ],
+  "gradleBuildLogSha256": "d18e75a3bc59ff52fbfcbbf4332fe6985be899e68016ecf1a11940a47c4889c0",
+  "scope": "Fresh source extraction and generated outputs; cached dependency/tool archives reused and verified. This does not claim an independent network retrieval or different-OS rebuild."
+}

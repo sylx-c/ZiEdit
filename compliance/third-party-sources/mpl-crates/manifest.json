@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "license": "MPL-2.0",
+  "status": "SOURCE_FORM_VERIFIED",
+  "scope": "Exact source archives for covered crates; application notice and source-access integration are separate obligations.",
+  "packages": [
+    {
+      "name": "cssparser",
+      "version": "0.37.0",
+      "license": "MPL-2.0",
+      "status": "SOURCE_FORM_VERIFIED",
+      "modified": false,
+      "archive": "cssparser-0.37.0/cssparser-0.37.0.crate",
+      "archiveSha256": "8c9cdaae01d5ed7882b04d795e7f752f46ff52d2fa3b50a20d28c464510bba98",
+      "inventory": "cssparser-0.37.0/source-inventory.json",
+      "metadata": "cssparser-0.37.0/registry-metadata.json",
+      "upstreamCommit": "4c49486494fb24dc01390e3baca9698ef1744c71",
+      "sourceFileCount": 24,
+      "verifiedLocalCacheFileCount": 24,
+      "sourceURL": "https://static.crates.io/crates/cssparser/cssparser-0.37.0.crate",
+      "repositoryURL": "https://github.com/servo/rust-cssparser",
+      "unresolved": []
+    },
+    {
+      "name": "cssparser-macros",
+      "version": "0.7.1",
+      "license": "MPL-2.0",
+      "status": "SOURCE_FORM_VERIFIED",
+      "modified": false,
+      "archive": "cssparser-macros-0.7.1/cssparser-macros-0.7.1.crate",
+      "archiveSha256": "d045de693cb712d0b22c6a64be5b953f67b3ce00ab5ad3dd5d8b441886ab8e1a",
+      "inventory": "cssparser-macros-0.7.1/source-inventory.json",
+      "metadata": "cssparser-macros-0.7.1/registry-metadata.json",
+      "upstreamCommit": "d128a90e1203fc4afb959420d6dc5e24f77a3191",
+      "sourceFileCount": 6,
+      "verifiedLocalCacheFileCount": 6,
+      "sourceURL": "https://static.crates.io/crates/cssparser-macros/cssparser-macros-0.7.1.crate",
+      "repositoryURL": "https://github.com/servo/rust-cssparser",
+      "unresolved": []
+    },
+    {
+      "name": "dtoa-short",
+      "version": "0.3.5",
+      "license": "MPL-2.0",
+      "status": "SOURCE_FORM_VERIFIED",
+      "modified": false,
+      "archive": "dtoa-short-0.3.5/dtoa-short-0.3.5.crate",
+      "archiveSha256": "cd1511a7b6a56299bd043a9c167a6d2bfb37bf84a6dfceaba651168adfb43c87",
+      "inventory": "dtoa-short-0.3.5/source-inventory.json",
+      "metadata": "dtoa-short-0.3.5/registry-metadata.json",
+      "upstreamCommit": "2d905cdb8b2e08163dc0d015f529877fe657b4ef",
+      "sourceFileCount": 6,
+      "verifiedLocalCacheFileCount": 6,
+      "sourceURL": "https://static.crates.io/crates/dtoa-short/dtoa-short-0.3.5.crate",
+      "repositoryURL": "https://github.com/upsuper/dtoa-short",
+      "unresolved": []
+    },
+    {
+      "name": "selectors",
+      "version": "0.38.0",
+      "license": "MPL-2.0",
+      "status": "SOURCE_FORM_VERIFIED",
+      "modified": false,
+      "archive": "selectors-0.38.0/selectors-0.38.0.crate",
+      "archiveSha256": "8adfa1c298912827b8a28b223b3b874357397ae706e6190acd9bf28cee99114d",
+      "inventory": "selectors-0.38.0/source-inventory.json",
+      "metadata": "selectors-0.38.0/registry-metadata.json",
+      "upstreamCommit": "572ecba2d1600e7c3d490586692a209faf703baa",
+      "sourceFileCount": 22,
+      "verifiedLocalCacheFileCount": 22,
+      "sourceURL": "https://static.crates.io/crates/selectors/selectors-0.38.0.crate",
+      "repositoryURL": "https://github.com/servo/stylo",
+      "unresolved": [],
+      "licenseSupplement": {
+        "path": "selectors-0.38.0/MPL-2.0-supplement.txt",
+        "origin": "https://www.mozilla.org/media/MPL/2.0/index.815ca599c9df.txt",
+        "reason": "Original exact crate omits standalone LICENSE but retains MPL2.0 headers. This is the official license body supplied separately, not a replacement for upstream copyright notices and not represented as an original archived file."
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "cssparser-0.37.0/cssparser-0.37.0.crate",
+      "bytes": 56860,
+      "sha256": "8c9cdaae01d5ed7882b04d795e7f752f46ff52d2fa3b50a20d28c464510bba98",
+      "origin": "https://static.crates.io/crates/cssparser/cssparser-0.37.0.crate"
+    },
+    {
+      "path": "cssparser-0.37.0/source-inventory.json",
+      "bytes": 3357,
+      "sha256": "0d21749f8875660ad3541c8ebdab343d866adb1322a21c154a45eeb68cef441c",
+      "origin": "derived from original archive"
+    },
+    {
+      "path": "cssparser-0.37.0/registry-metadata.json",
+      "bytes": 1802,
+      "sha256": "8475c31625f0a0d07f467a0d079b8a296f55d2d5ad96340fd2be80a5636f51c4",
+      "origin": "https://crates.io/api/v1/crates/cssparser/0.37.0"
+    },
+    {
+      "path": "cssparser-macros-0.7.1/cssparser-macros-0.7.1.crate",
+      "bytes": 8197,
+      "sha256": "d045de693cb712d0b22c6a64be5b953f67b3ce00ab5ad3dd5d8b441886ab8e1a",
+      "origin": "https://static.crates.io/crates/cssparser-macros/cssparser-macros-0.7.1.crate"
+    },
+    {
+      "path": "cssparser-macros-0.7.1/source-inventory.json",
+      "bytes": 820,
+      "sha256": "becdda706124d22742d1e1a83ef04595a1acec4b2aed8e4f135088fdbaa590ce",
+      "origin": "derived from original archive"
+    },
+    {
+      "path": "cssparser-macros-0.7.1/registry-metadata.json",
+      "bytes": 1604,
+      "sha256": "5401776d45b699eec7f01a753ee27d8d992a5a2b0251ee04bbaf82bfed79fef2",
+      "origin": "https://crates.io/api/v1/crates/cssparser-macros/0.7.1"
+    },
+    {
+      "path": "dtoa-short-0.3.5/dtoa-short-0.3.5.crate",
+      "bytes": 8287,
+      "sha256": "cd1511a7b6a56299bd043a9c167a6d2bfb37bf84a6dfceaba651168adfb43c87",
+      "origin": "https://static.crates.io/crates/dtoa-short/dtoa-short-0.3.5.crate"
+    },
+    {
+      "path": "dtoa-short-0.3.5/source-inventory.json",
+      "bytes": 821,
+      "sha256": "206f54d42318612ec305949a4c936d8c02d005a1c468dd7da5a1a212aec863ae",
+      "origin": "derived from original archive"
+    },
+    {
+      "path": "dtoa-short-0.3.5/registry-metadata.json",
+      "bytes": 1555,
+      "sha256": "6eb20923c669fff681c84e69a5e84aed1355b8a5ee58d37efd42aeda26d9479b",
+      "origin": "https://crates.io/api/v1/crates/dtoa-short/0.3.5"
+    },
+    {
+      "path": "selectors-0.38.0/selectors-0.38.0.crate",
+      "bytes": 69601,
+      "sha256": "8adfa1c298912827b8a28b223b3b874357397ae706e6190acd9bf28cee99114d",
+      "origin": "https://static.crates.io/crates/selectors/selectors-0.38.0.crate"
+    },
+    {
+      "path": "selectors-0.38.0/source-inventory.json",
+      "bytes": 3031,
+      "sha256": "c548095a36c442ace754735dd7c84cc51b4b65f693be46ebfd5fdd1d4d9c3f9b",
+      "origin": "derived from original archive"
+    },
+    {
+      "path": "selectors-0.38.0/registry-metadata.json",
+      "bytes": 1628,
+      "sha256": "08b515709c071b5aa435b81cc0857df677fc26a34dce151629491cf06a0e22ae",
+      "origin": "https://crates.io/api/v1/crates/selectors/0.38.0"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5190,
+      "sha256": "f162312cd581611b9f4b574002d4baaa4b5c069241f4ecc32ce1cd41697a4008",
+      "origin": "local source acquisition instructions"
+    },
+    {
+      "path": "selectors-0.38.0/MPL-2.0-supplement.txt",
+      "bytes": 16726,
+      "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+      "origin": "https://www.mozilla.org/media/MPL/2.0/index.815ca599c9df.txt"
+    }
+  ],
+  "unresolved": []
+}

@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "capturedAt": "2026-11-05T16:48:27.229Z",
+  "origin": "New real website first-viewport capture in this remediation session. No DOM/CSS injection, composition or image resampling.",
+  "script": {
+    "path": "scripts/capture-website-assets.mjs",
+    "bytes": 16977,
+    "sha256": "9419dca03d2f59ca0b3d50dd566c96ae60e57f5b7dd450de0ceeedf0bd35ad32"
+  },
+  "browser": {
+    "path": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+    "bytes": 5453128,
+    "sha256": "d35d48b11f0439eeeddbbff0bf54856e922f5e1506a2f3098b5a808fcec4068b"
+  },
+  "browserVersion": {
+    "protocolVersion": "1.3",
+    "product": "Edg/156.0.4314.58",
+    "revision": "@7806b68d20d1c1273d5b07b4f4de18e8f5852581",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "jsVersion": "15.6.12.10"
+  },
+  "viewport": {
+    "width": 1262,
+    "height": 624,
+    "dpr": 1
+  },
+  "servedOrigin": "Ephemeral loopback static server for repository website only; no use of port 1420 or DSH.",
+  "inputs": [
+    {
+      "path": "website/README.md",
+      "bytes": 1762,
+      "sha256": "b01c471b2170b46d0c5cc0d08153f808abfec20be79e3dbddcfaf8d4a2ce271b"
+    },
+    {
+      "path": "website/favicon.svg",
+      "bytes": 227,
+      "sha256": "49c9850905de2fd64c3468693b0c62465fdb4da9b9bac1bf052f8c92f88b2e2d"
+    },
+    {
+      "path": "website/index.html",
+      "bytes": 15446,
+      "sha256": "2a83cb5693d12bdd222dd648183b9525463ddb919ab935bad8ab952d8597fdbc"
+    },
+    {
+      "path": "website/shots/en/code.png",
+      "bytes": 72767,
+      "sha256": "ca11d30531080abed0722b4522e846f85063056e026ad2a476c0a32d679f063a"
+    },
+    {
+      "path": "website/shots/en/markdown.png",
+      "bytes": 111098,
+      "sha256": "87ceabb8c4adc269f81cd9e992e83baf424fde5dd66ed965ff0b2b20313f02fb"
+    },
+    {
+      "path": "website/shots/en/text.png",
+      "bytes": 67685,
+      "sha256": "e22076ec11dc3e623756619badc8f2f6c15a7b76bff3fdc895970d8d00fd3a8c"
+    },
+    {
+      "path": "website/shots/zh/code.png",
+      "bytes": 72579,
+      "sha256": "217647b6d93fc919cd46e912f8aa4eb87be4a3c4f36d259b36418bc1576cf33a"
+    },
+    {
+      "path": "website/shots/zh/markdown.png",
+      "bytes": 130773,
+      "sha256": "cd020216e9c59850c769cde144bc1c89d13f45c851efecad7a7b32c3f0510307"
+    },
+    {
+      "path": "website/shots/zh/text.png",
+      "bytes": 67998,
+      "sha256": "90242e70b7a31cf6a8a8113d21f930a356c3d6bde5426841d70a5bb0384917f6"
+    },
+    {
+      "path": "website/site.js",
+      "bytes": 1243,
+      "sha256": "890bd538e7c6a9908f4e6371335a36baf3c9eb6daa99d640de171c9eba92121c"
+    },
+    {
+      "path": "website/styles.css",
+      "bytes": 9040,
+      "sha256": "7325bdc3b887133fd61003c5ea0f581f33615c07cbe82b8f419756d0e9d622c8"
+    },
+    {
+      "path": "website/third-party-licenses.txt",
+      "bytes": 1067,
+      "sha256": "17ac770007d4204cd1fc72a29e4573a9800f0d418431fa866e80e7284e5d16fd"
+    }
+  ],
+  "raw": {
+    "path": "compliance/asset-provenance/website/raw/og.png",
+    "bytes": 66574,
+    "sha256": "b24143d2d826bbec4924a501dbc2e3403d95696bb794bd882902c0c01e753d2d",
+    "width": 1262,
+    "height": 624
+  },
+  "published": {
+    "path": "website/og.png",
+    "bytes": 66574,
+    "sha256": "b24143d2d826bbec4924a501dbc2e3403d95696bb794bd882902c0c01e753d2d"
+  }
+}
