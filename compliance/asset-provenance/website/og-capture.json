@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "capturedAt": "2026-11-05T16:48:27.229Z",
+  "capturedAt": "2026-11-07T08:11:17.595Z",
   "origin": "New real website first-viewport capture in this remediation session. No DOM/CSS injection, composition or image resampling.",
   "script": {
     "path": "scripts/capture-website-assets.mjs",
@@ -9,15 +9,15 @@
   },
   "browser": {
     "path": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-    "bytes": 5453128,
-    "sha256": "d35d48b11f0439eeeddbbff0bf54856e922f5e1506a2f3098b5a808fcec4068b"
+    "bytes": 5073736,
+    "sha256": "d258e512aa24947cfbef0c0033d8c3cd56ecb40f7b2ad59802fa75c4e4f3324d"
   },
   "browserVersion": {
     "protocolVersion": "1.3",
-    "product": "Edg/156.0.4314.58",
-    "revision": "@7806b68d20d1c1273d5b07b4f4de18e8f5852581",
-    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
-    "jsVersion": "15.6.12.10"
+    "product": "Edg/157.0.4341.42",
+    "revision": "@7b1486be4607d53d9f93841b7c776bc525ca74b7",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+    "jsVersion": "15.7.11.4"
   },
   "viewport": {
     "width": 1262,
@@ -28,8 +28,8 @@
   "inputs": [
     {
       "path": "website/README.md",
-      "bytes": 1762,
-      "sha256": "b01c471b2170b46d0c5cc0d08153f808abfec20be79e3dbddcfaf8d4a2ce271b"
+      "bytes": 2583,
+      "sha256": "f5012ace2553cb1df0e7b70c13528d87e0da66d39c191f05812cdd8eb1d9f41d"
     },
     {
       "path": "website/favicon.svg",
@@ -38,8 +38,8 @@
     },
     {
       "path": "website/index.html",
-      "bytes": 15446,
-      "sha256": "2a83cb5693d12bdd222dd648183b9525463ddb919ab935bad8ab952d8597fdbc"
+      "bytes": 15467,
+      "sha256": "47252b3ab031fa50ce699e5d7686f9b0a05d24b0604782918fa0d9a7e0a26ffe"
     },
     {
       "path": "website/shots/en/code.png",
@@ -73,8 +73,8 @@
     },
     {
       "path": "website/site.js",
-      "bytes": 1243,
-      "sha256": "890bd538e7c6a9908f4e6371335a36baf3c9eb6daa99d640de171c9eba92121c"
+      "bytes": 1917,
+      "sha256": "694ad66d8a9d203b3bc60acf1284553e6feb6b55ae08f2904906de011c0dc179"
     },
     {
       "path": "website/styles.css",

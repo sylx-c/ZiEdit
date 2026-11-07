@@ -38,3 +38,9 @@ npx serve .
 - 用户选择保存在 `localStorage`；脚本在 `<head>` 中阻塞执行，在正文解析前恢复语言，不产生异步渲染窗口。
 - 六张截图全部预加载；所有 `<img>` 都有显式 `width="1600"` / `height="1040"`，且不使用懒加载。
 - 格式切换由原生单选框与 CSS 完成；移动导航由原生复选框与 CSS 完成。
+
+## 版本号与下载链接
+
+- 全站下载链接统一指向 `https://github.com/sylx-c/ZiEdit/releases/latest`——永远解析到最新正式 Release，发版后无需改链接，也不会出现指向不存在标签的死链。
+- 页内版本号（`.version` 元素）由 `site.js` 调用 GitHub Releases API 自动对齐最新标签；`index.html` 里写死的 `v1.0.0` 只是接口失败时的静态兜底。发新版本时**可选**同步更新静态兜底值，但漏改也不会展示错误版本。
+- 官网由 [website-deploy 工作流](../.github/workflows/website-deploy.yml) 在 master 的 `website/**` 变更时自动部署。若线上内容与 master 不一致（例如历史被重写后工作流未触发），可在 Actions 页手动触发一次 website-deploy，或推送任意 `website/**` 变更。

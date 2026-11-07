@@ -6,9 +6,31 @@
 
 全程本地运行，不需要账号，不上传数据；唯一可选的联网能力是用户自行配置的 S3 兼容图床。
 
+[![最新版本](https://img.shields.io/github/v/release/sylx-c/ZiEdit)](https://github.com/sylx-c/ZiEdit/releases/latest)
+[![许可证](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![平台](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](https://github.com/sylx-c/ZiEdit/releases/latest)
+
+<div align="center">
+<img src="website/shots/zh/markdown.png" width="832" alt="ZiEdit 主界面：Markdown 渲染预览（实际界面截图）">
+</div>
+
+<!-- 操作演示 GIF：录制 20–30 秒真实操作（如：打开大文本文件 → Markdown 分屏编辑 → 双文件对比），
+     存为 website/shots/demo.gif 后在此插入：
+     <img src="website/shots/demo.gif" width="832" alt="ZiEdit 操作演示（实际录制）"> -->
+
+**一个窗口，多种格式**：文本 / 代码 / Markdown / CSV / TSV / 图片 / docx / xlsx / PDF，外加双文件对比。
+
+| 纯文本 · 编码自动识别 | 源码 · 语法高亮 |
+|:---:|:---:|
+| <img src="website/shots/zh/text.png" width="384" alt="ZiEdit 纯文本查看（实际界面截图）"> | <img src="website/shots/zh/code.png" width="384" alt="ZiEdit 源码查看（实际界面截图）"> |
+
 ## 下载
 
-- **Windows x64**：从 [Releases](https://github.com/sylx-c/ZiEdit/releases) 页下载 NSIS 安装包（附 SHA-256 校验值）。
+<p align="center">
+<a href="https://github.com/sylx-c/ZiEdit/releases/latest"><img src="https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-Windows_x64-2ea44f?style=for-the-badge&logo=windows" alt="下载 Windows x64 安装包（前往最新 Release）"></a>
+</p>
+
+- **Windows x64**：[Releases 最新版](https://github.com/sylx-c/ZiEdit/releases/latest) 提供 NSIS 安装包（附 SHA-256 校验值）。
 - **macOS / Linux**：同一 Release 提供 dmg / AppImage / deb / rpm（CI 构建，未经实机测试；仅 Windows 经实机验证）。
 
 ## 功能特性
@@ -38,6 +60,10 @@
 
 完整的中文与英文操作说明见 [docs/USER-GUIDE.md](docs/USER-GUIDE.md)，涵盖保存恢复、PDF/Office、会话导航、日志尾随台和快捷键。
 
+## 更新日志
+
+版本变化见 [docs/CHANGELOG.md](docs/CHANGELOG.md)；各版本安装包与 SHA-256 校验值见 [Releases](https://github.com/sylx-c/ZiEdit/releases)。
+
 ## 从源码构建
 
 工程版本 1.0.0。环境要求：
@@ -48,7 +74,7 @@
 - macOS：Xcode Command Line Tools；Windows：WebView2（系统自带或自动安装）
 
 ```bash
-git clone <仓库地址>
+git clone https://github.com/sylx-c/ZiEdit.git
 cd ZiEdit
 npm ci
 npm run tauri dev      # 开发运行
