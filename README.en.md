@@ -6,10 +6,32 @@ A cross-platform, offline-first desktop file viewer and editor for Windows / mac
 
 Everything runs locally — no account required, no data uploaded. The only optional network feature is an S3-compatible image host that you configure yourself.
 
+[![Latest release](https://img.shields.io/github/v/release/sylx-c/ZiEdit)](https://github.com/sylx-c/ZiEdit/releases/latest)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](https://github.com/sylx-c/ZiEdit/releases/latest)
+
+<div align="center">
+<img src="website/shots/en/markdown.png" width="832" alt="ZiEdit main window: rendered Markdown preview (actual interface)">
+</div>
+
+<!-- Demo GIF: record a 20–30 s clip of real usage (e.g. open a large text file → split-screen Markdown editing → two-file comparison),
+     save it as website/shots/demo.gif and insert here:
+     <img src="website/shots/demo.gif" width="832" alt="ZiEdit demo (actual recording)"> -->
+
+**One window, many formats**: text / code / Markdown / CSV / TSV / images / docx / xlsx / PDF, plus two-file comparison.
+
+| Plain text · automatic encoding detection | Source code · syntax highlighting |
+|:---:|:---:|
+| <img src="website/shots/en/text.png" width="384" alt="ZiEdit plain-text view (actual interface)"> | <img src="website/shots/en/code.png" width="384" alt="ZiEdit source view (actual interface)"> |
+
 ## Download
 
-- **Windows x64**: grab the NSIS installer (SHA-256 checksum included) from the [Releases](https://github.com/sylx-c/ZiEdit/releases) page.
-- **macOS / Linux**: the same Release provides dmg / AppImage / deb / rpm packages (CI builds, untested on real machines; only Windows has been verified on real hardware).
+<p align="center">
+<a href="https://github.com/sylx-c/ZiEdit/releases/latest"><img src="https://img.shields.io/badge/Download-Windows_x64-2ea44f?style=for-the-badge&logo=windows" alt="Download the Windows x64 installer (latest release)"></a>
+</p>
+
+- **Windows x64**: the [latest release](https://github.com/sylx-c/ZiEdit/releases/latest) provides the NSIS installer (SHA-256 checksum included).
+- **macOS / Linux**: the same release provides dmg / AppImage / deb / rpm packages (CI builds, untested on real machines; only Windows has been verified on real hardware).
 
 ## Features
 
@@ -37,6 +59,10 @@ Everything runs locally — no account required, no data uploaded. The only opti
 ## User guide
 
 Read the bilingual [User Guide](docs/USER-GUIDE.md#ziedit-user-guide) for saving and recovery, PDF/Office viewing, sessions, log tailing, shortcuts and other common tasks.
+
+## Changelog
+
+See [docs/CHANGELOG.md](docs/CHANGELOG.md) for version history, and [Releases](https://github.com/sylx-c/ZiEdit/releases) for per-release packages and SHA-256 checksums.
 
 ## Build from source
 
