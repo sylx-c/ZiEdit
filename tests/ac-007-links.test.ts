@@ -207,6 +207,21 @@ describe('AC 本地图片解析（R1）', () => {
     resolveLocalImages(root, null);
     expect(root.querySelector('img')!.getAttribute('src')).toBe('a.png');
   });
+  it('反斜杠 UNC 不授权，文档所在共享上的相对图仍授权', async () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<img src="\\\\attacker\\share\\a.png"><img src="ok.png">';
+    resolveLocalImages(root, '//nas/docs');
+    await vi.waitFor(() => expect(zassetAllow).toHaveBeenCalledWith('//nas/docs/ok.png'));
+    expect(zassetAllow).not.toHaveBeenCalledWith(expect.stringMatching(/attacker/i));
+    expect(root.querySelector('img')!.dataset.mdBroken).toBe('1');
+    expect(root.querySelector('img')!.getAttribute('src')).toBeNull();
+  });
+  it('盘符绝对路径仍授权（草稿贴图与显式本地图）', async () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<img src="C:/images/a.png">';
+    resolveLocalImages(root, 'C:/docs');
+    await vi.waitFor(() => expect(zassetAllow).toHaveBeenCalledWith('C:/images/a.png'));
+  });
 });
 
 describe('AC 离线渲染接管与未随包块降级', () => {

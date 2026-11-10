@@ -2029,7 +2029,7 @@ export async function boot(): Promise<void> {
       }
       if (mode === 'wysiwyg') {
         // 超限守卫（007 规则 6：超 IR 上限回源码——≤10MB 即编辑面，>10MB 流式查看面）
-        // 草稿无磁盘大小可查，跳过探测（内容承载于编辑缓冲，天然受 EDIT_LIMIT 约束）
+        // 草稿无磁盘大小可查。草稿始终可编辑，保存时由 SAVE_MAX_BYTES 拦住无界正文。
         // Pass 1：IR 模块加载与大小探测并行；加载失败走既有打开失败提示
         const isDraft = tab.path.startsWith('draft://');
         const livePreviewReady = Promise.all([loadLivePreview(), loadPreviewKit()]).then(([live]) => live).catch(err => err as unknown as Error);

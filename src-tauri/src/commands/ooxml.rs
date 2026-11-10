@@ -61,6 +61,7 @@ fn publish_entry(
 /// 再二次加锁经 [`publish_entry`] 做失效校验 + 淘汰 + 插入；
 /// len/mtime 失效语义与 4 份淘汰上限不变。
 fn load(registry: &OoxmlRegistry, path: &str, kind: u8) -> Result<Arc<Content>, ZiEditError> {
+    crate::paths::reject_device_path(path)?;
     let meta = std::fs::metadata(path)?;
     let modified = meta.modified().ok();
     {

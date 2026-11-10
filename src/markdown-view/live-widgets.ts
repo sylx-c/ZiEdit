@@ -11,7 +11,7 @@ import { userScrolledRecently } from '../common/user-scroll';
 import { cellRange, activeCell, openCellEditor, syncCellEditor, destroyCellEditor, createTableTools, refreshTableTools } from './table-editor';
 import { TableViewport, tableCellAt, tableRowNumber } from './table-viewport';
 import { fenceSourceChanged, fenceSourceField, fenceDraftField } from './writing';
-import { joinRelPath, decodeLocalRef, renderMarkdownInline, type HeadingItem } from './preview';
+import { localImagePath, renderMarkdownInline, type HeadingItem } from './preview';
 import { type RenderBlock } from './render-model';
 import { createRenderContext, mountRender, renderMountKey, rememberedRenderHeight, rememberRenderHeight, type RenderContext } from './render-service';
 import { SOURCE_LINE_HEIGHT_PX, TABLE_ROW_ESTIMATE_PX } from './layout';
@@ -22,14 +22,14 @@ const tableHeightOwners = new WeakMap<HTMLElement, BlockHeightMeasurements>();
 
 /** 装饰构建期的图片 src 解析（规则 21：非活动块装饰件构建时解析相对路径 → asset 协议） */
 function localImgPath(src: string, baseDir: string | null): string | null {
-  if (!src || /^(https?:|data:|asset:|blob:|tauri:|\/\/)/i.test(src)) return null;
   const internals = (window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
   if (!internals) {
-    console.warn('[ZiEdit IR] 本地图片需要 Tauri asset 环境，浏览器开发态无法显示本地图片。');
+    if (src && !/^(https?:|data:|asset:|blob:|tauri:|\/\/)/i.test(src)) {
+      console.warn('[ZiEdit IR] 本地图片需要 Tauri asset 环境，浏览器开发态无法显示本地图片。');
+    }
     return null;
   }
-  if (!baseDir) return null;
-  return joinRelPath(baseDir, decodeLocalRef(src.split(/[?#]/)[0]!));
+  return localImagePath(src, baseDir);
 }
 
 // ── 装饰件（WidgetType） ──

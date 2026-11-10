@@ -21,6 +21,8 @@ use crate::encoding;
 
 /// 行哈希降级阈值（008 规则 4；可在设置调整的候选项）
 pub const LINE_LIMIT: u64 = 5_000_000;
+/// 单行超过该字节数时停止行级哈希，调用方改走窗口降级。先于上限判断读完整行会把无换行文件整段载入。
+pub const MAX_COMPARE_LINE_BYTES: usize = 1024 * 1024;
 /// compare_detail 单次行窗口上限
 pub const DETAIL_WINDOW: u64 = 2_000;
 /// diff 兜底 deadline（≈3s，BE2 护栏 6c）：超时 similar 返回非最小但**合法**的 diff
@@ -43,6 +45,51 @@ pub fn hash_of<T: Hash + ?Sized>(v: &T) -> u64 {
     h.finish()
 }
 
+enum CappedLine {
+    Line,
+    Eof,
+    TooLong,
+}
+
+/// 读到换行或文件尾。单行超过 `cap` 时不再把剩余字节放进 `raw`。
+fn read_line_capped(
+    r: &mut impl BufRead,
+    raw: &mut Vec<u8>,
+    cap: usize,
+) -> std::io::Result<CappedLine> {
+    raw.clear();
+    loop {
+        let buf = r.fill_buf()?;
+        if buf.is_empty() {
+            return Ok(if raw.is_empty() {
+                CappedLine::Eof
+            } else {
+                CappedLine::Line
+            });
+        }
+        if let Some(i) = buf.iter().position(|&b| b == b'\n') {
+            let take = i + 1;
+            if raw.len().saturating_add(take) > cap {
+                r.consume(take);
+                raw.clear();
+                return Ok(CappedLine::TooLong);
+            }
+            raw.extend_from_slice(&buf[..take]);
+            r.consume(take);
+            return Ok(CappedLine::Line);
+        }
+        if raw.len().saturating_add(buf.len()) > cap {
+            let n = buf.len();
+            r.consume(n);
+            raw.clear();
+            return Ok(CappedLine::TooLong);
+        }
+        let n = buf.len();
+        raw.extend_from_slice(buf);
+        r.consume(n);
+    }
+}
+
 /// 去除行尾换行（\r\n / \n / \r）
 fn trim_newline(mut s: &str) -> &str {
     s = s.strip_suffix('\n').unwrap_or(s);
@@ -62,11 +109,12 @@ pub fn hash_lines(path: &Path, enc_name: &str, cap: u64) -> std::io::Result<(Vec
     let mut text = String::with_capacity(1024);
     let mut total: u64 = 0;
     loop {
-        raw.clear();
-        let n = r.read_until(b'\n', &mut raw)?;
-        if n == 0 {
-            break;
+        match read_line_capped(&mut r, &mut raw, MAX_COMPARE_LINE_BYTES)? {
+            CappedLine::Eof => break,
+            CappedLine::TooLong => return Ok((out, cap.saturating_add(1))),
+            CappedLine::Line => {}
         }
+        let n = raw.len();
         total += 1;
         if total > cap {
             // 上限保护：超 cap 停止收集（调用方改走降级）
@@ -903,5 +951,20 @@ mod tests {
             read_lines_raw(&p3, 1, u64::MAX).unwrap().len(),
             DETAIL_WINDOW as usize
         );
+    }
+
+    #[test]
+    fn hash_lines_stops_before_a_giant_line_is_buffered() {
+        let dir = std::env::temp_dir().join(format!("ziedit-linecap-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let file = dir.join("nonewline.bin");
+        std::fs::write(&file, vec![b'a'; super::MAX_COMPARE_LINE_BYTES + 8]).unwrap();
+        let (lines, total) = super::hash_lines(&file, "UTF-8", super::LINE_LIMIT).unwrap();
+        assert!(lines.is_empty(), "oversize line must not be hashed");
+        assert!(
+            total > super::LINE_LIMIT,
+            "caller degrades when total exceeds the line cap"
+        );
+        std::fs::remove_dir_all(dir).unwrap();
     }
 }

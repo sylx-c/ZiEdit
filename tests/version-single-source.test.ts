@@ -11,7 +11,7 @@ describe('版本单一来源', () => {
   it('版本为语义化三段', () => {
     expect(conf.version).toMatch(/^\d+\.\d+\.\d+$/);
   });
-  it('初始正式版版本号为 1.0.0', () => {
-    expect(conf.version).toBe('1.0.0');
+  it('当前工程版本号为 1.0.1', () => {
+    expect(conf.version).toBe('1.0.1');
   });
 });

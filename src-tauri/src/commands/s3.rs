@@ -386,9 +386,9 @@ fn url_host(url: &str) -> Result<(String, String), String> {
 
 /// host 全等校验（读侧零请求边界：目标 host 必须与公网基址 host 全等，不匹配即拒绝）
 pub fn host_allowed(url: &str, allowed_base: &str) -> Result<bool, String> {
-    let (_, uh) = url_host(url)?;
-    let (_, ah) = url_host(allowed_base)?;
-    Ok(uh == ah)
+    let (us, uh) = url_host(url)?;
+    let (abs, ah) = url_host(allowed_base)?;
+    Ok(us == abs && uh == ah)
 }
 
 /// 魔数嗅探（缓存命中无 Content-Type 时的 MIME 判定；不识别返回 None → 调用方拒缓存）
@@ -830,6 +830,8 @@ mod tests {
         assert!(
             !host_allowed("https://x.cdn.example.org/a.png", "https://cdn.example.org").unwrap()
         );
+        // 公网基址是 https 时，同主机的明文 http 不能取图
+        assert!(!host_allowed("http://cdn.example.org/a.png", "https://cdn.example.org").unwrap());
     }
 
     #[test]

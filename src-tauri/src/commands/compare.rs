@@ -59,6 +59,8 @@ fn enc_name_of(path: &str) -> Result<String, ZiEditError> {
 /// 打开对比：流式行哈希 diff（超限降级为锚点块级）
 #[tauri::command]
 pub async fn compare_open(a: String, b: String) -> Result<CompareResult, ZiEditError> {
+    crate::paths::reject_device_path(&a)?;
+    crate::paths::reject_device_path(&b)?;
     let pa = PathBuf::from(&a);
     let pb = PathBuf::from(&b);
     let input_state = compare::input_state(&pa, &pb)?;
@@ -232,6 +234,7 @@ pub async fn normalize_preview(
     opts: compare::NormalizeOpts,
     encoding_name: Option<String>,
 ) -> Result<NormalizePreview, ZiEditError> {
+    crate::paths::reject_device_path(&src)?;
     const LIMIT: u64 = 100 * 1024 * 1024;
     let p = PathBuf::from(&src);
     let enc = match &encoding_name {
@@ -414,6 +417,8 @@ pub async fn normalize_save(
     opts: compare::NormalizeOpts,
     encoding_name: Option<String>,
 ) -> Result<u64, ZiEditError> {
+    crate::paths::reject_device_path(&src)?;
+    crate::paths::reject_device_path(&dst)?;
     const LIMIT: u64 = 100 * 1024 * 1024;
     let p = PathBuf::from(&src);
     let enc = match &encoding_name {
@@ -459,6 +464,8 @@ pub fn encode_convert_impl(
     dst: &std::path::Path,
     to_enc: &str,
 ) -> Result<u64, ZiEditError> {
+    crate::paths::reject_device_path(&src.to_string_lossy())?;
+    crate::paths::reject_device_path(&dst.to_string_lossy())?;
     const LIMIT: u64 = 100 * 1024 * 1024;
     let len = std::fs::metadata(src)?.len();
     if len > LIMIT {

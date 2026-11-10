@@ -66,7 +66,7 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for version history, and [Releases](h
 
 ## Build from source
 
-Engineering version 1.0.0. Requirements:
+Engineering version 1.0.1. Requirements:
 
 - Node.js 24, npm
 - Rust stable (via rustup)

@@ -97,6 +97,7 @@ fn cli_take_pending(pending: tauri::State<'_, std::sync::Mutex<Vec<String>>>) ->
 /// 在系统文件管理器中显示（001 规则 26「定位」，reveal 与 open 同理由走 Rust 侧直调）
 #[tauri::command]
 fn reveal_in_dir(path: String) -> Result<(), ZiEditError> {
+    paths::reject_device_path(&path)?;
     tauri_plugin_opener::reveal_item_in_dir(&path)
         .map_err(|e| ZiEditError::Msg(format!("reveal in dir: {e}")))
 }
