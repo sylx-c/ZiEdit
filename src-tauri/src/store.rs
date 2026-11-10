@@ -116,12 +116,34 @@ pub fn save_limited<T: Serialize>(
     value: &T,
     limit: usize,
 ) -> Result<(), crate::error::ZiEditError> {
+    write_limited(path, value, limit, false)
+}
+
+/// 会话与命名会话使用私有权限。正文保持 JSON：启动时解密失败再被自动保存覆盖会丢掉草稿。
+pub fn save_limited_private<T: Serialize>(
+    path: &Path,
+    value: &T,
+    limit: usize,
+) -> Result<(), crate::error::ZiEditError> {
+    write_limited(path, value, limit, true)
+}
+
+fn write_limited<T: Serialize>(
+    path: &Path,
+    value: &T,
+    limit: usize,
+    private: bool,
+) -> Result<(), crate::error::ZiEditError> {
     let json = serde_json::to_string_pretty(value)?;
     check_size(json.len(), limit)?;
     if let Some(dir) = path.parent() {
         std::fs::create_dir_all(dir)?;
     }
-    atomic_write(path, json.as_bytes())?;
+    if private {
+        atomic_write_private(path, json.as_bytes())?;
+    } else {
+        atomic_write(path, json.as_bytes())?;
+    }
     Ok(())
 }
 

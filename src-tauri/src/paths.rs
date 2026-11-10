@@ -21,6 +21,17 @@ pub fn reject_device_path(path: &str) -> Result<(), crate::error::ZiEditError> {
 
 pub fn validate_viewer_path(path: &str) -> Result<(), crate::error::ZiEditError> {
     reject_device_path(path)?;
+    reject_viewer_extension(path)?;
+    // 符号链接按链接名可以通过 pdf 检查，真正打开的是目标。能解析时再查目标。
+    if let Ok(canon) = std::fs::canonicalize(path) {
+        let canon = canon.to_string_lossy();
+        reject_device_path(&canon)?;
+        reject_viewer_extension(&canon)?;
+    }
+    Ok(())
+}
+
+fn reject_viewer_extension(path: &str) -> Result<(), crate::error::ZiEditError> {
     let extension = std::path::Path::new(path)
         .extension()
         .and_then(|s| s.to_str())
@@ -53,6 +64,14 @@ pub fn validate_viewer_path(path: &str) -> Result<(), crate::error::ZiEditError>
             | "url"
             | "appref-ms"
             | "application"
+            | "settingcontent-ms"
+            | "search-ms"
+            | "library-ms"
+            | "scf"
+            | "desktop"
+            | "command"
+            | "py"
+            | "sh"
     ) {
         return Err(crate::error::ZiEditError::Msg(
             "Executable or extensionless files cannot be opened with the system viewer".into(),
@@ -94,10 +113,26 @@ mod tests {
             assert!(super::reject_device_path(path).is_err());
         }
         for path in [
-            "file", "file.EXE", "file.bat", "file.cmd", "file.ps1", "file.msi", "file.scr",
-            "file.vbs", "file.js", "file.lnk",
+            "file",
+            "file.EXE",
+            "file.bat",
+            "file.cmd",
+            "file.ps1",
+            "file.msi",
+            "file.scr",
+            "file.vbs",
+            "file.js",
+            "file.lnk",
+            "file.settingcontent-ms",
+            "file.search-ms",
+            "file.library-ms",
+            "file.scf",
+            "file.desktop",
+            "file.command",
+            "file.py",
+            "file.sh",
         ] {
-            assert!(super::validate_viewer_path(path).is_err());
+            assert!(super::validate_viewer_path(path).is_err(), "{path}");
         }
         assert!(super::validate_viewer_path("file.pdf").is_ok());
         assert!(super::reject_device_path(r"\\server\share\file.txt").is_ok());

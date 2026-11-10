@@ -116,13 +116,13 @@ fn token(r: &mut impl BufRead) -> Result<Option<Token>> {
             if delimiter(b) {
                 break;
             }
-            out.push(byte(r)?.unwrap());
+            out.push(byte(r)?.ok_or("PDF_TRUNCATED")?);
             if out.len() > WINDOW_BYTES {
                 return Err("PDF_TOKEN_LIMIT".into());
             }
         }
     } else if matches!(first, b'<' | b'>') && peek(r)? == Some(first) {
-        out.push(byte(r)?.unwrap());
+        out.push(byte(r)?.ok_or("PDF_TRUNCATED")?);
     }
     Ok(Some(Token::Word(out)))
 }

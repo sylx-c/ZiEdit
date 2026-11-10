@@ -143,7 +143,11 @@ pub fn clipboard_read_image() -> Result<Option<ClipboardImageData>, ZiEditError>
             Err(_) => return Ok(None),
         };
         let (w, h) = (img.width as u32, img.height as u32);
-        if w == 0 || h == 0 || img.bytes.len() != (w * h * 4) as usize {
+        if w == 0
+            || h == 0
+            || img.bytes.len() != (w * h * 4) as usize
+            || img.bytes.len() > 32 * 1024 * 1024
+        {
             return Ok(None);
         }
         // base64 编码 RGBA（不用额外 crate——手写简易 base64）
@@ -292,6 +296,7 @@ pub struct FileStatResult {
 
 #[tauri::command]
 pub fn file_stat(path: String) -> Result<FileStatResult, ZiEditError> {
+    crate::paths::reject_device_path(&path)?;
     let meta = std::fs::metadata(&path)?;
     let modified_ms = meta
         .modified()
@@ -309,6 +314,7 @@ pub fn file_stat(path: String) -> Result<FileStatResult, ZiEditError> {
 /// 新建空文件（001 规则 28：树右键轻量管理；已存在报 EXISTS）
 #[tauri::command]
 pub fn file_create(path: String) -> Result<(), ZiEditError> {
+    crate::paths::reject_device_path(&path)?;
     let p = PathBuf::from(&path);
     create_new_file(&p)?;
     Ok(())
@@ -331,6 +337,7 @@ fn create_new_file(path: &std::path::Path) -> Result<std::fs::File, ZiEditError>
 /// 新建目录（001 规则 28；已存在报 EXISTS）
 #[tauri::command]
 pub fn dir_create(path: String) -> Result<(), ZiEditError> {
+    crate::paths::reject_device_path(&path)?;
     let p = PathBuf::from(&path);
     if p.exists() {
         return Err(ZiEditError::Exists);
@@ -342,6 +349,8 @@ pub fn dir_create(path: String) -> Result<(), ZiEditError> {
 /// 重命名/移动（001 规则 28；目标已存在报 EXISTS，不覆盖）
 #[tauri::command]
 pub fn file_rename(from: String, to: String) -> Result<(), ZiEditError> {
+    crate::paths::reject_device_path(&from)?;
+    crate::paths::reject_device_path(&to)?;
     let src = PathBuf::from(&from);
     let dst = PathBuf::from(&to);
     if !src.exists() {
@@ -379,7 +388,7 @@ pub async fn session_save(app: AppHandle, session: SessionState) -> Result<(), Z
     tauri::async_runtime::spawn_blocking(move || {
         let dir = config_dir(&app)?;
         let _tx = persistence_lock();
-        store::save_limited(
+        store::save_limited_private(
             &store::config_file(&dir, "session.json"),
             &session,
             256 * 1024 * 1024,

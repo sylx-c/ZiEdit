@@ -36,7 +36,7 @@
 ## 查阅入口
 
 - [逐包许可证据](../../../public/third-party-licenses/README.md)
-- [ELK对应源码](../../../public/third-party-sources/elkjs/README.md)
+- [ELK对应源码](../../../compliance/third-party-sources/elkjs/README.md)
 - [项目规则](../../../AGENTS.md)
 - [总代声明](../../../THIRD-PARTY-NOTICES.md)
 - [官网素材新来源](../asset-provenance/website-capture.md)

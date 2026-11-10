@@ -81,28 +81,34 @@ fn decode(path: &str) -> Option<String> {
     String::from_utf8(result).ok()
 }
 
-fn content_type(path: &Path) -> &'static str {
-    match path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_ascii_lowercase()
-        .as_str()
-    {
-        "png" => "image/png",
-        "jpg" | "jpeg" => "image/jpeg",
-        "webp" => "image/webp",
-        "bmp" => "image/bmp",
-        "gif" => "image/gif",
-        "svg" => "image/svg+xml",
-        "pdf" => "application/pdf",
-        "woff2" => "font/woff2",
-        "woff" => "font/woff",
-        "ttf" => "font/ttf",
-        "ico" => "image/x-icon",
-        "avif" => "image/avif",
-        _ => "application/octet-stream",
-    }
+pub const ZASSET_MAX_BYTES: u64 = 256 * 1024 * 1024;
+
+fn content_type(path: &Path) -> Option<&'static str> {
+    Some(
+        match path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("")
+            .to_ascii_lowercase()
+            .as_str()
+        {
+            "png" => "image/png",
+            "jpg" | "jpeg" => "image/jpeg",
+            "webp" => "image/webp",
+            "bmp" => "image/bmp",
+            "gif" => "image/gif",
+            "svg" => "image/svg+xml",
+            "pdf" => "application/pdf",
+            "woff2" => "font/woff2",
+            "woff" => "font/woff",
+            "ttf" => "font/ttf",
+            "ico" => "image/x-icon",
+            "avif" => "image/avif",
+            "tif" | "tiff" => "image/tiff",
+            "otf" => "font/otf",
+            _ => return None,
+        },
+    )
 }
 
 pub fn respond(request: tauri::http::Request<Vec<u8>>) -> tauri::http::Response<Vec<u8>> {
@@ -132,8 +138,17 @@ pub fn respond(request: tauri::http::Request<Vec<u8>>) -> tauri::http::Response<
     if !permitted(&scope, &path) {
         return response(403, "text/plain", Vec::new());
     }
+    let Some(mime) = content_type(&path) else {
+        return response(403, "text/plain", Vec::new());
+    };
+    let Ok(meta) = std::fs::metadata(&path) else {
+        return response(404, "text/plain", Vec::new());
+    };
+    if meta.len() > ZASSET_MAX_BYTES {
+        return response(413, "text/plain", Vec::new());
+    }
     match std::fs::read(&path) {
-        Ok(bytes) => response(200, content_type(&path), bytes),
+        Ok(bytes) => response(200, mime, bytes),
         Err(_) => response(404, "text/plain", Vec::new()),
     }
 }
@@ -171,7 +186,19 @@ mod tests {
             assert!(validate(&system).is_err());
         }
         assert_eq!(decode("%E4%B8%AD%20%23%25"), Some("中 #%".into()));
-        assert_eq!(content_type(Path::new("a.PDF")), "application/pdf");
+        assert_eq!(content_type(Path::new("a.PDF")), Some("application/pdf"));
+        assert_eq!(content_type(Path::new("secret.txt")), None);
+        let secret = dir.join("secret.txt");
+        std::fs::write(&secret, b"secret").unwrap();
+        zasset_allow(secret.to_string_lossy().into()).unwrap();
+        let denied = tauri::http::Request::builder()
+            .uri(format!(
+                "http://zasset.localhost/{}",
+                secret.to_string_lossy().replace('\\', "/")
+            ))
+            .body(Vec::new())
+            .unwrap();
+        assert_eq!(respond(denied).status(), 403);
         std::fs::remove_dir_all(dir).unwrap();
     }
 }

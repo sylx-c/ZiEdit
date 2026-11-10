@@ -29,7 +29,7 @@ NewCM npm 包只标 Apache，公开源码仓库/提交无法访问，生成定�
 - [STIX完整OFL](../../../public/font-licenses/OFL-STIX.txt)
 - [MathJax字形分项说明](../../../public/font-licenses/NOTICE-MathJax-STIX2.txt)
 - [内嵌MJX-ZERO准确源码](../../../public/font-licenses/MathJax-zero-source.ts.txt)
-- [PDF字体对应源说明](../../../public/third-party-sources/LIBERATION-SOURCE.txt)
+- [PDF字体对应源说明](../../../compliance/third-party-sources/LIBERATION-SOURCE.txt)
 - [总第三方声明](../../../THIRD-PARTY-NOTICES.md)
 
 Tauri 的 `bundle.resources` 显式复制 `font-licenses/` 与 `third-party-sources/` 为可读目录。用户可在应用资源目录直接打开，而非仅把许可藏在可执行文件中。Vite public 也包含同样材料。Liberation对应源包 2,937,949 字节，SHA-256 `ad98b7498dc2992f7f0868f79b65ce4a720a3acdb63ab3f1f1cb6881117a5406`；包含 SFD、Makefile、转换脚本和原始许可，不只提供外部网页链接。

@@ -42,7 +42,7 @@
 - [逐包机器清单](../../public/third-party-licenses/manifest.json)
 - [待补证清单](../../public/third-party-licenses/review-required.json)
 - [MPL/EPL 对应源码说明](../../public/third-party-licenses/SOURCE-OFFERS.txt)
-- [Liberation 对应源包与散列说明](../../public/third-party-sources/LIBERATION-SOURCE.txt)
+- [Liberation 对应源包与散列说明](../../compliance/third-party-sources/LIBERATION-SOURCE.txt)
 - [更新的总声明](../../THIRD-PARTY-NOTICES.md)
 - [官网图标原文](../../website/third-party-licenses.txt)
 

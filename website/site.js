@@ -38,7 +38,7 @@ if (navigationToggle) navigationToggle.checked = false;
 }
 });
 // 版本号自动对齐：从 GitHub 最新正式 Release 读取标签并刷新页内 .version 文本。
-// HTML 中的静态版本号（v1.0.0）仅为接口不可用时的兜底；下载链接始终指向 releases/latest。
+// HTML 中的静态版本号（v1.0.1）仅为接口不可用时的兜底；下载链接始终指向 releases/latest。
 fetch("https://api.github.com/repos/sylx-c/ZiEdit/releases/latest")
 .then((response) => (response.ok ? response.json() : null))
 .then((release) => {

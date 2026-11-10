@@ -1,6 +1,6 @@
 [package]
 name = "ziedit"
-version = "1.0.0"
+version = "1.0.1"
 description = "ZiEdit - 跨平台文件查看与编辑工具"
 authors = ["ziedit"]
 edition = "2024"

@@ -10,6 +10,24 @@ use std::sync::{
 use std::time::{Duration, Instant};
 use tauri::Emitter;
 
+/// 目录联接（junction）在 Windows 上 `is_symlink()` 为 false，但仍会走出用户选择的根。
+/// 只跳过目录重解析点，避免把 OneDrive 文件占位也排除出搜索。
+fn is_reparse_point(path: &Path) -> bool {
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt;
+        const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x400;
+        std::fs::symlink_metadata(path)
+            .map(|meta| meta.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0)
+            .unwrap_or(false)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = path;
+        false
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FifOptions {
@@ -158,6 +176,10 @@ fn search(
             }
             let name = entry.file_name().to_string_lossy().into_owned();
             if ty.is_dir() {
+                if is_reparse_point(&p) {
+                    skipped(&mut out, &p, "reparse");
+                    continue;
+                }
                 if [
                     "node_modules",
                     ".git",

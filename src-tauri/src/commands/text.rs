@@ -198,6 +198,7 @@ pub(crate) fn ensure_open(
     path: &str,
     preferred: Option<&str>,
 ) -> Result<(), ZiEditError> {
+    crate::paths::reject_device_path(path)?;
     let preferred = preferred
         .map(|name| {
             encoding_rs::Encoding::for_label(name.as_bytes())

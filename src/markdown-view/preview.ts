@@ -231,6 +231,26 @@ const MD_HREF = /\.md(?:[?#].*)?$/i;
 
 export function isExternalHref(href: string): boolean { return EXTERNAL_HREF.test(href); }
 
+/** UNC 主机（`\\server\share` 或 `//server/share`）。盘符路径返回 null。 */
+export function uncHost(path: string): string | null {
+  const normalized = path.replace(/\\/g, '/');
+  const match = /^\/\/([^/]+)/.exec(normalized);
+  return match ? match[1]!.toLowerCase() : null;
+}
+
+/**
+ * 本地图片的授权路径。http(s)、data、asset 等不在这里处理。
+ * 文档所在共享以外的 UNC 返回 null：打开 Markdown 不得去访问任意主机。
+ * 盘符绝对路径保留，草稿贴图和显式本地图仍走 zasset。
+ */
+export function localImagePath(src: string, baseDir: string | null): string | null {
+  if (!src || !baseDir || /^(https?:|data:|asset:|blob:|tauri:|\/\/)/i.test(src)) return null;
+  const path = joinRelPath(baseDir, decodeLocalRef(src.split(/[?#]/)[0]!));
+  const imageHost = uncHost(path);
+  if (imageHost && imageHost !== uncHost(baseDir)) return null;
+  return path;
+}
+
 /** 路径拼接（相对链接/图片解析用）：base 目录 + 相对片段，容忍 ./ 前缀与混合分隔符（统一 /） */
 export function joinRelPath(dir: string, rel: string): string {
   const ref = rel.replace(/\\/g, '/');
@@ -322,6 +342,12 @@ export function resolveLocalImages(root: HTMLElement, baseDir: string | null, is
     const src = img.getAttribute('src') ?? '';
     if (!src || /^(https?:|data:|asset:|blob:|tauri:|\/\/)/i.test(src)) continue;
     img.dataset.mdSrc = src;
+    const path = localImagePath(src, baseDir);
+    if (!path) {
+      img.dataset.mdBroken = '1';
+      img.removeAttribute('src');
+      continue;
+    }
     if (!assetAvailable) {
       console.warn(t('md.localImageUnavailable'));
       img.dataset.mdBroken = '1';
@@ -329,7 +355,6 @@ export function resolveLocalImages(root: HTMLElement, baseDir: string | null, is
       img.alt ||= img.title;
       continue;
     }
-    const path = joinRelPath(baseDir, decodeLocalRef(src.split(/[?#]/)[0]!));
     const pending = localRequests.get(img);
     if (pending?.src === src && pending.path === path && pending.current()) continue;
     const request = { src, path, current: isCurrent };

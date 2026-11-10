@@ -11,7 +11,7 @@ ZiEdit 是跨平台（Windows / macOS / Linux）、离线优先的桌面文件�
 - 本地第三方资产：`public/renderers/`（MathJax、Mermaid、highlight.js、数学字体，均为 vendored，版本与许可清单见 `public/renderers/manifest.json`）、`public/fonts/`（JetBrains Mono）。
 - 测试：`tests/`（vitest，按验收编号 ac-0XX 组织）与 `tests/gates/`（原生性能门禁，Windows）。
 
-工程版本 1.0.0；公开发布状态以发布记录为准。CI 监听 `master` 分支的 push 与全部 PR（`.github/workflows/ci.yml`）。
+工程版本 1.0.1；公开发布状态以发布记录为准。CI 监听 `master` 分支的 push 与全部 PR（`.github/workflows/ci.yml`）。
 
 ## 2. 常用命令
 
@@ -59,6 +59,19 @@ ZiEdit 是跨平台（Windows / macOS / Linux）、离线优先的桌面文件�
 - 依赖或素材变化后运行对应来源/许可门禁，提交前至少执行 `npm run license:check`（汇总字体、逐包许可、vendored 内嵌、素材来源与对应源码门禁），构建后执行 `npm run license:dist` 核对实际前端分发材料。单项命令包括 `node scripts/verify-font-licenses.mjs` 和 `node scripts/generate-third-party-licenses.mjs --check --strict`。未决项必须明确保留并报告，不得删除待审记录、跳过失败或把收集成功写成合规放行；构建/测试通过也不等于版权审查通过。
 - 新增内容证据不齐不得进入发行物。最终审查只能陈述已验证的范围与义务完成情况，不承诺绝对无侵权风险；商标、专利和存在争议的权属另行核查。提交、推送和发布仍须用户授权。
 
-## 5. 三原则引用
+## 5. Release 说明固定版式（每次发布都这样写）
+
+Release 标题就是「ZiEdit <版本号>」（如「ZiEdit 1.0.0」），不加副词修饰；正文**不重复标题行**，直接从一句话简介开始。其余固定结构：
+
+1. **一句话简介**：产品定位 + 核心格式 + 本地离线/无账号特征。
+2. **下载**：平台 × 文件名 × SHA-256 表格（每个附件一行；哈希取自实际上传资产的 digest，不抄本地构建值）。
+3. **测试状态**：双语标注「仅 Windows 经实机测试；macOS/Linux CI 构建、未经实机验证」——如实反映当轮验证范围，平台覆盖变化时同步改写。
+4. **构建说明**：同源提交链接与标签、本地验证构建/CI 构建的分工、逐平台清单文件（`build-manifest.json`）指引。
+5. **本版亮点**：3–5 组能力要点，面向使用者，不写内部实现细节。
+6. **验证**：门禁与溯源声明（许可门禁未决数、安装包解包核验、发布验收清单及其当前状态）+ 指向 CHANGELOG 链接。验收未全部完成前，文字必须如实写明「全部通过后方转公开」之类的门槛状态。
+
+CI 自动生成的「Full Changelog」正文一律替换为上述版式；写好的 notes 存 `docs/tmp/release-<版本>/notes.md` 留档。
+
+## 6. 三原则引用
 
 入口精简，详情按需 / 事实归位，再做收口 / 一事一处权威，文件恢复现场。（出处：polaris skill `SKILL.md`；提交与推送永远等用户授权。）

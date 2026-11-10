@@ -11,6 +11,8 @@ use std::time::SystemTime;
 
 /// 编辑缓冲上限（PRD 002/005 与 AGENTS.md 口径统一为 10MB；AC-21 ≤10MB 守卫）
 pub const READ_ALL_LIMIT: u64 = 10 * 1024 * 1024;
+/// 保存正文的编码后上限。编辑打开仍是 10MB；这里拦住 IPC 传入的无界字符串，并给草稿留出长于打开上限的保存空间。
+pub const SAVE_MAX_BYTES: u64 = 32 * 1024 * 1024;
 
 #[derive(Debug, PartialEq, Eq)]
 struct FileSignature {
@@ -166,6 +168,7 @@ fn text_save_impl(
     backup_keep: Option<u32>,
     app: &tauri::AppHandle,
 ) -> Result<SaveStat, ZiEditError> {
+    crate::paths::reject_device_path(path)?;
     let p = PathBuf::from(path);
     // 保存是基于打开时内容的写回。编码或备份期间若外部程序改写/增长了文件，
     // 直接覆盖会丢掉外部更新；先后两次签名检查把这段可控竞态收口为可恢复错误。
@@ -181,6 +184,9 @@ fn text_save_impl(
     };
     let bytes = encoding::encode_preserving_bom(&content, encoding_name, &original[..original_len])
         .map_err(|e| ZiEditError::Unmappable(e.to_string()))?;
+    if bytes.len() as u64 > SAVE_MAX_BYTES {
+        return Err(ZiEditError::TooLarge);
+    }
     if file_signature(&p)? != before {
         return Err(ZiEditError::ExternalChanged);
     }
@@ -230,6 +236,7 @@ pub fn backup_dir(app: tauri::AppHandle) -> Result<String, ZiEditError> {
 /// async + spawn_blocking：数十 MB 读取 + base64 编码不冻结主线程（BE1）
 #[tauri::command]
 pub async fn font_read(path: String) -> Result<String, ZiEditError> {
+    crate::paths::reject_device_path(&path)?;
     tauri::async_runtime::spawn_blocking(move || {
         const MAX_FONT_BYTES: u64 = 32 * 1024 * 1024;
         let p = PathBuf::from(&path);
@@ -326,8 +333,12 @@ pub fn base64_decode(s: &str) -> Result<Vec<u8>, String> {
 #[tauri::command]
 pub async fn image_write(path: String, data_base64: String) -> Result<(), ZiEditError> {
     tauri::async_runtime::spawn_blocking(move || {
+        crate::paths::reject_device_path(&path)?;
         let p = PathBuf::from(&path);
         let bytes = base64_decode(&data_base64).map_err(|e| ZiEditError::Msg(e.to_string()))?;
+        if bytes.len() > 32 * 1024 * 1024 {
+            return Err(ZiEditError::TooLarge);
+        }
         if let Some(parent) = p.parent() {
             std::fs::create_dir_all(parent)?;
         }
@@ -349,6 +360,7 @@ pub struct ImageProbeInfo {
 /// 图片查看守护（ac-010）：探测失败时放行，由前端照常加载。
 #[tauri::command]
 pub async fn image_probe(path: String) -> Result<Option<ImageProbeInfo>, ZiEditError> {
+    crate::paths::reject_device_path(&path)?;
     let result = tauri::async_runtime::spawn_blocking(move || {
         let probe = || -> Result<ImageProbeInfo, Box<dyn std::error::Error>> {
             let size = imagesize::size(&path)?;
@@ -547,6 +559,7 @@ fn checksum_impl(path: &str, algo: &str) -> Result<String, ZiEditError> {
 /// 删除到系统回收站（二次确认由 UI 负责）
 #[tauri::command]
 pub fn delete_to_trash(path: String) -> Result<(), ZiEditError> {
+    crate::paths::reject_device_path(&path)?;
     trash::delete(&path).map_err(|e| ZiEditError::Msg(e.to_string()))
 }
 
@@ -708,7 +721,7 @@ pub fn named_sessions_save(
 ) -> Result<(), ZiEditError> {
     let dir = crate::paths::config_dir(&app)?;
     let _tx = super::persistence_lock();
-    crate::store::save_limited(
+    crate::store::save_limited_private(
         &crate::store::config_file(&dir, "named_sessions.json"),
         &sessions,
         64 * 1024 * 1024,
