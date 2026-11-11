@@ -31,6 +31,7 @@ ZiEdit 本体以 [MIT](LICENSE) 许可。以下组件随应用分发，各自适
 | Mermaid | 12.2.0 | MIT | `public/renderers/mermaid/` |
 | highlight.js | 11.7.0 | BSD-3-Clause | `public/renderers/highlight/`；`third-languages.js` 另含 highlightjs-solidity 2.0.5（实际固定归档 LICENSE 为 WTFPL-2.0；metadata 的 MIT 标记与原文不同，按原文履行并保留差异记录）、highlightjs-sap-abap 0.2.0（MIT）、highlightjs-hlsl unversioned（MIT）、highlightjs-gdscript unversioned（BSD-3-Clause），来源见 manifest |
 | Emoji 短名映射 | 本地整理 | MIT 上游谱系 | `src/markdown-view/unicode-emojis.json`；出处及声明见 [unicode-emojis.NOTICE.md](src/markdown-view/unicode-emojis.NOTICE.md) |
+| GitHub 标记图标（Octicons `mark-github` 16） | primer/octicons v19.19.0 | MIT | 内嵌于 `src/shell/app.ts`，放在关于对话框「官网」之前。图形未改。来源 [mark-github-16.svg](https://github.com/primer/octicons/blob/v19.19.0/icons/mark-github-16.svg)，Copyright (c) 2025 GitHub Inc. |
 | Tauri 生成 schemas | 随构建工具 | MIT OR Apache-2.0（Tauri） | `src-tauri/gen/schemas/` 为 Tauri 生成产物，非手工维护的第三方源码 |
 | PDF 解码资产（pdf.js CMaps/标准字体/JS 解码回退） | 6.4.299 | pdf.js 代码 Apache-2.0；Foxit 字体 BSD-3-Clause；Liberation Sans **1.07.4** 为 GPL-2.0 WITH Liberation 字体例外 | `public/pdfjs-assets/`（含 LICENSE、standard_fonts/LICENSE_FOXIT、LICENSE_LIBERATION）。字体例外不免除字体本身的源码分发义务；对应 1.07.4 源码包、SHA-256 与获取说明随 `third-party-sources/` 分发，见 `LIBERATION-SOURCE.txt`；发布时须与二进制一同提供并检查最终包内容。不能将整个目录统称 Apache-2.0。版本依据 [pdf.js v6.4.299 上游说明](https://github.com/mozilla/pdf.js/blob/v6.4.299/external/standard_fonts/README.md) |
 
