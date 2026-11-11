@@ -43,8 +43,8 @@ cargo fmt --manifest-path src-tauri/Cargo.toml --check
 
 - **输入契约**：外部文本（磁盘读取、剪贴板、恢复快照、剪贴板粘贴）进入渲染前必须归一为 LF（`src/common/text.ts` 的 `toLf`）；不要在单个解析器里补 CRLF 兼容（`\r` 会进入单元格文本与行内解析）。背景与约定见 `docs/changes/markdown-unification.md` 第 39 条。
 - `src/markdown-view/render-input-eol.test.ts`：LF / CRLF / CR / 混合行尾必须产出同一文档树、块结构与 HTML。
-- `src/markdown-view/render-correctness.test.ts`：常用 GFM 构造在预览主路径（Lezer 静态序列化）下与 markdown-it 参考实现的结构一致；新增支持的标准语法、调整序列化或更换解析器时补语料。
-- 原生侧：`node tests/gates/gate-md-consistency.mjs`（隔离构建后）用同一份样例的 LF/CRLF 副本各跑亮暗两轮，验证表格等元素在实际窗口里可见且两种渲染形态一致。
+- `src/markdown-view/render-correctness.test.ts`：常用 GFM 构造在预览主路径（Lezer 静态序列化）下与 markdown-it 参考实现的结构一致；项目自定义语法（任务列表/高亮上下标/脚注/emoji/目录/公式占位）用期值断言锁结构。新增语法、调整序列化或更换解析器时补语料。
+- 原生侧：`node tests/gates/gate-md-structure.mjs`（已入 run-all 默认集）用同一份样例的 LF/CRLF/CR/混合行尾四副本逐元素断言展示结构；`gate-md-consistency` 另比样式与几何（亮暗 × LF/CRLF）。
 - 涉及渲染/滚动性能，再跑上一条对应的原生门禁。
 
 `scripts/codemirror-parser-budget.mjs` 为锁定的 CodeMirror 后台解析设置 8ms 单片上限，开发与构建共用；源码特征变化会拒绝构建。升级 `@codemirror/language` 时需核对其调度实现，并执行预算回归及 Markdown 原生矩阵。
@@ -69,3 +69,5 @@ cargo fmt --manifest-path src-tauri/Cargo.toml --check
 ## 可追溯本地交付
 
 使用 Node 24，先执行 `node scripts/verify-project.mjs`，通过后执行 `node scripts/build-verified.mjs`。默认开发渠道；正式渠道显式设置 `ZIEDIT_CHANNEL=release`。检查日志、源码摘要与安装包 SHA-256 记录在 `docs/tmp/phase1/`。源码变化后旧验证报告失效，须重新验证。打包失败会恢复原安装包；成功后删除备份旧包。两条命令不会提交或发布。原生行为和性能结果须另附实际报告，不由工程检查替代。
+
+装包冒烟（源码修复 ≠ 装机生效）：安装 setup 后启动**已安装的** `ziedit.exe`，打开一份 CRLF 行尾且含表格的 `.md`（如 `docs/tmp/<run>/corpus/md-structure-crlf.md`），确认首开渲染预览里表格已渲染而不是一行竖线文本，再对比「关于」对话框里的构建提交号与本次源码一致。2026-11-11 的 CRLF 修复曾因只验证了仓库构建、未装包冒烟而被误报「没修好」。
