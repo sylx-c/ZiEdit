@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { RUN_DIR, EXE, GATE_ENV, GATE_BUDGET } from './gate-lib.mjs';
 
 const GATES_DIR = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_SET = ['ac36', 'arrow', 'scroll', 'ir-scroll', 'md-surfaces', 'walk-f'];
+const DEFAULT_SET = ['ac36', 'arrow', 'scroll', 'ir-scroll', 'md-surfaces', 'md-structure', 'walk-f'];
 const GATE_DEFS = {
   'release-formats': { script: 'gate-release-behavior.mjs', out: 'release-formats.json', corpus: false },
   'release-resources': { script: 'gate-release-behavior.mjs', out: 'release-resources.json', corpus: false, args: ['--resources'] },
@@ -21,6 +21,7 @@ const GATE_DEFS = {
   'md-editing': { script: 'gate-md-editing.mjs', out: 'md-editing.json', corpus: false },
   'md-navigation': { script: 'gate-md-navigation.mjs', out: 'md-navigation.json', corpus: true, defaultCorpus: 'repeated-6001.md' },
   'md-surfaces': { script: 'gate-md-surfaces.mjs', out: 'md-surfaces.json', corpus: true },
+  'md-structure': { script: 'gate-md-structure.mjs', out: 'md-structure.json', corpus: false },
   'ac36':     { script: 'native-gate-ac36.mjs',          out: 'native-gate-ac36.json',   corpus: true },
   'arrow':    { script: 'gate-batch1-arrow.mjs',         out: 'gate-batch1-arrow.json',  corpus: true },
   'scroll':   { script: 'gate-batch1-scroll.mjs',        out: 'gate-batch1-scroll.json', corpus: true },

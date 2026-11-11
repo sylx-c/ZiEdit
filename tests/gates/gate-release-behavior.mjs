@@ -64,6 +64,8 @@ try {
       await open(file, type);
       const detail = await cdp.evaluate(`({text:document.querySelector('#viewarea')?.textContent,image:document.querySelector('.img-canvas')?.naturalWidth,canvas:document.querySelector('canvas')?.width})`);
       check(`${type} 中文空格路径真实渲染`, type === 'png' ? detail.image > 0 : type === 'pdf' ? detail.canvas > 0 : type === 'md' || detail.text.includes('中文'), detail);
+      // md 夹具为 CRLF：表格必须真实渲染，渲染面不得出现竖线原文（2026-11-11 CRLF 展示缺陷的发布侧防线）。
+      if (type === 'md') check('md CRLF 表格真实渲染', await cdp.evaluate(`(() => { const root = [...document.querySelectorAll('.md-preview')].find(e => e.offsetParent !== null && !e.closest('.md-split')); return !!root && !!root.querySelector('table') && !(root.textContent || '').includes('| A |'); })()`));
     }
     await open(files.md, 'md');
     for (const [mode, signature] of [['源码视图', '.view-host:not(.parked) .cm-content'], ['渲染预览', '.md-preview:not(.md-split-preview) .md-col'], ['分屏预览', '.md-split-preview .md-col'], ['即时渲染', '.md-ir:not(.md-ir-loading) .cm-content']]) {
