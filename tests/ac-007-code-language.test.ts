@@ -8,7 +8,7 @@ import { EditorView } from '@codemirror/view';
 import { history, undo } from '@codemirror/commands';
 import { editorMarkdown } from '../src/markdown-view/editor-language';
 import { codeHighlight } from '../src/markdown-view/code-highlight';
-import { codeLanguage, visibleCodeTokens, type CodeToken } from '../src/markdown-view/code-tokens';
+import { codeLanguage, visibleCodeSource, visibleCodeTokens, type CodeToken } from '../src/markdown-view/code-tokens';
 import { compositionChanged, compositionGuard } from '../src/common/composition';
 import { CODE_HINT_LANGS, waitForPreviewCode } from '../src/markdown-view/preview';
 import { renderStaticHtml, staticMarkdownParser } from '../src/markdown-view/static-html';
@@ -63,6 +63,17 @@ async function colored(view: EditorView, text: string) {
 const bash = 'if [ -n "$HOME" ]; then\n  echo "中文<&😀" # comment\nfi';
 
 describe('007 代码语言选择与离线高亮', () => {
+  it('超长代码只切出视口前后的源码，短代码仍取全文', () => {
+    const parts = [{ from: 0, to: 80_000 }];
+    const windowed = visibleCodeSource(parts, [{ from: 40_000, to: 40_200 }], (from, to) => 'x'.repeat(to - from));
+    expect(windowed.coverFrom).toBe(28_000);
+    expect(windowed.coverTo).toBe(52_200);
+    expect(windowed.source.length).toBe(52_200 - 28_000);
+    expect(windowed.segments).toEqual([{ from: 28_000, to: 52_200, offset: 0 }]);
+    const whole = visibleCodeSource([{ from: 10, to: 40 }], [{ from: 12, to: 16 }], (from, to) => 'y'.repeat(to - from));
+    expect(whole.source.length).toBe(30);
+    expect(whole.segments).toEqual([{ from: 10, to: 40, offset: 0 }]);
+  });
   it('长代码只读取视口附近的 token，正确裁切容器前缀及不连续视口', () => {
     const tokens = Array.from({ length: 100000 }, (_, i) => ({ from: i * 10, to: i * 10 + 5, classes: 'hljs-keyword' }));
     let reads = 0;

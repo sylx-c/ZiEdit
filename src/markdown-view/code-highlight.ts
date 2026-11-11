@@ -2,11 +2,12 @@ import { StateEffect, type Range } from '@codemirror/state';
 import { Decoration, ViewPlugin, type DecorationSet, type EditorView, type ViewUpdate } from '@codemirror/view';
 import { syntaxTree, type LanguageDescription } from '@codemirror/language';
 import { compositionActive } from '../common/composition';
-import { codeLanguage, visibleCodeTokens, type CodeToken } from './code-tokens';
+import { codeLanguage, visibleCodeSource, visibleCodeTokens, type CodeToken } from './code-tokens';
 
 interface CodeBlock {
   language: string; source: string; key: string;
   segments: { from: number; to: number; offset: number }[];
+  coverFrom: number; coverTo: number;
   tokens?: CodeToken[];
 }
 const highlighted = StateEffect.define<void>();
@@ -27,13 +28,14 @@ export function codeHighlight(languages: readonly LanguageDescription[]) {
     private cacheSize = 0;
     private sources = new Map<string, CodeBlock>();
     private sourceSize = 0;
+    private spans = new Map<string, { from: number; to: number }[]>();
     private notify: ReturnType<typeof setTimeout> | undefined;
 
     constructor(private view: EditorView) { this.refresh(); }
     update(update: ViewUpdate) {
       if (update.docChanged) {
         this.decorations = this.decorations.map(update.changes);
-        this.sources.clear(); this.sourceSize = 0;
+        this.sources.clear(); this.sourceSize = 0; this.spans.clear();
       }
       if (update.state.field(compositionActive, false)) return;
       if (update.docChanged || update.viewportChanged || syntaxTree(update.startState) !== syntaxTree(update.state)
@@ -52,20 +54,20 @@ export function codeHighlight(languages: readonly LanguageDescription[]) {
         const language = codeLanguage(info ? view.state.sliceDoc(info.from, info.to) : '');
         if (!language || native.has(language) || ['text', 'txt', 'plaintext', 'mermaid', 'math'].includes(language)) return false;
         const sourceKey = ref.from + ':' + ref.to + ':' + language;
+        const parts = this.spans.get(sourceKey) ?? ref.node.getChildren('CodeText').map(text => ({ from: text.from, to: text.to }));
+        this.spans.set(sourceKey, parts);
+        let viewportFrom = Infinity, viewportTo = -1;
+        for (const range of view.visibleRanges) { viewportFrom = Math.min(viewportFrom, range.from); viewportTo = Math.max(viewportTo, range.to); }
         const known = this.sources.get(sourceKey);
-        if (known) {
+        if (known && (viewportFrom === Infinity || known.coverFrom <= viewportFrom && known.coverTo >= viewportTo)) {
           known.tokens = previous.get(known.key) ?? known.tokens ?? this.cache.get(known.key);
           blocks.push(known); return false;
         }
-        const segments: CodeBlock['segments'] = [];
-        let source = '';
-        for (const text of ref.node.getChildren('CodeText')) {
-          segments.push({ from: text.from, to: text.to, offset: source.length });
-          source += view.state.sliceDoc(text.from, text.to);
-        }
-        if (source) {
-          const key = language + '\0' + source;
-          const block = { language, source, key, segments, tokens: previous.get(key) ?? this.cache.get(key) };
+        const windowed = visibleCodeSource(parts, view.visibleRanges, (from, to) => view.state.sliceDoc(from, to));
+        if (windowed.source) {
+          const { source, segments, coverFrom, coverTo } = windowed;
+          const key = language + '\0' + coverFrom + '\0' + coverTo + '\0' + source;
+          const block = { language, source, key, segments, coverFrom, coverTo, tokens: previous.get(key) ?? this.cache.get(key) };
           blocks.push(block); this.sources.set(sourceKey, block); this.sourceSize += source.length;
           while (this.sources.size > 32 || this.sourceSize > CACHE_CHARS * 2) {
             const oldest = this.sources.keys().next().value!;
@@ -123,7 +125,7 @@ export function codeHighlight(languages: readonly LanguageDescription[]) {
     }
     destroy() {
       this.destroyed = true; clearTimeout(this.notify); this.worker?.terminate();
-      this.cache.clear(); this.sources.clear(); this.blocks = []; this.pending = null;
+      this.cache.clear(); this.sources.clear(); this.spans.clear(); this.blocks = []; this.pending = null;
     }
   }, { decorations: plugin => plugin.decorations });
 }

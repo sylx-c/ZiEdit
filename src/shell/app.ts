@@ -2288,6 +2288,9 @@ export async function boot(): Promise<void> {
         const editorRow = document.getElementById('editorRow');
         editorRow?.addEventListener('pointerdown', minimapInput);
         editorRow?.addEventListener('wheel', minimapInput, { passive: true });
+        // 编辑器首测与右侧大表不能落在同一次点击任务里，否则分屏挂载会超过 100ms。
+        await yieldToBrowser();
+        if (stale()) return;
         const schedulePreview = (): void => {
           if (previewDead || stale()) return;
           // 大文档保持 500ms 静默窗口；序列化和正文提交只更新受影响的块。
@@ -2460,6 +2463,8 @@ export async function boot(): Promise<void> {
           items.push([$t('ctx.mdModes'), () => void 0, mdModeMenuItems(tab)]);
           menu(items, e.clientX, e.clientY);
         });
+        await yieldToBrowser();
+        if (stale()) return;
         await renderRight(text); // 初渲染与独立预览共用同一正文组件
         if (!stale() && blockRenderer.surface) {
           mdPreviewScroller = prevHost;
