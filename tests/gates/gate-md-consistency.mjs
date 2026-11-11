@@ -3,6 +3,8 @@
 // 「Markdown 小毛病修一个冒一个」的结构性来源。本门用一份含全部常用元素的样例文档，在同一窗口里
 // 先后进两种形态，逐元素比对计算样式（字号/字重/字形/行高/颜色/底色/装饰线/字体族）与几何
 // （正文起点相对阅读栏的横向位置；表格/引用/分隔线的宽度），亮暗两种主题各比一轮。
+// 2026-11-11 起同一份样例再以 CRLF 行尾副本跑一轮：预览首开读原样文本，行尾若未归一，
+// 表格会退化成一段竖线文本，本门即报 missing: preview（而不是只在单元测试里发现）。
 // 判据：除已登记的实现差异（ALLOWED）外，所有比对项一致（数值容差 1.5px）。
 // 用法: node tests/gates/gate-md-consistency.mjs   （仅 Windows；结果 RUN_DIR/results/gate-md-consistency.json）
 import fs from 'node:fs';
@@ -50,7 +52,6 @@ Final paragraph.
 `);
 const outFile = path.join(RUN_DIR, 'results', 'gate-md-consistency.json');
 fs.mkdirSync(path.dirname(outFile), { recursive: true });
-const webviewDir = path.join(RUN_DIR, 'profiles', 'md-consistency');
 
 const PROPS = ['fontSize', 'fontWeight', 'fontStyle', 'lineHeight', 'color', 'backgroundColor', 'textDecorationLine', 'fontFamily'];
 // [名称, 预览选择器, 即时渲染选择器, 文本匹配]
@@ -94,7 +95,13 @@ const collect = side => `(() => {
   return out; })()`;
 
 const TONES = { paper: 'light', graphite: 'dark' };
-const out = { exe: EXE, fixture, started: new Date().toISOString(), rounds: [] };
+// 同一份样例跑两种行尾：LF 与 CRLF。CRLF 副本专门覆盖「预览首开读原样文本」的输入边界。
+const fixtures = [
+  { label: 'lf', file: fixture },
+  { label: 'crlf', file: path.join(RUN_DIR, 'corpus', 'md-consistency-crlf.md') },
+];
+fs.writeFileSync(fixtures[1].file, fs.readFileSync(fixture, 'utf8').replace(/\n/g, '\r\n'));
+const out = { exe: EXE, fixtures: fixtures.map(item => item.file), started: new Date().toISOString(), rounds: [] };
 const save = () => fs.writeFileSync(outFile, JSON.stringify(out, null, 2));
 
 function compare(pre, ir) {
@@ -114,8 +121,8 @@ function compare(pre, ir) {
   return diffs;
 }
 
-(async () => {
-  const child = spawn(EXE, [fixture], { detached: true, stdio: 'ignore', env: { ...process.env, WEBVIEW2_USER_DATA_FOLDER: webviewDir } });
+async function runFixture(item) {
+  const child = spawn(EXE, [item.file], { detached: true, stdio: 'ignore', env: { ...process.env, WEBVIEW2_USER_DATA_FOLDER: path.join(RUN_DIR, 'profiles', 'md-consistency-' + item.label) } });
   child.unref();
   let cdp;
   try {
@@ -137,18 +144,22 @@ function compare(pre, ir) {
       await sleep(800);
       const ir = await cdp.evaluate(collect('ir'));
       const diffs = compare(pre, ir);
-      out.rounds.push({ theme, tone, pass: diffs.length === 0, diffs }); save();
-      console.log(`${diffs.length ? 'FAIL' : 'PASS'} ${theme}/${tone}${diffs.length ? ' ' + JSON.stringify(diffs) : ''}`);
+      out.rounds.push({ fixture: item.label, theme, tone, pass: diffs.length === 0, diffs }); save();
+      console.log(`${diffs.length ? 'FAIL' : 'PASS'} ${item.label}/${theme}/${tone}${diffs.length ? ' ' + JSON.stringify(diffs) : ''}`);
       await switchMdMode(cdp, '渲染预览');
     }
   } catch (err) {
-    out.fatal = String(err?.stack ?? err); console.error(out.fatal);
+    out.fatal = `${item.label}: ${String(err?.stack ?? err)}`; console.error(out.fatal);
   } finally {
-    out.verdict = !out.fatal && out.rounds.length === Object.keys(TONES).length && out.rounds.every(r => r.pass);
-    save();
     try { cdp?.close(); } catch {}
     await killTree(child.pid);
-    console.log(`verdict: ${out.verdict ? 'PASS' : 'FAIL'} → ${outFile}`);
-    process.exit(out.verdict ? 0 : 1);
   }
+}
+
+(async () => {
+  for (const item of fixtures) if (!out.fatal) await runFixture(item);
+  out.verdict = !out.fatal && out.rounds.length === fixtures.length * Object.keys(TONES).length && out.rounds.every(r => r.pass);
+  save();
+  console.log(`verdict: ${out.verdict ? 'PASS' : 'FAIL'} → ${outFile}`);
+  process.exit(out.verdict ? 0 : 1);
 })();
