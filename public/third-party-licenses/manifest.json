@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generator": "scripts/generate-third-party-licenses.mjs",
   "inputSHA256": {
-    "package-lock.json": "fec4b770bb1e9d1c7428b537459dac7e7712ebb56d2e1c411c2bc0ebc93bff1e",
-    "src-tauri/Cargo.lock": "56c5b9a449fb20854545745b348202a5b7a5fc7d7aee82e17eb4cff3fab3f5e9",
-    "src-tauri/Cargo.toml": "10c09f23af63f6e54d934b8432de980335f5c60fc2b81732645601773c244be5"
+    "package-lock.json": "2c43113952bb16b616731a766d50df353bc79ce46bdb13f03d29d6847a3c1ad6",
+    "src-tauri/Cargo.lock": "faa803bd9214216e3fc1c0e10e4cefbc56a4bcb1234d619a2ec7447b1766bd09",
+    "src-tauri/Cargo.toml": "2909b44be123f65f8369a917afbff6a9789ae9a136e18da136cc2595d85ce869"
   },
   "cargoCommand": [
     "cargo",
@@ -48,7 +48,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@antfu/install-pkg/-/install-pkg-2.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@antfu/install-pkg/-/install-pkg-2.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40antfu%2Finstall-pkg/2.1.0",
         "integrity": "sha512-sdg9NxU3zR4Mnawfbc/x6GB5Wf17WYud5qOuEuxXjaKpYpMkISSJEjItGebXJ2bQ4DIcly4NYH23mtkGJjvKUw==",
         "repositoryURL": "https://github.com/antfu-collective/install-pkg"
@@ -79,7 +79,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@asamuzakjp/css-color/-/css-color-7.1.5.tgz",
+        "archiveURL": "https://registry.npmjs.org/@asamuzakjp/css-color/-/css-color-7.1.5.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40asamuzakjp%2Fcss-color/7.1.5",
         "integrity": "sha512-jCpAvj8apa7SKHZYogk0rbXB3Kb0hLFrpkWF+Ap+vBA5rirItnpv9NKyAyEuDuFizvl0qwnj6JWR70RGJ0rOlw==",
         "repositoryURL": "https://github.com/asamuzaK/cssColor"
@@ -110,7 +110,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@asamuzakjp/dom-selector/-/dom-selector-10.0.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@asamuzakjp/dom-selector/-/dom-selector-10.0.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40asamuzakjp%2Fdom-selector/10.0.3",
         "integrity": "sha512-3+777rEPsOOjoy5/sRmIzHnoRDaLpm3XWY2dmWn/N7f/XwDG0bcpnFaKL3X9FYJUbNwLmpcJC1bUYexJRxsFlw==",
         "repositoryURL": "https://github.com/asamuzaK/domSelector"
@@ -141,7 +141,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@braintree/sanitize-url/-/sanitize-url-7.1.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@braintree/sanitize-url/-/sanitize-url-7.1.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40braintree%2Fsanitize-url/7.1.2",
         "integrity": "sha512-jigsZK+sMF/cuiB7sERuo9V7N9jx+dhmHHnQyDSVdpZwVutaBu7WvNYqMDLSgFgfB30n452TP3vjDAvFC973mA==",
         "repositoryURL": "https://github.com/braintree/sanitize-url"
@@ -172,7 +172,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@bramus/specificity/-/specificity-2.4.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@bramus/specificity/-/specificity-2.4.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40bramus%2Fspecificity/2.4.3",
         "integrity": "sha512-0GEz8qJWokkUVYQYRukmkSHIFNoBH8QTreeHrAFbvz1XFYc3Y+puhMs8PQ5x8GNugiC2l5jvDBXKLbBIByeSBw==",
         "repositoryURL": "https://github.com/bramus/specificity"
@@ -203,7 +203,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@chevrotain/cst-dts-gen/-/cst-dts-gen-13.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@chevrotain/cst-dts-gen/-/cst-dts-gen-13.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40chevrotain%2Fcst-dts-gen/13.2.0",
         "integrity": "sha512-bA9dvWlhAUcHkNwU+8w9yiUxJPlj/Lm3VqS7MD+NbIR/7LmpNLuK/AWNFdCo/T3SK5ND0/UHf3IJvl/Jn/i6yg==",
         "repositoryURL": "git://github.com/Chevrotain/chevrotain"
@@ -234,7 +234,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@chevrotain/gast/-/gast-13.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@chevrotain/gast/-/gast-13.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40chevrotain%2Fgast/13.2.0",
         "integrity": "sha512-bCARdAsG+eEbOveSXcOAC7pVxA04I1ionzeMOwIYf5NX7SaS7zgn4Dgug2BSqoL+iyKeMNSorQjsFSHJHsCNwg==",
         "repositoryURL": "git://github.com/Chevrotain/chevrotain"
@@ -265,7 +265,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@chevrotain/regexp-to-ast/-/regexp-to-ast-13.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@chevrotain/regexp-to-ast/-/regexp-to-ast-13.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40chevrotain%2Fregexp-to-ast/13.2.0",
         "integrity": "sha512-kxpUkLtiaK09ph+dib+Yvm+3sWSnuwlo25gqfKRgTPNmF6H7uW4gVkMjaRdtnN783S9sM6vUNWh9CsxYX4QwKw==",
         "repositoryURL": "git://github.com/Chevrotain/chevrotain"
@@ -296,7 +296,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@chevrotain/types/-/types-13.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@chevrotain/types/-/types-13.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40chevrotain%2Ftypes/13.2.0",
         "integrity": "sha512-7qrYHRlKfWf2AvBfJi5eVOrKAkbxvMFsy/iIHTGIiApNcEecCaVIdR+mIQhyCBsTDJxBz4JWXHMo6krbhR9hVg==",
         "repositoryURL": "git://github.com/Chevrotain/chevrotain"
@@ -327,7 +327,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@chevrotain/utils/-/utils-13.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@chevrotain/utils/-/utils-13.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40chevrotain%2Futils/13.2.0",
         "integrity": "sha512-SzKYY68rseOrb9KILVzPsl6SjkQtdWw01SRGB5aCVI5kFcHltQsOYV3JB0Ffst72DgkvHCyDQ0NLwxtmCCf97Q==",
         "repositoryURL": "git://github.com/Chevrotain/chevrotain"
@@ -358,7 +358,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/autocomplete/-/autocomplete-6.20.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/autocomplete/-/autocomplete-6.20.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Fautocomplete/6.20.3",
         "integrity": "sha512-tlosUqb+3BbxCxZdu4tKeRghPFC+QM7q4X5YhKV2eCmPG+1r2F3f4AaSz5sCrFqUtX4Jh20VFTKecl16MgiV9g==",
         "repositoryURL": "https://code.haverbeke.berlin/codemirror/autocomplete"
@@ -389,7 +389,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/commands/-/commands-6.11.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/commands/-/commands-6.11.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Fcommands/6.11.1",
         "integrity": "sha512-O/4hG3SC1YwcmQ0d2UVNDs+AsaNWd1iHVxbTeEBuqH+6bExAiPK3iS/BvpY6rZGURALv4ZD3sIgcCmRvw3ehBg==",
         "repositoryURL": "https://code.haverbeke.berlin/codemirror/commands"
@@ -420,7 +420,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-cpp/-/lang-cpp-6.0.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-cpp/-/lang-cpp-6.0.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-cpp/6.0.3",
         "integrity": "sha512-URM26M3vunFFn9/sm6rzqrBzDgfWuDixp85uTY49wKudToc2jTHUrKIGGKs+QWND+YLofNNZpxcNGRynFJfvgA==",
         "repositoryURL": "https://github.com/codemirror/lang-cpp"
@@ -451,7 +451,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-css/-/lang-css-6.3.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-css/-/lang-css-6.3.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-css/6.3.1",
         "integrity": "sha512-kr5fwBGiGtmz6l0LSJIbno9QrifNMUusivHbnA1H6Dmqy4HZFte3UAICix1VuKo0lMPKQr2rqB+0BkKi/S3Ejg==",
         "repositoryURL": "https://github.com/codemirror/lang-css"
@@ -482,7 +482,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-html/-/lang-html-6.4.12.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-html/-/lang-html-6.4.12.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-html/6.4.12",
         "integrity": "sha512-pw2ReWKUqSkbvh76RAT4NYxiogRu+PWkR2ukAwO9uOgrm8uipkzjtKKtNpyeAQwHOqxEeSvAXZ6vr3AfyB9y/w==",
         "repositoryURL": "https://code.haverbeke.berlin/codemirror/lang-html"
@@ -513,7 +513,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-java/-/lang-java-6.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-java/-/lang-java-6.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-java/6.0.2",
         "integrity": "sha512-m5Nt1mQ/cznJY7tMfQTJchmrjdjQ71IDs+55d1GAa8DGaB8JXWsVCkVT284C3RTASaY43YknrK2X3hPO/J3MOQ==",
         "repositoryURL": "https://github.com/codemirror/lang-java"
@@ -544,7 +544,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-javascript/-/lang-javascript-6.2.5.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-javascript/-/lang-javascript-6.2.5.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-javascript/6.2.5",
         "integrity": "sha512-zD4e5mS+50htS7F+TYjBPsiIFGanfVqg4HyUz6WNFikgOPf2BgKlx+TQedI1w6n/IqRBVBbBWmGFdLB/7uxO4A==",
         "repositoryURL": "https://github.com/codemirror/lang-javascript"
@@ -575,7 +575,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-json/-/lang-json-6.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-json/-/lang-json-6.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-json/6.0.2",
         "integrity": "sha512-x2OtO+AvwEHrEwR0FyyPtfDUiloG3rnVTSZV1W8UteaLL8/MajQd8DpvUb2YVzC+/T18aSDv0H9mu+xw0EStoQ==",
         "repositoryURL": "https://github.com/codemirror/lang-json"
@@ -606,7 +606,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-markdown/-/lang-markdown-6.5.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-markdown/-/lang-markdown-6.5.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-markdown/6.5.2",
         "integrity": "sha512-AwBOdkWYuA//WcM0xO5PfHPUcmz/O2i5o0Nsg1U69SII/loCJlFI1Romd9xp2HYb1kYJRGZotyqRghuHH5n8Kw==",
         "repositoryURL": "https://code.haverbeke.berlin/codemirror/lang-markdown"
@@ -637,7 +637,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-python/-/lang-python-6.2.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-python/-/lang-python-6.2.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-python/6.2.1",
         "integrity": "sha512-IRjC8RUBhn9mGR9ywecNhB51yePWCGgvHfY1lWN/Mrp3cKuHr0isDKia+9HnvhiWNnMpbGhWrkhuWOc09exRyw==",
         "repositoryURL": "https://github.com/codemirror/lang-python"
@@ -668,7 +668,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-rust/-/lang-rust-6.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-rust/-/lang-rust-6.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-rust/6.0.2",
         "integrity": "sha512-EZaGjCUegtiU7kSMvOfEZpaCReowEf3yNidYu7+vfuGTm9ow4mthAparY5hisJqOHmJowVH3Upu+eJlUji6qqA==",
         "repositoryURL": "https://github.com/codemirror/lang-rust"
@@ -699,7 +699,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-sql/-/lang-sql-6.10.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-sql/-/lang-sql-6.10.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-sql/6.10.0",
         "integrity": "sha512-6ayPkEd/yRw0XKBx5uAiToSgGECo/GY2NoJIHXIIQh1EVwLuKoU8BP/qK0qH5NLXAbtJRLuT73hx7P9X34iO4w==",
         "repositoryURL": "https://github.com/codemirror/lang-sql"
@@ -730,7 +730,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-xml/-/lang-xml-6.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-xml/-/lang-xml-6.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-xml/6.1.0",
         "integrity": "sha512-3z0blhicHLfwi2UgkZYRPioSgVTo9PV5GP5ducFH6FaHy0IAJRg+ixj5gTR1gnT/glAIC8xv4w2VL1LoZfs+Jg==",
         "repositoryURL": "https://github.com/codemirror/lang-xml"
@@ -761,7 +761,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lang-yaml/-/lang-yaml-6.1.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lang-yaml/-/lang-yaml-6.1.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flang-yaml/6.1.3",
         "integrity": "sha512-AZ8DJBuXGVHybpBQhmZtgew5//4hv3tdkXnr3vDmOUMJRuB6vn/uuwtmTOTlqEaQFg3hQSVeA90NmvIQyUV6FQ==",
         "repositoryURL": "https://github.com/codemirror/lang-yaml"
@@ -792,7 +792,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/language/-/language-6.13.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/language/-/language-6.13.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flanguage/6.13.1",
         "integrity": "sha512-zfvU2r3TyylQLMj/te+5CnQ0rSqZi8B1oTCBbQkagcLW4Xc6imab6qN+pEJhsuNOLaJqiRyBXp9UhWA1DhVvDw==",
         "repositoryURL": "https://code.haverbeke.berlin/codemirror/language"
@@ -823,7 +823,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/lint/-/lint-6.9.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/lint/-/lint-6.9.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Flint/6.9.7",
         "integrity": "sha512-28/+iWLYxKxsvGYhSYL7zaCZqLz5+FFFDq9tVsvGv9kv8RY4fFAchJ5WX9M3YrrRlTIsECjsXPqeNgnSmNP2dg==",
         "repositoryURL": "https://code.haverbeke.berlin/codemirror/lint"
@@ -854,7 +854,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/search/-/search-6.7.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/search/-/search-6.7.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Fsearch/6.7.2",
         "integrity": "sha512-gUYkYhT2+n/+VGZ+8EzE5WFkYZUZYm1VOKDudIsNqh42uRVQJ0a6Yss9sdKT3MeOYfuL1N6AZA57oza0Oyr0LA==",
         "repositoryURL": "https://code.haverbeke.berlin/codemirror/search"
@@ -885,7 +885,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/state/-/state-6.7.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/state/-/state-6.7.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Fstate/6.7.6",
         "integrity": "sha512-kAz+AncRtKuIknedxT1bq4XwXv4UowhbkHU1myPrtVb/jZtImWuV5BXzv5vK6i3kYACsdiZiQKFQQ5Mq7elW8w==",
         "repositoryURL": "https://code.haverbeke.berlin/codemirror/state"
@@ -916,7 +916,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/streamparser/-/streamparser-6.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/streamparser/-/streamparser-6.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Fstreamparser/6.0.0",
         "integrity": "sha512-JTFPF6xrfjt0mnfGPgzcLiMwYmvIyNaoizp8BYzv8FE8KrT6GBGDZ190rtt+O7Wke3gG/MFHyiY9YGNeimof4w==",
         "repositoryURL": "https://code.haverbeke.berlin/codemirror/streamparser"
@@ -947,7 +947,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@codemirror/view/-/view-6.43.14.tgz",
+        "archiveURL": "https://registry.npmjs.org/@codemirror/view/-/view-6.43.14.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40codemirror%2Fview/6.43.14",
         "integrity": "sha512-hC45YnmJNR1rz42OF57BLoQNFMV12/13drnvibDsR2quNDmldcb4WvYVV81hFQg56i9lcqQMEDqilhX2QDcGQQ==",
         "repositoryURL": "https://code.haverbeke.berlin/codemirror/view"
@@ -978,7 +978,7 @@
       "license": "MIT-0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@csstools/color-helpers/-/color-helpers-6.1.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@csstools/color-helpers/-/color-helpers-6.1.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40csstools%2Fcolor-helpers/6.1.2",
         "integrity": "sha512-grhRy3OKmniaAEKXMjua5z/EODX0MSqBGjunw8+j/3HQjOnahs2AGhvEOIYVUWcU6ScApbhLhVrQTX8XqrMrow==",
         "repositoryURL": "https://github.com/csstools/postcss-plugins"
@@ -1009,7 +1009,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@csstools/css-calc/-/css-calc-3.4.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@csstools/css-calc/-/css-calc-3.4.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40csstools%2Fcss-calc/3.4.3",
         "integrity": "sha512-iex20d8CHVkyvg6B7UKV7uHnI2Bqo9g+EFfT9E0y+GvTvhZ/DwONJ+9aKb1dlqm0ZiGsL5RXjp0fCoJYnkeDjA==",
         "repositoryURL": "https://github.com/csstools/postcss-plugins"
@@ -1040,7 +1040,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@csstools/css-color-parser/-/css-color-parser-4.2.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/@csstools/css-color-parser/-/css-color-parser-4.2.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40csstools%2Fcss-color-parser/4.2.6",
         "integrity": "sha512-iiPQ3iRWwnJkeEn6RIu6SJPr7hYrLz6XZ9s/QZl+2/LI5KQVjpl2fdmDSZKuD4xP6GMmMPgHFFXg6k1Wkz0Trg==",
         "repositoryURL": "https://github.com/csstools/postcss-plugins"
@@ -1071,7 +1071,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@csstools/css-parser-algorithms/-/css-parser-algorithms-4.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@csstools/css-parser-algorithms/-/css-parser-algorithms-4.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40csstools%2Fcss-parser-algorithms/4.0.2",
         "integrity": "sha512-40cSKyMvK+tq4qz6Awrlye2WGuOKt3FwPgtGg6KTfbHOWNw+Rk1rzbAtZnZ6IBhsY491HLRnDXwoyBAijmmILA==",
         "repositoryURL": "https://github.com/csstools/postcss-plugins"
@@ -1102,7 +1102,7 @@
       "license": "MIT-0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@csstools/css-syntax-patches-for-csstree/-/css-syntax-patches-for-csstree-1.1.15.tgz",
+        "archiveURL": "https://registry.npmjs.org/@csstools/css-syntax-patches-for-csstree/-/css-syntax-patches-for-csstree-1.1.15.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40csstools%2Fcss-syntax-patches-for-csstree/1.1.15",
         "integrity": "sha512-J0u7HkVl2nzSlhsiTOp4AmwcUQ3D+mGEEKfBy/7To5/y7F2OHwyLrXfrhR0SMgr4p5Lo+eaMVSeai24zUcBIxA==",
         "repositoryURL": "https://github.com/csstools/postcss-plugins"
@@ -1133,7 +1133,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@csstools/css-tokenizer/-/css-tokenizer-4.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@csstools/css-tokenizer/-/css-tokenizer-4.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40csstools%2Fcss-tokenizer/4.0.2",
         "integrity": "sha512-OoKoR0f76dCY666JlcbhmVTs2drYj1GUXZTYTcbUgJjh9Nv41aFfZ21bPQTERm5+L5cBDo466NltB2lplS5GBw==",
         "repositoryURL": "https://github.com/csstools/postcss-plugins"
@@ -1164,7 +1164,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@exodus/bytes/-/bytes-1.16.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@exodus/bytes/-/bytes-1.16.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40exodus%2Fbytes/1.16.0",
         "integrity": "sha512-IcpW84uEn3N7ETtNZMlxKhfl6Pec8rUNGOTBtWbK1FKhJxIFAptZyVrvVRVBimAJxJCgc3PxepxkdWWG4DVzfA==",
         "repositoryURL": "https://github.com/ExodusOSS/bytes"
@@ -1195,7 +1195,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@iconify/types/-/types-2.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@iconify/types/-/types-2.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40iconify%2Ftypes/2.0.0",
         "integrity": "sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==",
         "repositoryURL": "https://github.com/iconify/iconify"
@@ -1226,7 +1226,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@iconify/utils/-/utils-3.1.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/@iconify/utils/-/utils-3.1.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40iconify%2Futils/3.1.7",
         "integrity": "sha512-JZHlwdID+dy+lTgbYC8NEC4zeugqeYsc6jewvzb4c58kHauJn+X7rNwQjxz5p2qSjqaEeQoLkCIQ9v/H4PK0/w==",
         "repositoryURL": "https://github.com/iconify/iconify"
@@ -1300,7 +1300,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/common/-/common-1.5.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/common/-/common-1.5.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fcommon/1.5.3",
         "integrity": "sha512-H0iErY4e43LpXbYDyBci5W4v/RwTgGV3YzYOlJPiGZ8RY8w51kVE+xLn1tg3Z6UmSfyETvtsUK3r7YsgDQEI7Q==",
         "repositoryURL": "https://code.haverbeke.berlin/lezer/common"
@@ -1331,7 +1331,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/cpp/-/cpp-1.1.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/cpp/-/cpp-1.1.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fcpp/1.1.6",
         "integrity": "sha512-vh9gWWJOXFVY8HBHK3Twzq8MgwG2iN4GSyzBP9sCGTe37P15x2R14VaBQk0VA0ezTRN1KHYBBsHhvpGZ2Xy/pA==",
         "repositoryURL": "https://code.haverbeke.berlin/lezer/cpp"
@@ -1362,7 +1362,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/css/-/css-1.3.9.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/css/-/css-1.3.9.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fcss/1.3.9",
         "integrity": "sha512-ZmzgvTOBdJWGIsY/ItAfN7UW8DV802oZG+jeG6E508SwEzz5YhuAajptpWPICvIyqYAD2+VjMdOS40GgGkyEOQ==",
         "repositoryURL": "https://code.haverbeke.berlin/lezer/css"
@@ -1393,7 +1393,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/highlight/-/highlight-1.2.5.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/highlight/-/highlight-1.2.5.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fhighlight/1.2.5",
         "integrity": "sha512-O1GMVKgtf5YspFaRzpmqkVgMtIk2HG9uMAbH6wdAIdNh3TVzCsch/+cRi+6l2//UGDKe6NB9BW3cvuR5ezMQ0w==",
         "repositoryURL": "https://code.haverbeke.berlin/lezer/highlight"
@@ -1424,7 +1424,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/html/-/html-1.3.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/html/-/html-1.3.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fhtml/1.3.13",
         "integrity": "sha512-oI7n6NJml729m7pjm9lvLvmXbdoMoi2f+1pwSDJkl9d68zGr7a9Btz8NdHTGQZtW2DA25ybeuv/SyDb9D5tseg==",
         "repositoryURL": "https://github.com/lezer-parser/html"
@@ -1455,7 +1455,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/java/-/java-1.1.5.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/java/-/java-1.1.5.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fjava/1.1.5",
         "integrity": "sha512-JppTd1iKHpeNlLYw/Zl8JX7zSY5HqAzK4zZ05lpn8l8Sk7Fo5KAKiDiMiezKoT5lfeC2xZf8HeKp1tSctj4G6Q==",
         "repositoryURL": "https://code.haverbeke.berlin/lezer/java"
@@ -1486,7 +1486,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/javascript/-/javascript-1.5.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/javascript/-/javascript-1.5.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fjavascript/1.5.6",
         "integrity": "sha512-sEvOqpl4vJQca0NugSQK02vQPbc5KrvoojnYGoqqFgFO0MtcYhwGiHKVEB+LuXYJnfyXo4QPA8ztbrEa4Fw5NA==",
         "repositoryURL": "https://code.haverbeke.berlin/lezer/javascript"
@@ -1517,7 +1517,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/json/-/json-1.0.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/json/-/json-1.0.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fjson/1.0.3",
         "integrity": "sha512-BP9KzdF9Y35PDpv04r0VeSTKDeox5vVr3efE7eBbx3r4s3oNLfunchejZhjArmeieBH+nVOpgIiBJpEAv8ilqQ==",
         "repositoryURL": "https://github.com/lezer-parser/json"
@@ -1548,7 +1548,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/lr/-/lr-1.4.11.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/lr/-/lr-1.4.11.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Flr/1.4.11",
         "integrity": "sha512-UwgZcl1R66H2hDzBrA7kWyYmX6s8p5TQ+e/t7CuvgCtBEPxbEPaHYHu+pJBvTvDotEJpuQkJjbXuHiw5Cixxgw==",
         "repositoryURL": "https://code.haverbeke.berlin/lezer/lr"
@@ -1579,7 +1579,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/markdown/-/markdown-1.8.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/markdown/-/markdown-1.8.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fmarkdown/1.8.0",
         "integrity": "sha512-X6w3A2NpyhdtGqTWRJB8gR4QDXBaFMbTOs780ZdZ15KKCfBXOQTKcB3Vr+W6tqJHVlealt53tLmHRvOqPTQgYA==",
         "repositoryURL": "https://code.haverbeke.berlin/lezer/markdown"
@@ -1610,7 +1610,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/python/-/python-1.1.19.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/python/-/python-1.1.19.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fpython/1.1.19",
         "integrity": "sha512-MhQIURHRytsNzP/YXnqpYKW6la6voAH3kyplTOOiCdjyFY6cWWGFVmYVdHIPrElqSDf4iCDktQCockB9FxuhzQ==",
         "repositoryURL": "https://code.haverbeke.berlin/lezer/python"
@@ -1641,7 +1641,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/rust/-/rust-1.0.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/rust/-/rust-1.0.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Frust/1.0.3",
         "integrity": "sha512-XxErOjZzQ7yJt1agUT4fu9qQvESZ3acgoxpPaPTPOiUx+duCjaVAtZGFIgphkHxlN05djdVAIOy/wItShMEjqQ==",
         "repositoryURL": "https://code.haverbeke.berlin/lezer/rust"
@@ -1672,7 +1672,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/xml/-/xml-1.0.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/xml/-/xml-1.0.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fxml/1.0.6",
         "integrity": "sha512-CdDwirL0OEaStFue/66ZmFSeppuL6Dwjlk8qk153mSQwiSH/Dlri4GNymrNWnUmPl2Um7QfV1FO9KFUyX3Twww==",
         "repositoryURL": "https://github.com/lezer-parser/xml"
@@ -1703,7 +1703,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@lezer/yaml/-/yaml-1.0.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/@lezer/yaml/-/yaml-1.0.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40lezer%2Fyaml/1.0.4",
         "integrity": "sha512-2lrrHqxalACEbxIbsjhqGpSW8kWpUKuY6RHgnSAFZa6qK62wvnPxA8hGOwOoDbwHcOFs5M4o27mjGu+P7TvBmw==",
         "repositoryURL": "https://github.com/lezer-parser/yaml"
@@ -1734,7 +1734,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@marijn/find-cluster-break/-/find-cluster-break-1.0.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/@marijn/find-cluster-break/-/find-cluster-break-1.0.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40marijn%2Ffind-cluster-break/1.0.4",
         "integrity": "sha512-Wy0V7+SGUjnF9/TkiM1hKVDPj7jKXduPNboMVtHTA8dySMURWqfg/JZ9E2Sq8JgSJmkl7k7Qe9FLeMSrSraWmQ==",
         "repositoryURL": "https://code.haverbeke.berlin/marijn/find-cluster-break"
@@ -1765,7 +1765,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@mathjax/mathjax-stix2-font/-/mathjax-stix2-font-4.1.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@mathjax/mathjax-stix2-font/-/mathjax-stix2-font-4.1.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40mathjax%2Fmathjax-stix2-font/4.1.3",
         "integrity": "sha512-DjJh93JuKodoYmvWawiqa22y/dwP+hn6/DN/DepFRFaRbdndNcSD3iBsBunSrLPFIJBS83mn4iR015YRPWZWhg==",
         "repositoryURL": "https://github.com/mathjax/MathJax-fonts"
@@ -1810,7 +1810,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@mermaid-js/parser/-/parser-2.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/@mermaid-js/parser/-/parser-2.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40mermaid-js%2Fparser/2.0.1",
         "integrity": "sha512-j37dj/h6p6pots1L7pLPPNuABEEu9WP4OYg9pW1g+nYG331j0+3canE9OagtYdytYvdSAMG+2fKU5cxep6LgjA==",
         "repositoryURL": "https://github.com/mermaid-js/mermaid"
@@ -1841,7 +1841,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas/-/canvas-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas/-/canvas-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas/1.0.13",
         "integrity": "sha512-b87ugZpQ5ViwqVBkjervxpwa0GmJPsKHLBNoZN6GpjWeHzTbDUGryriq+2DYW2XbB+xCqSIINQysC0/I87nPbw==",
         "repositoryURL": "https://github.com/Brooooooklyn/canvas"
@@ -1876,7 +1876,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-android-arm64/-/canvas-android-arm64-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-android-arm64/-/canvas-android-arm64-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-android-arm64/1.0.13",
         "integrity": "sha512-trn7AaDzQ+yeeA0ezhkC7cB1ZDPtp4UYk0EvB5F8qtYL9jEVWtVrU30WOpI52DszoTxaTsCgf5PP4ZVaOlOIHQ==",
         "repositoryURL": null
@@ -1932,7 +1932,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-darwin-arm64/-/canvas-darwin-arm64-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-darwin-arm64/-/canvas-darwin-arm64-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-darwin-arm64/1.0.13",
         "integrity": "sha512-6Y2djEetL8copxfNK6hg7oig/xqTwOchv19hBOm+zBNdKc/02Z3kjZN5wrLzv/l5O04/bAQS6I/AlQpwBlXgPg==",
         "repositoryURL": null
@@ -1988,7 +1988,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-darwin-x64/-/canvas-darwin-x64-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-darwin-x64/-/canvas-darwin-x64-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-darwin-x64/1.0.13",
         "integrity": "sha512-OZoPwwu4TMMg8GTCFBrg8UFExwQTU/55i3uTC/izDat6PHE+ro9dimyQoOboFf91+NY7Pnn70ScR8f8I8+eZXw==",
         "repositoryURL": null
@@ -2044,7 +2044,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-linux-arm-gnueabihf/-/canvas-linux-arm-gnueabihf-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm-gnueabihf/-/canvas-linux-arm-gnueabihf-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-linux-arm-gnueabihf/1.0.13",
         "integrity": "sha512-dZSYaKROuswU2eUWG5aBKndNVe68elo1YX93xtRax7q658tj8rYE+HwduovWJgs6qwv1r1/CLR60nDeBbyjvyg==",
         "repositoryURL": null
@@ -2100,7 +2100,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-linux-arm64-gnu/-/canvas-linux-arm64-gnu-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm64-gnu/-/canvas-linux-arm64-gnu-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-linux-arm64-gnu/1.0.13",
         "integrity": "sha512-W6FzYE8ADHI93In1vi80KBL6btDtAMuj50Ch5ptkWS8xuntyzbR4h5JDUmXoakxZn2yMInksudTEqVSWoFqFGg==",
         "repositoryURL": null
@@ -2156,7 +2156,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-linux-arm64-musl/-/canvas-linux-arm64-musl-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm64-musl/-/canvas-linux-arm64-musl-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-linux-arm64-musl/1.0.13",
         "integrity": "sha512-+6fQ+rR49hkAa4voh2stLIwQ+4t+gmoseM8Bc53/DlMXb73IKymDPWK9A/NtWeqTW4ijWppYuyuxS2hPI8tzNA==",
         "repositoryURL": null
@@ -2212,7 +2212,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-linux-riscv64-gnu/-/canvas-linux-riscv64-gnu-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-riscv64-gnu/-/canvas-linux-riscv64-gnu-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-linux-riscv64-gnu/1.0.13",
         "integrity": "sha512-17XEMO3t9RW/TtHtSFf2AkaSWuCWdzbPeidz7zrOFawHxoLSJCnpTI1hN5aUvrZNnkNNmt/vZVJCh0ryUaik3A==",
         "repositoryURL": null
@@ -2268,7 +2268,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-linux-x64-gnu/-/canvas-linux-x64-gnu-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-x64-gnu/-/canvas-linux-x64-gnu-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-linux-x64-gnu/1.0.13",
         "integrity": "sha512-lc48IwknVHBsNzXn9Xs5OkUsRX38Ml3Z1aOybQ51mMEzZckm8+4A0qROlyYHEoBPzr1kL3IU8ZUAqDb7wtdX8w==",
         "repositoryURL": null
@@ -2324,7 +2324,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-linux-x64-musl/-/canvas-linux-x64-musl-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-x64-musl/-/canvas-linux-x64-musl-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-linux-x64-musl/1.0.13",
         "integrity": "sha512-bGY1r26S2bs8UNFJcPWcCSNdCFbKep5PATsvtgtC9A5u6SRgr2/jJE/RlhHL5m9ZpixNDhVkLY/5h16Kx5V9YA==",
         "repositoryURL": null
@@ -2380,7 +2380,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-win32-arm64-msvc/-/canvas-win32-arm64-msvc-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-win32-arm64-msvc/-/canvas-win32-arm64-msvc-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-win32-arm64-msvc/1.0.13",
         "integrity": "sha512-2vRPBZoaIvJrUkDhZTE2Hn0YrnpJRCWVM3EJACoBKjuWI6WgPxGtUoRMsxRviCsyks8bKTSFdyw14CellnG2qA==",
         "repositoryURL": null
@@ -2436,7 +2436,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@napi-rs/canvas-win32-x64-msvc/-/canvas-win32-x64-msvc-1.0.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@napi-rs/canvas-win32-x64-msvc/-/canvas-win32-x64-msvc-1.0.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40napi-rs%2Fcanvas-win32-x64-msvc/1.0.13",
         "integrity": "sha512-DUlW3lZPz63kYsf8mxgyyZuevhlH0T3/BGP9l+NazhB0F1+gL6D4hqZdnhZpw24DlWmTpATDcyYSZlJOi+DdfQ==",
         "repositoryURL": null
@@ -2488,7 +2488,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@oxc-project/types/-/types-0.153.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@oxc-project/types/-/types-0.153.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40oxc-project%2Ftypes/0.153.0",
         "integrity": "sha512-jSNrRIyvPVLL5E1z/tS5zLAprosGz/FuI1PWwEOz59j3E4TTTzSpqKb/RDGqJhhW0QHYISGXxq582wGx6T11Tw==",
         "repositoryURL": "https://github.com/oxc-project/oxc"
@@ -2523,7 +2523,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-android-arm-eabi/-/binding-android-arm-eabi-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-android-arm-eabi/-/binding-android-arm-eabi-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-android-arm-eabi/1.2.13",
         "integrity": "sha512-Vu/NICrgdRvUOeaJZIyB2FP63s6fO/4ud5l8dXmxDx9yDyn+mN0y+gsvsVviSli+T361Aqo0h46EuMoobrwawA==",
         "repositoryURL": null
@@ -2579,7 +2579,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-android-arm64/-/binding-android-arm64-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-android-arm64/-/binding-android-arm64-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-android-arm64/1.2.13",
         "integrity": "sha512-6LEoIrGy5vvCd2boNnv2soPSUZj/PRvhp8R/t9KlX+mIZxThIE/ZqxrGXxmuNX0FuvQFvLdZr7S4HrYpYBVhEQ==",
         "repositoryURL": null
@@ -2635,7 +2635,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-darwin-arm64/-/binding-darwin-arm64-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-darwin-arm64/-/binding-darwin-arm64-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-darwin-arm64/1.2.13",
         "integrity": "sha512-CaJSRzlQ6Q+zkDMVA9OkVxBjVoPRCDEE3v0FSJ9kIQBgRjFApA3Si4ijhbNVUji7ZJt+PfO0e46qy4nPInHUPA==",
         "repositoryURL": null
@@ -2691,7 +2691,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-darwin-x64/-/binding-darwin-x64-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-darwin-x64/-/binding-darwin-x64-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-darwin-x64/1.2.13",
         "integrity": "sha512-e4r340I5hxSzJkD3YJBxgzq/rJ3wwxwdLLb2FPt1Zpyem20nrQPT11DDEEkazwxaHumH8wpglsp/Ozgj/wT6mw==",
         "repositoryURL": null
@@ -2747,7 +2747,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-freebsd-x64/-/binding-freebsd-x64-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-freebsd-x64/-/binding-freebsd-x64-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-freebsd-x64/1.2.13",
         "integrity": "sha512-hoBWDZ4/K/mJKVMbsgUd1jfpA2DiOrJ54mpegObU9TBHBBrtX4FLIXJJQRDPZ/2Dn91GvPob+Z2hwKJzf4E5SQ==",
         "repositoryURL": null
@@ -2803,7 +2803,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-linux-arm-gnueabihf/-/binding-linux-arm-gnueabihf-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-arm-gnueabihf/-/binding-linux-arm-gnueabihf-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-linux-arm-gnueabihf/1.2.13",
         "integrity": "sha512-oF9fZu3vTWnTiVAkDFxU9PJLt1nh20K9RRpuHsR7ZnE2L7XookBbDBVLojCVSLGbvtSlxeUNnjAj6DbNsKyzbg==",
         "repositoryURL": null
@@ -2859,7 +2859,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-linux-arm64-gnu/1.2.13",
         "integrity": "sha512-DTpb/+jMiqWMPgphn4ksW1zW+XLJ6dJJ9FMvnIk9I291LhCctMPhMYJrP5t9p6C9qa3KXadDdUEZHBaPh3kNxQ==",
         "repositoryURL": null
@@ -2915,7 +2915,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-linux-arm64-musl/-/binding-linux-arm64-musl-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-arm64-musl/-/binding-linux-arm64-musl-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-linux-arm64-musl/1.2.13",
         "integrity": "sha512-xU+Kvv9N2A3SY35zFh1FWWNjxbadE/BKeqnkXe7vScU4GZsw757BlVmDLITZEq8DPpk6m7uoDYkK7P+x/uU5Ow==",
         "repositoryURL": null
@@ -2971,7 +2971,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-linux-ppc64-gnu/-/binding-linux-ppc64-gnu-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-ppc64-gnu/-/binding-linux-ppc64-gnu-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-linux-ppc64-gnu/1.2.13",
         "integrity": "sha512-XMk/hnhh25oQ756Lclb1Q11h4ll0xC0Esa5w4Vzp+mAE2S3AGJgeM0SonrIgY8fHhjarb6hcoTuwoFG0VVP2ig==",
         "repositoryURL": null
@@ -3027,7 +3027,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-linux-s390x-gnu/-/binding-linux-s390x-gnu-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-s390x-gnu/-/binding-linux-s390x-gnu-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-linux-s390x-gnu/1.2.13",
         "integrity": "sha512-U1BoTHYmlywE2n3HUWjzZ+8EQsKr+OwpxYuDWaubx42tUL8QSL7nOqRz/NVHanibbFP3M1Rxuprz/wNcbMKjqw==",
         "repositoryURL": null
@@ -3083,7 +3083,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-linux-x64-gnu/1.2.13",
         "integrity": "sha512-J4cm80Pc6wEwV5AZ42o62sIQgDk+Y7R2s646jIwuvO+4V46QB58N4vVuMPWCBaNgursXLpmUWJV//WQAkPvHBQ==",
         "repositoryURL": null
@@ -3139,7 +3139,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-linux-x64-musl/-/binding-linux-x64-musl-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-x64-musl/-/binding-linux-x64-musl-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-linux-x64-musl/1.2.13",
         "integrity": "sha512-W0euZS40U4V6JkmEnVCIX9mcsL6cbXQ4X8c2w+MMOIjFg68TXUW+u3RT+2e1t1pv9mg/EP3pDtK3POXdQ7Rxyw==",
         "repositoryURL": null
@@ -3195,7 +3195,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-openharmony-arm64/-/binding-openharmony-arm64-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-openharmony-arm64/-/binding-openharmony-arm64-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-openharmony-arm64/1.2.13",
         "integrity": "sha512-do/AF/4n9MRshia3a5aXoy8xM2c6mgfT6D7H/dY6my5z+hfCIR4ab7mk4IRj++nsEQpKy39kd0DQnDq+r692tw==",
         "repositoryURL": null
@@ -3251,7 +3251,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-win32-arm64-msvc/-/binding-win32-arm64-msvc-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-win32-arm64-msvc/-/binding-win32-arm64-msvc-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-win32-arm64-msvc/1.2.13",
         "integrity": "sha512-6FtUf2cJZobutJdxnGYX8z0vtbgqU0b2v8vfBhkXb9wp2MppMFtkunE+IaOntyi01rkIQoPW2GHABtfzsC0BRQ==",
         "repositoryURL": null
@@ -3307,7 +3307,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fbinding-win32-x64-msvc/1.2.13",
         "integrity": "sha512-UKhFaZTeTcbKrb3iU82m17jVcPEAoqDkCN5MBqgPyZSwp/cQmib21crTS0DdH7T1B7wZRWEI89YQAOJMet5yhg==",
         "repositoryURL": null
@@ -3359,7 +3359,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@rolldown/pluginutils/-/pluginutils-1.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40rolldown%2Fpluginutils/1.0.1",
         "integrity": "sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==",
         "repositoryURL": "https://github.com/rolldown/plugins"
@@ -3421,7 +3421,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/api/-/api-2.12.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/api/-/api-2.12.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fapi/2.12.3",
         "integrity": "sha512-9s0PKw0p4r3kFq92jhpivYSp+cSht15o0gXpZxuQd0+dV9KCexEVkNaLELVoLdJWyoH4KlfQo5h3W2LIM8siJg==",
         "repositoryURL": "https://github.com/tauri-apps/tauri"
@@ -3464,7 +3464,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli/-/cli-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli/-/cli-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli/2.12.2",
         "integrity": "sha512-PMSppzAnlT+BvZtRKuidxjRSm2r5t8kDpJ/czmmQUa0AtDNTwrjLE8vApK3phCWGg7isfnYL46Dl1jB4ArI0hA==",
         "repositoryURL": "https://github.com/tauri-apps/tauri"
@@ -3505,7 +3505,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-darwin-arm64/-/cli-darwin-arm64-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-darwin-arm64/-/cli-darwin-arm64-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-darwin-arm64/2.12.2",
         "integrity": "sha512-Lk3zaBTfzNvA7670Al5PNgo2M/95uaDPe1yp+ILJeDOmol87XiYuK5E5+FUbK5e6U6OORx9qpZdOo2U+5tETtQ==",
         "repositoryURL": null
@@ -3595,7 +3595,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-darwin-x64/-/cli-darwin-x64-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-darwin-x64/-/cli-darwin-x64-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-darwin-x64/2.12.2",
         "integrity": "sha512-2CyYjJ833JB3sKRz4B0W/Tv4oOVC16ws1bxdSCWj1XvrmanWwvZi99e5tNIoCHwHhcOm0jh+sh0PCGQyls6Z+w==",
         "repositoryURL": null
@@ -3685,7 +3685,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-linux-arm-gnueabihf/-/cli-linux-arm-gnueabihf-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm-gnueabihf/-/cli-linux-arm-gnueabihf-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-linux-arm-gnueabihf/2.12.2",
         "integrity": "sha512-uvt2xbone4JftKarelssi86Kqnl7JiG1Smh5+Ae+nZmtM+JUhTGmqkcqfUPXRW8Ygwog92POZvd4oGDN9j8eXQ==",
         "repositoryURL": null
@@ -3775,7 +3775,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-linux-arm64-gnu/-/cli-linux-arm64-gnu-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm64-gnu/-/cli-linux-arm64-gnu-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-linux-arm64-gnu/2.12.2",
         "integrity": "sha512-DZlDJ24u3tlocKOYqzR+b2M+Qr+5WFcoMBZ7EfdhHN5j3ZXwBBpms4G4gyNvPCrak5vMzmdZ65ecBXPJcC+5sA==",
         "repositoryURL": null
@@ -3865,7 +3865,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-linux-arm64-musl/2.12.2",
         "integrity": "sha512-pb+RTZUYH/p0gR4j4ecCCq+FNfz3W3eKuUQvVEBn7MQZx6DzfLO7FaYzt2NyDKWpdNN3lP10mdzOvw3R5P5aAQ==",
         "repositoryURL": null
@@ -3955,7 +3955,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-linux-riscv64-gnu/-/cli-linux-riscv64-gnu-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-riscv64-gnu/-/cli-linux-riscv64-gnu-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-linux-riscv64-gnu/2.12.2",
         "integrity": "sha512-nidEvDUJyHYNbIv9MUk6KiEix8IXfRh4Wj2G2SA5g8nFmgbBCwazUNWYiG/LhNeNbfZpBMLerRBUtoQ5K0GidA==",
         "repositoryURL": null
@@ -4045,7 +4045,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-linux-x64-gnu/-/cli-linux-x64-gnu-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-x64-gnu/-/cli-linux-x64-gnu-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-linux-x64-gnu/2.12.2",
         "integrity": "sha512-gkXyYn3w+Xfc8nz/DleEbkm1M7bBuU2cejqUXNmI98cA2P5kp+oPmS4ALTorb1FaNWjpsKoYZBWsbS9BXxYFkQ==",
         "repositoryURL": null
@@ -4135,7 +4135,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-linux-x64-musl/-/cli-linux-x64-musl-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-x64-musl/-/cli-linux-x64-musl-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-linux-x64-musl/2.12.2",
         "integrity": "sha512-MrjgoZ09s8Hsn99XvxSNvK8NQTZxi7XiyK3FxxytzfHgz2jb3qUT69CZtsokRkN/zdi9rCgrMtq+w9XNICjcfQ==",
         "repositoryURL": null
@@ -4225,7 +4225,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-win32-arm64-msvc/-/cli-win32-arm64-msvc-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-arm64-msvc/-/cli-win32-arm64-msvc-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-win32-arm64-msvc/2.12.2",
         "integrity": "sha512-BR+CYM7iF3lkfyTtVkwMQU/s9hwegLpj3UqDjaxKCPmixQCa1csBBPy3C75V+FhLtOjIXNna4Gt6Vm9oxbV+qA==",
         "repositoryURL": null
@@ -4315,7 +4315,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-win32-ia32-msvc/-/cli-win32-ia32-msvc-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-ia32-msvc/-/cli-win32-ia32-msvc-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-win32-ia32-msvc/2.12.2",
         "integrity": "sha512-zODJo9l3TbNBM+GrO/yPqGeELNMK5cjIc+QHh1WQc3l8tD+jDZGTQyYuAxViCsM6Uh5uWJ//RnCZG9LXrvsXww==",
         "repositoryURL": null
@@ -4405,7 +4405,7 @@
       "license": "Apache-2.0 OR MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-2.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-2.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fcli-win32-x64-msvc/2.12.2",
         "integrity": "sha512-cQXI2ZaZmwBDt0XATCqASVanYizxkEE3ceQVlVHXaQ51HzsQUWA04c9Nz7LrrY2lgAu3jFMyat+8Yz3Z2R2qBA==",
         "repositoryURL": null
@@ -4491,7 +4491,7 @@
       "license": "MIT OR Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/plugin-clipboard-manager/-/plugin-clipboard-manager-2.4.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/plugin-clipboard-manager/-/plugin-clipboard-manager-2.4.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fplugin-clipboard-manager/2.4.2",
         "integrity": "sha512-bpQ6ONK2jcCVraBVtazdQ2X7bRK6P/vdi+D4jFDOJ9IbqR4cC8D6K3YGHR+c+cgZf2HQOE7hBEkRlybEVnCNPg==",
         "repositoryURL": "https://github.com/tauri-apps/plugins-workspace"
@@ -4522,7 +4522,7 @@
       "license": "MIT OR Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/plugin-dialog/-/plugin-dialog-2.8.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/plugin-dialog/-/plugin-dialog-2.8.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fplugin-dialog/2.8.2",
         "integrity": "sha512-LFqp8OTx0bHOwhKRhMMDyRDlo/2IO5XxoOclpf8+yvjAfM2ytVdbB6tk63dBlicsR8pRw38maj/GxrU6cW8mXw==",
         "repositoryURL": "https://github.com/tauri-apps/plugins-workspace"
@@ -4553,7 +4553,7 @@
       "license": "MIT OR Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@tauri-apps/plugin-opener/-/plugin-opener-2.7.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/@tauri-apps/plugin-opener/-/plugin-opener-2.7.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40tauri-apps%2Fplugin-opener/2.7.1",
         "integrity": "sha512-XkXdt30rontti9TII/gBBxFRXWfj8DiprFW7RgBFRBj1OhdfjBNVcFqSEWkkZ4hXafHnuEnB7F1sFsmu6uyywQ==",
         "repositoryURL": "https://github.com/tauri-apps/plugins-workspace"
@@ -4615,7 +4615,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3/-/d3-7.4.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3/-/d3-7.4.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3/7.4.3",
         "integrity": "sha512-lZXZ9ckh5R8uiFVt8ogUNf+pIrK4EsWrx2Np75WvF/eTpJ0FMHNhjXk8CKEx/+gpHbNQyJWehbFaTvqmHWB3ww==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4646,7 +4646,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-array/-/d3-array-3.2.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-array/-/d3-array-3.2.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-array/3.2.2",
         "integrity": "sha512-hOLWVbm7uRza0BYXpIIW5pxfrKe0W+D5lrFiAEYR+pb6w3N2SwSMaJbXdUfSEv+dT4MfHBLtn5js0LAWaO6otw==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4677,7 +4677,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-axis/-/d3-axis-3.0.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-axis/-/d3-axis-3.0.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-axis/3.0.6",
         "integrity": "sha512-pYeijfZuBd87T0hGn0FO1vQ/cgLk6E1ALJjfkC0oJ8cbwkZl3TpgS8bVBLZN+2jjGgg38epgxb2zmoGtSfvgMw==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4708,7 +4708,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-brush/-/d3-brush-3.0.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-brush/-/d3-brush-3.0.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-brush/3.0.6",
         "integrity": "sha512-nH60IZNNxEcrh6L1ZSMNA28rj27ut/2ZmI3r96Zd+1jrZD++zD3LsMIjWlvg4AYrHn/Pqz4CF3veCxGjtbqt7A==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4739,7 +4739,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-chord/-/d3-chord-3.0.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-chord/-/d3-chord-3.0.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-chord/3.0.6",
         "integrity": "sha512-LFYWWd8nwfwEmTZG9PfQxd17HbNPksHBiJHaKuY1XeqscXacsS2tyoo6OdRsjf+NQYeB6XrNL3a25E3gH69lcg==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4770,7 +4770,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-color/-/d3-color-3.1.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-color/-/d3-color-3.1.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-color/3.1.3",
         "integrity": "sha512-iO90scth9WAbmgv7ogoq57O9YpKmFBbmoEoCHDB2xMBY0+/KVrqAaCDyCE16dUspeOvIxFFRI+0sEtqDqy2b4A==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4801,7 +4801,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-contour/-/d3-contour-3.0.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-contour/-/d3-contour-3.0.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-contour/3.0.6",
         "integrity": "sha512-BjzLgXGnCWjUSYGfH1cpdo41/hgdWETu4YxpezoztawmqsvCeep+8QGfiY6YbDvfgHz/DkjeIkkZVJavB4a3rg==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4832,7 +4832,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-delaunay/-/d3-delaunay-6.0.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-delaunay/-/d3-delaunay-6.0.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-delaunay/6.0.4",
         "integrity": "sha512-ZMaSKu4THYCU6sV64Lhg6qjf1orxBthaC161plr5KuPHo3CNm8DTHiLw/5Eq2b6TsNP0W0iJrUOFscY6Q450Hw==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4863,7 +4863,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-dispatch/-/d3-dispatch-3.0.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-dispatch/-/d3-dispatch-3.0.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-dispatch/3.0.7",
         "integrity": "sha512-5o9OIAdKkhN1QItV2oqaE5KMIiXAvDWBDPrD85e58Qlz1c1kI/J0NcqbEG88CoTwJrYe7ntUCVfeUl2UJKbWgA==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4894,7 +4894,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-drag/-/d3-drag-3.0.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-drag/-/d3-drag-3.0.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-drag/3.0.7",
         "integrity": "sha512-HE3jVKlzU9AaMazNufooRJ5ZpWmLIoc90A37WU2JMmeq28w1FQqCZswHZ3xR+SuxYftzHq6WU6KJHvqxKzTxxQ==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4925,7 +4925,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-dsv/-/d3-dsv-3.0.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-dsv/-/d3-dsv-3.0.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-dsv/3.0.7",
         "integrity": "sha512-n6QBF9/+XASqcKK6waudgL0pf/S5XHPPI8APyMLLUHd8NqouBGLsU8MgtO7NINGtPBtk9Kko/W4ea0oAspwh9g==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4956,7 +4956,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-ease/-/d3-ease-3.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-ease/-/d3-ease-3.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-ease/3.0.2",
         "integrity": "sha512-NcV1JjO5oDzoK26oMzbILE6HW7uVXOHLQvHshBUW4UMdZGfiY6v5BeQwh9a9tCzv+CeefZQHJt5SRgK154RtiA==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -4987,7 +4987,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-fetch/-/d3-fetch-3.0.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-fetch/-/d3-fetch-3.0.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-fetch/3.0.7",
         "integrity": "sha512-fTAfNmxSb9SOWNB9IoG5c8Hg6R+AzUHDRlsXsDZsNp6sxAEOP0tkP3gKkNSO/qmHPoBFTxNrjDprVHDQDvo5aA==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5018,7 +5018,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-force/-/d3-force-3.0.10.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-force/-/d3-force-3.0.10.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-force/3.0.10",
         "integrity": "sha512-ZYeSaCF3p73RdOKcjj+swRlZfnYpK1EbaDiYICEEp5Q6sUiqFaFQ9qgoshp5CzIyyb/yD09kD9o2zEltCexlgw==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5049,7 +5049,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-format/-/d3-format-3.0.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-format/-/d3-format-3.0.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-format/3.0.4",
         "integrity": "sha512-fALi2aI6shfg7vM5KiR1wNJnZ7r6UuggVqtDA+xiEdPZQwy/trcQaHnwShLuLdta2rTymCNpxYTiMZX/e09F4g==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5080,7 +5080,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-geo/-/d3-geo-3.1.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-geo/-/d3-geo-3.1.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-geo/3.1.1",
         "integrity": "sha512-65Emv9fQiQQqphLlRkuQ5ypPsOmWPhtBGCMv61JDPEPMvsx+gzhGf74yw1a78xFKPj6zw4AgQICJoQv0vK9M2w==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5111,7 +5111,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-hierarchy/-/d3-hierarchy-3.1.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-hierarchy/-/d3-hierarchy-3.1.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-hierarchy/3.1.7",
         "integrity": "sha512-tJFtNoYBtRtkNysX1Xq4sxtjK8YgoWUNpIiUee0/jHGRwqvzYxkq0hGVbbOGSz+JgFxxRu4K8nb3YpG3CMARtg==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5142,7 +5142,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-interpolate/-/d3-interpolate-3.0.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-interpolate/-/d3-interpolate-3.0.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-interpolate/3.0.4",
         "integrity": "sha512-mgLPETlrpVV1YRJIglr4Ez47g7Yxjl1lj7YKsiMCb27VJH9W8NVM6Bb9d8kkpG/uAQS5AmbA48q2IAolKKo1MA==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5173,7 +5173,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-path/-/d3-path-3.1.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-path/-/d3-path-3.1.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-path/3.1.1",
         "integrity": "sha512-VMZBYyQvbGmWyWVea0EHs/BwLgxc+MKi1zLDCONksozI4YJMcTt8ZEuIR4Sb1MMTE8MMW49v0IwI5+b7RmfWlg==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5204,7 +5204,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-polygon/-/d3-polygon-3.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-polygon/-/d3-polygon-3.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-polygon/3.0.2",
         "integrity": "sha512-ZuWOtMaHCkN9xoeEMr1ubW2nGWsp4nIql+OPQRstu4ypeZ+zk3YKqQT0CXVe/PYqrKpZAi+J9mTs05TKwjXSRA==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5235,7 +5235,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-quadtree/-/d3-quadtree-3.0.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-quadtree/-/d3-quadtree-3.0.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-quadtree/3.0.6",
         "integrity": "sha512-oUzyO1/Zm6rsxKRHA1vH0NEDG58HrT5icx/azi9MF1TWdtttWl0UIUsjEQBBh+SIkrpd21ZjEv7ptxWys1ncsg==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5266,7 +5266,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-random/-/d3-random-3.0.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-random/-/d3-random-3.0.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-random/3.0.4",
         "integrity": "sha512-UHYId5WTCx4L4YNel7NU00XUXXgvgpgZOvp10PuvsQENjMDXhh2RyFc0KBjO7B45ne4Ha1yVH7ii0vnzKkuzWA==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5297,7 +5297,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-scale/-/d3-scale-4.0.9.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-scale/-/d3-scale-4.0.9.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-scale/4.0.9",
         "integrity": "sha512-dLmtwB8zkAeO/juAMfnV+sItKjlsw2lKdZVVy6LRr0cBmegxSABiLEpGVmSJJ8O08i4+sGR6qQtb6WtuwJdvVw==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5328,7 +5328,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-scale-chromatic/-/d3-scale-chromatic-3.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-scale-chromatic/-/d3-scale-chromatic-3.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-scale-chromatic/3.1.0",
         "integrity": "sha512-iWMJgwkK7yTRmWqRB5plb1kadXyQ5Sj8V/zYlFGMUBbIPKQScw+Dku9cAAMgJG+z5GYDoMjWGLVOvjghDEFnKQ==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5359,7 +5359,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-selection/-/d3-selection-3.0.12.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-selection/-/d3-selection-3.0.12.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-selection/3.0.12",
         "integrity": "sha512-Qe/KWYhEiIIxGs7HrAAjMfShxKldx19SJtr5zu53f3afPsdZNz7HHtdTLXo/kqeiWNXVycI24kSnfzBYkTzpgw==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5390,7 +5390,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-shape/-/d3-shape-3.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-shape/-/d3-shape-3.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-shape/3.2.0",
         "integrity": "sha512-kVd74ta9eof3eJOvbNd1vGKS/XERRyQbT26Og63hIsvDO84cjD5gEOhsXf26w3FSoNlPVz84DOFcKv/oou+fMw==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5421,7 +5421,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-time/-/d3-time-3.0.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-time/-/d3-time-3.0.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-time/3.0.4",
         "integrity": "sha512-yuzZug1nkAAaBlBBikKZTgzCeA+k1uy4ZFwWANOfKw5z5LRhV0gNA7gNkKm7HoK+HRN0wX3EkxGk0fpbWhmB7g==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5452,7 +5452,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-time-format/-/d3-time-format-4.0.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-time-format/-/d3-time-format-4.0.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-time-format/4.0.3",
         "integrity": "sha512-5xg9rC+wWL8kdDj153qZcsJ0FWiFt0J5RB6LYUNZjwSnesfblqrI/bJ1wBdJ8OQfncgbJG5+2F+qfqnqyzYxyg==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5483,7 +5483,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-timer/-/d3-timer-3.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-timer/-/d3-timer-3.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-timer/3.0.2",
         "integrity": "sha512-Ps3T8E8dZDam6fUyNiMkekK3XUsaUEik+idO9/YjPtfj2qruF8tFBXS7XhtE4iIXBLxhmLjP3SXpLhVf21I9Lw==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5514,7 +5514,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-transition/-/d3-transition-3.0.9.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-transition/-/d3-transition-3.0.9.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-transition/3.0.9",
         "integrity": "sha512-uZS5shfxzO3rGlu0cC3bjmMFKsXv+SmZZcgp0KD22ts4uGXp5EVYGzu/0YdwZeKmddhcAccYtREJKkPfXkZuCg==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5545,7 +5545,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/d3-zoom/-/d3-zoom-3.0.9.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/d3-zoom/-/d3-zoom-3.0.9.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fd3-zoom/3.0.9",
         "integrity": "sha512-0sE1406XBYJGiqD3AusTl9ZqC//2mIXix51tbom25gDCA8ri4xnSZg28CaSE8Srl6FClqABUKfsn0qghgdepMA==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5638,7 +5638,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/geojson/-/geojson-7946.0.16.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/geojson/-/geojson-7946.0.16.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Fgeojson/7946.0.16",
         "integrity": "sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5669,7 +5669,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@types/trusted-types/-/trusted-types-2.0.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/@types/trusted-types/-/trusted-types-2.0.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40types%2Ftrusted-types/2.0.7",
         "integrity": "sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==",
         "repositoryURL": "https://github.com/DefinitelyTyped/DefinitelyTyped"
@@ -5700,7 +5700,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/@upsetjs/venn.js/-/venn.js-2.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/@upsetjs/venn.js/-/venn.js-2.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/%40upsetjs%2Fvenn.js/2.0.0",
         "integrity": "sha512-WbBhLrooyePuQ1VZxrJjtLvTc4NVfpOyKx0sKqioq9bX1C1m7Jgykkn8gLrtwumBioXIqam8DLxp88Adbue6Hw==",
         "repositoryURL": "https://github.com/upsetjs/venn.js"
@@ -5948,7 +5948,7 @@
       "license": "PSF-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/argparse/-/argparse-3.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/argparse/-/argparse-3.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/argparse/3.0.2",
         "integrity": "sha512-mFdDM6WqWKraGLsVb+C9CahPnzTXOefAOLq3jYcca2YZ8bEWpr++Tzj+zSaKW9+X9L5uSxcm1AZ3Y6aZJ09OhQ==",
         "repositoryURL": "nodeca/argparse"
@@ -6010,7 +6010,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/bidi-js/-/bidi-js-1.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/bidi-js/-/bidi-js-1.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/bidi-js/1.1.0",
         "integrity": "sha512-fX1Onk0tdVPC7obPWB5EbJ1z7NVhLq4m2xZLq2YXBkxzMXIGRpNMU88n0EPgWseKl12J7zXs7qrDxPK4sRs2fg==",
         "repositoryURL": "https://github.com/lojjic/bidi-js"
@@ -6072,7 +6072,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/chevrotain/-/chevrotain-13.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/chevrotain/-/chevrotain-13.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/chevrotain/13.2.0",
         "integrity": "sha512-GTouk5YzgBxlTPCaDn5q0q2EJKkrYmnPF+HmF8v0Qo4r3iyPG7HJivkN1wthCXZcm3sIcZFpGTRovLPNdJNRCA==",
         "repositoryURL": "git://github.com/Chevrotain/chevrotain"
@@ -6103,7 +6103,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/commander/-/commander-7.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/commander/-/commander-7.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/commander/7.2.0",
         "integrity": "sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==",
         "repositoryURL": "https://github.com/tj/commander.js"
@@ -6165,7 +6165,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/cose-base/-/cose-base-1.0.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/cose-base/-/cose-base-1.0.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/cose-base/1.0.3",
         "integrity": "sha512-s9whTXInMSgAp/NVXVNuVxVKzGH2qck3aQlVHxDCdAEPgtMKwc4Wq6/QKhgdEdgbLSi9rBTAcPoRa6JpiG4ksg==",
         "repositoryURL": "https://github.com/iVis-at-Bilkent/cose-base"
@@ -6196,7 +6196,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/crelt/-/crelt-1.0.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/crelt/-/crelt-1.0.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/crelt/1.0.7",
         "integrity": "sha512-aK6BbWfhf4U/wCcLHKPJl/xa6VkVstRaPywWtMKGwuOLc/wZTyQYuoxgvZnNsBvv7Kg3YTBQYYBCggcviQczuA==",
         "repositoryURL": "https://code.haverbeke.berlin/marijn/crelt"
@@ -6227,7 +6227,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/css-tree/-/css-tree-3.2.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/css-tree/-/css-tree-3.2.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/css-tree/3.2.1",
         "integrity": "sha512-X7sjQzceUhu1u7Y/ylrRZFU2FS6LRiFVp6rKLPg23y3x3c3DOKAwuXGDp+PAGjh6CSnCjYeAul8pcT8bAl+lSA==",
         "repositoryURL": "csstree/csstree"
@@ -6258,7 +6258,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/cytoscape/-/cytoscape-3.34.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/cytoscape/-/cytoscape-3.34.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/cytoscape/3.34.4",
         "integrity": "sha512-msY99tMY8iWTg+sIPGfSqDcPNOt4xcj+v/K/7qUFaCUxxlqnMkUYLBjRUzn9W5CU/R2hrmtJa5+UtovrEM2ctg==",
         "repositoryURL": "https://github.com/cytoscape/cytoscape.js"
@@ -6295,7 +6295,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/cytoscape-cose-bilkent/-/cytoscape-cose-bilkent-4.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/cytoscape-cose-bilkent/-/cytoscape-cose-bilkent-4.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/cytoscape-cose-bilkent/4.1.0",
         "integrity": "sha512-wgQlVIUJF13Quxiv5e1gstZ08rnZj2XaLHGoFMYXz7SkNfCDOOteKBE6SYRfA9WxxI/iBc3ajfDoc6hb/MRAHQ==",
         "repositoryURL": "https://github.com/cytoscape/cytoscape.js-cose-bilkent"
@@ -6326,7 +6326,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/cytoscape-fcose/-/cytoscape-fcose-2.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/cytoscape-fcose/-/cytoscape-fcose-2.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/cytoscape-fcose/2.2.0",
         "integrity": "sha512-ki1/VuRIHFCzxWNrsshHYPs6L7TvLu3DL+TyIGEsRcvVERmxokbf5Gdk7mFxZnTdiGtnA4cfSmjZJMviqSuZrQ==",
         "repositoryURL": "https://github.com/iVis-at-Bilkent/cytoscape.js-fcose"
@@ -6357,7 +6357,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/cose-base/-/cose-base-2.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/cose-base/-/cose-base-2.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/cose-base/2.2.0",
         "integrity": "sha512-AzlgcsCbUMymkADOJtQm3wO9S3ltPfYOFD5033keQn9NJzIbtnZj+UdBJe7DYml/8TdbtHJW3j58SOnKhWY/5g==",
         "repositoryURL": "https://github.com/iVis-at-Bilkent/cose-base"
@@ -6388,7 +6388,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/layout-base/-/layout-base-2.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/layout-base/-/layout-base-2.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/layout-base/2.0.1",
         "integrity": "sha512-dp3s92+uNI1hWIpPGH3jK2kxE2lMjdXdr+DH8ynZHpd6PUlH6x6cbuXnoMmiNumznqaNO31xu9e79F0uuZ0JFg==",
         "repositoryURL": "https://github.com/iVis-at-Bilkent/layout-base"
@@ -6419,7 +6419,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3/-/d3-7.9.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3/-/d3-7.9.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3/7.9.0",
         "integrity": "sha512-e1U46jVP+w7Iut8Jt8ri1YsPOvFpg46k+K8TpCb0P+zjCkjkPnV7WzfDJzMHy1LnA+wj5pLT1wjO901gLXeEhA==",
         "repositoryURL": "https://github.com/d3/d3"
@@ -6450,7 +6450,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-array/-/d3-array-3.2.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-array/-/d3-array-3.2.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-array/3.2.4",
         "integrity": "sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==",
         "repositoryURL": "https://github.com/d3/d3-array"
@@ -6481,7 +6481,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-axis/-/d3-axis-3.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-axis/-/d3-axis-3.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-axis/3.0.0",
         "integrity": "sha512-IH5tgjV4jE/GhHkRV0HiVYPDtvfjHQlQfJHs0usq7M30XcSBvOotpmH1IgkcXsO/5gEQZD43B//fc7SRT5S+xw==",
         "repositoryURL": "https://github.com/d3/d3-axis"
@@ -6512,7 +6512,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-brush/-/d3-brush-3.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-brush/-/d3-brush-3.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-brush/3.0.0",
         "integrity": "sha512-ALnjWlVYkXsVIGlOsuWH1+3udkYFI48Ljihfnh8FZPF2QS9o+PzGLBslO0PjzVoHLZ2KCVgAM8NVkXPJB2aNnQ==",
         "repositoryURL": "https://github.com/d3/d3-brush"
@@ -6543,7 +6543,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-chord/-/d3-chord-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-chord/-/d3-chord-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-chord/3.0.1",
         "integrity": "sha512-VE5S6TNa+j8msksl7HwjxMHDM2yNK3XCkusIlpX5kwauBfXuyLAtNg9jCp/iHH61tgI4sb6R/EIMWCqEIdjT/g==",
         "repositoryURL": "https://github.com/d3/d3-chord"
@@ -6574,7 +6574,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-color/-/d3-color-3.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-color/-/d3-color-3.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-color/3.1.0",
         "integrity": "sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA==",
         "repositoryURL": "https://github.com/d3/d3-color"
@@ -6605,7 +6605,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-contour/-/d3-contour-4.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-contour/-/d3-contour-4.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-contour/4.0.2",
         "integrity": "sha512-4EzFTRIikzs47RGmdxbeUvLWtGedDUNkTcmzoeyg4sP/dvCexO47AaQL7VKy/gul85TOxw+IBgA8US2xwbToNA==",
         "repositoryURL": "https://github.com/d3/d3-contour"
@@ -6636,7 +6636,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-delaunay/-/d3-delaunay-6.0.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-delaunay/-/d3-delaunay-6.0.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-delaunay/6.0.4",
         "integrity": "sha512-mdjtIZ1XLAM8bm/hx3WwjfHt6Sggek7qH043O8KEjDXN40xi3vx/6pYSVTwLjEgiXQTbvaouWKynLBiUZ6SK6A==",
         "repositoryURL": "https://github.com/d3/d3-delaunay"
@@ -6667,7 +6667,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-dispatch/-/d3-dispatch-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-dispatch/-/d3-dispatch-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-dispatch/3.0.1",
         "integrity": "sha512-rzUyPU/S7rwUflMyLc1ETDeBj0NRuHKKAcvukozwhshr6g6c5d8zh4c2gQjY2bZ0dXeGLWc1PF174P2tVvKhfg==",
         "repositoryURL": "https://github.com/d3/d3-dispatch"
@@ -6698,7 +6698,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-drag/-/d3-drag-3.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-drag/-/d3-drag-3.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-drag/3.0.0",
         "integrity": "sha512-pWbUJLdETVA8lQNJecMxoXfH6x+mO2UQo8rSmZ+QqxcbyA3hfeprFgIT//HW2nlHChWeIIMwS2Fq+gEARkhTkg==",
         "repositoryURL": "https://github.com/d3/d3-drag"
@@ -6729,7 +6729,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-dsv/-/d3-dsv-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-dsv/-/d3-dsv-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-dsv/3.0.1",
         "integrity": "sha512-UG6OvdI5afDIFP9w4G0mNq50dSOsXHJaRE8arAS5o9ApWnIElp8GZw1Dun8vP8OyHOZ/QJUKUJwxiiCCnUwm+Q==",
         "repositoryURL": "https://github.com/d3/d3-dsv"
@@ -6760,7 +6760,7 @@
       "license": "BSD-3-Clause",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-ease/-/d3-ease-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-ease/-/d3-ease-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-ease/3.0.1",
         "integrity": "sha512-wR/XK3D3XcLIZwpbvQwQ5fK+8Ykds1ip7A2Txe0yxncXSdq1L9skcG7blcedkOX+ZcgxGAmLX1FrRGbADwzi0w==",
         "repositoryURL": "https://github.com/d3/d3-ease"
@@ -6791,7 +6791,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-fetch/-/d3-fetch-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-fetch/-/d3-fetch-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-fetch/3.0.1",
         "integrity": "sha512-kpkQIM20n3oLVBKGg6oHrUchHM3xODkTzjMoj7aWQFq5QEM+R6E4WkzT5+tojDY7yjez8KgCBRoj4aEr99Fdqw==",
         "repositoryURL": "https://github.com/d3/d3-fetch"
@@ -6822,7 +6822,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-force/-/d3-force-3.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-force/-/d3-force-3.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-force/3.0.0",
         "integrity": "sha512-zxV/SsA+U4yte8051P4ECydjD/S+qeYtnaIyAs9tgHCqfguma/aAQDjo85A9Z6EKhBirHRJHXIgJUlffT4wdLg==",
         "repositoryURL": "https://github.com/d3/d3-force"
@@ -6853,7 +6853,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-format/-/d3-format-3.1.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-format/-/d3-format-3.1.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-format/3.1.2",
         "integrity": "sha512-AJDdYOdnyRDV5b6ArilzCPPwc1ejkHcoyFarqlPqT7zRYjhavcT3uSrqcMvsgh2CgoPbK3RCwyHaVyxYcP2Arg==",
         "repositoryURL": "https://github.com/d3/d3-format"
@@ -6884,7 +6884,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-geo/-/d3-geo-3.1.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-geo/-/d3-geo-3.1.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-geo/3.1.1",
         "integrity": "sha512-637ln3gXKXOwhalDzinUgY83KzNWZRKbYubaG+fGVuc/dxO64RRljtCTnf5ecMyE1RIdtqpkVcq0IbtU2S8j2Q==",
         "repositoryURL": "https://github.com/d3/d3-geo"
@@ -6915,7 +6915,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-hierarchy/-/d3-hierarchy-3.1.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-hierarchy/-/d3-hierarchy-3.1.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-hierarchy/3.1.2",
         "integrity": "sha512-FX/9frcub54beBdugHjDCdikxThEqjnR93Qt7PvQTOHxyiNCAlvMrHhclk3cD5VeAaq9fxmfRp+CnWw9rEMBuA==",
         "repositoryURL": "https://github.com/d3/d3-hierarchy"
@@ -6946,7 +6946,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-interpolate/-/d3-interpolate-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-interpolate/-/d3-interpolate-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-interpolate/3.0.1",
         "integrity": "sha512-3bYs1rOD33uo8aqJfKP3JWPAibgw8Zm2+L9vBKEHJ2Rg+viTR7o5Mmv5mZcieN+FRYaAOWX5SJATX6k1PWz72g==",
         "repositoryURL": "https://github.com/d3/d3-interpolate"
@@ -6977,7 +6977,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-path/-/d3-path-3.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-path/-/d3-path-3.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-path/3.1.0",
         "integrity": "sha512-p3KP5HCf/bvjBSSKuXid6Zqijx7wIfNW+J/maPs+iwR35at5JCbLUT0LzF1cnjbCHWhqzQTIN2Jpe8pRebIEFQ==",
         "repositoryURL": "https://github.com/d3/d3-path"
@@ -7008,7 +7008,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-polygon/-/d3-polygon-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-polygon/-/d3-polygon-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-polygon/3.0.1",
         "integrity": "sha512-3vbA7vXYwfe1SYhED++fPUQlWSYTTGmFmQiany/gdbiWgU/iEyQzyymwL9SkJjFFuCS4902BSzewVGsHHmHtXg==",
         "repositoryURL": "https://github.com/d3/d3-polygon"
@@ -7039,7 +7039,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-quadtree/-/d3-quadtree-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-quadtree/-/d3-quadtree-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-quadtree/3.0.1",
         "integrity": "sha512-04xDrxQTDTCFwP5H6hRhsRcb9xxv2RzkcsygFzmkSIOJy3PeRJP7sNk3VRIbKXcog561P9oU0/rVH6vDROAgUw==",
         "repositoryURL": "https://github.com/d3/d3-quadtree"
@@ -7070,7 +7070,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-random/-/d3-random-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-random/-/d3-random-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-random/3.0.1",
         "integrity": "sha512-FXMe9GfxTxqd5D6jFsQ+DJ8BJS4E/fT5mqqdjovykEB2oFbTMDVdg1MGFxfQW+FBOGoB++k8swBrgwSHT1cUXQ==",
         "repositoryURL": "https://github.com/d3/d3-random"
@@ -7101,7 +7101,7 @@
       "license": "BSD-3-Clause",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-sankey/-/d3-sankey-0.12.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-sankey/-/d3-sankey-0.12.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-sankey/0.12.3",
         "integrity": "sha512-nQhsBRmM19Ax5xEIPLMY9ZmJ/cDvd1BG3UVvt5h3WRxKg5zGRbvnteTyWAbzeSvlh3tW7ZEmq4VwR5mB3tutmQ==",
         "repositoryURL": "https://github.com/d3/d3-sankey"
@@ -7132,7 +7132,7 @@
       "license": "BSD-3-Clause",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-array/-/d3-array-2.12.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-array/-/d3-array-2.12.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-array/2.12.1",
         "integrity": "sha512-B0ErZK/66mHtEsR1TkPEEkwdy+WDesimkM5gpZr5Dsg54BiTA5RXtYW5qTLIAcekaS9xfZrzBLF/OAkB3Qn1YQ==",
         "repositoryURL": "https://github.com/d3/d3-array"
@@ -7163,7 +7163,7 @@
       "license": "BSD-3-Clause",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-path/-/d3-path-1.0.9.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-path/-/d3-path-1.0.9.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-path/1.0.9",
         "integrity": "sha512-VLaYcn81dtHVTjEHd8B+pbe9yHWpXKZUC87PzoFmsFrJqgFwDe/qxfp5MlfsfM1V5E/iVt0MmEbWQ7FVIXh/bg==",
         "repositoryURL": "https://github.com/d3/d3-path"
@@ -7194,7 +7194,7 @@
       "license": "BSD-3-Clause",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-shape/-/d3-shape-1.3.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-shape/-/d3-shape-1.3.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-shape/1.3.7",
         "integrity": "sha512-EUkvKjqPFUAZyOlhY5gzCxCeI0Aep04LwIRpsZ/mLFelJiUfnK56jo5JMDSE7yyP2kLSb6LtF+S5chMk7uqPqw==",
         "repositoryURL": "https://github.com/d3/d3-shape"
@@ -7225,7 +7225,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/internmap/-/internmap-1.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/internmap/-/internmap-1.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/internmap/1.0.1",
         "integrity": "sha512-lDB5YccMydFBtasVtxnZ3MRBHuaoE8GKsppq+EchKL2U4nK/DmEpPHNH8MZe5HkMtpSiTSOZwfN0tzYjO/lJEw==",
         "repositoryURL": "https://github.com/mbostock/internmap"
@@ -7256,7 +7256,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-scale/-/d3-scale-4.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-scale/-/d3-scale-4.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-scale/4.0.2",
         "integrity": "sha512-GZW464g1SH7ag3Y7hXjf8RoUuAFIqklOAq3MRl4OaWabTFJY9PN/E1YklhXLh+OQ3fM9yS2nOkCoS+WLZ6kvxQ==",
         "repositoryURL": "https://github.com/d3/d3-scale"
@@ -7287,7 +7287,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-scale-chromatic/-/d3-scale-chromatic-3.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-scale-chromatic/-/d3-scale-chromatic-3.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-scale-chromatic/3.1.0",
         "integrity": "sha512-A3s5PWiZ9YCXFye1o246KoscMWqf8BsD9eRiJ3He7C9OBaxKhAd5TFCdEx/7VbKtxxTsu//1mMJFrEt572cEyQ==",
         "repositoryURL": "https://github.com/d3/d3-scale-chromatic"
@@ -7318,7 +7318,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-selection/-/d3-selection-3.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-selection/-/d3-selection-3.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-selection/3.0.0",
         "integrity": "sha512-fmTRWbNMmsmWq6xJV8D19U/gw/bwrHfNXxrIN+HfZgnzqTHp9jOmKMhsTUjXOJnZOdZY9Q28y4yebKzqDKlxlQ==",
         "repositoryURL": "https://github.com/d3/d3-selection"
@@ -7349,7 +7349,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-shape/-/d3-shape-3.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-shape/-/d3-shape-3.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-shape/3.2.0",
         "integrity": "sha512-SaLBuwGm3MOViRq2ABk3eLoxwZELpH6zhl3FbAoJ7Vm1gofKx6El1Ib5z23NUEhF9AsGl7y+dzLe5Cw2AArGTA==",
         "repositoryURL": "https://github.com/d3/d3-shape"
@@ -7380,7 +7380,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-time/-/d3-time-3.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-time/-/d3-time-3.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-time/3.1.0",
         "integrity": "sha512-VqKjzBLejbSMT4IgbmVgDjpkYrNWUYJnbCGo874u7MMKIWsILRX+OpX/gTk8MqjpT1A/c6HY2dCA77ZN0lkQ2Q==",
         "repositoryURL": "https://github.com/d3/d3-time"
@@ -7411,7 +7411,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-time-format/-/d3-time-format-4.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-time-format/-/d3-time-format-4.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-time-format/4.1.0",
         "integrity": "sha512-dJxPBlzC7NugB2PDLwo9Q8JiTR3M3e4/XANkreKSUxF8vvXKqm1Yfq4Q5dl8budlunRVlUUaDUgFt7eA8D6NLg==",
         "repositoryURL": "https://github.com/d3/d3-time-format"
@@ -7442,7 +7442,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-timer/-/d3-timer-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-timer/-/d3-timer-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-timer/3.0.1",
         "integrity": "sha512-ndfJ/JxxMd3nw31uyKoY2naivF+r29V+Lc0svZxe1JvvIRmi8hUsrMvdOwgS1o6uBHmiz91geQ0ylPP0aj1VUA==",
         "repositoryURL": "https://github.com/d3/d3-timer"
@@ -7473,7 +7473,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-transition/-/d3-transition-3.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-transition/-/d3-transition-3.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-transition/3.0.1",
         "integrity": "sha512-ApKvfjsSR6tg06xrL434C0WydLr7JewBB3V+/39RMHsaXTOG0zmt/OAXeng5M5LBm0ojmxJrpomQVZ1aPvBL4w==",
         "repositoryURL": "https://github.com/d3/d3-transition"
@@ -7504,7 +7504,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/d3-zoom/-/d3-zoom-3.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/d3-zoom/-/d3-zoom-3.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/d3-zoom/3.0.0",
         "integrity": "sha512-b8AmV3kfQaqWAuacbPuNbL6vahnOJflOhexLzMMNLga62+/nh0JzvJ0aO/5a5MVgUFGS7Hu1P9P03o3fJkDCyw==",
         "repositoryURL": "https://github.com/d3/d3-zoom"
@@ -7535,7 +7535,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/dagre-d3-es/-/dagre-d3-es-7.0.14.tgz",
+        "archiveURL": "https://registry.npmjs.org/dagre-d3-es/-/dagre-d3-es-7.0.14.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/dagre-d3-es/7.0.14",
         "integrity": "sha512-P4rFMVq9ESWqmOgK+dlXvOtLwYg0i7u0HBGJER0LZDJT2VHIPAMZ/riPxqJceWMStH5+E61QxFra9kIS3AqdMg==",
         "repositoryURL": "https://github.com/tbo47/dagre-es"
@@ -7566,7 +7566,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/data-urls/-/data-urls-8.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/data-urls/-/data-urls-8.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/data-urls/8.0.0",
         "integrity": "sha512-JQUCCK+/CAGbGGx618PlFZMXH81Jtj7t73CHv9dd/zVWvxgGT2zLFRjnKb+Ng46GIwcy+f7f88qd4duqllK+WQ==",
         "repositoryURL": "https://github.com/jsdom/data-urls"
@@ -7597,7 +7597,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/dayjs/-/dayjs-1.11.23.tgz",
+        "archiveURL": "https://registry.npmjs.org/dayjs/-/dayjs-1.11.23.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/dayjs/1.11.23",
         "integrity": "sha512-QDTCU0M0MxR3hQfnlDJfwekQiaanm1ubOD231u73WBckQ/fsamwRLiE2GBz6D3a/xF1NgfiDLJjXBa1hYOYTtQ==",
         "repositoryURL": "https://github.com/iamkun/dayjs"
@@ -7628,7 +7628,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/decimal.js/-/decimal.js-10.6.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/decimal.js/-/decimal.js-10.6.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/decimal.js/10.6.0",
         "integrity": "sha512-YpgQiITW3JXGntzdUmyUR1V812Hn8T1YVXhCu+wO3OpS4eU9l4YdD3qjyiKdV6mvV29zapkMeD390UVEf2lkUg==",
         "repositoryURL": "https://github.com/MikeMcl/decimal.js"
@@ -7659,7 +7659,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/delaunator/-/delaunator-5.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/delaunator/-/delaunator-5.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/delaunator/5.1.0",
         "integrity": "sha512-AGrQ4QSgssa1NGmWmLPqN5NY2KajF5MqxetNEO+o0n3ZwZZeTmt7bBnvzHWrmkZFxGgr4HdyFgelzgi06otLuQ==",
         "repositoryURL": "https://github.com/mapbox/delaunator"
@@ -7690,7 +7690,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/detect-libc/-/detect-libc-2.1.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/detect-libc/-/detect-libc-2.1.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/detect-libc/2.1.2",
         "integrity": "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==",
         "repositoryURL": "git://github.com/lovell/detect-libc"
@@ -7721,7 +7721,7 @@
       "license": "(MPL-2.0 OR Apache-2.0)",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/dompurify/-/dompurify-3.4.17.tgz",
+        "archiveURL": "https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/dompurify/3.4.17",
         "integrity": "sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==",
         "repositoryURL": "git://github.com/cure53/DOMPurify"
@@ -7765,7 +7765,7 @@
       "license": "EPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/elkjs/-/elkjs-0.9.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/elkjs/-/elkjs-0.9.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/elkjs/0.9.3",
         "integrity": "sha512-f/ZeWvW/BCXbhGEf1Ujp29EASo/lk1FDnETgNKwJrsVvGZhUWCZyg3xLJjAsxfOmt8KjswHmI5EwCQcPMpOYhQ==",
         "repositoryURL": "https://github.com/kieler/elkjs"
@@ -7804,7 +7804,7 @@
       "license": "BSD-2-Clause",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/entities/-/entities-8.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/entities/-/entities-8.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/entities/8.1.0",
         "integrity": "sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==",
         "repositoryURL": "https://github.com/fb55/entities"
@@ -7866,7 +7866,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/es-toolkit/-/es-toolkit-1.52.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/es-toolkit/-/es-toolkit-1.52.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/es-toolkit/1.52.0",
         "integrity": "sha512-XTNEJQh1tY1ZJVcf6ayP/2n4ZPyaHlW2FWs7xvw5ddPuhUVjLD3olQVQS7kf58JbAB48iL0uL/jerTrjtV3lDA==",
         "repositoryURL": "https://github.com/toss/es-toolkit"
@@ -7934,7 +7934,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/expect-type/-/expect-type-1.4.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/expect-type/-/expect-type-1.4.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/expect-type/1.4.0",
         "integrity": "sha512-KfYbmpRm0VbLjEvVa9yGwCi9GI34xvi7A/HXYWQO65CSD2u3MczUJSuwXKFIxlGsgBQizV9q5J9NHj4VG0n+pA==",
         "repositoryURL": "https://github.com/mmkal/expect-type"
@@ -7965,7 +7965,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/fdir/-/fdir-6.5.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/fdir/6.5.0",
         "integrity": "sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==",
         "repositoryURL": "https://github.com/thecodrr/fdir"
@@ -7998,7 +7998,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/fsevents/-/fsevents-2.3.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/fsevents/2.3.3",
         "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==",
         "repositoryURL": null
@@ -8042,7 +8042,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/hachure-fill/-/hachure-fill-0.5.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/hachure-fill/-/hachure-fill-0.5.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/hachure-fill/0.5.2",
         "integrity": "sha512-3GKBOn+m2LX9iq+JC1064cSFprJY4jL1jCXTcpnfER5HYE2l/4EfWSGzkPa/ZDBmYI0ZOEj5VHV/eKnPGkHuOg==",
         "repositoryURL": "https://github.com/pshihn/hachure-fill"
@@ -8073,7 +8073,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/html-encoding-sniffer/-/html-encoding-sniffer-7.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/html-encoding-sniffer/-/html-encoding-sniffer-7.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/html-encoding-sniffer/7.0.0",
         "integrity": "sha512-UikN5yr7xsCDAq87Or5or0PAlD3HJJOKVzM05az588WnpDJ4Ux7a2A53Qi6gofGg2/EtvF/H4hCi/TXfCW4Y6w==",
         "repositoryURL": "https://github.com/jsdom/html-encoding-sniffer"
@@ -8104,7 +8104,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/iconv-lite/-/iconv-lite-0.6.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/iconv-lite/0.6.3",
         "integrity": "sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==",
         "repositoryURL": "git://github.com/ashtuchkin/iconv-lite"
@@ -8135,7 +8135,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/import-meta-resolve/-/import-meta-resolve-4.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/import-meta-resolve/-/import-meta-resolve-4.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/import-meta-resolve/4.2.0",
         "integrity": "sha512-Iqv2fzaTQN28s/FwZAoFq0ZSs/7hMAHJVX+w8PZl3cY19Pxk6jFFalxQoIfW2826i/fDLXv8IiEZRIT0lDuWcg==",
         "repositoryURL": "wooorm/import-meta-resolve"
@@ -8166,7 +8166,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/internmap/-/internmap-2.0.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/internmap/-/internmap-2.0.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/internmap/2.0.3",
         "integrity": "sha512-5Hh7Y1wQbvY5ooGgPbDaL5iYLAPzMTUrjMulskHLH6wnv/A+1q5rgEaiuqEjB+oxGXIVZs1FF+R/KPN3ZSQYYg==",
         "repositoryURL": "https://github.com/mbostock/internmap"
@@ -8197,7 +8197,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/is-potential-custom-element-name/-/is-potential-custom-element-name-1.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/is-potential-custom-element-name/-/is-potential-custom-element-name-1.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/is-potential-custom-element-name/1.0.1",
         "integrity": "sha512-bCYeRA2rVibKZd+s2625gGnGF/t7DSqDs4dP7CrLA1m7jKWz6pps0LpYLJN8Q64HtmPKJ1hrN3nzPNKFEKOUiQ==",
         "repositoryURL": "https://github.com/mathiasbynens/is-potential-custom-element-name"
@@ -8228,7 +8228,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/jsdom/-/jsdom-30.1.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/jsdom/-/jsdom-30.1.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/jsdom/30.1.3",
         "integrity": "sha512-hQMUPvRgN7KxsfIytDQji7bimuJeRQa6Qo5+iuiZQk5CafeRxLIA10/cG5YCBFNpD9RO3oqIiN4CO1Y44kxqXg==",
         "repositoryURL": "https://github.com/jsdom/jsdom"
@@ -8259,7 +8259,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/katex/-/katex-0.18.11.tgz",
+        "archiveURL": "https://registry.npmjs.org/katex/-/katex-0.18.11.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/katex/0.18.11",
         "integrity": "sha512-yvyz/2VMKqoho/35Hat5w37wIEdWJ5ElVMidTAlWrxr5uW4aBGsEpveTmKh18/zw08v/7lGswCPon4OhqmqrTA==",
         "repositoryURL": "https://github.com/KaTeX/KaTeX"
@@ -8290,7 +8290,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/commander/-/commander-15.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/commander/-/commander-15.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/commander/15.0.0",
         "integrity": "sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==",
         "repositoryURL": "https://github.com/tj/commander.js"
@@ -8321,7 +8321,7 @@
       "license": "MIT",
       "licenseEvidence": "node_modules/khroma/license (explicit license title; not inferred from absent lock metadata)",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/khroma/-/khroma-2.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/khroma/-/khroma-2.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/khroma/2.1.0",
         "integrity": "sha512-Ls993zuzfayK269Svk9hzpeGUKob/sIgZzyHYdjQoAdQetRKpOLj+k/QQQ/6Qi0Yz65mlROrfd+Ev+1+7dz9Kw==",
         "repositoryURL": "https://github.com/fabiospampinato/khroma"
@@ -8352,7 +8352,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/layout-base/-/layout-base-1.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/layout-base/-/layout-base-1.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/layout-base/1.0.2",
         "integrity": "sha512-8h2oVEZNktL4BH2JCOI90iD1yXwL6iNW7KcCKT2QZgQJR2vbqDsldCTPRU9NifTCqHZci57XvQQ15YTu+sTYPg==",
         "repositoryURL": "https://github.com/iVis-at-Bilkent/layout-base"
@@ -8383,7 +8383,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss/-/lightningcss-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss/-/lightningcss-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss/1.33.0",
         "integrity": "sha512-WkUDrojuJs0xkgGf2udWxa3yGBRxPtxUkB79i6aCZLRgc7PM8fZe9TosfPDcvEpQZbuFASnHYmRLBLUbmLOIIA==",
         "repositoryURL": "https://github.com/parcel-bundler/lightningcss"
@@ -8418,7 +8418,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-android-arm64/-/lightningcss-android-arm64-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-android-arm64/-/lightningcss-android-arm64-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-android-arm64/1.33.0",
         "integrity": "sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg==",
         "repositoryURL": null
@@ -8466,7 +8466,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-darwin-arm64/-/lightningcss-darwin-arm64-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-darwin-arm64/-/lightningcss-darwin-arm64-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-darwin-arm64/1.33.0",
         "integrity": "sha512-Sciaz8eenNTKn9b3t7+xr0ipTp9YxKQY4npwQ3mrRuL0BAVHBLyZxofhaKBAVtzmtRZ/zTyo0/to4B1uWG/Djg==",
         "repositoryURL": null
@@ -8514,7 +8514,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-darwin-x64/-/lightningcss-darwin-x64-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-darwin-x64/-/lightningcss-darwin-x64-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-darwin-x64/1.33.0",
         "integrity": "sha512-Z5UPAxzrjlWNNyGy6i65cJzzvgJ5D3T6wMvs+gWpY9d7qRhANrxqAp6LhxIgZhWEw18RfJTGcRxjuLIBr+m8XQ==",
         "repositoryURL": null
@@ -8562,7 +8562,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-freebsd-x64/-/lightningcss-freebsd-x64-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-freebsd-x64/-/lightningcss-freebsd-x64-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-freebsd-x64/1.33.0",
         "integrity": "sha512-QQM/Ti/hQajJwCY+RiWuCZ9sdtI/XQk7nDK5vC8kkdwixezOlDgvDx7+RT+QjK6FcFT4MpsuoBnHIo/O3StRRg==",
         "repositoryURL": null
@@ -8610,7 +8610,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-linux-arm-gnueabihf/-/lightningcss-linux-arm-gnueabihf-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-linux-arm-gnueabihf/-/lightningcss-linux-arm-gnueabihf-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-linux-arm-gnueabihf/1.33.0",
         "integrity": "sha512-N7FVBe6iS24MlM6R/4RBTxGhQheZGs7tiQ9U32UtF75NzP5Q7xWPRqLBCKxlRQRk3rY1jCIPLzx7WzOhuUIRLQ==",
         "repositoryURL": null
@@ -8658,7 +8658,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-linux-arm64-gnu/-/lightningcss-linux-arm64-gnu-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-linux-arm64-gnu/-/lightningcss-linux-arm64-gnu-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-linux-arm64-gnu/1.33.0",
         "integrity": "sha512-j2v/itmy4HlNxlc6voKXYgBqNi0Ng2LShg4z7GufpEgs05P+2suBVyi9I6YHq5uoVFx9ETin3eCEhLVyXGQnKg==",
         "repositoryURL": null
@@ -8706,7 +8706,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-linux-arm64-musl/-/lightningcss-linux-arm64-musl-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-linux-arm64-musl/-/lightningcss-linux-arm64-musl-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-linux-arm64-musl/1.33.0",
         "integrity": "sha512-yiO5ROMuYQgXbC60yjZU5CYSFZGKXL0HFATXt9mHJn1+zW55oCtMI9NfcVhYLMFDL7gV7oBPon/EmMMGg2OvtQ==",
         "repositoryURL": null
@@ -8754,7 +8754,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-linux-x64-gnu/1.33.0",
         "integrity": "sha512-ar+Ju7LmcN0Jo4FpL4hpFybwNG9/3A/Br5KW2n2jyODg3MEZXaDYADdemoNS+BDNfMgKvylJLj4S5tyRActuAg==",
         "repositoryURL": null
@@ -8802,7 +8802,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-linux-x64-musl/1.33.0",
         "integrity": "sha512-RYiYbkokw0trfKqqzfF55lginwEPrD3OJDfTuJzFs1MK6iFnDenaz1fqLLtX4ITG3OktJQXOeTaw1awrBAlZPw==",
         "repositoryURL": null
@@ -8850,7 +8850,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-win32-arm64-msvc/-/lightningcss-win32-arm64-msvc-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-win32-arm64-msvc/-/lightningcss-win32-arm64-msvc-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-win32-arm64-msvc/1.33.0",
         "integrity": "sha512-1K+MPfLSFVpphzpdbfkhlWk6wBrTObBzS2T6db10PNOZgR9GoVsAWzwNyuhUYYbTp23j+4RrncfujZ4uAzXvwA==",
         "repositoryURL": null
@@ -8898,7 +8898,7 @@
       "license": "MPL-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.33.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.33.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lightningcss-win32-x64-msvc/1.33.0",
         "integrity": "sha512-OlEICDx/Xl0FqSp4bry8zFnCvGpig3Gl4gCquvYwHuqJKEC1+n9NgDniFvqHGmMv1ZkqDJrDqKKSykTDX+ehuA==",
         "repositoryURL": null
@@ -8944,7 +8944,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/linkify-it/-/linkify-it-6.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/linkify-it/-/linkify-it-6.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/linkify-it/6.1.0",
         "integrity": "sha512-wJ/TwpSDTLepCrQoYWYIExIKg5Zchex2Nn5yk2mFnB+6PtdkHtyLx742md9csRjjOnGkKIS/RrbY7l8D6gT9Vw==",
         "repositoryURL": "https://github.com/markdown-it/linkify-it"
@@ -8975,7 +8975,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lodash-es/-/lodash-es-4.18.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/lodash-es/-/lodash-es-4.18.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lodash-es/4.18.1",
         "integrity": "sha512-J8xewKD/Gk22OZbhpOVSwcs60zhd95ESDwezOFuA3/099925PdHJ7OFHNTGtajL3AlZkykD32HykiMo+BIBI8A==",
         "repositoryURL": "lodash/lodash"
@@ -9006,7 +9006,7 @@
       "license": "BlueOak-1.0.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/lru-cache/-/lru-cache-11.5.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/lru-cache/-/lru-cache-11.5.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/lru-cache/11.5.3",
         "integrity": "sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg==",
         "repositoryURL": "ssh://git@github.com/isaacs/node-lru-cache"
@@ -9068,7 +9068,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/markdown-it/-/markdown-it-15.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/markdown-it/-/markdown-it-15.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/markdown-it/15.0.2",
         "integrity": "sha512-q4IGxMv56jCqT4OCRCADBoDP3LO4MhmTXjFbphHPXs4g3j9Xg5RDnxqN8IF/3vIWEU+VCnUq+7JUg/cfy2E6Qw==",
         "repositoryURL": "markdown-it/markdown-it"
@@ -9099,7 +9099,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/marked/-/marked-16.4.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/marked/-/marked-16.4.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/marked/16.4.2",
         "integrity": "sha512-TI3V8YYWvkVf3KJe1dRkpnjs68JUPyEa5vjKrp1XEEJUAOaQc+Qj+L1qWbPd0SJuAdQkFU0h73sXXqwDYxsiDA==",
         "repositoryURL": "git://github.com/markedjs/marked"
@@ -9130,7 +9130,7 @@
       "license": "CC0-1.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/mdn-data/-/mdn-data-2.27.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/mdn-data/-/mdn-data-2.27.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/mdn-data/2.27.1",
         "integrity": "sha512-9Yubnt3e8A0OKwxYSXyhLymGW4sCufcLG6VdiDdUGVkPhpqLxlvP5vl1983gQjJl3tqbrM731mjaZaP68AgosQ==",
         "repositoryURL": "https://github.com/mdn/data"
@@ -9161,7 +9161,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/mdurl/-/mdurl-2.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/mdurl/-/mdurl-2.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/mdurl/2.1.0",
         "integrity": "sha512-1+HBaOx0zi/dQWht8rNv9MYf9qqpqL/kxI0hXImU6Y547zM6Sni8BQibt7ifgMcYtQg41ao3Ivd6cnSM86inpg==",
         "repositoryURL": "https://github.com/markdown-it/mdurl"
@@ -9192,7 +9192,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/mermaid/-/mermaid-12.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/mermaid/-/mermaid-12.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/mermaid/12.2.0",
         "integrity": "sha512-w7nr/SFrLO7BaVTs3dQTvYSV6nYSBj0Yy9DjBhsIJtAcHqRzXSq4Pg32ujHZ/AdWsAMNEvvhbm5dt9E2tOiHzw==",
         "repositoryURL": "https://github.com/mermaid-js/mermaid"
@@ -9223,7 +9223,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/nanoid/-/nanoid-3.3.20.tgz",
+        "archiveURL": "https://registry.npmjs.org/nanoid/-/nanoid-3.3.20.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/nanoid/3.3.20",
         "integrity": "sha512-uKdg2G3GNCKQn9byYOpxbGqrT2fGO5KRt5J/8b3pok8rT6qxGWF6hxMyJiEYtAf+FVyYuD9hRaDqX5uPFYJ4ZQ==",
         "repositoryURL": "ai/nanoid"
@@ -9285,7 +9285,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/package-manager-detector/-/package-manager-detector-1.9.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/package-manager-detector/-/package-manager-detector-1.9.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/package-manager-detector/1.9.0",
         "integrity": "sha512-zAMfbta9nPA8AKkA4WdmNAT8R8s6Dk0/xwPsqNnRidMFcLo1YkLuPDTgs2f64XdzS8vbLNnoJ+uUIkgbz7oRHA==",
         "repositoryURL": "https://github.com/antfu-collective/package-manager-detector"
@@ -9316,7 +9316,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/parse5/-/parse5-8.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/parse5/-/parse5-8.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/parse5/8.0.1",
         "integrity": "sha512-z1e/HMG90obSGeidlli3hj7cbocou0/wa5HacvI3ASx34PecNjNQeaHNo5WIZpWofN9kgkqV1q5YvXe3F0FoPw==",
         "repositoryURL": "git://github.com/inikulin/parse5"
@@ -9347,7 +9347,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/path-data-parser/-/path-data-parser-0.1.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/path-data-parser/-/path-data-parser-0.1.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/path-data-parser/0.1.0",
         "integrity": "sha512-NOnmBpt5Y2RWbuv0LMzsayp3lVylAHLPUTut412ZA3l+C4uw4ZVkQbjShYCQ8TCpUMdPapr4YjUqLYD6v68j+w==",
         "repositoryURL": "https://github.com/pshihn/path-data-parser"
@@ -9409,7 +9409,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+        "archiveURL": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/pdfjs-dist/6.4.299",
         "integrity": "sha512-AVl138zALtfaAPvADulE0PZThbYzCBS79nL4pOSL/6Sm/4AH5A21BD9VHt97OlCuzJuCpmeZtAtkinisF4Vb1g==",
         "repositoryURL": "https://github.com/mozilla/pdf.js"
@@ -9500,7 +9500,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/picocolors/-/picocolors-1.1.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/picocolors/1.1.1",
         "integrity": "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==",
         "repositoryURL": "alexeyraspopov/picocolors"
@@ -9531,7 +9531,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/picomatch/-/picomatch-4.0.7.tgz",
+        "archiveURL": "https://registry.npmjs.org/picomatch/-/picomatch-4.0.7.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/picomatch/4.0.7",
         "integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==",
         "repositoryURL": "micromatch/picomatch"
@@ -9562,7 +9562,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/points-on-curve/-/points-on-curve-0.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/points-on-curve/-/points-on-curve-0.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/points-on-curve/0.2.0",
         "integrity": "sha512-0mYKnYYe9ZcqMCWhUjItv/oHjvgEsfKvnUTg8sAtnHr3GVy7rGkXCb6d5cSyqrWqL4k81b9CPg3urd+T7aop3A==",
         "repositoryURL": "https://github.com/pshihn/bezier-points"
@@ -9593,7 +9593,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/points-on-path/-/points-on-path-0.2.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/points-on-path/-/points-on-path-0.2.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/points-on-path/0.2.1",
         "integrity": "sha512-25ClnWWuw7JbWZcgqY/gJ4FQWadKxGWk+3kR/7kD0tCaDtPPMj7oHu2ToLaVhfpnHrZzYby2w6tUA0eOIuUg8g==",
         "repositoryURL": "https://github.com/pshihn/points-on-path"
@@ -9624,7 +9624,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/postcss/-/postcss-8.5.30.tgz",
+        "archiveURL": "https://registry.npmjs.org/postcss/-/postcss-8.5.30.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/postcss/8.5.30",
         "integrity": "sha512-zkd+e9S1AQHhmaBKye9zlFHWjOwVgqXl1q3ECYy8561K7qxR2cREf/STLskulBFd78k6AOFeA+ff1TtEzk9bAA==",
         "repositoryURL": "postcss/postcss"
@@ -9655,7 +9655,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/punycode/-/punycode-2.3.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/punycode/2.3.1",
         "integrity": "sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==",
         "repositoryURL": "https://github.com/mathiasbynens/punycode.js"
@@ -9686,7 +9686,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/punycode.js/-/punycode.js-2.3.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/punycode.js/-/punycode.js-2.3.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/punycode.js/2.3.1",
         "integrity": "sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA==",
         "repositoryURL": "https://github.com/mathiasbynens/punycode.js"
@@ -9717,7 +9717,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/require-from-string/-/require-from-string-2.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/require-from-string/-/require-from-string-2.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/require-from-string/2.0.2",
         "integrity": "sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==",
         "repositoryURL": "floatdrop/require-from-string"
@@ -9748,7 +9748,7 @@
       "license": "Unlicense",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/robust-predicates/-/robust-predicates-3.0.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/robust-predicates/-/robust-predicates-3.0.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/robust-predicates/3.0.3",
         "integrity": "sha512-NS3levdsRIUOmiJ8FZWCP7LG3QpJyrs/TE0Zpf1yvZu8cAJJ6QMW92H1c7kWpdIHo8RvmLxN/o2JXTKHp74lUA==",
         "repositoryURL": "https://github.com/mourner/robust-predicates"
@@ -9779,7 +9779,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/rolldown/-/rolldown-1.2.13.tgz",
+        "archiveURL": "https://registry.npmjs.org/rolldown/-/rolldown-1.2.13.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/rolldown/1.2.13",
         "integrity": "sha512-/5apOkwWxtACcQtZ5WlrAsKS4JwXVThQPJZ3RqIruRY9UG9M8e0VlXN068xum/JRKA4aIUoJ13ghe/kGCvidiQ==",
         "repositoryURL": "https://github.com/rolldown/rolldown"
@@ -9810,7 +9810,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/roughjs/-/roughjs-4.6.6.tgz",
+        "archiveURL": "https://registry.npmjs.org/roughjs/-/roughjs-4.6.6.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/roughjs/4.6.6",
         "integrity": "sha512-ZUz/69+SYpFN/g/lUlo2FXcIjRkSu3nDarreVdGGndHEBJ6cXPdKguS8JGxwj5HA5xIbVKSmLgr5b3AWxtRfvQ==",
         "repositoryURL": "https://github.com/pshihn/rough"
@@ -9841,7 +9841,7 @@
       "license": "BSD-3-Clause",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/rw/-/rw-1.3.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/rw/-/rw-1.3.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/rw/1.3.3",
         "integrity": "sha512-PdhdWy89SiZogBLaw42zdeqtRJ//zFd2PgQavcICDUgJT5oW10QCRKbJ6bg4r0/UY2M6BWd5tkxuGFRvCkgfHQ==",
         "repositoryURL": "http://github.com/mbostock/rw"
@@ -9872,7 +9872,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/safer-buffer/-/safer-buffer-2.1.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/safer-buffer/2.1.2",
         "integrity": "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==",
         "repositoryURL": "https://github.com/ChALkeR/safer-buffer"
@@ -9903,7 +9903,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/saxes/-/saxes-6.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/saxes/-/saxes-6.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/saxes/6.0.0",
         "integrity": "sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==",
         "repositoryURL": "https://github.com/lddubeau/saxes"
@@ -9954,7 +9954,7 @@
       "license": "ISC",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/siginfo/-/siginfo-2.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/siginfo/-/siginfo-2.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/siginfo/2.0.0",
         "integrity": "sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==",
         "repositoryURL": "https://github.com/emilbayes/siginfo"
@@ -9985,7 +9985,7 @@
       "license": "BSD-3-Clause",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/source-map-js/-/source-map-js-1.2.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/source-map-js/1.2.2",
         "integrity": "sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==",
         "repositoryURL": "7rulnik/source-map-js"
@@ -10078,7 +10078,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/style-mod/-/style-mod-4.1.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/style-mod/-/style-mod-4.1.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/style-mod/4.1.4",
         "integrity": "sha512-XXWIQt633/EpAFx8aZDOTjBzrCaGmhvEQlQo6MVPfa2OzO2cWo+4hV9h+6UkHYlXGfy+ODXKUdP7Pthmcu5ATw==",
         "repositoryURL": "https://code.haverbeke.berlin/marijn/style-mod"
@@ -10109,7 +10109,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/stylis/-/stylis-4.4.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/stylis/-/stylis-4.4.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/stylis/4.4.0",
         "integrity": "sha512-5Z9ZpRzfuH6l/UAvCPAPUo3665Nk2wLaZU3x+TLHKVzIz33+sbJqbtrYoC3KD4/uVOr2Zp+L0LySezP9OHV9yA==",
         "repositoryURL": "https://github.com/thysultan/stylis.js"
@@ -10140,7 +10140,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/tinybench/-/tinybench-2.9.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/tinybench/-/tinybench-2.9.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/tinybench/2.9.0",
         "integrity": "sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==",
         "repositoryURL": "tinylibs/tinybench"
@@ -10202,7 +10202,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/tinyglobby/-/tinyglobby-0.2.17.tgz",
+        "archiveURL": "https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.17.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/tinyglobby/0.2.17",
         "integrity": "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==",
         "repositoryURL": "https://github.com/SuperchupuDev/tinyglobby"
@@ -10264,7 +10264,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/tldts/-/tldts-7.4.18.tgz",
+        "archiveURL": "https://registry.npmjs.org/tldts/-/tldts-7.4.18.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/tldts/7.4.18",
         "integrity": "sha512-somxA8xKAUzlAxl0TX/jMSYIbRNFIVGnI96pVGJPeMc5BsHmfVXn6mOJT6U++ELnl04eGfzpfcEuZe8WiASkXg==",
         "repositoryURL": "ssh://git@github.com/remusao/tldts"
@@ -10295,7 +10295,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/tldts-core/-/tldts-core-7.4.18.tgz",
+        "archiveURL": "https://registry.npmjs.org/tldts-core/-/tldts-core-7.4.18.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/tldts-core/7.4.18",
         "integrity": "sha512-KI2PKvCmvQI/xD6ypPqkU0i7oxNXR/O58RLRaHR4svsgVUQ2JE/XC8BtMbG6PSehD27I8sZJRcC1ASnCy6lp3g==",
         "repositoryURL": "ssh://git@github.com/remusao/tldts"
@@ -10326,7 +10326,7 @@
       "license": "BSD-3-Clause",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/tough-cookie/-/tough-cookie-6.0.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-6.0.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/tough-cookie/6.0.2",
         "integrity": "sha512-exgYmnmL/sJpR3upZfXG5PoatXQii55xAiXGXzY+sROLZ/Y+SLcp9PgJNI9Vz37HpQ74WvDcLT8eqm+kV3FzrA==",
         "repositoryURL": "git://github.com/salesforce/tough-cookie"
@@ -10357,7 +10357,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/tr46/-/tr46-7.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/tr46/-/tr46-7.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/tr46/7.0.0",
         "integrity": "sha512-BcDSDW+SIGWVOns1Zm6Yg91q9AEj7eaID0QDY9oIqJD1A8dscNwMcl9Sms2DeuWCNov1X0/oXanHGYQBSLwZsg==",
         "repositoryURL": "https://github.com/jsdom/tr46"
@@ -10388,7 +10388,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/ts-dedent/-/ts-dedent-2.3.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/ts-dedent/-/ts-dedent-2.3.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/ts-dedent/2.3.0",
         "integrity": "sha512-JfJeIHke7y2egdGGgRAvpCwYFUsHlM2gPcrVOxFkznt/4uzQ7HFmvE63iFHVLBJNDuyDOQgijDK/tXH/f6Msjg==",
         "repositoryURL": "https://github.com/tamino-martinius/node-ts-dedent"
@@ -10419,7 +10419,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/typescript/-/typescript-6.0.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/typescript/-/typescript-6.0.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/typescript/6.0.3",
         "integrity": "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==",
         "repositoryURL": "https://github.com/microsoft/TypeScript"
@@ -10450,7 +10450,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/uc.micro/-/uc.micro-3.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/uc.micro/-/uc.micro-3.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/uc.micro/3.0.0",
         "integrity": "sha512-U3PppEkleoTnIfi8BozMx3yju3qc/L6SwqWo2Sw+54PX+PX0q9I+r1Um5HCmqD7n9VDX5/v3vQH/AjA6deDdtw==",
         "repositoryURL": "markdown-it/uc.micro"
@@ -10481,7 +10481,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/undici/-/undici-8.12.2.tgz",
+        "archiveURL": "https://registry.npmjs.org/undici/-/undici-8.12.2.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/undici/8.12.2",
         "integrity": "sha512-XtuDWVdqTLr3NAxm2ly9/hU6kUsJOgGh1RASzMBbsw6aWCOaQzHdW+QQDfdERjfJ2V5vL5pRPa4RetO9UfivDg==",
         "repositoryURL": "https://github.com/nodejs/undici"
@@ -10524,7 +10524,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/uuid/-/uuid-14.0.3.tgz",
+        "archiveURL": "https://registry.npmjs.org/uuid/-/uuid-14.0.3.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/uuid/14.0.3",
         "integrity": "sha512-Sc5u1VVln93y1Xnz4R+CunOZc7R9LUcTmhj7Rc7Eg3HVcf7rVn2FOoa812fe0W8p3jD7xeoGSYbfqCGGH2B6xw==",
         "repositoryURL": "https://github.com/uuidjs/uuid"
@@ -10555,7 +10555,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/vite/-/vite-8.3.4.tgz",
+        "archiveURL": "https://registry.npmjs.org/vite/-/vite-8.3.4.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/vite/8.3.4",
         "integrity": "sha512-IftLE8phJhdNRIGNEV4JCCvfNScoZQVfcXaN8TQropWGJtOHcu+iAB9pHcuGvmEb/kddw0LBe/jS8ztdC6xdiQ==",
         "repositoryURL": "https://github.com/vitejs/vite"
@@ -10617,7 +10617,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/w3c-keyname/-/w3c-keyname-2.2.8.tgz",
+        "archiveURL": "https://registry.npmjs.org/w3c-keyname/-/w3c-keyname-2.2.8.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/w3c-keyname/2.2.8",
         "integrity": "sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==",
         "repositoryURL": "https://github.com/marijnh/w3c-keyname"
@@ -10648,7 +10648,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/w3c-xmlserializer/-/w3c-xmlserializer-6.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/w3c-xmlserializer/-/w3c-xmlserializer-6.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/w3c-xmlserializer/6.0.0",
         "integrity": "sha512-4Nsy8K5Tr6SPDH9jhKJOHf7ChDrc1zufZTVSF7x72hwuEXBqxqk9G6cK+K2NRUtB3iELRJqjXb4JPDMBjMTl2Q==",
         "repositoryURL": "https://github.com/jsdom/w3c-xmlserializer"
@@ -10679,7 +10679,7 @@
       "license": "BSD-2-Clause",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/webidl-conversions/-/webidl-conversions-8.0.1.tgz",
+        "archiveURL": "https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-8.0.1.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/webidl-conversions/8.0.1",
         "integrity": "sha512-BMhLD/Sw+GbJC21C/UgyaZX41nPt8bUTg+jWyDeg7e7YN4xOM05YPSIXceACnXVtqyEw/LMClUQMtMZ+PGGpqQ==",
         "repositoryURL": "https://github.com/jsdom/webidl-conversions"
@@ -10710,7 +10710,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/whatwg-mimetype/-/whatwg-mimetype-5.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/whatwg-mimetype/-/whatwg-mimetype-5.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/whatwg-mimetype/5.0.0",
         "integrity": "sha512-sXcNcHOC51uPGF0P/D4NVtrkjSU2fNsm9iog4ZvZJsL3rjoDAzXZhkm2MWt1y+PUdggKAYVoMAIYcs78wJ51Cw==",
         "repositoryURL": "jsdom/whatwg-mimetype"
@@ -10741,7 +10741,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/whatwg-url/-/whatwg-url-17.3.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/whatwg-url/-/whatwg-url-17.3.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/whatwg-url/17.3.0",
         "integrity": "sha512-KwOAJrpf+GTgBvcBQJcP38sMF0DsQKdwtG+TxM2pW44P6E5k0hDbWrDmyuJDIF0Uef0aQq0ZoJs+5oI+k8ddhg==",
         "repositoryURL": "https://github.com/jsdom/whatwg-url"
@@ -10772,7 +10772,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/why-is-node-running/-/why-is-node-running-2.3.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/why-is-node-running/-/why-is-node-running-2.3.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/why-is-node-running/2.3.0",
         "integrity": "sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w==",
         "repositoryURL": "https://github.com/mafintosh/why-is-node-running"
@@ -10803,7 +10803,7 @@
       "license": "Apache-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/xml-name-validator/-/xml-name-validator-5.0.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/xml-name-validator/-/xml-name-validator-5.0.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/xml-name-validator/5.0.0",
         "integrity": "sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==",
         "repositoryURL": "jsdom/xml-name-validator"
@@ -10834,7 +10834,7 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmmirror.com/xmlchars/-/xmlchars-2.2.0.tgz",
+        "archiveURL": "https://registry.npmjs.org/xmlchars/-/xmlchars-2.2.0.tgz",
         "registryMetadataURL": "https://registry.npmjs.org/xmlchars/2.2.0",
         "integrity": "sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==",
         "repositoryURL": "https://github.com/lddubeau/xmlchars"
