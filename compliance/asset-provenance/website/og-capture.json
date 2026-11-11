@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "capturedAt": "2026-11-07T08:11:17.595Z",
+  "capturedAt": "2026-11-10T15:46:20.733Z",
   "origin": "New real website first-viewport capture in this remediation session. No DOM/CSS injection, composition or image resampling.",
   "script": {
     "path": "scripts/capture-website-assets.mjs",
@@ -39,7 +39,7 @@
     {
       "path": "website/index.html",
       "bytes": 15467,
-      "sha256": "47252b3ab031fa50ce699e5d7686f9b0a05d24b0604782918fa0d9a7e0a26ffe"
+      "sha256": "dabdb0cefee4a4c0f5e07a2dd437eb1026b4da71830a79958eedc6b872871884"
     },
     {
       "path": "website/shots/en/code.png",
@@ -74,7 +74,7 @@
     {
       "path": "website/site.js",
       "bytes": 1917,
-      "sha256": "694ad66d8a9d203b3bc60acf1284553e6feb6b55ae08f2904906de011c0dc179"
+      "sha256": "6f9e9df0f7842f13c74c9d9d143118267e0726f6dbe6cec512c5287028576f8c"
     },
     {
       "path": "website/styles.css",
@@ -89,14 +89,14 @@
   ],
   "raw": {
     "path": "compliance/asset-provenance/website/raw/og.png",
-    "bytes": 66574,
-    "sha256": "b24143d2d826bbec4924a501dbc2e3403d95696bb794bd882902c0c01e753d2d",
+    "bytes": 66481,
+    "sha256": "d2639aca58d944f6acade8f603e9a66bd60e2d9f884215df5a85904eca4a39a2",
     "width": 1262,
     "height": 624
   },
   "published": {
     "path": "website/og.png",
-    "bytes": 66574,
-    "sha256": "b24143d2d826bbec4924a501dbc2e3403d95696bb794bd882902c0c01e753d2d"
+    "bytes": 66481,
+    "sha256": "d2639aca58d944f6acade8f603e9a66bd60e2d9f884215df5a85904eca4a39a2"
   }
 }
