@@ -75,3 +75,61 @@ describe('渲染正确性：常用 GFM 构造与参考引擎、各类行尾一�
     });
   }
 });
+
+// 项目自定义语法不在 markdown-it 参考集内，用期值断言锁结构（防止重构/换解析器时静默退化）。
+describe('渲染正确性：自定义语法期值断言', () => {
+  const render = async (source: string): Promise<HTMLElement> => {
+    const host = document.createElement('div');
+    const renderer = createBlockRenderer();
+    const result = await renderer.render(host, source, { dark: false });
+    renderer.destroy();
+    expect(result.engine).toBe('lezer');
+    return host;
+  };
+
+  it('任务列表：复选框状态与完成态 class', async () => {
+    const host = await render('- [ ] task open\n- [x] task done\n');
+    const items = host.querySelectorAll('li.md-task-item');
+    expect(items).toHaveLength(2);
+    const [open, done] = [...items];
+    expect(open?.querySelector('input[type=checkbox]')?.hasAttribute('checked')).toBe(false);
+    expect(done?.classList.contains('md-task-item--done')).toBe(true);
+    expect(done?.querySelector('input[type=checkbox]')?.hasAttribute('checked')).toBe(true);
+    expect(host.textContent).toContain('task open');
+  });
+
+  it('高亮 / 上标 / 下标', async () => {
+    const host = await render('==高亮== 与 ^上标^ 与 ~下标~ 同段。\n');
+    expect(host.querySelector('mark')?.textContent).toBe('高亮');
+    expect(host.querySelector('sup')?.textContent).toBe('上标');
+    expect(host.querySelector('sub')?.textContent).toBe('下标');
+  });
+
+  it('脚注引用与定义区：编号锚点互链', async () => {
+    const host = await render('正文[^note] 结尾。\n\n[^note]: 脚注内容\n');
+    const ref = host.querySelector('sup.footnotes-ref a');
+    expect(ref?.getAttribute('href')).toBe('#footnotes-def-1');
+    expect(ref?.textContent).toBe('1');
+    const def = host.querySelector('#footnotes-def-1');
+    expect(def?.textContent).toContain('脚注内容');
+  });
+
+  it('Emoji 别名替换为字符', async () => {
+    const host = await render('前缀 :smile: 后缀\n');
+    expect(host.textContent).toContain('😄');
+    expect(host.textContent).not.toContain(':smile:');
+  });
+
+  it('目录 [toc] 渲染为导航件', async () => {
+    const host = await render('[toc]\n\n# 一级标题\n\n正文。\n');
+    expect(host.querySelector('nav.md-toc')).toBeTruthy();
+  });
+
+  it('行内与块级公式占位（水合目标）', async () => {
+    const host = await render('行内 $x^2$ 结束。\n\n$$E=mc^2$$\n');
+    const inline = host.querySelector('span.md-render-target[data-render-kind="math"][data-render-display="0"]');
+    const display = host.querySelector('div.md-render-target[data-render-kind="math"][data-render-display="1"]');
+    expect(inline?.textContent).toContain('x^2');
+    expect(display?.textContent).toContain('E=mc^2');
+  });
+});
