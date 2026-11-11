@@ -363,21 +363,26 @@ pub fn file_rename(from: String, to: String) -> Result<(), ZiEditError> {
     Ok(())
 }
 
-/// 会话读写：draft_content 可达 10MB，序列化/解析移出主线程（BE1）
+/// 会话读写：draft_content 可达 10MB，序列化/解析移出主线程（BE1）。
+/// Windows 正文经 DPAPI 封装；解密失败返回 SESSION_UNREADABLE，且不改动原文件。
 #[tauri::command]
-pub async fn session_load(app: AppHandle) -> SessionState {
+pub async fn session_load(app: AppHandle) -> Result<SessionState, ZiEditError> {
     tauri::async_runtime::spawn_blocking(move || {
         let dir = match config_dir(&app) {
             Ok(d) => d,
-            Err(_) => return SessionState::default(),
+            Err(_) => return Ok(SessionState::default()),
         };
-        store::load_or_default(&store::config_file(&dir, "session.json"))
+        match recovery::read_sealed_json(
+            &store::config_file(&dir, "session.json"),
+            256 * 1024 * 1024,
+        ) {
+            recovery::SealedJson::Missing => Ok(SessionState::default()),
+            recovery::SealedJson::Value(session) => Ok(session),
+            recovery::SealedJson::Unreadable => Err(ZiEditError::Msg("SESSION_UNREADABLE".into())),
+        }
     })
     .await
-    .unwrap_or_else(|e| {
-        log::warn!("session_load blocking task failed: {e}");
-        SessionState::default()
-    })
+    .map_err(|e| ZiEditError::Msg(e.to_string()))?
 }
 
 /// 保存与 recent/favorites 共用持久化事务锁：临界区覆盖整次原子写，
@@ -388,7 +393,7 @@ pub async fn session_save(app: AppHandle, session: SessionState) -> Result<(), Z
     tauri::async_runtime::spawn_blocking(move || {
         let dir = config_dir(&app)?;
         let _tx = persistence_lock();
-        store::save_limited_private(
+        recovery::write_sealed_json(
             &store::config_file(&dir, "session.json"),
             &session,
             256 * 1024 * 1024,

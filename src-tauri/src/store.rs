@@ -97,7 +97,7 @@ pub fn save<T: Serialize>(path: &Path, value: &T) -> Result<(), crate::error::Zi
     Ok(())
 }
 
-fn quarantine(path: &Path) {
+pub(crate) fn quarantine(path: &Path) {
     let ts = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs())
@@ -119,7 +119,7 @@ pub fn save_limited<T: Serialize>(
     write_limited(path, value, limit, false)
 }
 
-/// 会话与命名会话使用私有权限。正文保持 JSON：启动时解密失败再被自动保存覆盖会丢掉草稿。
+/// 私有权限的 JSON 落盘。会话文件改走 `write_sealed_json`，这里留给仍是明文的配置。
 pub fn save_limited_private<T: Serialize>(
     path: &Path,
     value: &T,
@@ -147,7 +147,7 @@ fn write_limited<T: Serialize>(
     Ok(())
 }
 
-fn check_size(bytes: usize, limit: usize) -> Result<(), crate::error::ZiEditError> {
+pub(crate) fn check_size(bytes: usize, limit: usize) -> Result<(), crate::error::ZiEditError> {
     if bytes > limit {
         return Err(crate::error::ZiEditError::Msg(format!(
             "Serialized data exceeds {limit} bytes"

@@ -706,12 +706,21 @@ mod tests {
 #[tauri::command]
 pub fn named_sessions_load(
     app: tauri::AppHandle,
-) -> std::collections::HashMap<String, crate::commands::SessionState> {
+) -> Result<std::collections::HashMap<String, crate::commands::SessionState>, ZiEditError> {
     let dir = match crate::paths::config_dir(&app) {
         Ok(d) => d,
-        Err(_) => return Default::default(),
+        Err(_) => return Ok(Default::default()),
     };
-    crate::store::load_or_default(&crate::store::config_file(&dir, "named_sessions.json"))
+    match crate::commands::recovery::read_sealed_json(
+        &crate::store::config_file(&dir, "named_sessions.json"),
+        64 * 1024 * 1024,
+    ) {
+        crate::commands::recovery::SealedJson::Missing => Ok(Default::default()),
+        crate::commands::recovery::SealedJson::Value(sessions) => Ok(sessions),
+        crate::commands::recovery::SealedJson::Unreadable => {
+            Err(ZiEditError::Msg("NAMED_SESSION_UNREADABLE".into()))
+        }
+    }
 }
 
 #[tauri::command]
@@ -721,7 +730,7 @@ pub fn named_sessions_save(
 ) -> Result<(), ZiEditError> {
     let dir = crate::paths::config_dir(&app)?;
     let _tx = super::persistence_lock();
-    crate::store::save_limited_private(
+    crate::commands::recovery::write_sealed_json(
         &crate::store::config_file(&dir, "named_sessions.json"),
         &sessions,
         64 * 1024 * 1024,

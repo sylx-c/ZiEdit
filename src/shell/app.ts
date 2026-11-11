@@ -484,7 +484,11 @@ export async function boot(): Promise<void> {
   const applySavedTheme = (s: Settings) => applyTheme(s.theme ?? 'paper');
 
   let saveTimer: ReturnType<typeof setTimeout> | undefined;
+  // 解密失败时保持磁盘原文件。启动流程和退出流程都不得再把空会话写回去。
+  let blockSessionWrite = false;
+  let blockNamedWrite = false;
   const scheduleSave = (s: SessionState) => {
+    if (blockSessionWrite) return;
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = setTimeout(() => void saveSession(captureDrafts(s)), 500);
   };
@@ -3992,6 +3996,10 @@ export async function boot(): Promise<void> {
     run: () => void dlgPrompt($t('prompt.sessionName')).then(async name => {
       if (!name) return;
       const next = { ...namedSessions, [name]: captureDrafts(store.session()) };
+      if (blockNamedWrite) {
+        flash($t('err.namedUnreadable'));
+        return;
+      }
       try {
         await namedSessionsSave(next);
         namedSessions = next;
@@ -5915,8 +5923,14 @@ export async function boot(): Promise<void> {
   // ---- 启动序列（各步独立容错：设置/会话损坏或非 Tauri 环境不阻断启动，001 异常处理） ----
   const [loadedSettings, loadedSession, loadedNamedSessions, loadedHome] = await Promise.all([
     settingsLoad().catch(() => ({}) as Settings),
-    loadSession().catch(() => null),
-    namedSessionsLoad().catch(() => ({})),
+    loadSession().catch(err => {
+      if (String(err).includes('SESSION_UNREADABLE')) blockSessionWrite = true;
+      return null;
+    }),
+    namedSessionsLoad().catch(err => {
+      if (String(err).includes('NAMED_SESSION_UNREADABLE')) blockNamedWrite = true;
+      return {};
+    }),
     homeDir().catch(() => 'C:\\'),
   ]);
   settings = { ...DEFAULT_SETTINGS, ...loadedSettings };
@@ -5946,6 +5960,8 @@ export async function boot(): Promise<void> {
   }
   namedSessions = loadedNamedSessions;
   registerSessionActions();
+  if (blockSessionWrite) flash($t('err.sessionUnreadable'));
+  if (blockNamedWrite) flash($t('err.namedUnreadable'));
   try {
     const session = loadedSession ?? { tabs: [], activeIndex: 0 };
     if (store.restore(session) === 0) render();
@@ -5956,6 +5972,7 @@ export async function boot(): Promise<void> {
   }
   window.addEventListener('beforeunload', () => {
     if (saveTimer) clearTimeout(saveTimer);
+    if (blockSessionWrite) return;
     void saveSession(captureDrafts(store.session()));
   });
 
@@ -6139,7 +6156,9 @@ export async function boot(): Promise<void> {
         const session = captureDrafts(store.session());
         for (const t of dirtyTabList()) recoveryPending.delete(t.path);
         void recoveryClear().catch(() => void 0);
-        void saveSession(session).then(() => getCurrentWindow().destroy()).catch(err => flash(String(err)));
+        void (blockSessionWrite ? Promise.resolve() : saveSession(session))
+          .then(() => getCurrentWindow().destroy())
+          .catch(err => flash(String(err)));
       };
       const hideToTray = (): void => {
         void getCurrentWindow().hide().catch(() => void 0);
