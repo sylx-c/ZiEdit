@@ -5,6 +5,7 @@ import { parseError } from '../common/errors';
 //       列命令收进编辑右键"列操作"子菜单，行批处理进编辑菜单"行批处理"子菜单（悬浮工具条取消）。
 import { bufferHistory, ReadOnlyControl, restoreBufferScroll, type EditorBuffer } from '../common/editor-buffer';
 import { startParseWarmup } from '../common/parse-warmup';
+import { yieldToBrowser } from '../common/yield';
 import { safeSyntaxLanguage } from './language-guard';
 import { compositionGuard, isComposing } from '../common/composition';
 import { Compartment, EditorSelection, EditorState, Prec, StateEffect, StateField, RangeSet, findClusterBreak, type Extension } from '@codemirror/state';
@@ -766,7 +767,9 @@ export class EditView {
     const language = !this.syntaxEnabled ? null : this.language === 'JSON'
       ? safeSyntaxLanguage(this.language, this.view.state.doc.iterLines()) : this.language;
     const seq = ++this.langApplySeq;
-    void loadLangExt(language).then(exts => {
+    void loadLangExt(language).then(async exts => {
+      // 语言包命中缓存时 then 是微任务，会和编辑器构造叠成同一次长任务。
+      await yieldToBrowser();
       if (this.destroyed || seq !== this.langApplySeq) return;
       this.view.dispatch({ effects: this.langComp.reconfigure(exts) });
     });
