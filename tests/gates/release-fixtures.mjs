@@ -30,7 +30,8 @@ function pdf() {
 }
 export function releaseFixtures(dir) {
   fs.mkdirSync(dir, { recursive: true });
-  const types = { txt: 'ZiEdit 中文 text\nline two\n', md: '# ZiEdit\n\n中文 **Markdown**\n\n| A | B |\n|---|---|\n|1|2|\n', csv: 'Name,Value\n中文,42\n', pdf: pdf(),
+  // md 用 CRLF 行尾：Windows 常见形态，发布门据此同时守住「渲染入口按 LF 解析」的展示契约。
+  const types = { txt: 'ZiEdit 中文 text\nline two\n', md: '# ZiEdit\r\n\r\n中文 **Markdown**\r\n\r\n| A | B |\r\n|---|---|\r\n|1|2|\r\n', csv: 'Name,Value\n中文,42\n', pdf: pdf(),
     png: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR1sAAAAASUVORK5CYII=', 'base64'),
     docx: zip({ 'word/document.xml': '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>ZiEdit 中文 Office</w:t></w:r></w:p></w:body></w:document>' }),
     xlsx: zip({ 'xl/workbook.xml': '<workbook xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="首表" sheetId="1" r:id="rId1"/></sheets></workbook>',
