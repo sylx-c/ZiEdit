@@ -14,10 +14,13 @@ export function convertEol(text: string, seq: string): string {
   return text.replace(/\r\n|\r|\n/g, seq);
 }
 
-/** 归一为 LF（Markdown 渲染输入契约：外部文本进入 Lezer 前必须是 LF）。
- *  无 \r 时原样返回，避免对已归一的编辑器缓冲（CM 恒 LF）做大字符串改写。 */
+/** 归一为 LF 并剥离前导 BOM（Markdown 渲染输入契约：外部文本进入 Lezer 前必须是 LF）。
+ *  前导 U+FEFF 是不可见字符，会让首行的 ATX 标题/表格判定失效——解码层（encoding_rs
+ *  decode 的 BOM 嗅探）正常会剥离它，这里兜住剪贴板、草稿、恢复快照等绕过文件解码的路径。
+ *  无 \r 且无前导 BOM 时原样返回（同一引用），避免对已归一的编辑器缓冲做大字符串改写。 */
 export function toLf(text: string): string {
-  return text.includes('\r') ? convertEol(text, '\n') : text;
+  const body = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  return body.includes('\r') ? convertEol(body, '\n') : body;
 }
 
 /** 另存文件名：后缀插在扩展名前；无扩展名时直接追加（a.md→a.lf.md；README→README.lf；.gitignore→.lf.gitignore） */

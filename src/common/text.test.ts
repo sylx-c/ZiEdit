@@ -25,6 +25,14 @@ describe('toLf（Markdown 渲染输入契约）', () => {
   it('空串不受影响', () => {
     expect(toLf('')).toBe('');
   });
+  it('剥离前导 BOM（U+FEFF）', () => {
+    expect(toLf('\ufeff# 标题\n')).toBe('# 标题\n');
+    expect(toLf('\ufeffa\r\nb')).toBe('a\nb');
+  });
+  it('BOM 剥离不影响正文中的 U+FEFF', () => {
+    expect(toLf('a\ufeffb')).toBe('a\ufeffb');
+    expect(toLf('a\ufeffb\r\nc')).toBe('a\ufeffb\nc');
+  });
 });
 
 describe('nlSaveName（后缀插在扩展名前）', () => {

@@ -39,6 +39,8 @@ const EOL_VARIANTS: Readonly<Record<string, string>> = {
   CR: DOC.replace(/\n/g, '\r'),
   // 三种行尾混排：首个换行 CRLF、第二个 CR、其余 LF。
   MIXED: DOC.replace('\n', '\r\n').replace('\n', '\r'),
+  // 前导 BOM + CRLF：绕过文件解码层的输入（剪贴板/草稿/恢复快照）可能同时带两者。
+  'BOM+CRLF': '\ufeff' + DOC.replace(/\n/g, '\r\n'),
 };
 
 beforeAll(async () => { await loadMarkdownIt(); });
