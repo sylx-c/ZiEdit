@@ -1,4 +1,5 @@
 import { type ChangeSet, type Text } from '@codemirror/state';
+import { toLf } from '../common/text';
 import { snapshotDocument } from '../common/snapshot';
 import { MarkdownDocumentSession, documentChange, blockHtml, type MarkdownBlock, type MarkdownChange } from './document-model';
 import type { MarkdownMetadata } from './headings';
@@ -38,6 +39,9 @@ export class MarkdownDocumentClient {
   }
 
   render(text: string | Text, metadataOnly = false): Promise<MarkdownRenderPlan> {
+    // 渲染输入契约：先归一再参与 sent/diff 记账。首份快照可能来自 textReadAll 原样读盘（CRLF），
+    // 后续文本来自编辑器缓冲（CM 恒 LF）；不先归一会让差分偏移按 \r 数目漂移，增量语法树错位。
+    if (typeof text === 'string') text = toLf(text);
     const version = ++this.version, pendingChanges = this.pendingChanges;
     this.pendingChanges = null;
     const result = this.queue.then(() => this.renderVersion(text, metadataOnly, version, pendingChanges));

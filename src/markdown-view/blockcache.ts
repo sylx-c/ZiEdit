@@ -15,6 +15,7 @@ import { hydrateRenders, destroyHydratedRenders, registerReadingRenderTargets } 
 import { yieldToBrowser } from '../common/yield';
 import { requestIrFrame } from './frame-work';
 import { userScrolledRecently } from '../common/user-scroll';
+import { toLf } from '../common/text';
 
 const gfmParser = staticMarkdownParser;
 
@@ -173,6 +174,9 @@ export function createBlockRenderer(renderHtml?: BlockHtmlRenderer, cap = BLOCK_
     reset(): void { generation++; active.clear(); detached.clear(); local.reset(); layoutKey = ''; },
     destroy(): void { destroyed = true; renderer.reset(); if (!documentSession) client.destroy(); if (col) destroyHydratedRenders(col); surface?.destroy(); routeCleanup?.(); },
     async render(host: HTMLElement, text: string, opts: BlockCacheOpts, fallback = false): Promise<BlockRenderResult> {
+      // 渲染输入契约：预览/分屏首份正文可能来自 textReadAll 原样读盘（CRLF/CR）。先归一 LF，
+      // 后续 Lezer 解析、markdown-it 回退与引用定义扫描才共用同一坐标（否则表格退化、块偏移错位）。
+      text = toLf(text);
       const engine: PreviewEngine = fallback ? 'fallback' : 'lezer';
       const version = ++generation;
       const current = (): boolean => !destroyed && version === generation && (opts.isCurrent?.() ?? true);

@@ -9,7 +9,9 @@ import { staticHighlighter, staticCodeLanguage } from './static-code';
 import { codeLanguage } from './code-tokens';
 import { mdLinkTools } from './md-link';
 
-/** 与 IR 同一语法配置；不经过 Markdown→Markdown 投影或第二次语义解析。 */
+/** 与 IR 同一语法配置；不经过 Markdown→Markdown 投影或第二次语义解析。
+ *  输入契约：text 必须为 LF（上层入口经 `common/text.toLf` 归一）。`@lezer/markdown` 的 GFM 表格
+ *  分隔行判定不接受行尾 `\r`，CRLF 文本会把整张表解析成段落。 */
 export const staticMarkdownParser = parser.configure(markdownSyntaxExtensions);
 // 链接校验/实体解码走主线程共享 markdown-it 单例（perf-silk Pass 1 FC①）：normalizeLink/
 // validateLink/unescapeAll 均为与构造选项无关的原型/静态行为，共享实例输出不变。

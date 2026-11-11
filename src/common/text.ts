@@ -14,6 +14,12 @@ export function convertEol(text: string, seq: string): string {
   return text.replace(/\r\n|\r|\n/g, seq);
 }
 
+/** 归一为 LF（Markdown 渲染输入契约：外部文本进入 Lezer 前必须是 LF）。
+ *  无 \r 时原样返回，避免对已归一的编辑器缓冲（CM 恒 LF）做大字符串改写。 */
+export function toLf(text: string): string {
+  return text.includes('\r') ? convertEol(text, '\n') : text;
+}
+
 /** 另存文件名：后缀插在扩展名前；无扩展名时直接追加（a.md→a.lf.md；README→README.lf；.gitignore→.lf.gitignore） */
 export function nlSaveName(path: string, id: NlId): string {
   const preset = NL_PRESETS.find(p => p.id === id) ?? NL_PRESETS[1]!;
