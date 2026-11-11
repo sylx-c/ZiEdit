@@ -521,6 +521,32 @@ mod tests {
         );
     }
 
+    /// 渲染输入契约的上游锁定（2026-11-11 CRLF 展示缺陷收口）：decode 走 Web 规范的
+    /// BOM 嗅探入口，返回文本不含前导 U+FEFF——否则首个 ATX 标题/表格判定会失效。
+    /// 前端 toLf 对绕过文件解码的路径再兜底，这里锁住文件解码层自身的行为。
+    #[test]
+    fn decode_strips_bom_and_keeps_crlf_verbatim() {
+        let mut bytes = b"\xEF\xBB\xBF# \xE6\xA0\x87\xE9\xA2\x98".to_vec();
+        bytes.extend_from_slice(b"\r\n\r\n| a | b |\r\n| --- | --- |\r\n");
+        let (text, err) = decode(&bytes, "UTF-8");
+        assert!(!err);
+        assert!(text.starts_with('#'), "前导 BOM 必须被剥离：{text:?}");
+        assert!(!text.contains('\u{FEFF}'));
+        // CRLF 原样交付：行尾归一是前端渲染入口（toLf）的职责，解码层不擅自改写。
+        assert!(text.contains("| a | b |\r\n"));
+
+        // encoding_rs 的 UTF-16LE.encode 按 Web 规范输出 UTF-8（本项目 encode() 因此手工编码），
+        // 测试字节须直接按 UTF-16LE 构造。
+        let body: Vec<u8> = "hello"
+            .encode_utf16()
+            .flat_map(|u| u.to_le_bytes())
+            .collect();
+        let mut with_bom = vec![0xFF, 0xFE];
+        with_bom.extend_from_slice(&body);
+        let (text16, _) = decode(&with_bom, "UTF-16LE");
+        assert_eq!(text16, "hello");
+    }
+
     #[test]
     fn gbk_no_bom_chinese() {
         // "中文编码测试" 的 GBK 字节
