@@ -30,7 +30,9 @@ describe('草稿会话持久化', () => {
     expect(app).toContain('saveSession(captureDrafts(s))');
     expect(app).toContain('[name]: captureDrafts(store.session())');
     expect(app).toContain('const session = captureDrafts(store.session())');
-    expect(app).toContain('void saveSession(session).then(() => getCurrentWindow().destroy())');
+    expect(app).toContain('void (blockSessionWrite ? Promise.resolve() : saveSession(session))');
+    expect(app).toContain('.then(() => getCurrentWindow().destroy())');
+    expect(app).toContain('if (blockSessionWrite) return;');
   });
 
   it('设置保存刷新工具栏，不可见字符切换接入编辑面而非 IR', () => {

@@ -386,6 +386,87 @@ fn dpapi(bytes: &[u8], protect: bool) -> std::io::Result<Vec<u8>> {
     Ok(result)
 }
 
+/// 会话与命名会话共用快照的 DPAPI 封装。Unix 保持明文，不写魔数。
+pub(crate) fn seal_persisted(bytes: &[u8]) -> std::io::Result<Vec<u8>> {
+    encode_snapshot(bytes)
+}
+
+/// 没有魔数的旧 JSON 原样返回。魔数存在但解密失败时返回错误，调用方不得写回。
+pub(crate) fn open_persisted(bytes: &[u8], max_plain: usize) -> std::io::Result<Vec<u8>> {
+    if !bytes.starts_with(ENCRYPTED_MAGIC) {
+        if bytes.len() > max_plain {
+            return Err(std::io::Error::other(
+                "persisted payload exceeds size limit",
+            ));
+        }
+        return Ok(bytes.to_vec());
+    }
+    let fail = || std::io::Error::other(DECRYPT_ERROR);
+    let header = ENCRYPTED_MAGIC.len();
+    let length_bytes = bytes.get(header..header + 4).ok_or_else(fail)?;
+    let length = u32::from_le_bytes(length_bytes.try_into().map_err(|_| fail())?) as usize;
+    if length > max_plain {
+        return Err(fail());
+    }
+    #[cfg(windows)]
+    {
+        let plaintext = dpapi(&bytes[header + 4..], false)?;
+        if plaintext.len() != length {
+            return Err(fail());
+        }
+        Ok(plaintext)
+    }
+    #[cfg(not(windows))]
+    {
+        Err(fail())
+    }
+}
+
+#[derive(Debug)]
+pub(crate) enum SealedJson<T> {
+    Missing,
+    Value(T),
+    Unreadable,
+}
+
+/// 只读。解密失败或加密正文无法解析时不改名、不覆盖。
+pub(crate) fn read_sealed_json<T: serde::de::DeserializeOwned>(
+    path: &std::path::Path,
+    max_plain: usize,
+) -> SealedJson<T> {
+    let bytes = match std::fs::read(path) {
+        Ok(bytes) => bytes,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return SealedJson::Missing,
+        Err(_) => return SealedJson::Unreadable,
+    };
+    match open_persisted(&bytes, max_plain) {
+        Err(_) => SealedJson::Unreadable,
+        Ok(plain) => match serde_json::from_slice(&plain) {
+            Ok(value) => SealedJson::Value(value),
+            Err(_) if bytes.starts_with(ENCRYPTED_MAGIC) => SealedJson::Unreadable,
+            Err(_) => {
+                crate::store::quarantine(path);
+                SealedJson::Missing
+            }
+        },
+    }
+}
+
+pub(crate) fn write_sealed_json<T: Serialize>(
+    path: &std::path::Path,
+    value: &T,
+    limit: usize,
+) -> Result<(), ZiEditError> {
+    let json = serde_json::to_vec_pretty(value)?;
+    crate::store::check_size(json.len(), limit)?;
+    let stored = seal_persisted(&json)?;
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    crate::store::atomic_write_private(path, &stored)?;
+    Ok(())
+}
+
 fn encode_snapshot(bytes: &[u8]) -> std::io::Result<Vec<u8>> {
     #[cfg(windows)]
     {
@@ -633,6 +714,55 @@ pub async fn recovery_clear(app: tauri::AppHandle) -> Result<(), ZiEditError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn decrypt_failure_leaves_the_original_file() {
+        let dir =
+            std::env::temp_dir().join(format!("ziedit-seal-{}-{}", std::process::id(), now_ms()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("session.json");
+        let garbage = b"ZEDP1\0\x04\x00\x00\x00nope";
+        std::fs::write(&path, garbage).unwrap();
+        let loaded = read_sealed_json::<serde_json::Value>(&path, 1024);
+        assert!(matches!(loaded, SealedJson::Unreadable));
+        assert_eq!(std::fs::read(&path).unwrap(), garbage);
+        let names: Vec<_> = std::fs::read_dir(&dir)
+            .unwrap()
+            .map(|entry| entry.unwrap().file_name())
+            .collect();
+        assert_eq!(names, vec![std::ffi::OsString::from("session.json")]);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn sealed_json_roundtrip_and_legacy_plaintext() {
+        let dir = std::env::temp_dir().join(format!(
+            "ziedit-seal-ok-{}-{}",
+            std::process::id(),
+            now_ms()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("session.json");
+        write_sealed_json(&path, &serde_json::json!({"n": 1}), 4096).unwrap();
+        let stored = std::fs::read(&path).unwrap();
+        #[cfg(windows)]
+        assert!(stored.starts_with(ENCRYPTED_MAGIC));
+        #[cfg(not(windows))]
+        assert!(stored.starts_with(b"{"));
+        match read_sealed_json::<serde_json::Value>(&path, 4096) {
+            SealedJson::Value(value) => assert_eq!(value["n"], 1),
+            SealedJson::Missing | SealedJson::Unreadable => panic!("sealed session did not load"),
+        }
+        let legacy = br#"{ "n": 2 }"#;
+        std::fs::write(&path, legacy).unwrap();
+        match read_sealed_json::<serde_json::Value>(&path, 4096) {
+            SealedJson::Value(value) => assert_eq!(value["n"], 2),
+            SealedJson::Missing | SealedJson::Unreadable => panic!("legacy plaintext did not load"),
+        }
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     #[test]
     fn private_snapshot_write_read_and_failed_replacement() {
