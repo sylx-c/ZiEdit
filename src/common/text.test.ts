@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { convertEol, nlSaveName, NL_PRESETS } from './text';
+import { convertEol, nlSaveName, NL_PRESETS, toLf } from './text';
 
 describe('convertEol（002 规则 21：换行统一）', () => {
   it('混合行尾归一为 LF', () => {
@@ -11,6 +11,19 @@ describe('convertEol（002 规则 21：换行统一）', () => {
   it('空串与无行尾串不受影响', () => {
     expect(convertEol('', '\n')).toBe('');
     expect(convertEol('abc', '\n')).toBe('abc');
+  });
+});
+
+describe('toLf（Markdown 渲染输入契约）', () => {
+  it('混合行尾归一为 LF', () => {
+    expect(toLf('a\r\nb\rc\nd')).toBe('a\nb\nc\nd');
+  });
+  it('已是 LF 时原样返回（不产生新缓冲）', () => {
+    const lf = 'a\nb\nc';
+    expect(toLf(lf)).toBe(lf);
+  });
+  it('空串不受影响', () => {
+    expect(toLf('')).toBe('');
   });
 });
 

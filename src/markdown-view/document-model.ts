@@ -1,4 +1,5 @@
 import { TreeFragment, type Tree } from '@lezer/common';
+import { toLf } from '../common/text';
 import { staticMarkdownParser, renderStaticHtml, renderFootnotesHtml } from './static-html';
 import { extractMarkdownMetadata, normalizeReference, type MarkdownMetadata } from './headings';
 
@@ -49,6 +50,10 @@ export class MarkdownDocumentSession {
   reset(): void { this.doc = null; }
 
   update(text: string, changes?: readonly MarkdownChange[]): MarkdownDocument {
+    // 渲染输入契约（最后防线）：Lezer 的 GFM 表格分隔行判定（cooperative-table 的 delimiter
+    // 正则）不接受行尾 \r；带 CRLF/CR 的外部文本（如 textReadAll 原样读盘）会让整张表退化成
+    // 段落。上层入口已归一 LF，这里兜住绕过入口的新调用方。
+    text = toLf(text);
     const previous = this.doc;
     if (previous?.text === text) return previous;
     const edits = previous ? changes ?? [documentChange(previous.text, text)] : [];

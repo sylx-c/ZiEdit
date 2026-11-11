@@ -75,6 +75,8 @@
 
 38. v52 正式定向中密集 2MB 停手后预览约 13.05 秒、分屏约 8.39 秒完成，均未出现 ≥100ms 任务；混合 IR 位移 0.40px。但普通 4MB 位移 10.40px、巨表位移 20px 仍失败，不能用重内容改善收口。空白 WebView 同环境复测响应 45.1ms（此前 62.1ms），说明当前环境响应会波动，不能把 50ms 描述为环境绝对下限。普通正文隔离为 CM 默认锚落在空白行顶部，段间距缩小时后续文字仍移动；同事务使用 CM 原生滚动目标的诊断位移为 0px。v53 仅对这种空白锚交付下一可见正文及其现有偏移，仍由 CM 同轮测量/定位，不另写像素补偿、不改变选区与横向位置。巨表后台发布更长解析前缀时还会清空已有行高，v53 经内容、引用、列布局、宽度与世代核验后保留未变前缀的测量。另修复公式结果因滚动暂缓后由 30ms 定时器直接交付、绕过共享队列的路径。新增行高和定时交付回归均先红后绿；原生复验待完成。
 
+39. （2026-11-11）渲染预览/分屏首次打开 CRLF 行尾的 Markdown 时，GFM 表格整段退化为段落：HTML 折叠段内换行与填充空格后显示成一行 `| 对比项 | ...`，切一次源码/分屏或编辑后自愈（预览改读编辑器缓冲，CM 文档恒 LF）。复现结论：`@lezer/markdown` 的表格分隔行判定（本仓库 `cooperative-table.ts` 的同款 `delimiter` 正则）不接受行尾 `\r`；已保存 Markdown 默认进渲染预览，首开无编辑器缓冲，`textReadAll` 原样读盘的 CRLF 直接进入 Lezer。markdown-it 回退与即时渲染不受影响（前者内部归一，后者由 CM6 装载时按 `/\r\n?|\n/` 分行）。约定渲染输入不变量：外部文本进入 Markdown 渲染前必须归一为 LF（`common/text.toLf`），在 `createBlockRenderer.render`（预览/分屏唯一入口，回退与引用定义扫描同坐标）、`MarkdownDocumentClient.render`（Worker 与本地回退共用入口，`sent`/diff 记账同口径）、`MarkdownDocumentSession.update`（Lezer 文档解析最后防线）三处执行；不在表格解析器内容忍 `\r`，避免 `\r` 进入单元格文本与行内解析。新增 `src/markdown-view/render-input-eol.test.ts`，锁 LF/CRLF/CR/混合行尾产出同一文档文本、块结构与渲染 HTML 并覆盖预览入口；另新增 `src/markdown-view/render-correctness.test.ts` 作为跨引擎/跨行尾结构基线（常用 GFM 构造与 markdown-it 参考实现比对，新增标准语法时补语料）。原生门禁样例仍为 LF，未加 CRLF 变体。
+
 ## 验证与证据
 
 结果均按当次构建和环境记录，失败样本不排除。当前桌面只能使用远程环境。先前 Windows 报告远程显示 2560×1440、32Hz，DPR 1.25，实测 rAF 约 31.2ms；v32 矩阵期间 Windows 不再列出该远程显示适配器，而列出 NVIDIA 1920×1080、60Hz，WebView2 实测 DPR 1.25、帧 P95 约 19ms。矩阵逐项记录采样前后的显示配置；v37 同时核对每份可获得的 WebView GPU 和缩放。不同环境的样本不能直接比较。原生性能阈值保持不变。
