@@ -75,7 +75,7 @@
 
 38. v52 正式定向中密集 2MB 停手后预览约 13.05 秒、分屏约 8.39 秒完成，均未出现 ≥100ms 任务；混合 IR 位移 0.40px。但普通 4MB 位移 10.40px、巨表位移 20px 仍失败，不能用重内容改善收口。空白 WebView 同环境复测响应 45.1ms（此前 62.1ms），说明当前环境响应会波动，不能把 50ms 描述为环境绝对下限。普通正文隔离为 CM 默认锚落在空白行顶部，段间距缩小时后续文字仍移动；同事务使用 CM 原生滚动目标的诊断位移为 0px。v53 仅对这种空白锚交付下一可见正文及其现有偏移，仍由 CM 同轮测量/定位，不另写像素补偿、不改变选区与横向位置。巨表后台发布更长解析前缀时还会清空已有行高，v53 经内容、引用、列布局、宽度与世代核验后保留未变前缀的测量。另修复公式结果因滚动暂缓后由 30ms 定时器直接交付、绕过共享队列的路径。新增行高和定时交付回归均先红后绿；原生复验待完成。
 
-39. （2026-11-11）渲染预览/分屏首次打开 CRLF 行尾的 Markdown 时，GFM 表格整段退化为段落：HTML 折叠段内换行与填充空格后显示成一行 `| 对比项 | ...`，切一次源码/分屏或编辑后自愈（预览改读编辑器缓冲，CM 文档恒 LF）。复现结论：`@lezer/markdown` 的表格分隔行判定（本仓库 `cooperative-table.ts` 的同款 `delimiter` 正则）不接受行尾 `\r`；已保存 Markdown 默认进渲染预览，首开无编辑器缓冲，`textReadAll` 原样读盘的 CRLF 直接进入 Lezer。markdown-it 回退与即时渲染不受影响（前者内部归一，后者由 CM6 装载时按 `/\r\n?|\n/` 分行）。约定渲染输入不变量：外部文本进入 Markdown 渲染前必须归一为 LF（`common/text.toLf`），在 `createBlockRenderer.render`（预览/分屏唯一入口，回退与引用定义扫描同坐标）、`MarkdownDocumentClient.render`（Worker 与本地回退共用入口，`sent`/diff 记账同口径）、`MarkdownDocumentSession.update`（Lezer 文档解析最后防线）三处执行；不在表格解析器内容忍 `\r`，避免 `\r` 进入单元格文本与行内解析。新增 `src/markdown-view/render-input-eol.test.ts`，锁 LF/CRLF/CR/混合行尾产出同一文档文本、块结构与渲染 HTML 并覆盖预览入口；另新增 `src/markdown-view/render-correctness.test.ts` 作为跨引擎/跨行尾结构基线（常用 GFM 构造与 markdown-it 参考实现比对，新增标准语法时补语料）。原生门禁样例仍为 LF，未加 CRLF 变体。
+39. （2026-11-11）渲染预览/分屏首次打开 CRLF 行尾的 Markdown 时，GFM 表格整段退化为段落：HTML 折叠段内换行与填充空格后显示成一行 `| 对比项 | ...`，切一次源码/分屏或编辑后自愈（预览改读编辑器缓冲，CM 文档恒 LF）。复现结论：`@lezer/markdown` 的表格分隔行判定（本仓库 `cooperative-table.ts` 的同款 `delimiter` 正则）不接受行尾 `\r`；已保存 Markdown 默认进渲染预览，首开无编辑器缓冲，`textReadAll` 原样读盘的 CRLF 直接进入 Lezer。markdown-it 回退与即时渲染不受影响（前者内部归一，后者由 CM6 装载时按 `/\r\n?|\n/` 分行）。约定渲染输入不变量：外部文本进入 Markdown 渲染前必须归一为 LF（`common/text.toLf`），在 `createBlockRenderer.render`（预览/分屏唯一入口，回退与引用定义扫描同坐标）、`MarkdownDocumentClient.render`（Worker 与本地回退共用入口，`sent`/diff 记账同口径）、`MarkdownDocumentSession.update`（Lezer 文档解析最后防线）三处执行；不在表格解析器内容忍 `\r`，避免 `\r` 进入单元格文本与行内解析。新增 `src/markdown-view/render-input-eol.test.ts`，锁 LF/CRLF/CR/混合行尾产出同一文档文本、块结构与渲染 HTML 并覆盖预览入口；另新增 `src/markdown-view/render-correctness.test.ts` 作为跨引擎/跨行尾结构基线（常用 GFM 构造与 markdown-it 参考实现比对，新增标准语法时补语料）。原生侧：`tests/gates/gate-md-consistency.mjs` 现用同一份样例的 LF 与 CRLF 副本各跑亮暗两轮；用修复前构建（gates-run-101-r1，2026-11-11 13:07）复跑，CRLF 首轮出现 `table`/`th`/`td` `missing: preview`（复现本问题），修复后构建四轮均无 missing，表格正常。该门在本机整体仍判 FAIL：预览与即时渲染的标题/段落纵向间距各轮均有约 17–63px 的基线差（LF/CRLF 相同、修复前后相同），属既存问题，见「尚待关闭」。
 
 ## 验证与证据
 
@@ -166,5 +166,6 @@ node tests/gates/run-md-matrix.mjs
 
 - 2026-11-11 完整矩阵 19 项中 17 项通过之后，对未达的两份语料做了隔离复测：巨 JavaScript 分屏滚轮响应 P95 48.8ms，400KB 单表分屏挂载不再有 ≥50ms 的长任务。完整 19 项尚未用这次构建重跑，也没有同环境旧版对照，不能收口。
 - v53 空白锚、巨表行高前缀及暂缓交付已完成完整前端回归、当前源码 Tauri CLI 构建和原生矩阵；正文/巨表位移问题在本轮未再复现，但完整性能验收仍未通过。
+- 2026-11-11 真机一致性门（`gate-md-consistency`）在本机因「预览 vs 即时渲染」的标题/段落纵向间距基线差判 FAIL（LF 与 CRLF、修复前后同差，约 17–63px），与本轮 CRLF 输入修复无关；需在显示环境匹配时复跑，或单独收口该样式基线，不得放宽 1.5px 判据。
 - 继续定位当前环境中的帧 P95/滚轮响应超标与普通 100KB 菜单切换错误；保留失败，不放宽 32ms/50ms 门槛，也不以旧版更慢抵消当前失败。
 - 最终性能问题修复后须重新构建、跑完整矩阵及同环境旧版对照，再做记录收口；现阶段保持“实施与原生验收进行中”。
