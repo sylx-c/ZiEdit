@@ -89,17 +89,35 @@ pub fn xml(
     }
     Ok(())
 }
-pub fn attr(e: &quick_xml::events::BytesStart<'_>, key: &[u8]) -> Result<Option<String>> {
+pub fn attr(e: &quick_xml::events::BytesStart<'_>, key: &str) -> Result<Option<String>> {
     for a in e.attributes() {
         let a = a.map_err(|e| e.to_string())?;
         if a.key.as_ref() == key {
             return a
-                .unescape_value()
+                .normalized_value(quick_xml::XmlVersion::Implicit1_0)
                 .map(|s| Some(s.into_owned()))
                 .map_err(|e| e.to_string());
         }
     }
     Ok(None)
+}
+
+/// quick-xml 0.42 起 Reader 把实体引用拆成独立的 `Event::GeneralRef`（内容为 `&` 与 `;` 之间的名称），
+/// 文本回调必须显式解码，否则 `&amp;` 等实体会被静默丢弃。命名实体走预定义解析器，
+/// 数字引用（`#N` / `#xH`）按码位还原；未定义实体有界报错，不猜测。
+pub fn resolve_ref(name: &str) -> Result<String> {
+    if let Some(text) = quick_xml::escape::resolve_xml_entity(name) {
+        return Ok(text.to_owned());
+    }
+    let code = name.strip_prefix('#').ok_or("OOXML_UNKNOWN_ENTITY")?;
+    let code_point = if let Some(hex) = code.strip_prefix('x').or_else(|| code.strip_prefix('X')) {
+        u32::from_str_radix(hex, 16).map_err(|_| "OOXML_UNKNOWN_ENTITY")?
+    } else {
+        code.parse::<u32>().map_err(|_| "OOXML_UNKNOWN_ENTITY")?
+    };
+    char::from_u32(code_point)
+        .map(|c| c.to_string())
+        .ok_or("OOXML_UNKNOWN_ENTITY".into())
 }
 pub fn window(from: u64, to: u64) -> Result<std::ops::Range<usize>> {
     if from == 0 || to < from {
