@@ -317,6 +317,9 @@ describe('007 AC-31 表格主事务', () => {
     const { main, host } = await mount(source);
     await until(() => !!host.querySelector('.mdir-table'));
     const box = host.querySelector<HTMLElement>('.mdir-tablebox')!;
+    // 后台解析会渐进扩展同一张表：慢机上首帧仅部分行（未过 160 窗口阈值、未分窗），
+    // 直接断言会把扩展中的行数当窗口大小。等全表（220 数据行）到齐再断言窗口。
+    await until(() => Number(box.dataset.mdTableRows ?? 0) >= 220);
     expect(host.querySelectorAll('tr[data-md-row]').length).toBeLessThan(80);
     const cell = tableCellAt(box, 180, 1)!;
     expect(cell.textContent).toBe('b179');
