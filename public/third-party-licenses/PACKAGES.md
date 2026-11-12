@@ -359,6 +359,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | clipboard-win | 5.4.1 | all-targets-conservative-superset | BSL-1.0 | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | combine | 4.6.8 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | concurrent-queue | 2.5.0 | all-targets-conservative-superset | Apache-2.0 OR MIT | 2 | LOCAL_TEXT_COLLECTED |
+| cargo | constant_time_eq | 0.6.1 | all-targets-conservative-superset | CC0-1.0 OR MIT-0 OR Apache-2.0 | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | cookie | 0.18.2 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | core-foundation-sys | 0.8.7 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | core-foundation | 0.10.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
@@ -538,6 +539,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | ndk-sys | 0.6.0+11769913 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | ndk | 0.9.0 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | new_debug_unreachable | 1.0.6 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| cargo | nix | 0.31.3 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | nom | 8.0.0 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | num-conv | 0.2.2 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | num-traits | 0.2.19 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
@@ -625,7 +627,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | rustc_version | 0.4.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | rustix | 1.1.5 | all-targets-conservative-superset | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | 4 | LOCAL_TEXT_COLLECTED |
 | cargo | rustls-pki-types | 1.15.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
-| cargo | rustls-webpki | 0.103.15 | all-targets-conservative-superset | ISC | 1 | LOCAL_TEXT_COLLECTED |
+| cargo | rustls-webpki | 0.103.16 | all-targets-conservative-superset | ISC | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | rustls | 0.23.46 | all-targets-conservative-superset | Apache-2.0 OR ISC OR MIT | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | rustversion | 1.0.23 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | ryu | 1.0.23 | all-targets-conservative-superset | Apache-2.0 OR BSL-1.0 | 2 | LOCAL_TEXT_COLLECTED |
@@ -731,7 +733,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | tray-icon | 0.25.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | tree_magic_mini | 3.2.2 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | try-lock | 0.2.5 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| cargo | typed-path | 0.12.3 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
+| cargo | typed-path | 0.13.0 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | typeid | 1.0.3 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | typenum | 1.20.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | uds_windows | 1.2.1 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
@@ -769,7 +771,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | web_atoms | 0.2.6 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | webkit2gtk-sys | 2.0.2 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | webkit2gtk | 2.0.2 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| cargo | webpki-roots | 1.0.9 | all-targets-conservative-superset | CDLA-Permissive-2.0 | 1 | LOCAL_TEXT_COLLECTED |
+| cargo | webpki-roots | 1.0.12 | all-targets-conservative-superset | CDLA-Permissive-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | webview2-com-macros | 0.8.1 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | webview2-com-sys | 0.39.1 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | webview2-com | 0.39.1 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
@@ -843,10 +845,11 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | zerofrom-derive | 0.1.8 | all-targets-conservative-superset | Unicode-3.0 | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | zerofrom | 0.1.8 | all-targets-conservative-superset | Unicode-3.0 | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | zeroize | 1.9.1 | all-targets-conservative-superset | Apache-2.0 OR MIT | 2 | LOCAL_TEXT_COLLECTED |
+| cargo | zeroize_derive | 1.5.0 | all-targets-conservative-superset | Apache-2.0 OR MIT | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | zerotrie | 0.2.5 | all-targets-conservative-superset | Unicode-3.0 | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | zerovec-derive | 0.11.6 | all-targets-conservative-superset | Unicode-3.0 | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | zerovec | 0.11.8 | all-targets-conservative-superset | Unicode-3.0 | 1 | LOCAL_TEXT_COLLECTED |
-| cargo | zip | 8.0.0 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| cargo | zip | 9.5.1 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | zlib-rs | 0.6.8 | all-targets-conservative-superset | Zlib | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | zmij | 1.0.23 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | zune-core | 0.5.3 | all-targets-conservative-superset | MIT OR Apache-2.0 OR Zlib | 3 | LOCAL_TEXT_COLLECTED |

@@ -180,6 +180,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - window-vibrancy 0.8.1
 - wry 0.57.0
 - zeroize 1.9.1
+- zeroize_derive 1.5.0
 
 ### Apache-2.0 WITH LLVM-exception
 
@@ -235,16 +236,17 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 
 ### CC0-1.0 OR MIT-0 OR Apache-2.0
 
+- constant_time_eq 0.6.1
 - dunce 1.0.5
 
 ### CDLA-Permissive-2.0
 
-- webpki-roots 1.0.9
+- webpki-roots 1.0.12
 
 ### ISC
 
 - libloading 0.7.4
-- rustls-webpki 0.103.15
+- rustls-webpki 0.103.16
 - untrusted 0.9.0
 
 ### MIT
@@ -305,6 +307,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - memoffset 0.9.1
 - mio 1.2.4
 - new_debug_unreachable 1.0.6
+- nix 0.31.3
 - nom 8.0.0
 - objc2 0.6.5
 - objc2-encode 4.1.0
@@ -376,7 +379,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - zbus_macros 5.19.0
 - zbus_names 4.3.4
 - zcheapstr 1.1.0
-- zip 8.0.0
+- zip 9.5.1
 - zmij 1.0.23
 - zvariant 5.15.0
 - zvariant_derive 5.15.0
@@ -574,7 +577,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - toml_parser 1.1.5+spec-1.1.0
 - toml_writer 1.1.3+spec-1.1.0
 - tray-icon 0.25.1
-- typed-path 0.12.3
+- typed-path 0.13.0
 - typeid 1.0.3
 - typenum 1.20.1
 - unicode-normalization 0.1.25

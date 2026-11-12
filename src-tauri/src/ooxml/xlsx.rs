@@ -42,7 +42,10 @@ impl Workbook {
 }
 
 fn strings(zip: &mut Package) -> Result<Vec<String>> {
-    if !zip.file_names().any(|n| n == "xl/sharedStrings.xml") {
+    if !zip
+        .file_names()
+        .any(|n| matches!(n.as_deref(), Ok("xl/sharedStrings.xml")))
+    {
         return Ok(Vec::new());
     }
     let mut pool = Vec::new();
