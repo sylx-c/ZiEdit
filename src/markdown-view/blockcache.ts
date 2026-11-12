@@ -141,6 +141,9 @@ export function createBlockRenderer(renderHtml?: BlockHtmlRenderer, cap = BLOCK_
   const local = new MarkdownDocumentSession();
   let active = new Map<string, MountedBlock>();
   const detached = new Map<string, HTMLElement[]>();
+  // 已插入正文的块/组 DOM 真值集合：清理只做集合差集，不再每轮全树扫描。
+  let committedBlocks = new Set<HTMLElement>();
+  const pages = new Set<HTMLElement>();
   let col: HTMLElement | null = null, surface: ReadingSurface | null = null;
   let generation = 0, destroyed = false, routeCleanup: (() => void) | undefined, route: LinkRouteOpts | undefined;
   let layoutKey = '';
@@ -155,13 +158,13 @@ export function createBlockRenderer(renderHtml?: BlockHtmlRenderer, cap = BLOCK_
         if (previous?.classList.contains('md-reading-page') && previous.childElementCount < PAGE_BLOCKS) return previous;
       }
       if (before && before !== page.firstElementChild) {
-        const tail = document.createElement('div'); tail.className = 'md-reading-page';
+        const tail = document.createElement('div'); tail.className = 'md-reading-page'; pages.add(tail);
         page.after(tail);
         for (let node: ChildNode | null = before; node;) { const next: ChildNode | null = node.nextSibling; tail.append(node); node = next; }
         return page;
       }
     }
-    page = document.createElement('div'); page.className = 'md-reading-page';
+    page = document.createElement('div'); page.className = 'md-reading-page'; pages.add(page);
     root.insertBefore(page, before?.parentElement ?? null);
     return page;
   };
@@ -172,7 +175,7 @@ export function createBlockRenderer(renderHtml?: BlockHtmlRenderer, cap = BLOCK_
     noteChanges(changes: ChangeSet): void { client.noteChanges(changes); },
     invalidate(): void { generation++; },
     reset(): void { generation++; active.clear(); detached.clear(); local.reset(); layoutKey = ''; },
-    destroy(): void { destroyed = true; renderer.reset(); if (!documentSession) client.destroy(); if (col) destroyHydratedRenders(col); surface?.destroy(); routeCleanup?.(); },
+    destroy(): void { destroyed = true; renderer.reset(); committedBlocks.clear(); pages.clear(); if (!documentSession) client.destroy(); if (col) destroyHydratedRenders(col); surface?.destroy(); routeCleanup?.(); },
     async render(host: HTMLElement, text: string, opts: BlockCacheOpts, fallback = false): Promise<BlockRenderResult> {
       // 渲染输入契约：预览/分屏首份正文可能来自 textReadAll 原样读盘（CRLF/CR）。先归一 LF，
       // 后续 Lezer 解析、markdown-it 回退与引用定义扫描才共用同一坐标（否则表格退化、块偏移错位）。
@@ -194,7 +197,7 @@ export function createBlockRenderer(renderHtml?: BlockHtmlRenderer, cap = BLOCK_
         const nextKey = `${opts.dark}|${opts.route?.baseDir() ?? ''}|${engine}`;
         const changedLayout = layoutKey !== nextKey;
         const cold = !col || col.parentElement !== host;
-        if (cold) { col = document.createElement('div'); col.className = 'md-col'; }
+        if (cold) { col = document.createElement('div'); col.className = 'md-col'; committedBlocks = new Set(); pages.clear(); }
         const root = col!;
         const grouped = !!root.querySelector('.md-reading-page') || (cold && plan.blocks.length > 512);
         root.classList.toggle('md-fallback', fallback);
@@ -232,7 +235,7 @@ export function createBlockRenderer(renderHtml?: BlockHtmlRenderer, cap = BLOCK_
                 let page = cursor?.parentElement;
                 if (!page || page.childElementCount >= (cold ? PAGE_BLOCKS : PAGE_BLOCKS * 2)) page = pageFor(root, cursor);
                 if (cold && page.childElementCount >= PAGE_BLOCKS) {
-                  page = document.createElement('div'); page.className = 'md-reading-page'; root.append(page);
+                  page = document.createElement('div'); page.className = 'md-reading-page'; pages.add(page); root.append(page);
                 }
                 page.insertBefore(entry.element, cursor?.parentElement === page ? cursor : null);
                 if (cold) {
@@ -244,6 +247,7 @@ export function createBlockRenderer(renderHtml?: BlockHtmlRenderer, cap = BLOCK_
             if (!cold) cursor = nextBlock(entry.element);
             active.set(entry.block.id, entry);
           }
+          for (const entry of added) committedBlocks.add(entry.element);
           for (const page of sized) page.style.containIntrinsicSize = `auto ${pageEstimates.get(page)}px`;
           surface?.update(added, plan.lines, cold);
           if (surface) opts.onSurface?.(surface);
@@ -332,9 +336,17 @@ export function createBlockRenderer(renderHtml?: BlockHtmlRenderer, cap = BLOCK_
           const pool = detached.get(entry.signature) ?? [];
           pool.push(entry.element); detached.delete(entry.signature); detached.set(entry.signature, pool);
         }
-        // 清理上轮未完成的尾部节点，以及被替换的旧块。
-        for (const child of root.querySelectorAll<HTMLElement>('.md-block')) if (!used.has(child)) child.remove();
-        for (const page of root.querySelectorAll('.md-reading-page')) if (!page.firstChild) page.remove();
+        // 清理上轮未完成的尾部节点，以及被替换的旧块：已提交集合 − 本轮 used 即离群节点，避免全树扫描。
+        // remove() 不以 isConnected 为前提：测试宿主可能是游离子树，必须无条件摘除。
+        for (const element of committedBlocks) {
+          if (used.has(element)) continue;
+          element.remove();
+          committedBlocks.delete(element);
+        }
+        for (const page of pages) {
+          if (page.parentElement !== root) { pages.delete(page); continue; }
+          if (!page.firstChild) { page.remove(); pages.delete(page); }
+        }
         active = new Map(entries.map(entry => [entry.block.id, entry]));
         let cached = 0;
         for (const [key, pool] of [...detached].reverse()) { cached += pool.length; if (cached > cap) detached.delete(key); }
