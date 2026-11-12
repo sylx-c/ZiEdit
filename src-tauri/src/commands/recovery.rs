@@ -540,7 +540,11 @@ fn prune_oldest(mut files: Vec<(u64, PathBuf)>, keep: usize) -> Vec<PathBuf> {
 #[tauri::command]
 pub async fn recovery_list(app: tauri::AppHandle) -> Result<RecoveryList, ZiEditError> {
     let dir = recovery_dir(&app);
-    Ok(list_in_dir(&dir, &marker_path(&app)?))
+    let marker = marker_path(&app)?;
+    // 崩溃恢复路径全量读+解析快照（最多 64×10MB）为阻塞 IO，移阻塞线程（照 misc.rs 范例）。
+    tauri::async_runtime::spawn_blocking(move || list_in_dir(&dir, &marker))
+        .await
+        .map_err(|e| ZiEditError::Msg(e.to_string()))
 }
 
 fn list_in_dir(dir: &std::path::Path, marker: &std::path::Path) -> RecoveryList {

@@ -61,84 +61,89 @@ fn enc_name_of(path: &str) -> Result<String, ZiEditError> {
 pub async fn compare_open(a: String, b: String) -> Result<CompareResult, ZiEditError> {
     crate::paths::reject_device_path(&a)?;
     crate::paths::reject_device_path(&b)?;
-    let pa = PathBuf::from(&a);
-    let pb = PathBuf::from(&b);
-    let input_state = compare::input_state(&pa, &pb)?;
-    let binary = compare::inputs_binary(&pa, &pb)?;
-    if binary {
-        return Ok(CompareResult {
-            binary,
-            input_state,
-            blocks: Vec::new(),
-            meta_a: meta_of(&a, "-", 0)?,
-            meta_b: meta_of(&b, "-", 0)?,
-            enc_marks_a: Vec::new(),
-            enc_marks_b: Vec::new(),
-            degraded: false,
-        });
-    }
-    let enc_a = enc_name_of(&a)?;
-    let enc_b = enc_name_of(&b)?;
+    // 行哈希 diff / 编码探测 / 元信息读取均为阻塞 IO+CPU，移阻塞线程不冻结异步运行时（照 misc.rs 范例）。
+    tauri::async_runtime::spawn_blocking(move || {
+        let pa = PathBuf::from(&a);
+        let pb = PathBuf::from(&b);
+        let input_state = compare::input_state(&pa, &pb)?;
+        let binary = compare::inputs_binary(&pa, &pb)?;
+        if binary {
+            return Ok(CompareResult {
+                binary,
+                input_state,
+                blocks: Vec::new(),
+                meta_a: meta_of(&a, "-", 0)?,
+                meta_b: meta_of(&b, "-", 0)?,
+                enc_marks_a: Vec::new(),
+                enc_marks_b: Vec::new(),
+                degraded: false,
+            });
+        }
+        let enc_a = enc_name_of(&a)?;
+        let enc_b = enc_name_of(&b)?;
 
-    let (ha, ta) = compare::hash_lines(&pa, &enc_a, compare::LINE_LIMIT)
-        .map_err(|e| ZiEditError::ctx("Read failed", e))?;
-    let (hb, tb) = compare::hash_lines(&pb, &enc_b, compare::LINE_LIMIT)
-        .map_err(|e| ZiEditError::ctx("Read failed", e))?;
+        let (ha, ta) = compare::hash_lines(&pa, &enc_a, compare::LINE_LIMIT)
+            .map_err(|e| ZiEditError::ctx("Read failed", e))?;
+        let (hb, tb) = compare::hash_lines(&pb, &enc_b, compare::LINE_LIMIT)
+            .map_err(|e| ZiEditError::ctx("Read failed", e))?;
 
-    let degraded = ta > compare::LINE_LIMIT
+        let degraded = ta > compare::LINE_LIMIT
         || tb > compare::LINE_LIMIT
         // 采样预检（BE2 6b）：大输入且采样命中率 <15%（整体改写型）直接走既有
         // hash_windows 有界降级，避免 Myers O(N·M) 级代价；判据见 should_degrade
         || compare::should_degrade(&ha, &hb);
-    let (blocks, marks_a, marks_b) = if degraded {
-        // 降级：按 4KB 窗口哈希重跑（块级，008 规则 4）
-        let (wa, la) =
-            compare::hash_windows(&pa, &enc_a).map_err(|e| ZiEditError::ctx("Read failed", e))?;
-        let (wb, lb) =
-            compare::hash_windows(&pb, &enc_b).map_err(|e| ZiEditError::ctx("Read failed", e))?;
-        // 块号→行号映射（BE2 收口缺陷 1）：降级块的 a/b 坐标是 4KB 窗口号，而前端契约
-        //（textLines/compareDetail）按行号拉取——修前把块号当行号下发，降级详情答错行
-        //（5M 降级路径既有问题，采样降级扩大暴露面后一并修复）
-        (
-            compare::window_blocks_to_lines(compare::diff_hashes(&wa, &wb), &la, &lb),
-            Vec::new(),
-            Vec::new(),
-        )
-    } else {
-        // 行级 diff + "文本同/字节异"标记（编码差异候选；detail 再细分 eol/encoding）
-        let blocks = compare::diff_hashes(&ha, &hb);
-        let mut marks_a = Vec::new();
-        let mut marks_b = Vec::new();
-        for blk in &blocks {
-            if blk.kind != "replace" {
-                continue;
-            }
-            let n = (blk.a_end - blk.a_start + 1).min(blk.b_end - blk.b_start + 1);
-            for k in 0..n {
-                let ia = (blk.a_start + k - 1) as usize;
-                let ib = (blk.b_start + k - 1) as usize;
-                if let (Some(va), Some(vb)) = (ha.get(ia), hb.get(ib))
-                    && va.text == vb.text
-                    && va.byte != vb.byte
-                {
-                    marks_a.push((blk.a_start + k, 1));
-                    marks_b.push((blk.b_start + k, 1));
+        let (blocks, marks_a, marks_b) = if degraded {
+            // 降级：按 4KB 窗口哈希重跑（块级，008 规则 4）
+            let (wa, la) = compare::hash_windows(&pa, &enc_a)
+                .map_err(|e| ZiEditError::ctx("Read failed", e))?;
+            let (wb, lb) = compare::hash_windows(&pb, &enc_b)
+                .map_err(|e| ZiEditError::ctx("Read failed", e))?;
+            // 块号→行号映射（BE2 收口缺陷 1）：降级块的 a/b 坐标是 4KB 窗口号，而前端契约
+            //（textLines/compareDetail）按行号拉取——修前把块号当行号下发，降级详情答错行
+            //（5M 降级路径既有问题，采样降级扩大暴露面后一并修复）
+            (
+                compare::window_blocks_to_lines(compare::diff_hashes(&wa, &wb), &la, &lb),
+                Vec::new(),
+                Vec::new(),
+            )
+        } else {
+            // 行级 diff + "文本同/字节异"标记（编码差异候选；detail 再细分 eol/encoding）
+            let blocks = compare::diff_hashes(&ha, &hb);
+            let mut marks_a = Vec::new();
+            let mut marks_b = Vec::new();
+            for blk in &blocks {
+                if blk.kind != "replace" {
+                    continue;
+                }
+                let n = (blk.a_end - blk.a_start + 1).min(blk.b_end - blk.b_start + 1);
+                for k in 0..n {
+                    let ia = (blk.a_start + k - 1) as usize;
+                    let ib = (blk.b_start + k - 1) as usize;
+                    if let (Some(va), Some(vb)) = (ha.get(ia), hb.get(ib))
+                        && va.text == vb.text
+                        && va.byte != vb.byte
+                    {
+                        marks_a.push((blk.a_start + k, 1));
+                        marks_b.push((blk.b_start + k, 1));
+                    }
                 }
             }
-        }
-        (blocks, marks_a, marks_b)
-    };
+            (blocks, marks_a, marks_b)
+        };
 
-    Ok(CompareResult {
-        binary,
-        input_state,
-        blocks,
-        meta_a: meta_of(&a, &enc_a, if degraded { ta } else { ha.len() as u64 })?,
-        meta_b: meta_of(&b, &enc_b, if degraded { tb } else { hb.len() as u64 })?,
-        enc_marks_a: marks_a,
-        enc_marks_b: marks_b,
-        degraded,
+        Ok(CompareResult {
+            binary,
+            input_state,
+            blocks,
+            meta_a: meta_of(&a, &enc_a, if degraded { ta } else { ha.len() as u64 })?,
+            meta_b: meta_of(&b, &enc_b, if degraded { tb } else { hb.len() as u64 })?,
+            enc_marks_a: marks_a,
+            enc_marks_b: marks_b,
+            degraded,
+        })
     })
+    .await
+    .map_err(|e| ZiEditError::Msg(e.to_string()))?
 }
 
 /// 详情行（1 基行号 + 文本 + 类别标记 + 变更 run）
