@@ -3,8 +3,8 @@
   "generator": "scripts/generate-third-party-licenses.mjs",
   "inputSHA256": {
     "package-lock.json": "6b4b0c75b044340831a838f0bc2d62d304ae30471f6ea91a7d2cb02654c8d77b",
-    "src-tauri/Cargo.lock": "faa803bd9214216e3fc1c0e10e4cefbc56a4bcb1234d619a2ec7447b1766bd09",
-    "src-tauri/Cargo.toml": "2909b44be123f65f8369a917afbff6a9789ae9a136e18da136cc2595d85ce869"
+    "src-tauri/Cargo.lock": "7decb070158ea003fd6f4e5d617cb9ec190e073b69f752540376d72ebbe2fb4d",
+    "src-tauri/Cargo.toml": "9249707624d8f121b323fb0dd4baa2e5e1318e2e9a1cbbc1c57e4bb732a373f1"
   },
   "cargoCommand": [
     "cargo",
@@ -27,11 +27,11 @@
     "npm": 295,
     "npmInstalled": 246,
     "npmDevelopmentOnly": 233,
-    "cargo": 556,
+    "cargo": 555,
     "packagesWithReviewItems": 0,
     "reviewItems": 0,
-    "collectedDocuments": 1373,
-    "collectedTextBytes": 6170970
+    "collectedDocuments": 1372,
+    "collectedTextBytes": 6169865
   },
   "packages": [
     {
@@ -20408,31 +20408,6 @@
           "path": "texts/cargo/quick-error-2.0.1-a7e8ce484e/LICENSE-MIT",
           "bytes": 1070,
           "sha256": "058f01fe181608d027fcde7e528fc03ea3cf90f30903c407644b0a9bbc54f500"
-        }
-      ],
-      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
-    },
-    {
-      "ecosystem": "cargo",
-      "name": "quick-xml",
-      "version": "0.37.5",
-      "location": "registry+https://github.com/rust-lang/crates.io-index#quick-xml@0.37.5",
-      "dependencyClass": "all-targets-conservative-superset",
-      "license": "MIT",
-      "licenseEvidence": "upstream Cargo.toml via cargo metadata",
-      "source": {
-        "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
-        "archiveURL": "https://static.crates.io/crates/quick-xml/quick-xml-0.37.5.crate",
-        "registryMetadataURL": "https://crates.io/api/v1/crates/quick-xml/0.37.5",
-        "repositoryURL": "https://github.com/tafia/quick-xml"
-      },
-      "review": [],
-      "documents": [
-        {
-          "originalPath": "LICENSE-MIT.md",
-          "path": "texts/cargo/quick-xml-0.37.5-f894d60cc9/LICENSE-MIT.md",
-          "bytes": 1105,
-          "sha256": "5b2c207dcf571267ebe0bbdd5bf321f561ddc22ff597e7b363e96f4539507a29"
         }
       ],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"

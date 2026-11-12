@@ -598,7 +598,6 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | proc-macro2 | 1.0.107 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | pxfm | 0.1.30 | all-targets-conservative-superset | BSD-3-Clause OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | quick-error | 2.0.1 | all-targets-conservative-superset | MIT/Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
-| cargo | quick-xml | 0.37.5 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | quick-xml | 0.41.0 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | quick-xml | 0.42.0 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | quinn-proto | 0.11.19 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
