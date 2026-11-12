@@ -84,7 +84,7 @@ const out = {
   basis: {
     theme: 'chrome.ts:673-679 applyTheme → <html> class th-<key> + data-tone（CDP evaluate 复刻三行）',
     mode: 'app.ts:3846-3849 工具栏 tbmd.source/split/ir → chrome.ts:432-434 click→reg.run → app.ts:3158 mdMode → app.ts:453 setMode（CDP 真实鼠标点击 button[data-action]）',
-    selectors: { edit: '.cm-content > .cm-line', split: '.md-split-preview .md-col > .md-block', wysiwyg: '.md-ir:not(.md-ir-loading) .cm-content > .cm-line' },
+    selectors: { edit: '.cm-content > .cm-line', split: '.md-split-preview .md-col .md-block', wysiwyg: '.md-ir:not(.md-ir-loading) .cm-content > .cm-line' },
   },
   combos: [], criteria: [],
 };
@@ -149,7 +149,10 @@ const FEATURE = {
 };
 const SIGN_SEL = {
   edit: '.cm-content > .cm-line',
-  split: '.md-split-preview .md-col > .md-block',
+  // 分屏右栏自引入 .md-reading-page 分页（blockcache pageFor，>512 块的文档分组）后，
+  // .md-block 不再是 .md-col 的直接子节点；签名取「.md-col 后代中的顶层块」按文档序等价。
+  // 语义不变：仍是分屏预览的顶层阅读块几何（perf-silk 时代直挂 .md-col 的同一口径延续）。
+  split: '.md-split-preview .md-col .md-block',
   wysiwyg: '.md-ir:not(.md-ir-loading) .cm-content > .cm-line',
 };
 

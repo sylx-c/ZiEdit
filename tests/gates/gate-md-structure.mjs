@@ -4,7 +4,8 @@
 // 并断言正文里没有以竖线原样出现的表格源码；再切即时渲染断言表格件。任一缺失即 FAIL。
 // 与 gate-md-consistency 的分工：本门只看结构（快、可常绿）；样式与几何一致性仍归
 // gate-md-consistency（其纵向间距基线差另案收口，不影响本门判定）。
-// 用法: node tests/gates/gate-md-structure.mjs   （仅 Windows；结果 RUN_DIR/results/gate-md-structure.json）
+// 用法: node tests/gates/gate-md-structure.mjs [out.json]   （仅 Windows；默认 RUN_DIR/results/gate-md-structure.json）
+// [out.json] 供 run-all.mjs 传入汇总目录内路径；不传时保持原默认（历史口径不变）。
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -41,7 +42,7 @@ const fixtures = VARIANTS.map(variant => {
   return { ...variant, file };
 });
 
-const outFile = path.join(RUN_DIR, 'results', 'gate-md-structure.json');
+const outFile = path.resolve(process.argv[2] ?? path.join(RUN_DIR, 'results', 'gate-md-structure.json'));
 fs.mkdirSync(path.dirname(outFile), { recursive: true });
 const out = { exe: EXE, started: new Date().toISOString(), fixtures: [] };
 const save = () => fs.writeFileSync(outFile, JSON.stringify(out, null, 2));
