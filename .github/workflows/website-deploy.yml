@@ -15,7 +15,7 @@ jobs:
     name: 部署官网到 gh-pages
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: 发布 website/ 到 gh-pages
         shell: bash
         env:

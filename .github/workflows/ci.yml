@@ -17,7 +17,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           # (2026-10-29 ac-011) pdfjs-dist 6.4 engines 要求 Node >=22.13 或 >=24。
@@ -36,7 +36,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
@@ -56,7 +56,7 @@ jobs:
     name: 版权来源与许可（固定证据及严格门禁）
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -73,7 +73,7 @@ jobs:
     name: 安全审计（npm audit + cargo audit）
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # npm audit 只读 package-lock.json，无需 npm ci；runner 默认官方 registry，audit 端点可用。
       # audit-level=high：high 及以上失败。低级别漏报名义上放行，避免离线桌面应用长期被 low/moderate 打红。
       # 已知状态：markdown-it 15.0.0–15.0.2 存在 1 条 high（GHSA-gfr2-rv44-r23c），修复版 15.0.3，
@@ -100,7 +100,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [frontend, rust, licenses]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -137,7 +137,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
