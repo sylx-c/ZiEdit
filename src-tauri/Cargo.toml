@@ -37,7 +37,7 @@ md-5 = "0.10"
 crc32fast = "1"
 trash = "5"
 quick-xml = "0.42"
-zip = { version = "8", default-features = false, features = ["deflate-flate2"] }
+zip = { version = "9", default-features = false, features = ["deflate-flate2"] }
 tauri-plugin-dialog = "2"
 # 剪贴板（#17）：桌面经插件读剪贴板，避免 WebView2 的浏览器权限弹窗；前端封装见 src/common/clipboard.ts
 tauri-plugin-clipboard-manager = "2"

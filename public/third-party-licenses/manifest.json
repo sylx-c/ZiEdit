@@ -3,8 +3,8 @@
   "generator": "scripts/generate-third-party-licenses.mjs",
   "inputSHA256": {
     "package-lock.json": "6b4b0c75b044340831a838f0bc2d62d304ae30471f6ea91a7d2cb02654c8d77b",
-    "src-tauri/Cargo.lock": "7decb070158ea003fd6f4e5d617cb9ec190e073b69f752540376d72ebbe2fb4d",
-    "src-tauri/Cargo.toml": "9249707624d8f121b323fb0dd4baa2e5e1318e2e9a1cbbc1c57e4bb732a373f1"
+    "src-tauri/Cargo.lock": "6879603193a31107cb3cd9122bf80a1845944acfed6e6ae437ac13a93dce76af",
+    "src-tauri/Cargo.toml": "0f47abc65e6422b7032e955ffa567520464e2cce69e4e28e1cdf523731416045"
   },
   "cargoCommand": [
     "cargo",
@@ -27,11 +27,11 @@
     "npm": 295,
     "npmInstalled": 246,
     "npmDevelopmentOnly": 233,
-    "cargo": 555,
+    "cargo": 558,
     "packagesWithReviewItems": 0,
     "reviewItems": 0,
-    "collectedDocuments": 1372,
-    "collectedTextBytes": 6169865
+    "collectedDocuments": 1378,
+    "collectedTextBytes": 6200899
   },
   "packages": [
     {
@@ -12798,6 +12798,43 @@
     },
     {
       "ecosystem": "cargo",
+      "name": "constant_time_eq",
+      "version": "0.6.1",
+      "location": "registry+https://github.com/rust-lang/crates.io-index#constant_time_eq@0.6.1",
+      "dependencyClass": "all-targets-conservative-superset",
+      "license": "CC0-1.0 OR MIT-0 OR Apache-2.0",
+      "licenseEvidence": "upstream Cargo.toml via cargo metadata",
+      "source": {
+        "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+        "archiveURL": "https://static.crates.io/crates/constant_time_eq/constant_time_eq-0.6.1.crate",
+        "registryMetadataURL": "https://crates.io/api/v1/crates/constant_time_eq/0.6.1",
+        "repositoryURL": "https://codeberg.org/cesarb/constant_time_eq"
+      },
+      "review": [],
+      "documents": [
+        {
+          "originalPath": "LICENSE-APACHE",
+          "path": "texts/cargo/constant_time_eq-0.6.1-df82e45c08/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "originalPath": "LICENSE-CC0",
+          "path": "texts/cargo/constant_time_eq-0.6.1-df82e45c08/LICENSE-CC0",
+          "bytes": 7048,
+          "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+        },
+        {
+          "originalPath": "LICENSE-MIT0",
+          "path": "texts/cargo/constant_time_eq-0.6.1-df82e45c08/LICENSE-MIT0",
+          "bytes": 858,
+          "sha256": "9a3aeb3f63659c4c6302d315e1d98784d1e8559858a47ff9562e091bb922d28d"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "cargo",
       "name": "cookie",
       "version": "0.18.2",
       "location": "registry+https://github.com/rust-lang/crates.io-index#cookie@0.18.2",
@@ -18392,6 +18429,31 @@
     },
     {
       "ecosystem": "cargo",
+      "name": "nix",
+      "version": "0.31.3",
+      "location": "registry+https://github.com/rust-lang/crates.io-index#nix@0.31.3",
+      "dependencyClass": "all-targets-conservative-superset",
+      "license": "MIT",
+      "licenseEvidence": "upstream Cargo.toml via cargo metadata",
+      "source": {
+        "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+        "archiveURL": "https://static.crates.io/crates/nix/nix-0.31.3.crate",
+        "registryMetadataURL": "https://crates.io/api/v1/crates/nix/0.31.3",
+        "repositoryURL": "https://github.com/nix-rust/nix"
+      },
+      "review": [],
+      "documents": [
+        {
+          "originalPath": "LICENSE",
+          "path": "texts/cargo/nix-0.31.3-0a29ed0484/LICENSE",
+          "bytes": 1097,
+          "sha256": "66e3ee1fa7f909ad3c612d556f2a0cdabcd809ad6e66f3b0605015ac64841b70"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "cargo",
       "name": "nom",
       "version": "8.0.0",
       "location": "registry+https://github.com/rust-lang/crates.io-index#nom@8.0.0",
@@ -21336,22 +21398,22 @@
     {
       "ecosystem": "cargo",
       "name": "rustls-webpki",
-      "version": "0.103.15",
-      "location": "registry+https://github.com/rust-lang/crates.io-index#rustls-webpki@0.103.15",
+      "version": "0.103.16",
+      "location": "registry+https://github.com/rust-lang/crates.io-index#rustls-webpki@0.103.16",
       "dependencyClass": "all-targets-conservative-superset",
       "license": "ISC",
       "licenseEvidence": "upstream Cargo.toml via cargo metadata",
       "source": {
         "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
-        "archiveURL": "https://static.crates.io/crates/rustls-webpki/rustls-webpki-0.103.15.crate",
-        "registryMetadataURL": "https://crates.io/api/v1/crates/rustls-webpki/0.103.15",
+        "archiveURL": "https://static.crates.io/crates/rustls-webpki/rustls-webpki-0.103.16.crate",
+        "registryMetadataURL": "https://crates.io/api/v1/crates/rustls-webpki/0.103.16",
         "repositoryURL": "https://github.com/rustls/webpki"
       },
       "review": [],
       "documents": [
         {
           "originalPath": "LICENSE",
-          "path": "texts/cargo/rustls-webpki-0.103.15-38a278d476/LICENSE",
+          "path": "texts/cargo/rustls-webpki-0.103.16-8f5bb5a560/LICENSE",
           "bytes": 916,
           "sha256": "5b698ca13897be3afdb7174256fa1574f8c6892b8bea1a66dd6469d3fe27885a"
         }
@@ -24805,28 +24867,28 @@
     {
       "ecosystem": "cargo",
       "name": "typed-path",
-      "version": "0.12.3",
-      "location": "registry+https://github.com/rust-lang/crates.io-index#typed-path@0.12.3",
+      "version": "0.13.0",
+      "location": "registry+https://github.com/rust-lang/crates.io-index#typed-path@0.13.0",
       "dependencyClass": "all-targets-conservative-superset",
       "license": "MIT OR Apache-2.0",
       "licenseEvidence": "upstream Cargo.toml via cargo metadata",
       "source": {
         "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
-        "archiveURL": "https://static.crates.io/crates/typed-path/typed-path-0.12.3.crate",
-        "registryMetadataURL": "https://crates.io/api/v1/crates/typed-path/0.12.3",
+        "archiveURL": "https://static.crates.io/crates/typed-path/typed-path-0.13.0.crate",
+        "registryMetadataURL": "https://crates.io/api/v1/crates/typed-path/0.13.0",
         "repositoryURL": "https://github.com/chipsenkbeil/typed-path"
       },
       "review": [],
       "documents": [
         {
           "originalPath": "LICENSE-APACHE",
-          "path": "texts/cargo/typed-path-0.12.3-ea1284ec86/LICENSE-APACHE",
+          "path": "texts/cargo/typed-path-0.13.0-23de4eb837/LICENSE-APACHE",
           "bytes": 9723,
           "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
         },
         {
           "originalPath": "LICENSE-MIT",
-          "path": "texts/cargo/typed-path-0.12.3-ea1284ec86/LICENSE-MIT",
+          "path": "texts/cargo/typed-path-0.13.0-23de4eb837/LICENSE-MIT",
           "bytes": 1023,
           "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
         }
@@ -25941,22 +26003,22 @@
     {
       "ecosystem": "cargo",
       "name": "webpki-roots",
-      "version": "1.0.9",
-      "location": "registry+https://github.com/rust-lang/crates.io-index#webpki-roots@1.0.9",
+      "version": "1.0.12",
+      "location": "registry+https://github.com/rust-lang/crates.io-index#webpki-roots@1.0.12",
       "dependencyClass": "all-targets-conservative-superset",
       "license": "CDLA-Permissive-2.0",
       "licenseEvidence": "upstream Cargo.toml via cargo metadata",
       "source": {
         "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
-        "archiveURL": "https://static.crates.io/crates/webpki-roots/webpki-roots-1.0.9.crate",
-        "registryMetadataURL": "https://crates.io/api/v1/crates/webpki-roots/1.0.9",
+        "archiveURL": "https://static.crates.io/crates/webpki-roots/webpki-roots-1.0.12.crate",
+        "registryMetadataURL": "https://crates.io/api/v1/crates/webpki-roots/1.0.12",
         "repositoryURL": "https://github.com/rustls/webpki-roots"
       },
       "review": [],
       "documents": [
         {
           "originalPath": "LICENSE",
-          "path": "texts/cargo/webpki-roots-1.0.9-45e818c60a/LICENSE",
+          "path": "texts/cargo/webpki-roots-1.0.12-cb3f63bf3c/LICENSE",
           "bytes": 2371,
           "sha256": "e271993808fec50ab29350b39539cdec611a9103f827e0aa26d61da70e2d33f8"
         }
@@ -28285,6 +28347,37 @@
     },
     {
       "ecosystem": "cargo",
+      "name": "zeroize_derive",
+      "version": "1.5.0",
+      "location": "registry+https://github.com/rust-lang/crates.io-index#zeroize_derive@1.5.0",
+      "dependencyClass": "all-targets-conservative-superset",
+      "license": "Apache-2.0 OR MIT",
+      "licenseEvidence": "upstream Cargo.toml via cargo metadata",
+      "source": {
+        "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+        "archiveURL": "https://static.crates.io/crates/zeroize_derive/zeroize_derive-1.5.0.crate",
+        "registryMetadataURL": "https://crates.io/api/v1/crates/zeroize_derive/1.5.0",
+        "repositoryURL": "https://github.com/RustCrypto/utils"
+      },
+      "review": [],
+      "documents": [
+        {
+          "originalPath": "LICENSE-APACHE",
+          "path": "texts/cargo/zeroize_derive-1.5.0-78668f8225/LICENSE-APACHE",
+          "bytes": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "originalPath": "LICENSE-MIT",
+          "path": "texts/cargo/zeroize_derive-1.5.0-78668f8225/LICENSE-MIT",
+          "bytes": 1082,
+          "sha256": "b8c6939380a400f53e11923d50fcc4dd2fa1ba8339fd9d04cda38a0251b6c9b0"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "cargo",
       "name": "zerotrie",
       "version": "0.2.5",
       "location": "registry+https://github.com/rust-lang/crates.io-index#zerotrie@0.2.5",
@@ -28361,24 +28454,24 @@
     {
       "ecosystem": "cargo",
       "name": "zip",
-      "version": "8.0.0",
-      "location": "registry+https://github.com/rust-lang/crates.io-index#zip@8.0.0",
+      "version": "9.5.1",
+      "location": "registry+https://github.com/rust-lang/crates.io-index#zip@9.5.1",
       "dependencyClass": "all-targets-conservative-superset",
       "license": "MIT",
       "licenseEvidence": "upstream Cargo.toml via cargo metadata",
       "source": {
         "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
-        "archiveURL": "https://static.crates.io/crates/zip/zip-8.0.0.crate",
-        "registryMetadataURL": "https://crates.io/api/v1/crates/zip/8.0.0",
+        "archiveURL": "https://static.crates.io/crates/zip/zip-9.5.1.crate",
+        "registryMetadataURL": "https://crates.io/api/v1/crates/zip/9.5.1",
         "repositoryURL": "https://github.com/zip-rs/zip2"
       },
       "review": [],
       "documents": [
         {
           "originalPath": "LICENSE",
-          "path": "texts/cargo/zip-8.0.0-e308658a3d/LICENSE",
-          "bytes": 1217,
-          "sha256": "04dc52136d82400b11df5f474949863a70a5d05d2278dec45b99c479494450a6"
+          "path": "texts/cargo/zip-9.5.1-6ea97b2eee/LICENSE",
+          "bytes": 1085,
+          "sha256": "58545fed1565e42d687aecec6897d35c6d37ccb71479a137c0deb2203e125c79"
         }
       ],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
