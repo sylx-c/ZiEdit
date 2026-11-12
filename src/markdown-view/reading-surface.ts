@@ -87,7 +87,7 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
           }
         }
         if (!changed || !this.element.clientHeight && !this.element.isConnected) return;
-        this.measureNested();
+        this.measureNested(new Set(entries.map(entry => entry.target as HTMLElement)));
         if (changedFrom < this.blocks.length) this.reindex(changedFrom);
         this.layoutChanged();
       });
@@ -323,9 +323,23 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
     this.source = [...this.navigation].sort((a,b)=>a.block.from-b.block.from);
     this.byId = new Map(this.navigation.map(entry=>[entry.block.id,entry]));
   }
-  private measureNested(): void {
-    for (const [element, nested] of this.nested) {
-      nested.relative = element.getBoundingClientRect().top - nested.parent.getBoundingClientRect().top;
+  private measureNested(dirty?: Set<HTMLElement>): void {
+    if (!this.nested.size) return;
+    let pairs = [...this.nested];
+    if (dirty) {
+      // 脏区间：嵌套目标只随自身或同父兄弟的布局变化而移动；其余父块维持已交付的 relative。
+      const dirtyParents = new Set<HTMLElement>();
+      for (const [, nested] of this.nested) if (dirty.has(nested.parent)) dirtyParents.add(nested.parent);
+      for (const element of dirty) { const nested = this.nested.get(element); if (nested) dirtyParents.add(nested.parent); }
+      if (!dirtyParents.size) return;
+      pairs = pairs.filter(([, nested]) => dirtyParents.has(nested.parent));
+    }
+    // 父盒一次性读取：同一父块的多个嵌套目标共享一次 getBoundingClientRect。
+    const parentTops = new Map<HTMLElement, number>();
+    for (const [element, nested] of pairs) {
+      let parentTop = parentTops.get(nested.parent);
+      if (parentTop === undefined) { parentTop = nested.parent.getBoundingClientRect().top; parentTops.set(nested.parent, parentTop); }
+      nested.relative = element.getBoundingClientRect().top - parentTop;
       const box = this.geometry.get(element); if (box) { box.height = element.offsetHeight; this.heights.set(element, box.height); }
     }
   }

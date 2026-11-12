@@ -37,6 +37,19 @@ interface LongLineState {
   text: string;
 }
 
+/** 单行内容物：内容签名的输入，也是行节点重建的原料 */
+interface RowContent {
+  heading: boolean;
+  rowClass: string;
+  lnClass: string;
+  lnText: string;
+  lnTitle: string;
+  txHtml: string;
+  controlsTitle: string;
+  longPrev: boolean;
+  longNext: boolean;
+}
+
 export interface TextViewStatus {
   rect: { lines: number; cols: number } | null;
   encoding: string;
@@ -64,6 +77,21 @@ export function visibleRange(scrollTop: number, viewportH: number, totalLines: n
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+}
+
+/** 行内容签名：FNV-1a + 长度乘子双 32 位口径；行复用凭据，覆盖行 DOM 的全部输入，碰撞概率可忽略。 */
+function lineSignature(parts: string[]): string {
+  let h1 = 0x811c9dc5, h2 = 0x9e3779b9;
+  for (const part of parts) {
+    for (let i = 0; i < part.length; i++) {
+      const c = part.charCodeAt(i);
+      h1 = Math.imul(h1 ^ c, 0x01000193) >>> 0;
+      h2 = Math.imul(h2 + c, 31) >>> 0;
+    }
+    h1 = Math.imul(h1 ^ 0x1f, 0x01000193) >>> 0;
+    h2 = Math.imul(h2 + part.length, 0x85ebca6b) >>> 0;
+  }
+  return h1.toString(36) + '.' + h2.toString(36);
 }
 
 /** 不可见字符（002 规则 25：零宽/控制/RTL；与 008 共享判定口径） */
@@ -1221,72 +1249,119 @@ export class TextView {
     }
     this.updateHighlight(realWindow);
     this.minimap?.sync();
-    const frag = document.createDocumentFragment();
+    this.viewport.style.transform = `translateY(${(from - 1) * LINE_HEIGHT}px)`;
+    // 行+签名复用：先算内容签名，仅对变化行重建，滚动/续写不再整视口重挂；
+    // 折叠地图、长行缓存与 cacheVersion 失效语义不变（签名覆盖行 DOM 的全部输入）。
+    const rows = Array.from(this.viewport.children) as HTMLElement[];
+    let cursor = 0;
     for (const n of realWindow) {
       const long = this.longLines.get(n);
       const text = long?.text ?? this.lines.get(n) ?? '';
-      const row = document.createElement('div');
-      row.className = 'tv-row' + (long ? ' tv-long' : '') + (this.findNeedle && this.lineFindRanges(text).length > 0 ? ' hit' : '');
-      const ln = document.createElement('span');
-      const isHeading = this.headings.has(n);
-      ln.className = 'tv-ln' + (this.bookmarks.has(n) ? ' bm' : '') + (isHeading ? ' foldable' : '');
-      ln.textContent = (isHeading ? (this.folded.has(n) ? '▸' : '▾') : '') + String(n);
-      ln.title = this.bookmarks.has(n)
+      const content = this.rowContent(n, text, long);
+      const sig = lineSignature([String(n), content.rowClass, content.lnClass, content.lnText, content.lnTitle,
+        String(this.showLn), content.txHtml, content.controlsTitle, String(content.longPrev), String(content.longNext)]);
+      while (cursor < rows.length && Number(rows[cursor]!.dataset.line) < n) rows[cursor++]!.remove();
+      const current = rows[cursor];
+      if (current && Number(current.dataset.line) === n) {
+        if (current.dataset.sig !== sig) {
+          const fresh = this.buildRow(n, long, content, sig);
+          current.replaceWith(fresh);
+          rows[cursor] = fresh;
+        }
+        cursor++;
+        continue;
+      }
+      const row = this.buildRow(n, long, content, sig);
+      if (current) {
+        current.before(row);
+        rows.splice(cursor, 0, row);
+      } else {
+        this.viewport.append(row);
+        rows.push(row);
+      }
+      cursor++;
+    }
+    while (cursor < rows.length) rows[cursor++]!.remove();
+  }
+
+  /** 行内容物（纯字符串，无 DOM）：内容签名的输入，也是行节点重建的原料。 */
+  private rowContent(n: number, text: string, long: LongLineState | undefined): RowContent {
+    const findRanges = this.findNeedle ? this.lineFindRanges(text) : undefined;
+    const heading = this.headings.has(n);
+    return {
+      heading,
+      rowClass: 'tv-row' + (long ? ' tv-long' : '') + (findRanges && findRanges.length > 0 ? ' hit' : ''),
+      lnClass: 'tv-ln' + (this.bookmarks.has(n) ? ' bm' : '') + (heading ? ' foldable' : ''),
+      lnText: (heading ? (this.folded.has(n) ? '▸' : '▾') : '') + String(n),
+      lnTitle: this.bookmarks.has(n)
         ? t('tv.bookmark')
-        : isHeading
+        : heading
           ? t('tv.foldToggle')
-          : '';
-      if (isHeading) ln.addEventListener('click', () => this.toggleFold(n));
-      const tx = document.createElement('span');
-      tx.className = 'tv-tx';
-      const spans = this.hlLang ? this.hlSpanMap?.get(n) : undefined;
-      tx.innerHTML = renderLineHtml(
+          : '',
+      txHtml: renderLineHtml(
         text,
-        spans,
-        this.findNeedle ? this.lineFindRanges(text) : undefined,
+        this.hlLang ? this.hlSpanMap?.get(n) : undefined,
+        findRanges,
         this.invisibleOn,
         this.rectSel ? this.lineRectRanges(n, text) : undefined,
         this.findNeedle && this.findCurHit === n && this.findCurCol != null ? this.findCurCol : undefined
-      );
-      // 002 规则 10（v2.8 W2 清偿）：行号可关——关时藏行号元素（CSS .tv-noln），文本占满行
-      if (!this.showLn) ln.style.display = 'none';
-      row.append(ln, tx);
-      if (long) {
-        const controls = document.createElement('span');
-        controls.className = 'tv-long-controls';
-        controls.title = `${long.offset}-${Math.min(long.totalBytes, long.offset + text.length)} / ${long.totalBytes}`;
-        if (long.offset > 0) {
-          const prev = document.createElement('button');
-          prev.type = 'button';
-          prev.className = 'tv-long-btn';
-          prev.textContent = '‹';
-          prev.title = '上一段';
-          prev.setAttribute('aria-label', '上一段');
-          prev.addEventListener('click', e => {
-            e.stopPropagation();
-            void this.fetchLongLine(n, Math.max(0, long.offset - LONG_LINE_SEGMENT_BYTES));
-          });
-          controls.appendChild(prev);
-        }
-        if (long.nextOffset !== null) {
-          const next = document.createElement('button');
-          next.type = 'button';
-          next.className = 'tv-long-btn';
-          next.textContent = '›';
-          next.title = '下一段';
-          next.setAttribute('aria-label', '下一段');
-          next.addEventListener('click', e => {
-            e.stopPropagation();
-            void this.fetchLongLine(n, long.nextOffset!);
-          });
-          controls.appendChild(next);
-        }
-        row.appendChild(controls);
+      ),
+      controlsTitle: long ? `${long.offset}-${Math.min(long.totalBytes, long.offset + text.length)} / ${long.totalBytes}` : '',
+      longPrev: !!long && long.offset > 0,
+      longNext: !!long && long.nextOffset !== null,
+    };
+  }
+
+  /** 按内容物重建单行节点（仅签名不同或行缺失时到达）。 */
+  private buildRow(n: number, long: LongLineState | undefined, content: RowContent, sig: string): HTMLElement {
+    const row = document.createElement('div');
+    row.className = content.rowClass;
+    const ln = document.createElement('span');
+    ln.className = content.lnClass;
+    ln.textContent = content.lnText;
+    ln.title = content.lnTitle;
+    if (content.heading) ln.addEventListener('click', () => this.toggleFold(n));
+    const tx = document.createElement('span');
+    tx.className = 'tv-tx';
+    tx.innerHTML = content.txHtml;
+    // 002 规则 10（v2.8 W2 清偿）：行号可关——关时藏行号元素（CSS .tv-noln），文本占满行
+    if (!this.showLn) ln.style.display = 'none';
+    row.append(ln, tx);
+    if (long) {
+      const controls = document.createElement('span');
+      controls.className = 'tv-long-controls';
+      controls.title = content.controlsTitle;
+      if (content.longPrev) {
+        const prev = document.createElement('button');
+        prev.type = 'button';
+        prev.className = 'tv-long-btn';
+        prev.textContent = '‹';
+        prev.title = '上一段';
+        prev.setAttribute('aria-label', '上一段');
+        prev.addEventListener('click', e => {
+          e.stopPropagation();
+          void this.fetchLongLine(n, Math.max(0, long.offset - LONG_LINE_SEGMENT_BYTES));
+        });
+        controls.appendChild(prev);
       }
-      frag.appendChild(row);
+      if (content.longNext) {
+        const next = document.createElement('button');
+        next.type = 'button';
+        next.className = 'tv-long-btn';
+        next.textContent = '›';
+        next.title = '下一段';
+        next.setAttribute('aria-label', '下一段');
+        next.addEventListener('click', e => {
+          e.stopPropagation();
+          void this.fetchLongLine(n, long.nextOffset!);
+        });
+        controls.appendChild(next);
+      }
+      row.appendChild(controls);
     }
-    this.viewport.style.transform = `translateY(${(from - 1) * LINE_HEIGHT}px)`;
-    this.viewport.replaceChildren(frag);
+    row.dataset.line = String(n);
+    row.dataset.sig = sig;
+    return row;
   }
 
   /** 窗口级高亮（决策 004 降级路径：可视区接管，Lezer 解析窗口文本；按行映射支持折叠空洞） */
