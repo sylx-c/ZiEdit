@@ -320,7 +320,6 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - phf_shared 0.13.1
 - plist 1.10.1
 - precomputed-hash 0.1.1
-- quick-xml 0.37.5
 - quick-xml 0.41.0
 - quick-xml 0.42.0
 - redox_syscall 0.5.18
