@@ -51,10 +51,15 @@ fn strings(zip: &mut Package) -> Result<Vec<String>> {
     let mut bytes = 0;
     xml(zip, "xl/sharedStrings.xml", 64 * 1024 * 1024, |event| {
         match event {
-            Event::Start(e) if e.local_name().as_ref() == b"t" => in_text = true,
-            Event::Text(e) if in_text => text.push_str(&e.unescape().map_err(|e| e.to_string())?),
-            Event::End(e) if e.local_name().as_ref() == b"t" => in_text = false,
-            Event::End(e) if e.local_name().as_ref() == b"si" => {
+            Event::Start(e) if e.local_name().as_ref() == "t" => in_text = true,
+            Event::Text(e) if in_text => {
+                text.push_str(&quick_xml::escape::unescape(e.as_ref()).map_err(|e| e.to_string())?)
+            }
+            Event::GeneralRef(e) if in_text => {
+                text.push_str(&crate::ooxml::resolve_ref(e.as_ref())?)
+            }
+            Event::End(e) if e.local_name().as_ref() == "t" => in_text = false,
+            Event::End(e) if e.local_name().as_ref() == "si" => {
                 bytes += text.len();
                 pool.push(std::mem::take(&mut text));
             }
@@ -101,12 +106,12 @@ fn worksheet(
     xml(zip, name, 64 * 1024 * 1024, |event| {
         match event {
             Event::Start(e) | Event::Empty(e) => match e.local_name().as_ref() {
-                b"row" => {
+                "row" => {
                     if in_row {
                         return Err("XLSX_NESTED_ROW".into());
                     }
                     in_row = true;
-                    row_no = match attr(&e, b"r")? {
+                    row_no = match attr(&e, "r")? {
                         Some(n) => n.parse().map_err(|_| "XLSX_INVALID_ROW")?,
                         None => records.len() + 1,
                     };
@@ -114,28 +119,33 @@ fn worksheet(
                         return Err("XLSX_ROW_LIMIT_OR_ORDER:200000".into());
                     }
                 }
-                b"c" => {
+                "c" => {
                     if !in_row || in_cell {
                         return Err("XLSX_INVALID_CELL".into());
                     }
                     in_cell = true;
-                    col = match attr(&e, b"r")? {
+                    col = match attr(&e, "r")? {
                         Some(r) => column(&r)?,
                         None => row.len(),
                     };
                     if col >= 1024 {
                         return Err("XLSX_COLUMN_LIMIT:1024".into());
                     }
-                    kind = attr(&e, b"t")?.unwrap_or_default();
+                    kind = attr(&e, "t")?.unwrap_or_default();
                     value.clear();
                 }
-                b"v" | b"t" if in_cell => capture = true,
+                "v" | "t" if in_cell => capture = true,
                 _ => {}
             },
-            Event::Text(e) if capture => value.push_str(&e.unescape().map_err(|e| e.to_string())?),
+            Event::Text(e) if capture => {
+                value.push_str(&quick_xml::escape::unescape(e.as_ref()).map_err(|e| e.to_string())?)
+            }
+            Event::GeneralRef(e) if capture => {
+                value.push_str(&crate::ooxml::resolve_ref(e.as_ref())?)
+            }
             Event::End(e) => match e.local_name().as_ref() {
-                b"v" | b"t" => capture = false,
-                b"c" => {
+                "v" | "t" => capture = false,
+                "c" => {
                     in_cell = false;
                     let cell = if kind == "s" {
                         pool.get(
@@ -159,7 +169,7 @@ fn worksheet(
                     row.resize(row.len().max(col + 1), String::new());
                     row[col] = cell;
                 }
-                b"row" => {
+                "row" => {
                     in_row = false;
                     *bytes += (row_no - records.len()) * std::mem::size_of::<Vec<String>>();
                     if *bytes > TEXT_LIMIT {
@@ -189,9 +199,9 @@ pub fn open(path: &str) -> Result<Workbook> {
         1024 * 1024,
         |event| {
             if let Event::Start(e) | Event::Empty(e) = event
-                && e.local_name().as_ref() == b"Relationship"
-                && attr(&e, b"TargetMode")?.as_deref() != Some("External")
-                && let (Some(id), Some(target)) = (attr(&e, b"Id")?, attr(&e, b"Target")?)
+                && e.local_name().as_ref() == "Relationship"
+                && attr(&e, "TargetMode")?.as_deref() != Some("External")
+                && let (Some(id), Some(target)) = (attr(&e, "Id")?, attr(&e, "Target")?)
             {
                 let target = if target.starts_with('/') {
                     target.trim_start_matches('/').to_owned()
@@ -209,14 +219,14 @@ pub fn open(path: &str) -> Result<Workbook> {
     let mut names = Vec::new();
     xml(&mut zip, "xl/workbook.xml", 1024 * 1024, |event| {
         if let Event::Start(e) | Event::Empty(e) = event
-            && e.local_name().as_ref() == b"sheet"
+            && e.local_name().as_ref() == "sheet"
         {
             if names.len() >= 64 {
                 return Err("XLSX_SHEET_LIMIT:64".into());
             }
-            let id = attr(&e, b"r:id")?.ok_or("XLSX_MISSING_RELATIONSHIP")?;
+            let id = attr(&e, "r:id")?.ok_or("XLSX_MISSING_RELATIONSHIP")?;
             names.push((
-                attr(&e, b"name")?.unwrap_or_default(),
+                attr(&e, "name")?.unwrap_or_default(),
                 targets.get(&id).ok_or("XLSX_MISSING_RELATIONSHIP")?.clone(),
             ));
         }

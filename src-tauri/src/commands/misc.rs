@@ -448,7 +448,8 @@ fn format_xml_impl(text: &str) -> Result<String, ZiEditError> {
                     .map_err(|e| ZiEditError::Msg(e.to_string()))?;
             }
             Ok(Event::Text(t)) => {
-                let txt = t.unescape().map_err(|e| ZiEditError::Msg(e.to_string()))?;
+                let txt = quick_xml::escape::unescape(t.as_ref())
+                    .map_err(|e| ZiEditError::Msg(e.to_string()))?;
                 if !txt.trim().is_empty() {
                     pending_text.push_str(txt.as_ref());
                 }
@@ -475,6 +476,12 @@ fn format_xml_impl(text: &str) -> Result<String, ZiEditError> {
                 flush_text(&mut writer, &mut pending_text)?;
                 writer
                     .write_event(Event::PI(t))
+                    .map_err(|e| ZiEditError::Msg(e.to_string()))?;
+            }
+            Ok(Event::GeneralRef(t)) => {
+                flush_text(&mut writer, &mut pending_text)?;
+                writer
+                    .write_event(Event::GeneralRef(t))
                     .map_err(|e| ZiEditError::Msg(e.to_string()))?;
             }
             Ok(Event::DocType(t)) => {
