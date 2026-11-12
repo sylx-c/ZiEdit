@@ -44,6 +44,9 @@ export default defineConfig(() => ({
     maxWorkers: 4,
     include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
     setupFiles: ["tests/setup.ts"],
+    // 仅放行 styles.css 的 ?raw 原文读取（spacing-contract 契约绑定测试）；
+    // 其余 CSS 导入仍按默认置空，不影响既有测试。
+    css: { include: [/styles\.css\?raw/] },
   },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
