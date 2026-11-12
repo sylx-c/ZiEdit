@@ -14,7 +14,7 @@
 - CI 的前端类型检查和 Vitest 加入 macOS，与工作流标题一致。依赖锁里的 npm 解析地址改为 `registry.npmjs.org`。
 - Markdown 渲染：打开使用 CRLF 行尾的文档时，渲染预览与分屏首屏会把表格显示成一行竖线文本，切换一次模式或编辑后才恢复；现在渲染入口统一按 LF 解析并剥离前导 BOM，表格在首次打开即正常。
 - Markdown 大文档：预览块清理、嵌套测量与文本面行渲染改为按需增量。本机 60Hz 对照实测：巨 JavaScript 文档分屏滚轮响应 P95 从约 49-50ms 降至约 36-42ms，400KB 单表分屏挂载不再出现超过 100ms 的长任务；完整性能验收状态仍见 `docs/changes/markdown-unification.md`。
-- 安全：Markdown 渲染库 markdown-it 升级到 15.0.3，修复一个可被恶意构造文档触发的渲染卡顿漏洞（CVE-2026-111758）；随附第三方许可清单同步再生成，许可门禁未决项仍为 0。官方源 `npm audit --audit-level=high` 实测 0 漏洞。
+- 安全：Markdown 渲染库 markdown-it 升级到 15.0.3，修复一个可被恶意构造文档触发的渲染卡顿漏洞（CVE-2026-111758）；Office 解析库 quick-xml 升级到 0.42，修复重复属性标签的平方级解析漏洞（RUSTSEC-2026-0194）。随附第三方许可清单同步再生成，许可门禁未决项仍为 0。官方源 `npm audit --audit-level=high` 实测 0 漏洞。
 - 工程：CI 新增 npm audit 与 cargo audit 依赖安全审计（真实漏洞不静默放行），并启用 Dependabot 每周检查 npm、cargo 与 GitHub Actions 三生态依赖更新。
 - 文档：PRD 中全局只读改回编辑菜单；许可记录里的对应源码链接改到 `compliance/`。官网静态兜底版本号改为 v1.0.1，下载链接维持 `releases/latest`。线上 gh-pages 要等这次网站变更部署后才更新。
 - Markdown 原生性能矩阵仍以 `docs/changes/markdown-unification.md` 的最近一次记录为准，本版没有把它改成通过。

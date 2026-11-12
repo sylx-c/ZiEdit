@@ -67,3 +67,8 @@
 - `public/third-party-licenses/` 已再生成（`node scripts/generate-third-party-licenses.mjs`），`--check --strict` 复验 exit 0（1373 份文档、0 issue）；完整 `npm run license:check` 复跑 **releaseAllowed: true、unresolved: []**（`docs/tmp/phase-a/license-check-final.log`）。
 - 官方 registry 复验 `npm audit --audit-level=high`：**found 0 vulnerabilities**（exit 0）——CI audit 步骤升级后预期绿，留 CI 首跑确认。
 - B3 暂缓决定维持：tsconfig.test.json 保留评估用途；138 条历史类型错误未清零（87 条需 @types/node、51 条需改 tests/，见上），不强行纳入。
+
+## 后续处置续（Lead，2026-11-12 晚）
+
+- CI 首跑（e00ee82 标签流水线）证实 audit job 按口径如实红：**cargo audit 报 quick-xml 0.37.5 RUSTSEC-2026-0194（HIGH 7.5，起始标签重复属性平方级解析，修复 ≥0.41.0）**。已升级直接依赖 0.37→0.42（与 lock 内其他 crate 既有 0.41/0.42 收敛为同版），并迁移 API：`local_name().as_ref()` 改 str 比较、`unescape` 改自由函数、属性取值 `normalized_value(Implicit1_0)`；**0.42 起 Reader 把实体引用拆成独立 `GeneralRef` 事件**，ooxml 三处文本回调显式解码（命名实体/数字引用，未定义实体有界报错）——cargo test 161/161（含 `A&amp;B`、`shared & text` 实体语义用例）、clippy -D warnings 0、fmt 通过。
+- 同轮 CI 的 macOS 前端门失败为表格窗口断言的慢机竞态（首帧 109 行 <160 阈值未分窗；同提交重跑即绿、本地 40 连跑 0 失败）：`ac-007-writing` 就绪条件补「等全表 220 行扩展完成」，断言本身不变。
