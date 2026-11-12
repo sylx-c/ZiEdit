@@ -47,6 +47,8 @@ const CORPUS: ReadonlyArray<{ name: string; src: string }> = [
   { name: '表格与对齐', src: '| 对比项 | Docker 容器 | 虚拟机 |\n| :-- | :-: | --: |\n| 隔离方式 | Namespace、Cgroups 等 | Hypervisor |\n| 部署效率 | 高 | 相对较低 |\n' },
   { name: '分隔线与硬换行', src: '段一  \n段二\n\n---\n' },
   { name: '转义与实体', src: '\\*不是斜体\\* &amp; <https://example.com>\n' },
+  { name: 'Tab 缩进代码块', src: '\t缩进代码行\n\n正文段落\n' },
+  { name: '货币符号不误判公式', src: '$5 and $10\n\nprice $5.99\n' },
 ];
 
 const EOL_VARIANTS: ReadonlyArray<{ name: string; text: (src: string) => string }> = [
@@ -131,5 +133,35 @@ describe('渲染正确性：自定义语法期值断言', () => {
     const display = host.querySelector('div.md-render-target[data-render-kind="math"][data-render-display="1"]');
     expect(inline?.textContent).toContain('x^2');
     expect(display?.textContent).toContain('E=mc^2');
+  });
+
+  it('前导 BOM 剥离后标题正常渲染（BOM 不进正文）', async () => {
+    const host = await render('\uFEFF# 标题\n\n正文\n');
+    expect(host.querySelector('h1')?.textContent).toBe('标题');
+    expect(host.textContent).not.toContain('\uFEFF');
+  });
+
+  it('HTML 块在 html:false 下安全显文本（不注入活动标签）', async () => {
+    const host = await render('<script>alert(1)</script>\n\n<div>raw html</div>\n');
+    expect(host.querySelector('script')).toBeNull();
+    // HTMLBlock 块壳内不得有活动子元素（raw html 须转义为文本，而非注入 div/script）。
+    expect(host.querySelector('[data-kind="HTMLBlock"] div, [data-kind="HTMLBlock"] script')).toBeNull();
+    expect(host.textContent).toContain('<script>alert(1)</script>');
+    expect(host.textContent).toContain('<div>raw html</div>');
+  });
+
+  it('货币 $ 不误判为行内公式（无公式占位）', async () => {
+    const host = await render('$5 and $10 与 price $5.99\n');
+    expect(host.querySelector('[data-render-kind="math"]')).toBeNull();
+    expect(host.textContent).toContain('$5 and $10');
+    expect(host.textContent).toContain('price $5.99');
+  });
+
+  it('引用容器内表格仍渲染为表格', async () => {
+    const host = await render('> | 甲 | 乙 |\n> | --- | --- |\n> | 1 | 2 |\n');
+    const table = host.querySelector('blockquote table');
+    expect(table).toBeTruthy();
+    expect(table?.querySelectorAll('td')).toHaveLength(2);
+    expect(host.textContent).not.toContain('| 甲');
   });
 });

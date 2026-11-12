@@ -4,6 +4,7 @@ import type { EditorState, Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import type { SyntaxNode } from '@lezer/common';
 import { irWorkStart, recordIrWork } from './ir-perf';
+import { estimateExprPx, siblingGap, tailGap } from './spacing';
 
 /** IR 源行高（px）：13.5px×1.6（styles.css .md-ir .cm-scroller），CM6 视口高度估计与 CSS 契约基准。
  *  显示公式 CSS min-height 40px、表格行高初值 TABLE_ROW_ESTIMATE_PX 均以此为对照。 */
@@ -15,9 +16,10 @@ export const SOURCE_LINE_HEIGHT_PX = 21.6;
 export const TABLE_ROW_ESTIMATE_PX = 48;
 
 class BlockSpace extends WidgetType {
-  constructor(private height: string, private quoted: boolean) { super(); }
+  private readonly estimate: number;
+  constructor(private height: string, private quoted: boolean) { super(); this.estimate = estimateExprPx(height); }
   eq(other: BlockSpace): boolean { return this.height === other.height && this.quoted === other.quoted; }
-  get estimatedHeight(): number { return 11; }
+  get estimatedHeight(): number { return this.estimate; }
   toDOM(): HTMLElement {
     const el = document.createElement('div');
     el.className = 'mdir-block-space' + (this.quoted ? ' mdir-quote-space' : '');
@@ -29,11 +31,6 @@ class BlockSpace extends WidgetType {
 
 const containers = new Set(['Document', 'Blockquote', 'BulletList', 'OrderedList', 'ListItem']);
 const markers = new Set(['QuoteMark', 'ListMark']);
-function margin(node: SyntaxNode, edge: 'before' | 'after'): string {
-  const level = /^(?:ATX|Setext)Heading([1-6])$/.exec(node.name)?.[1];
-  return level ? `var(--md-h${level}-${edge})`
-    : node.name === 'HorizontalRule' ? 'var(--md-rule-gap)' : 'var(--md-block-gap)';
-}
 
 /** 仅遍历视口相邻兄弟块；不在选区变化时扫描整篇文档。高度装饰由直接StateField提供。 */
 export function blockLayout(state: EditorState, from: number, to: number): DecorationSet {
@@ -81,7 +78,7 @@ function buildBlockLayout(state: EditorState, from: number, to: number): Decorat
       if (previous) {
         const height = parent.name === 'BulletList' || parent.name === 'OrderedList'
           ? (start <= end ? 'var(--md-block-gap)' : 'var(--md-list-gap)')
-          : `max(${margin(previous, 'after')}, ${margin(child, 'before')})`;
+          : siblingGap(previous.name, child.name);
         gap(start, end, height, child, isQuote);
       } else if (parent.name === 'Document') gap(start, end, '0px', null, false);
       walk(child, isQuote);
@@ -90,7 +87,7 @@ function buildBlockLayout(state: EditorState, from: number, to: number): Decorat
     // 尾部可写段落预留正文块间距，首字输入时不再突然补出间距。
     if (!child && previous && parent.name === 'Document' && tree.length === doc.length)
       gap(doc.lineAt(Math.max(previous.from, previous.to - 1)).number + 1, doc.lines,
-        `max(${margin(previous, 'after')}, var(--md-block-gap))`, null, false);
+        tailGap(previous.name), null, false);
   };
   walk(tree.topNode, false);
   return Decoration.set(out, true);
