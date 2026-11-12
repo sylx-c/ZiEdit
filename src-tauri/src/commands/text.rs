@@ -208,23 +208,48 @@ pub(crate) fn ensure_open(
         .transpose()?;
     // 后台标签可能已被外部改写；命中前按长度/mtime 对账，失配后沿用重开路径。
     validate_registry_entry(registry, path)?;
-    let mut reg = registry
-        .0
-        .lock()
-        .map_err(|e| ZiEditError::Msg(e.to_string()))?;
-    if let Some(tf) = reg.get_mut(path) {
-        if preferred.is_none_or(|name| name == tf.encoding.name) {
-            tf.last_used = Instant::now();
-            return Ok(());
+    // 快路径：命中且编码一致仅刷新 last_used；锁内只做 map 查询/移除，不做 IO。
+    {
+        let mut reg = registry
+            .0
+            .lock()
+            .map_err(|e| ZiEditError::Msg(e.to_string()))?;
+        if let Some(tf) = reg.get_mut(path) {
+            if preferred.is_none_or(|name| name == tf.encoding.name) {
+                tf.last_used = Instant::now();
+                return Ok(());
+            }
+            // 编码决定行界码元宽度；不能沿用另一编码建立的字节偏移。
+            reg.remove(path);
         }
-        // 编码决定行界码元宽度；不能沿用另一编码建立的字节偏移。
-        reg.remove(path);
     }
+    // 重活移锁外：open_text_file（stat+探测+头块读）与 build_index_cached（全量扫描建行索引）
+    // 只操作本地 cache，不触碰 registry；持锁做这些 IO 会把不同标签的打开/刷新串行化。
     let p = PathBuf::from(path);
     let (mut cache, encoding, mtime) = open_text_file(&p, preferred)?;
     let len = cache.len();
     let index_encoding = encoding.name.clone();
     let generation = NEXT_GENERATION.fetch_add(1, Ordering::Relaxed);
+    // 索引经块缓存顺序扫描（BE2 减读）：同一遍磁盘读取同时建行索引并填充块缓存，
+    // 随后的 text_read_all / 滚动窗口全部内存命中——不再对文件主体二读磁盘。
+    let sync_index = if len <= SYNC_INDEX_LIMIT {
+        Some(build_index_cached(&mut cache, &index_encoding)?)
+    } else {
+        None
+    };
+    // 回锁复核：并发 ensure_open 可能已就同一或更新版本建好条目——复用之、丢弃本地重复
+    // 构建，不覆盖在途索引/缓存（mtime 双检；后台线程另有 generation 双检）。
+    let mut reg = registry
+        .0
+        .lock()
+        .map_err(|e| ZiEditError::Msg(e.to_string()))?;
+    if let Some(tf) = reg.get_mut(path) {
+        if tf.encoding.name == index_encoding && tf.mtime >= mtime {
+            tf.last_used = Instant::now();
+            return Ok(());
+        }
+        reg.remove(path);
+    }
     if reg.len() >= REGISTRY_CAP
         && let Some(victim) = reg
             .iter()
@@ -233,10 +258,7 @@ pub(crate) fn ensure_open(
     {
         reg.remove(&victim);
     }
-    let (index_ready, total) = if len <= SYNC_INDEX_LIMIT {
-        // 索引经块缓存顺序扫描（BE2 减读）：同一遍磁盘读取同时建行索引并填充块缓存，
-        // 随后的 text_read_all / 滚动窗口全部内存命中——不再对文件主体二读磁盘
-        let idx = build_index_cached(&mut cache, &index_encoding)?;
+    let (index_ready, total) = if let Some(idx) = sync_index {
         let t = idx.total_lines;
         reg.insert(
             path.to_string(),
@@ -863,7 +885,6 @@ fn cached_regex(pat: &str) -> Result<Arc<regex::Regex>, String> {
 #[allow(clippy::too_many_arguments)]
 pub async fn text_find(
     app: AppHandle,
-    registry: tauri::State<'_, TextRegistry>,
     path: String,
     needle: String,
     opts: FindOptions,
@@ -878,105 +899,111 @@ pub async fn text_find(
             before: None,
         });
     }
-    ensure_open(&registry, &app, &path, None)?;
-    let want_count = want_count.unwrap_or(false);
-    let backward = backward.unwrap_or(false);
-    let re = if opts.regex {
-        let pat = if opts.case_sensitive {
-            needle.clone()
-        } else {
-            format!("(?i){}", needle)
-        };
-        Some(cached_regex(&pat).map_err(|e| ZiEditError::Msg(format!("Regex error: {e}")))?)
-    } else {
-        None
-    };
-    let mut line: u64 = 1;
-    let mut total_seen: u64 = 0; // 已扫过的命中数
-    let mut hit: Option<FindHit> = None;
-    let mut hit_before: u64 = 0; // 命中处之前的匹配数（正向计数路径用）
-    loop {
-        // 每批重新取快照：保留关闭/刷新文件时的批间可见性。
-        // 批内先拿 cache/index 的 Arc 快照再锁 cache 做 I/O——registry 锁不再覆盖读取全程。
-        let (cache, index, enc_name) = {
-            let mut reg = registry
-                .0
-                .lock()
-                .map_err(|e| ZiEditError::Msg(e.to_string()))?;
-            let tf = reg
-                .get_mut(&path)
-                .ok_or_else(|| ZiEditError::Msg("File is not open".into()))?;
-            (tf.cache.clone(), tf.index.clone(), tf.encoding.name.clone())
-        };
-        let index = index.ok_or(ZiEditError::Indexing)?;
-        let total_lines = index.total_lines;
-        if line > total_lines {
-            break;
-        }
-        let want = FIND_BATCH_LINES.min(total_lines - line + 1);
-        let (raw, want) = {
-            let mut cache = cache.lock().map_err(|e| ZiEditError::Msg(e.to_string()))?;
-            let offset = jump_to_line(&mut cache, &index, line - 1)
-                .ok_or_else(|| ZiEditError::Msg("Locate failed".into()))?;
-            read_window(&mut cache, offset, want, index.utf16)?
-        };
-        let (text, _) = encoding::decode(&raw, &enc_name);
-        for (i, l) in split_lines(&text)
-            .into_iter()
-            .take(want as usize)
-            .enumerate()
-        {
-            let cols = find_all_in(
-                l,
-                re.as_deref(),
-                &needle,
-                opts.case_sensitive,
-                opts.whole_word,
-            );
-            if cols.is_empty() {
-                continue;
-            }
-            let line_no = line + i as u64;
-            if !backward {
-                if hit.is_none() && line_no >= from_line.max(1) {
-                    let col = l[..cols[0]].chars().count() as u64 + 1;
-                    hit = Some(FindHit { line: line_no, col });
-                    hit_before = total_seen;
-                    if !want_count {
-                        return Ok(FindResult {
-                            hit,
-                            total: None,
-                            before: None,
-                        });
-                    }
-                }
-            } else if line_no < from_line.max(1) {
-                // 反向：记录 from_line 之前的最后一个命中（计数统一由正向 count-only 扫描提供）
-                let col = l[..cols[0]].chars().count() as u64 + 1;
-                hit = Some(FindHit { line: line_no, col });
-            }
-            total_seen += cols.len() as u64;
-        }
-        // 反向模式扫到 from_line 即停；环绕（找全文最后一个）由前端传超大 from_line 实现
-        if backward && line >= from_line.max(1) {
-            return Ok(FindResult {
-                hit,
-                total: None,
-                before: None,
-            });
-        }
-        line += want;
-    }
-    let has_hit = hit.is_some();
-    Ok(FindResult {
-        hit,
-        total: if want_count { Some(total_seen) } else { None },
-        before: if has_hit && want_count {
-            Some(hit_before)
+    // 全文查找扫描为阻塞 IO+CPU，移阻塞线程；批间仍重锁 registry 保留关闭/刷新可见性（照 ooxml.rs 范例）。
+    tauri::async_runtime::spawn_blocking(move || {
+        let registry = app.state::<TextRegistry>();
+        ensure_open(&registry, &app, &path, None)?;
+        let want_count = want_count.unwrap_or(false);
+        let backward = backward.unwrap_or(false);
+        let re = if opts.regex {
+            let pat = if opts.case_sensitive {
+                needle.clone()
+            } else {
+                format!("(?i){}", needle)
+            };
+            Some(cached_regex(&pat).map_err(|e| ZiEditError::Msg(format!("Regex error: {e}")))?)
         } else {
             None
-        },
+        };
+        let mut line: u64 = 1;
+        let mut total_seen: u64 = 0; // 已扫过的命中数
+        let mut hit: Option<FindHit> = None;
+        let mut hit_before: u64 = 0; // 命中处之前的匹配数（正向计数路径用）
+        loop {
+            // 每批重新取快照：保留关闭/刷新文件时的批间可见性。
+            // 批内先拿 cache/index 的 Arc 快照再锁 cache 做 I/O——registry 锁不再覆盖读取全程。
+            let (cache, index, enc_name) = {
+                let mut reg = registry
+                    .0
+                    .lock()
+                    .map_err(|e| ZiEditError::Msg(e.to_string()))?;
+                let tf = reg
+                    .get_mut(&path)
+                    .ok_or_else(|| ZiEditError::Msg("File is not open".into()))?;
+                (tf.cache.clone(), tf.index.clone(), tf.encoding.name.clone())
+            };
+            let index = index.ok_or(ZiEditError::Indexing)?;
+            let total_lines = index.total_lines;
+            if line > total_lines {
+                break;
+            }
+            let want = FIND_BATCH_LINES.min(total_lines - line + 1);
+            let (raw, want) = {
+                let mut cache = cache.lock().map_err(|e| ZiEditError::Msg(e.to_string()))?;
+                let offset = jump_to_line(&mut cache, &index, line - 1)
+                    .ok_or_else(|| ZiEditError::Msg("Locate failed".into()))?;
+                read_window(&mut cache, offset, want, index.utf16)?
+            };
+            let (text, _) = encoding::decode(&raw, &enc_name);
+            for (i, l) in split_lines(&text)
+                .into_iter()
+                .take(want as usize)
+                .enumerate()
+            {
+                let cols = find_all_in(
+                    l,
+                    re.as_deref(),
+                    &needle,
+                    opts.case_sensitive,
+                    opts.whole_word,
+                );
+                if cols.is_empty() {
+                    continue;
+                }
+                let line_no = line + i as u64;
+                if !backward {
+                    if hit.is_none() && line_no >= from_line.max(1) {
+                        let col = l[..cols[0]].chars().count() as u64 + 1;
+                        hit = Some(FindHit { line: line_no, col });
+                        hit_before = total_seen;
+                        if !want_count {
+                            return Ok(FindResult {
+                                hit,
+                                total: None,
+                                before: None,
+                            });
+                        }
+                    }
+                } else if line_no < from_line.max(1) {
+                    // 反向：记录 from_line 之前的最后一个命中（计数统一由正向 count-only 扫描提供）
+                    let col = l[..cols[0]].chars().count() as u64 + 1;
+                    hit = Some(FindHit { line: line_no, col });
+                }
+                total_seen += cols.len() as u64;
+            }
+            // 反向模式扫到 from_line 即停；环绕（找全文最后一个）由前端传超大 from_line 实现
+            if backward && line >= from_line.max(1) {
+                return Ok(FindResult {
+                    hit,
+                    total: None,
+                    before: None,
+                });
+            }
+            line += want;
+        }
+        let has_hit = hit.is_some();
+        Ok(FindResult {
+            hit,
+            total: if want_count { Some(total_seen) } else { None },
+            before: if has_hit && want_count {
+                Some(hit_before)
+            } else {
+                None
+            },
+        })
     })
+    .await
+    .map_err(|e| ZiEditError::Msg(e.to_string()))?
 }
 
 /// 探测文件是否变化（日志跟随用）：变化则换新缓存并后台重建索引（发 text-index 事件）

@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
+use tauri::Manager;
 
 /// 记录起始偏移索引（Rust 侧常驻；~8B/记录）。
 /// MD-004（审计 2026-10-17）：len/modified_ms 为失效判决基线——外部修改后按新 stat 重建索引，
@@ -304,7 +305,7 @@ fn stable_csv_offsets(
 
 #[tauri::command]
 pub async fn csv_records(
-    registry: tauri::State<'_, CsvRegistry>,
+    app: tauri::AppHandle,
     path: String,
     from: u64,
     to: u64,
@@ -319,60 +320,66 @@ pub async fn csv_records(
     let to = to.min(from.saturating_add(WINDOW_LIMIT - 1));
     let enc_name = encoding_name.unwrap_or_else(|| "UTF-8".into());
     let p = PathBuf::from(&path);
-    // 版本化索引获取 + 读取前磁盘版本校验（BE2 收口缺陷 3，见 stable_csv_offsets）
-    let (offsets, len) = stable_csv_offsets(&registry, &p, &path, &enc_name)?;
-    let total = offsets.len() as u64;
-    if total == 0 {
-        return Ok(CsvRecordsResult {
-            records: vec![],
-            total: 0,
-            delimiter: delim.chars().next().unwrap_or(',').to_string(),
-        });
-    }
-    let mut f = std::fs::File::open(&p)?;
-    let delim_char = match delim.chars().next() {
-        Some(value) => value,
-        None => {
-            let end = offsets.get(1).copied().unwrap_or(len);
-            let raw = read_at(&mut f, 0, end)?;
-            sniff_delimiter(&crate::encoding::decode(&raw, &enc_name).0)
+    // 索引构建（磁盘扫描）与窗口解码均为阻塞 IO，移阻塞线程（照 ooxml.rs docx_open 范例）。
+    tauri::async_runtime::spawn_blocking(move || {
+        let registry = app.state::<CsvRegistry>();
+        // 版本化索引获取 + 读取前磁盘版本校验（BE2 收口缺陷 3，见 stable_csv_offsets）
+        let (offsets, len) = stable_csv_offsets(&registry, &p, &path, &enc_name)?;
+        let total = offsets.len() as u64;
+        if total == 0 {
+            return Ok(CsvRecordsResult {
+                records: vec![],
+                total: 0,
+                delimiter: delim.chars().next().unwrap_or(',').to_string(),
+            });
         }
-    };
-    if from > total {
-        return Ok(CsvRecordsResult {
-            records: vec![],
+        let mut f = std::fs::File::open(&p)?;
+        let delim_char = match delim.chars().next() {
+            Some(value) => value,
+            None => {
+                let end = offsets.get(1).copied().unwrap_or(len);
+                let raw = read_at(&mut f, 0, end)?;
+                sniff_delimiter(&crate::encoding::decode(&raw, &enc_name).0)
+            }
+        };
+        if from > total {
+            return Ok(CsvRecordsResult {
+                records: vec![],
+                total,
+                delimiter: delim_char.to_string(),
+            });
+        }
+        let to = to.min(total);
+        let mut records = Vec::with_capacity((to - from + 1) as usize);
+        let mut window_bytes = 0;
+        for r in from..=to {
+            let start = offsets[(r - 1) as usize];
+            let end = if (r as usize) < offsets.len() {
+                offsets[r as usize]
+            } else {
+                len
+            };
+            if !records.is_empty() && window_bytes + end - start > WINDOW_BYTES {
+                break;
+            }
+            let raw = read_at(&mut f, start, end)?;
+            window_bytes += raw.len() as u64;
+            let (text, _) = crate::encoding::decode(&raw, &enc_name);
+            let text = text.strip_suffix('\n').unwrap_or(&text);
+            let text = text.strip_suffix('\r').unwrap_or(text);
+            records.push(CsvRecord {
+                no: r,
+                cells: split_cells(text, delim_char),
+            });
+        }
+        Ok(CsvRecordsResult {
+            records,
             total,
             delimiter: delim_char.to_string(),
-        });
-    }
-    let to = to.min(total);
-    let mut records = Vec::with_capacity((to - from + 1) as usize);
-    let mut window_bytes = 0;
-    for r in from..=to {
-        let start = offsets[(r - 1) as usize];
-        let end = if (r as usize) < offsets.len() {
-            offsets[r as usize]
-        } else {
-            len
-        };
-        if !records.is_empty() && window_bytes + end - start > WINDOW_BYTES {
-            break;
-        }
-        let raw = read_at(&mut f, start, end)?;
-        window_bytes += raw.len() as u64;
-        let (text, _) = crate::encoding::decode(&raw, &enc_name);
-        let text = text.strip_suffix('\n').unwrap_or(&text);
-        let text = text.strip_suffix('\r').unwrap_or(text);
-        records.push(CsvRecord {
-            no: r,
-            cells: split_cells(text, delim_char),
-        });
-    }
-    Ok(CsvRecordsResult {
-        records,
-        total,
-        delimiter: delim_char.to_string(),
+        })
     })
+    .await
+    .map_err(|e| ZiEditError::Msg(e.to_string()))?
 }
 
 #[cfg(test)]
