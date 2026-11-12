@@ -30,7 +30,7 @@
   "devDependencies": {
     "@mathjax/mathjax-stix2-font": "4.1.3",
     "@tauri-apps/cli": "^2",
-    "jsdom": "^30.1.3",
+    "jsdom": "^31.0.0",
     "mermaid": "12.2.0",
     "stackback": "file:tools/stackback-compat",
     "typescript": "~6.0.3",
