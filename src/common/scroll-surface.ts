@@ -1,4 +1,4 @@
-import { EditorView } from '@codemirror/view';
+import type { EditorView } from '@codemirror/view';
 import { syntaxTree } from '@codemirror/language';
 import { cancelCmRestore, cmTopLine, cmScrollToLine, type ScrollAnchor } from './scroll-anchor';
 

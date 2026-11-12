@@ -16,6 +16,7 @@ import { classHighlighter } from '@lezer/highlight';
 import { highlightSelectionMatches } from '@codemirror/search';
 import { textReadAll, textSave, textOpen } from '../common/ipc';
 import { t, tf } from '../common/i18n';
+import { clampFontSize } from '../common/fontSize';
 import { INVISIBLE_RE } from './view';
 import { runMdFormat, type MdFormatCmd } from '../markdown-view/mdformat';
 import { parsePairs, replaceDocLines, replaceInLine, type ReplaceOpts } from './replace';
@@ -50,6 +51,8 @@ import { convertEol } from '../common/text';
 import { readClipboardText, writeClipboardText } from '../common/clipboard';
 import { hasHighlightParser, highlightLines, loadHighlightParser, type Span } from './highlight';
 import { snapshotDocument } from '../common/snapshot';
+// 懒绑定再出口：app.ts 启动图不静态引 scroll-surface（携 codemirror），编辑模块就位时同步取用。
+export { cmScrollSurface } from '../common/scroll-surface';
 
 export const EDIT_LIMIT = 10 * 1024 * 1024; // CM6 文档实际上限（与 002/007 编辑缓冲口径一致：10MB）
 
@@ -726,15 +729,13 @@ export class EditView {
   private mmParserSeq = 0;
   private fontSize: number;
   private fontComp = new Compartment();
-  private static FONT_MIN = 10;
-  private static FONT_MAX = 18;
   private fontTheme(px: number) {
     return EditorView.theme({ '&': { fontSize: `${px}px` } });
   }
 
   /** 设置字号（001 规则 31：与查看态同值联动） */
   setFontSize(n: number): void {
-    const v = Math.min(EditView.FONT_MAX, Math.max(EditView.FONT_MIN, Math.round(n)));
+    const v = clampFontSize(n);
     if (v === this.fontSize) return;
     this.fontSize = v;
     if (this.view) this.view.dispatch({ effects: this.fontComp.reconfigure(this.fontTheme(v)) });

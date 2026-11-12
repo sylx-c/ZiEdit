@@ -210,6 +210,10 @@ const ZH_CN: Record<string, string> = {
   'err.findFail': '查找失败：{0}',
   'err.saveFail': '保存失败：{0}',
   'err.saveConflict': '保存已停止：文件在保存期间被外部修改，请先重载或另存。',
+  // OOXML/PDF 提取边界提示（批 4：超限/丢弃内容友好说明，经 flash 提示条展示，非错误）
+  'ooxml.truncated': '内容超出提取上限，仅显示部分。',
+  'ooxml.docxScope': 'Word 仅提取正文文本，不含图片、图表、页眉页脚。',
+  'ooxml.xlsxScope': 'Excel 仅显示单元格缓存值，不含格式与公式。',
   'msg.notFound': '未找到：{0}',
   // —— 文本视图 ——
   'tv.invisibleChar': 'U+{0} 等不可见字符',
@@ -970,6 +974,9 @@ const EN_US: Record<string, string> = {
   'err.findFail': 'Search failed: {0}',
   'err.saveFail': 'Save failed: {0}',
   'err.saveConflict': 'Save stopped: the file changed during save. Reload or use Save As first.',
+  'ooxml.truncated': 'Content exceeds the extraction limit; showing part only.',
+  'ooxml.docxScope': 'Word extracts body text only — no images, charts, headers or footers.',
+  'ooxml.xlsxScope': 'Excel shows cached cell values only — no formatting or formulas.',
   'msg.notFound': 'Not found: {0}',
   'tv.invisibleChar': 'U+{0} invisible character',
   'tv.caseSensitive': 'Match case',
@@ -1611,11 +1618,4 @@ export function syncLangFromSettings(lang?: string): boolean {
   if (lang === current) return false;
   setLang(lang); // 内部回写 localStorage 缓存，兼容旧数据读取路径
   return true;
-}
-
-/** 语言变化订阅（视图重渲染用） */
-export function onLangChange(handler: (lang: Lang) => void): () => void {
-  const listener = (e: Event) => handler((e as CustomEvent<Lang>).detail);
-  window.addEventListener('i18n-change', listener);
-  return () => window.removeEventListener('i18n-change', listener);
 }

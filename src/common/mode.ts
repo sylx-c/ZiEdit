@@ -50,6 +50,19 @@ export function mdSplitEligibleFile(meta: ModeMeta): boolean {
   return meta.language === 'Markdown' && meta.size <= MD_PREVIEW_LIMIT;
 }
 
+/** 菜单/工具栏的体量裁决：size 为 undefined 表示元数据尚未就位（会话恢复的异步窗口，
+ *  fileSizes 由 ensureFileMeta 稍后填充）。此时按 0 乐观放行——与 modeOf 入参、IR 挂载守卫
+ *  （textOpen 复核 + WYSIWYG_LIMIT）同源；真正的超限拦截在挂载路径，菜单不必预先悲观禁用。
+ *  收口 app.ts 的 wysiwygEligible / mdSplitEligible：历史上 IR 用 ?? Infinity（禁用）、分屏用
+ *  ?? 0（放行），不对称使恢复窗口内 IR 菜单项被禁用而分屏可用（v53 plain-100k 切换失败）。
+ *  isDraft/readonly 不影响体量闸（两谓词均忽略），故此处取占位值。 */
+export function menuWysiwygEligible(language: string | null, size: number | undefined): boolean {
+  return wysiwygEligibleFile({ language, isDraft: false, readonly: false, size: size ?? 0 });
+}
+export function menuSplitEligible(language: string | null, size: number | undefined): boolean {
+  return mdSplitEligibleFile({ language, isDraft: false, readonly: false, size: size ?? 0 });
+}
+
 /** 行批处理适用矩阵（005 规则 14 v1.4 / H-3）：Markdown 与结构化格式（JSON/XML/CSV/TSV）不启用
  *  ——排序/去重/删空行会破坏文档结构、对象键序与表头。注册表 enabled 与两处右键菜单共用的唯一判决；
  *  旧实现同一政策写了三遍且口径不一（右键两处只挡 Markdown），JSON/XML 可经右键执行破坏性行批处理。 */

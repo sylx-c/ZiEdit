@@ -13,6 +13,8 @@ import {
 } from '../common/ipc';
 import { normalizeSaveDialog, encodeConvertDialog } from '../shell/panels';
 import { t, tf } from '../common/i18n';
+import { fmtSize } from '../common/format';
+import { clampFontSize } from '../common/fontSize';
 import {
   NAV_SHORTCUTS,
   chordLabel,
@@ -35,13 +37,6 @@ import {
   ROW_H,
   SKIP_H,
 } from './layout';
-
-function fmtSize(n: number): string {
-  if (n >= 1024 * 1024 * 1024) return (n / 1024 / 1024 / 1024).toFixed(1) + ' GB';
-  if (n >= 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
-  if (n >= 1024) return (n / 1024).toFixed(1) + ' KB';
-  return n + ' B';
-}
 
 function mk<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -437,7 +432,7 @@ export class CompareView {
    *  （init 未完成时仅记录派生值，其后 init 的 relayout/render 自然用新行高）。 */
   setFontSize(fs: number): void {
     if (this.reloaded) { this.reloaded.setFontSize(fs); return; }
-    const v = Math.min(18, Math.max(10, Math.round(fs))); // 与设置字号同域（10–18px）
+    const v = clampFontSize(fs);
     if (v === this.fontSize || this.destroyed) return;
     this.fontSize = v;
     this.rowH = cmpRowHeight(v);

@@ -25,6 +25,10 @@ vi.mock('../src/shell/chrome', async importOriginal => {
   };
 });
 vi.mock('../src/text-view/edit', () => ({ EDIT_LIMIT: 10 * 1024 * 1024,
+  cmScrollSurface: vi.fn(() => ({
+    element: document.createElement('div'), snapshot: vi.fn(() => ({ version: 0, top: 0, height: 0, viewport: 0 })),
+    capture: vi.fn(() => ({ line: 1, surface: 'source' })), restore: vi.fn(), scrollTo: vi.fn(), overview: vi.fn(() => []),
+  })),
   EditView: class {
     filePath: string | null; opts: any; dirty = false;
     constructor(_host: unknown, opts: any) { this.filePath = opts.path; this.opts = opts; shell.edit = this; queueMicrotask(() => opts.onReady?.()); }

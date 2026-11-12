@@ -21,15 +21,13 @@ import { Minimap } from './minimap';
 import { FindBar, type FindRunResult } from './findbar';
 import { markRectCopy, rectPointerPlan, rectSpanOfCells, charAtVisualCol, visualWidth, autoScrollBeyond } from './rect';
 import { t, tf } from '../common/i18n';
+import { clampFontSize } from '../common/fontSize';
 
 export const LINE_HEIGHT = 19.2; // 定稿：12px × 1.6 行高
 const OVERSCAN = 20;
 const FETCH_BATCH = 300;
 const FOLLOW_POLL_MS = 1200;
 const HISTORY_MAX = 100;
-/** 缩放字号范围 */
-const FONT_MIN = 10;
-const FONT_MAX = 18;
 const LONG_LINE_SEGMENT_BYTES = 256 * 1024;
 
 interface LongLineState {
@@ -157,8 +155,12 @@ export class LinesCache {
   trimToBudget(center: number): boolean {
     if (this.bytes <= this.budgetBytes) return false;
     const target = Math.floor(this.budgetBytes * 0.8);
-    const keys = [...this.map.keys()].sort((a, b) => Math.abs(b - center) - Math.abs(a - center));
-    for (const k of keys) {
+    // 距离每键只算一次（修饰-排序-去修饰）：原比较器在 O(n log n) 次比较里反复 Math.abs，
+    // 大缓存超预算时排序开销显著；预计算后比较器只读字段。淘汰序与「离视口最远」口径不变。
+    const byFar = [...this.map.keys()]
+      .map(k => ({ k, d: Math.abs(k - center) }))
+      .sort((a, b) => b.d - a.d);
+    for (const { k } of byFar) {
       if (this.bytes <= target) break;
       this.delete(k);
     }
@@ -337,6 +339,8 @@ export class TextView {
       onFontSize?: (n: number) => void;
       /** 右键上下文菜单（app 侧实现；缺省用 webview 默认菜单） */
       onContextMenu?: (x: number, y: number, line: number) => void;
+      /** 提取边界提示（批 4：OOXML/PDF 超限/丢弃内容说明，app 侧接 flash；视图不反向依赖 shell） */
+      onNotice?: (msg: string) => void;
     }
   ) {
     this.host = host;
@@ -359,6 +363,7 @@ export class TextView {
   private rectSel: { lineA: number; colA: number; lineB: number; colB: number } | null = null;
   private rectDragging = false;
   private charW = 0; // 等宽字符像素宽（随字号缓存）
+  private gutterW = 0; // 行号栏宽（--gutter-w 为静态令牌）：懒读缓存，拖拽 posAt 不再每次 getComputedStyle
 
   /** 当前是否存在矩形选区（右键"复制矩形选区"显示依据） */
   hasRectSelection(): boolean {
@@ -426,7 +431,7 @@ export class TextView {
     const r = this.scroller.getBoundingClientRect();
     const disp = Math.max(0, Math.floor((ev.clientY - r.top + this.scroller.scrollTop) / LINE_HEIGHT));
     const line = this.realOfDisp(disp);
-    const gutterW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter-w')) || 46;
+    const gutterW = this.gutterW || (this.gutterW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter-w')) || 46);
     const x = ev.clientX - r.left + this.scroller.scrollLeft - gutterW - 16; // 16 = .tv-tx padding-left
     const col = Math.max(0, Math.floor(x / this.measureCharW()));
     return { line, col };
@@ -535,6 +540,13 @@ export class TextView {
         this.encoding = 'UTF-8';
         this.indexing = false;
         this.updateSizer();
+        // 提取边界提示：Word 说明正文-only 提取范围；超限再追加部分显示警告（PDF 文本层为既定非目标，仅超限提示）
+        if (this.opts.onNotice) {
+          const parts: string[] = [];
+          if (this.opts.language === 'Docx') parts.push(t('ooxml.docxScope'));
+          if (info.truncated) parts.push(t('ooxml.truncated'));
+          if (parts.length) this.opts.onNotice(parts.join(' '));
+        }
       } else {
       const info = await textOpen(this.path);
       this.size = info.len;
@@ -829,7 +841,7 @@ export class TextView {
   private onWheel(e: WheelEvent): void {
     if (!e.ctrlKey) return;
     e.preventDefault();
-    const next = Math.min(FONT_MAX, Math.max(FONT_MIN, this.fontSize - Math.sign(e.deltaY)));
+    const next = clampFontSize(this.fontSize - Math.sign(e.deltaY));
     if (next !== this.fontSize) {
       this.setFontSize(next);
       this.opts.onFontSize?.(next);
@@ -838,10 +850,11 @@ export class TextView {
 
   /** 设置字号（菜单/设置入口；滚轮路径经 onWheel 后也走这里保持一致） */
   setFontSize(n: number): void {
-    const v = Math.min(FONT_MAX, Math.max(FONT_MIN, Math.round(n)));
+    const v = clampFontSize(n);
     if (v === this.fontSize) return;
     this.fontSize = v;
     this.charW = 0; // 字号变化后重测字符宽（矩形选区列定位用）
+    this.gutterW = 0; // 与 charW 同步失效，根样式若变下次 posAt 重读
     this.scroller?.style.setProperty('--tv-fs', `${v}px`);
     this.render(true);
   }
