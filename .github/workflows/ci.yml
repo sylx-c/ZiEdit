@@ -67,6 +67,30 @@ jobs:
       - run: node scripts/sync-pdfjs-assets.mjs
       - run: npm run license:check
 
+  # 批6 工程化收口 B2：依赖安全审计（npm + cargo），独立 job 并行，不阻塞 build。
+  # 口径：真实漏洞不硬压（无 continue-on-error / ignore）；已知待修项见 docs/changes/eng-batch6-closeout.md。
+  audit:
+    name: 安全审计（npm audit + cargo audit）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # npm audit 只读 package-lock.json，无需 npm ci；runner 默认官方 registry，audit 端点可用。
+      # audit-level=high：high 及以上失败。低级别漏报名义上放行，避免离线桌面应用长期被 low/moderate 打红。
+      # 已知状态：markdown-it 15.0.0–15.0.2 存在 1 条 high（GHSA-gfr2-rv44-r23c），修复版 15.0.3，
+      # 升级运行时依赖归 Lead 处理，此前本步骤如实失败。
+      - name: npm audit（生产与开发依赖，high 及以上失败）
+        run: npm audit --audit-level=high
+      - uses: dtolnay/rust-toolchain@stable
+      # cargo audit 选 cargo install --locked 而非 rustsec/audit-check@v2.0.0：后者镜像内 cargo-audit
+      # 版本固定偏旧，对本仓库 Cargo.lock version 4 的解析兼容存疑，且 fork PR 上 Checks API 会失败；
+      # cargo install 每次取最新发布版，仅多数分钟编译（单 ubuntu job）。代价与理由详见收口卡。
+      - name: 安装 cargo-audit
+        run: cargo install cargo-audit --locked
+      # 默认口径：存在漏洞（vulnerability advisory）即失败；unmaintained 等告警不失败（Tauri 生态
+      # unmaintained crate 噪声大，清零不属于本批范围）。
+      - name: cargo audit（src-tauri/Cargo.lock）
+        run: cargo audit --file src-tauri/Cargo.lock
+
   build:
     name: tauri build（三平台安装包）
     strategy:

@@ -1,0 +1,17 @@
+# Dependabot 版本更新（批6 工程化收口 B1）：三生态每周检查依赖更新。
+# 必填键约定见官方文档：version 恒为 2，每项需 package-ecosystem / directory / schedule.interval。
+# 最小配置：不设 reviewers/labels/open-pull-requests-limit 等，保持默认行为。
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: cargo
+    directory: /src-tauri
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
