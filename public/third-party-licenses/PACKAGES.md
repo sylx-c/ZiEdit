@@ -151,7 +151,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | npm | @vitest/snapshot | 4.1.12 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | @vitest/spy | 4.1.12 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | @vitest/utils | 4.1.12 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | argparse | 3.0.2 | production-or-optional | PSF-2.0 | 1 | LOCAL_TEXT_COLLECTED |
+| npm | argparse | 3.0.4 | production-or-optional | PSF-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | assertion-error | 2.0.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | bidi-js | 1.1.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | chai | 6.3.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
@@ -244,7 +244,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | npm | lodash-es | 4.18.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | lru-cache | 11.5.3 | development-only | BlueOak-1.0.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | magic-string | 0.30.21 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | markdown-it | 15.0.2 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | markdown-it | 15.0.3 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | marked | 16.4.2 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | mdn-data | 2.27.1 | development-only | CC0-1.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | mdurl | 2.1.0 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |

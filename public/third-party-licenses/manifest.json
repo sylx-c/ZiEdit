@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "scripts/generate-third-party-licenses.mjs",
   "inputSHA256": {
-    "package-lock.json": "f5c7eb6de16ebb4afdfe498ac462d9b353608154a9afdc7dd3cf3bb5db3560cc",
+    "package-lock.json": "6b4b0c75b044340831a838f0bc2d62d304ae30471f6ea91a7d2cb02654c8d77b",
     "src-tauri/Cargo.lock": "faa803bd9214216e3fc1c0e10e4cefbc56a4bcb1234d619a2ec7447b1766bd09",
     "src-tauri/Cargo.toml": "2909b44be123f65f8369a917afbff6a9789ae9a136e18da136cc2595d85ce869"
   },
@@ -5937,7 +5937,7 @@
     {
       "ecosystem": "npm",
       "name": "argparse",
-      "version": "3.0.2",
+      "version": "3.0.4",
       "location": "node_modules/argparse",
       "dependencyClass": "production-or-optional",
       "optional": false,
@@ -5948,9 +5948,9 @@
       "license": "PSF-2.0",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmjs.org/argparse/-/argparse-3.0.2.tgz",
-        "registryMetadataURL": "https://registry.npmjs.org/argparse/3.0.2",
-        "integrity": "sha512-mFdDM6WqWKraGLsVb+C9CahPnzTXOefAOLq3jYcca2YZ8bEWpr++Tzj+zSaKW9+X9L5uSxcm1AZ3Y6aZJ09OhQ==",
+        "archiveURL": "https://registry.npmmirror.com/argparse/-/argparse-3.0.4.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/argparse/3.0.4",
+        "integrity": "sha512-fwWK3Zq22l4XJJjx5mcBHGikIk+hJqO+32dPm0Jur7+rtG5x1scOjSfdT9ZKeWHPpsya/l0HHK4tDImBkTrtvA==",
         "repositoryURL": "nodeca/argparse"
       },
       "review": [],
@@ -5958,7 +5958,7 @@
       "documents": [
         {
           "originalPath": "LICENSE",
-          "path": "texts/npm/argparse-3.0.2-eb17fba428/LICENSE",
+          "path": "texts/npm/argparse-3.0.4-eb17fba428/LICENSE",
           "bytes": 2427,
           "sha256": "ab745c5061d1dea43a3885e5b4b6befc7e983954954775c5736debeefcdfd89b"
         }
@@ -9057,7 +9057,7 @@
     {
       "ecosystem": "npm",
       "name": "markdown-it",
-      "version": "15.0.2",
+      "version": "15.0.3",
       "location": "node_modules/markdown-it",
       "dependencyClass": "production-or-optional",
       "optional": false,
@@ -9068,9 +9068,9 @@
       "license": "MIT",
       "licenseEvidence": "package-lock.json",
       "source": {
-        "archiveURL": "https://registry.npmjs.org/markdown-it/-/markdown-it-15.0.2.tgz",
-        "registryMetadataURL": "https://registry.npmjs.org/markdown-it/15.0.2",
-        "integrity": "sha512-q4IGxMv56jCqT4OCRCADBoDP3LO4MhmTXjFbphHPXs4g3j9Xg5RDnxqN8IF/3vIWEU+VCnUq+7JUg/cfy2E6Qw==",
+        "archiveURL": "https://registry.npmmirror.com/markdown-it/-/markdown-it-15.0.3.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/markdown-it/15.0.3",
+        "integrity": "sha512-+Az7Ojz3iRGu8KYMvJ6xVhvrxP3eE+vEtJX75Ow88XBpcQNV/0lGX5ZynIIBftREo4DC2jsveAMDaeltmm8QvQ==",
         "repositoryURL": "markdown-it/markdown-it"
       },
       "review": [],
@@ -9078,7 +9078,7 @@
       "documents": [
         {
           "originalPath": "LICENSE",
-          "path": "texts/npm/markdown-it-15.0.2-9cf0095570/LICENSE",
+          "path": "texts/npm/markdown-it-15.0.3-9cf0095570/LICENSE",
           "bytes": 1073,
           "sha256": "792c48c5a849a15fdf9e37e8bcf9e6d1dd13b32b46c642a748a0a46a9919d473"
         }
