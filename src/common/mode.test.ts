@@ -5,6 +5,8 @@ import {
   editableFile,
   lineBatchAllowed,
   mdSplitEligibleFile,
+  menuSplitEligible,
+  menuWysiwygEligible,
   sanitize,
   wysiwygEligibleFile,
   type ModeMeta,
@@ -108,6 +110,39 @@ describe('Markdown 草稿格式', () => {
     expect(mdSplitEligibleFile(draft)).toBe(false);
     expect(defaultModeFor(draft, {})).toBe('edit');
     expect(sanitize('wysiwyg', draft)).toBeNull();
+  });
+});
+
+describe('menuWysiwygEligible / menuSplitEligible（批1c：未知体量乐观口径，IR 与分屏对称）', () => {
+  it('元数据未就位（size=undefined）时 IR 与分屏同权放行——修 v53 恢复窗口 IR 菜单项被禁用', () => {
+    // 回归核心：历史 IR 用 ?? Infinity（禁用）、分屏用 ?? 0（放行），不对称即竞态根因。
+    expect(menuWysiwygEligible('Markdown', undefined)).toBe(true);
+    expect(menuSplitEligible('Markdown', undefined)).toBe(true);
+  });
+  it('草稿（无磁盘大小，size=undefined）同样放行，与旧 draft://?0 分支一致', () => {
+    expect(menuWysiwygEligible('Markdown', undefined)).toBe(true);
+    expect(menuSplitEligible('Markdown', undefined)).toBe(true);
+  });
+  it('已知体量按各自上限裁决：IR ≤4MiB、分屏 ≤2MiB', () => {
+    expect(menuWysiwygEligible('Markdown', 4 * 1024 * 1024)).toBe(true);
+    expect(menuWysiwygEligible('Markdown', 4 * 1024 * 1024 + 1)).toBe(false);
+    expect(menuSplitEligible('Markdown', 2 * 1024 * 1024)).toBe(true);
+    expect(menuSplitEligible('Markdown', 2 * 1024 * 1024 + 1)).toBe(false);
+    // 2–4MiB：IR 仍可、分屏已超限（两闸不同）
+    expect(menuWysiwygEligible('Markdown', 3 * 1024 * 1024)).toBe(true);
+    expect(menuSplitEligible('Markdown', 3 * 1024 * 1024)).toBe(false);
+  });
+  it('非 Markdown 恒不放行（即便体量未知）', () => {
+    expect(menuWysiwygEligible('TypeScript', undefined)).toBe(false);
+    expect(menuSplitEligible('TypeScript', undefined)).toBe(false);
+    expect(menuWysiwygEligible(null, 0)).toBe(false);
+    expect(menuSplitEligible(null, 0)).toBe(false);
+  });
+  it('与 File 谓词同源：已知 size 时裁决一致', () => {
+    for (const size of [0, 1000, 2 * 1024 * 1024, 3 * 1024 * 1024, 4 * 1024 * 1024, 9 * 1024 * 1024]) {
+      expect(menuWysiwygEligible('Markdown', size)).toBe(wysiwygEligibleFile(md({ size })));
+      expect(menuSplitEligible('Markdown', size)).toBe(mdSplitEligibleFile(md({ size })));
+    }
   });
 });
 

@@ -8,7 +8,6 @@ import { EXE, RUN_DIR, connectCDP, waitTargets, waitFor, switchMdMode, dismissOv
 
 const corpus = path.resolve(process.argv[2] ?? path.join(RUN_DIR, 'corpus/mixed-100k.md'));
 const output = path.resolve(process.argv[3] ?? path.join(RUN_DIR, 'results/md-surfaces.json'));
-const singleBlock = /^single-(?:code|js|table)-/.test(path.basename(corpus));
 const modes = [
   ['preview', '渲染预览', '.md-preview:not(.md-split-preview) .md-col'],
   ['split', '分屏预览', '.md-split-preview .md-col'],
@@ -217,7 +216,7 @@ try {
     if (record.interactionFrames.p95 > 32) record.failures.push('interaction frame p95 > 32ms');
     if (record.responseP95 > 50) record.failures.push('wheel response p95 > 50ms');
     if (record.longtasks.some(task => task.dur >= 100)) record.failures.push('main-thread longtask >= 100ms');
-    if (singleBlock && record.mountLongtasks.some(task => task.dur >= 100)) record.failures.push('single-block mount longtask >= 100ms');
+    if (record.mountLongtasks.some(task => task.dur >= 100)) record.failures.push('mount longtask >= 100ms');
     if (record.settle.maxDrift > 4 || record.settle.lost) record.failures.push('reading anchor moved/lost after last input');
     if (!record.settle.asyncComplete) record.failures.push('asynchronous rendering did not finish within observation limit');
     if (!record.rail || record.rail.topError > 1 || record.rail.heightError > 1) record.failures.push('map and scrollbar disagree');
@@ -244,7 +243,7 @@ try {
   out.allLongtasks = await cdp.evaluate('window.__gate.allLongtasks');
   out.verdict = out.modes.length === modes.length && out.modes.every(mode => !mode.failures.length) && !out.errors.length;
   if (path.basename(corpus) === 'plain-1m.md' && out.firstReadableMs > 500) { out.errors.push('1MiB plain first readable > 500ms'); out.verdict = false; }
-  if (singleBlock && out.openLongtasks.some(task => task.dur >= 100)) { out.errors.push('single-block open longtask >= 100ms'); out.verdict = false; }
+  if (out.openLongtasks.some(task => task.dur >= 100)) { out.errors.push('open longtask >= 100ms'); out.verdict = false; }
 } catch (error) { out.errors.push(String(error.stack ?? error)); }
 finally { cdp?.close(); await killTree(child.pid); save(); }
 console.log(JSON.stringify({ verdict:out.verdict, firstReadableMs:out.firstReadableMs,

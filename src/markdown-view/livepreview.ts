@@ -1,5 +1,7 @@
 import { parseError } from '../common/errors';
 import { cmScrollSurface, type ScrollSurfaceAdapter } from '../common/scroll-surface';
+// 懒绑定再出口：app.ts 启动图不静态引 scroll-surface（携 codemirror），IR 模块就位时同步取用。
+export { cmScrollSurface };
 import type { MarkdownDocumentClient } from './document-client';
 // markdown-view/livepreview —— CM6 live preview 自研引擎（007 v0.16 规则 2/23 M1；ADR 011 修订）。
 // 即时渲染：缓冲即文档模型（无序列化），按视口构建持续的块布局与按元素展开的行内装饰——
@@ -841,9 +843,12 @@ export class LivePreviewView {
         return;
       }
       el.classList.remove('mdir-flash');
-      void el.offsetWidth; // 重启动画
-      el.classList.add('mdir-flash');
-      window.setTimeout(() => el.classList.remove('mdir-flash'), 1500);
+      // 下一帧再加回类名重启脉冲：浏览器先提交移除即可重启动画，免去 void offsetWidth 强制同步回流。
+      requestAnimationFrame(() => {
+        if (!el.isConnected) return;
+        el.classList.add('mdir-flash');
+        window.setTimeout(() => el.classList.remove('mdir-flash'), 1500);
+      });
     };
     flashLine(90);
   }

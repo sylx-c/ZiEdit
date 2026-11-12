@@ -11,7 +11,7 @@ import { openUrl } from '@tauri-apps/plugin-opener';
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
 import { listen } from '@tauri-apps/api/event';
 import { FileTree, kindOf, relativeToRoot, type TreeRoot } from '../file-tree/tree';
-import { defaultModeFor, sanitize, MD_PREVIEW_LIMIT, WYSIWYG_LIMIT, lineBatchAllowed } from '../common/mode';
+import { defaultModeFor, sanitize, MD_PREVIEW_LIMIT, WYSIWYG_LIMIT, lineBatchAllowed, menuWysiwygEligible, menuSplitEligible } from '../common/mode';
 import {
   DEFAULT_SETTINGS,
   deleteToTrash,
@@ -79,7 +79,7 @@ import type { ScrollAnchor } from '../common/scroll-anchor';
 import type { MarkdownDocumentClient } from '../markdown-view/document-client';
 import { markUserScroll } from '../common/user-scroll';
 import { SplitScrollCoordinator } from '../markdown-view/split-scroll';
-import { cmScrollSurface, type ScrollSurfaceAdapter } from '../common/scroll-surface';
+import type { ScrollSurfaceAdapter } from '../common/scroll-surface';
 import type { EditStatus, EditView as EditViewT, LineBatchOp } from '../text-view/edit';
 import type { EditorView } from '@codemirror/view';
 import type { ImageView as ImageViewT } from '../image-view/view';
@@ -129,6 +129,8 @@ import {
 import { SidebarCtl, type RecentItem, type SidebarOpts } from './sidebar';
 import { startAutosaveTimers, closeActionFor } from './autosave';
 import { t as $t, tf as $tf, getLang, setLang, syncLangFromSettings, type Lang } from '../common/i18n';
+import { fmtSize } from '../common/format';
+import { clampFontSize } from '../common/fontSize';
 import { normLocal, dirOf, isRealFilePath, isVirtualTab, deriveTreeRoot } from '../common/paths';
 import { snapshotHint, INITIAL_SNAP_HINTS } from './recovery-hints';
 import { placePopup } from '../common/popup';
@@ -192,6 +194,9 @@ let decodeLocalRef: PreviewModule['decodeLocalRef'] = () => notLoaded('preview')
 let createBlockRenderer: BlockcacheModule['createBlockRenderer'] = () => notLoaded('blockcache');
 let createMarkdownDocument: () => MarkdownDocumentClient = () => notLoaded('blockcache');
 let xlsxRecordProvider: CsvModule['xlsxRecordProvider'] = () => notLoaded('csv');
+// scroll-surface 携 codemirror（syntaxTree/EditorView）；启动图仅留类型，运行期由 edit/IR
+// 模块就位时同步取用（二者静态依赖 scroll-surface，抓取为同步，调用点锚定时序不变）。
+let cmScrollSurface: typeof import('../common/scroll-surface')['cmScrollSurface'] = () => notLoaded('scroll-surface');
 
 /** 图床件懒绑定（imagehost 引 @codemirror/view，未启用时保持零加载；同步入口取安全缺省） */
 let imagehostMod: ImagehostModule | null = null;
@@ -223,6 +228,7 @@ const loadEdit = (): Promise<EditModule> =>
   (editPromise ??= import('../text-view/edit').then(m => {
     EditView = m.EditView;
     EDIT_LIMIT = m.EDIT_LIMIT;
+    cmScrollSurface = m.cmScrollSurface;
     // 伴生模块（highlight/mdformat/commands/view/imagehost）均为 edit 的静态依赖——
     // 主模块就位时其模块体已求值，下列 import 只取缓存引用（微任务级），后台补绑定即可：
     // 菜单/撤销深度/滚动定位/粘贴入稿都发生在挂载完成之后，不存在同挂载链的同步依赖
@@ -263,6 +269,7 @@ let livePreviewPromise: Promise<LivePreviewModule> | null = null;
 const loadLivePreview = (): Promise<LivePreviewModule> =>
   (livePreviewPromise ??= import('../markdown-view/livepreview').then(m => {
     LivePreviewView = m.LivePreviewView;
+    cmScrollSurface = m.cmScrollSurface;
     // preview/图床件为 IR 静态依赖（同图已求值），后台补绑定
     void loadPreviewKit().catch(() => undefined);
     return m;
@@ -300,13 +307,6 @@ function el(id: string): HTMLElement {
   const e = document.getElementById(id);
   if (!e) throw new Error($tf('err.missingEl', id));
   return e;
-}
-
-function fmtSize(n: number): string {
-  if (n >= 1024 * 1024 * 1024) return (n / 1024 / 1024 / 1024).toFixed(1) + ' GB';
-  if (n >= 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
-  if (n >= 1024) return (n / 1024).toFixed(1) + ' KB';
-  return n + ' B';
 }
 
 function fmtDate(ms: number): string {
@@ -705,6 +705,24 @@ export async function boot(): Promise<void> {
     const keep = new Set<Element>(parkedViews.hosts());
     for (const child of [...viewarea.children]) if (!keep.has(child)) child.remove();
   };
+  // 大正文换挂的拆除按批让出（v50 共享队列 + 世代复核）：预览整棵水合 DOM（dense-2m 数千
+  // 公式/代码块）单次 detach 走完整子树可达 ≥100ms（实证 clearViewarea 占挂载长任务主体，
+  // destroyView 本身仅 ≈3ms）。先按 ≤8ms 预算分批清空内容根（.md-col），片间让出，再摘空壳；
+  // 非预览面分批清子节点。与同步 clearViewarea 同口径保留暂存宿主；世代失效即弃（新链会续清）。
+  const clearViewareaChunked = async (isCurrent: () => boolean): Promise<void> => {
+    const keep = new Set<Element>(parkedViews.hosts());
+    for (const child of [...viewarea.children]) {
+      if (keep.has(child)) continue;
+      const content = child.querySelector('.md-col') ?? child;
+      while (content.firstElementChild) {
+        const deadline = performance.now() + 8;
+        do { content.firstElementChild.remove(); } while (content.firstElementChild && performance.now() < deadline);
+        if (content.firstElementChild) { await yieldToBrowser(); if (!isCurrent()) return; }
+      }
+      child.remove();
+      if (!isCurrent()) return;
+    }
+  };
   let recentCache: RecentItem[] = []; // 命令面板文件搜索来源（最近+收藏，不做全盘扫描）
   let favCache: RecentItem[] = [];
   const wysiwygHeadings = new Map<string, HeadingItem[]>(); // 大纲联动（007 规则 3）
@@ -725,14 +743,13 @@ export async function boot(): Promise<void> {
 
   // ---- 视图模式与渲染 ----
   /** Markdown 文件是否可进即时渲染（007 规则 6：≤4MiB，只读 .md 同权——
-   *  v2.6 起所有形态都在编辑缓冲内承载，保存侧 E1003 口径统一兜底，IR 不再单独设只读闸） */
+   *  v2.6 起所有形态都在编辑缓冲内承载，保存侧 E1003 口径统一兜底，IR 不再单独设只读闸）。
+   *  体量未知（会话恢复异步窗口）按 0 乐观放行，超限由挂载守卫复核——判决收口 mode.ts。 */
   const wysiwygEligible = (tab: TabState): boolean =>
-    tab.language === 'Markdown' &&
-    (fileSizes.get(tab.path) ?? (tab.path.startsWith('draft://') ? 0 : Infinity)) <= WYSIWYG_LIMIT;
-  /** 分屏右栏保留整篇 DOM，独立限制为 ≤2MiB。 */
+    menuWysiwygEligible(tab.language, fileSizes.get(tab.path));
+  /** 分屏右栏保留整篇 DOM，独立限制为 ≤2MiB；未知体量口径与 IR 对称（mode.ts）。 */
   const mdSplitEligible = (tab: TabState): boolean =>
-    tab.language === 'Markdown' &&
-    (fileSizes.get(tab.path) ?? 0) <= MD_PREVIEW_LIMIT;
+    menuSplitEligible(tab.language, fileSizes.get(tab.path));
 
   const modeOf = (tab: TabState): ViewMode => {
     if (tab.language === 'Docx' || tab.language === 'Pdf') return 'view';
@@ -1571,32 +1588,41 @@ export async function boot(): Promise<void> {
     const prevMode = currentViewKey.split('#')[2];
     if (prevTab && tab?.path !== prevPath && !currentViewKey.startsWith('\u0000')
       && (prevMode === 'edit' || prevMode === 'wysiwyg')) parkCurrentView(currentViewKey, prevTab);
-    const releaseStarted = performance.now();
     destroyView();
     currentViewKey = key;
-    clearViewarea();
-    const releasedLong = performance.now() - releaseStarted >= 8;
     mountEpoch.next();
-    if (!tab) {
-      // 空态纯空白（001 规则 32 v2.3，P3 用户定稿：推翻 v1.8 的引导式空态——品牌标/文案/
-      // 三入口钮/最近列表全删，「什么都不需要写」；打开入口在菜单/工具栏/快捷键，欢迎页保留）
-      const empty = document.createElement('div');
-      empty.className = 'view-empty';
-      viewarea.appendChild(empty);
-      updateMarkers();
-      return;
-    }
-    const mode = modeOf(tab);
     const seq = mountEpoch.value;
-    if (resumeParkedView(tab, key)) { renderStatus(); refreshViewCommands(); return; }
-    // 挂载完成后刷新工具栏快照：enabled/checked 在构建时求值，异步挂载（IR/编辑面都有 await）
-    // 期间 currentView 未就位会滞留旧值——IR 下 tbmd 格式组恒灰即此因（2026-10-26 实证）
-    // 大正文释放和新编辑器初始化各自有不可抢占的 DOM 成本，不能串成一个长任务。
-    const mounting = releasedLong ? yieldToBrowser().then(() => {
-      if (seq === mountEpoch.value) return mountView(tab, mode, seq);
-    }) : mountView(tab, mode, seq);
-    void mounting.then(() => { if (seq === mountEpoch.value) refreshViewCommands(); });
-    restoreSwitchAnchor(tab.path, seq);
+    const isCurrent = () => seq === mountEpoch.value;
+    const mountAfterClear = (): void => {
+      if (!isCurrent()) return;
+      if (!tab) {
+        // 空态纯空白（001 规则 32 v2.3，P3 用户定稿：推翻 v1.8 的引导式空态——品牌标/文案/
+        // 三入口钮/最近列表全删，「什么都不需要写」；打开入口在菜单/工具栏/快捷键，欢迎页保留）
+        const empty = document.createElement('div');
+        empty.className = 'view-empty';
+        viewarea.appendChild(empty);
+        updateMarkers();
+        return;
+      }
+      const mode = modeOf(tab);
+      if (resumeParkedView(tab, key)) { renderStatus(); refreshViewCommands(); return; }
+      // 挂载完成后刷新工具栏快照：enabled/checked 在构建时求值，异步挂载（IR/编辑面都有 await）
+      // 期间 currentView 未就位会滞留旧值——IR 下 tbmd 格式组恒灰即此因（2026-10-26 实证）
+      void mountView(tab, mode, seq).then(() => { if (isCurrent()) refreshViewCommands(); });
+    };
+    // 拆除按体量分流：小正文（<256KB）原子 detach 成本低，沿用同步 clearViewarea + 原 releasedLong
+    // 时序——同步挂载保留锚定时序，IR 空行间距装饰即时交付，停手无补塌缩位移（metadata 实证：异步
+    // 挂载停手位移 10.4px，同步 ≤0.4px）。大正文整棵水合 DOM（dense-2m 数千公式/代码块、400KB 巨表）
+    // 原子 detach 可达 ≥100ms，改 clearViewareaChunked 分批让出 + 世代守卫异步挂载链。
+    if ((fileSizes.get(prevPath) ?? 0) < 256 * 1024) {
+      const releaseStarted = performance.now();
+      clearViewarea();
+      if (performance.now() - releaseStarted >= 8) void yieldToBrowser().then(() => { if (isCurrent()) mountAfterClear(); });
+      else mountAfterClear();
+    } else {
+      void clearViewareaChunked(isCurrent).then(mountAfterClear);
+    }
+    if (tab) restoreSwitchAnchor(tab.path, seq);
   }
 
   /** B-2：切换后按锚点行恢复位置（挂载异步，轮询等待视图就绪） */
@@ -2527,6 +2553,12 @@ export async function boot(): Promise<void> {
         }
         currentView = csv;
         csv.setFontSize(settings.fontSize ?? 12); // v2.5 扩面：CSV 表格行高随字号派生（初始带上保存值）
+        if (workbook) {
+          // Excel 提取边界提示（批 4）：缓存值-only 范围说明，超限再追加部分显示警告
+          const parts = [$t('ooxml.xlsxScope')];
+          if (workbook.truncated) parts.push($t('ooxml.truncated'));
+          flash(parts.join(' '));
+        }
         return;
       }
       // 流式查看面（002 规则 7b v2.6：'view' 仅 >10MB 文件与读取失败兜底——不可编辑、无替换/列模式入口）
@@ -2559,6 +2591,7 @@ export async function boot(): Promise<void> {
         showLineNumbers: settings.showLineNumbers !== false,
         fontSize: settings.fontSize ?? 12,
         onFontSize: n => applyFontSize(n),
+        onNotice: msg => flash(msg),
       });
       await tv.mount();
       if (stale()) {
@@ -4172,7 +4205,7 @@ export async function boot(): Promise<void> {
   }
 
   function applyFontSize(n: number): void {
-    const v = Math.min(18, Math.max(10, Math.round(n)));
+    const v = clampFontSize(n);
     syncFsWidget();
     if (v === settings.fontSize) return;
     settings = { ...settings, fontSize: v };
@@ -6319,5 +6352,3 @@ export async function boot(): Promise<void> {
     }
   }
 }
-
-export { fmtSize };

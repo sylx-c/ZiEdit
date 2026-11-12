@@ -13,7 +13,6 @@ import {
 } from '../common/ipc';
 import { listen } from '@tauri-apps/api/event';
 import { save as saveDialog } from '@tauri-apps/plugin-dialog';
-import { parseCsvLine, sniffDelim } from '../csv-view/table';
 import { extractTreeSymbols, loadHighlightParser } from '../text-view/highlight';
 import { dlgAlert, overlayDialog, type OverlayMask } from './chrome';
 import { t, tf } from '../common/i18n';
@@ -518,6 +517,3 @@ function mkCb(label: string): HTMLLabelElement {
   lab.append(cb, document.createTextNode(label));
   return lab;
 }
-
-/** CSV 嗅探导出（供路由判断复用） */
-export { parseCsvLine, sniffDelim };

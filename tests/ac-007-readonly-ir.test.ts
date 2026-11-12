@@ -8,14 +8,21 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const app = readFileSync(fileURLToPath(new URL('../src/shell/app.ts', import.meta.url)), 'utf8');
+const mode = readFileSync(fileURLToPath(new URL('../src/common/mode.ts', import.meta.url)), 'utf8');
 
 describe('MD-001 v0.15：只读 Markdown 同权进即时渲染（源码契约锁）', () => {
-  it('UI 闸 wysiwygEligible 不再含只读判断（形态闸只剩 Markdown/≤2MB；草稿按语言放行，大小按 0）', () => {
-    const m = /const wysiwygEligible = \(tab: TabState\): boolean =>[\s\S]{0,340}?;/.exec(app);
+  it('UI 闸 wysiwygEligible 委托 mode.ts，不含只读/草稿排除（形态闸只剩 Markdown/≤4MiB）', () => {
+    // 批1c：体量判决收口 mode.ts，UI 闸仅委托——不得回漂引入只读判断或草稿排除。
+    const m = /const wysiwygEligible = \(tab: TabState\): boolean =>[\s\S]{0,200}?;/.exec(app);
     expect(m).toBeTruthy();
-    expect(m![0]).toMatch(/tab\.language === 'Markdown'/);
-    expect(m![0]).not.toMatch(/!tab\.path\.startsWith\('draft:\/\/'\)/); // 草稿格式切换后按 language 放行，不得回漂排除草稿
-    expect(m![0]).toMatch(/<= WYSIWYG_LIMIT/);
+    expect(m![0]).toContain('menuWysiwygEligible(tab.language, fileSizes.get(tab.path))');
+    expect(m![0]).not.toMatch(/!tab\.path\.startsWith\('draft:\/\/'\)/); // 草稿按 language 放行，不得回漂排除草稿
     expect(m![0]).not.toMatch(/fileReadonly/); // 只读闸不得回漂（保存侧 E1003 统一兜底）
+    // 纯函数侧（单一真相源）：语言闸 + 4MiB 上限，无只读判断。
+    const f = /export function wysiwygEligibleFile\(meta: ModeMeta\): boolean \{[\s\S]{0,200}?\}/.exec(mode);
+    expect(f).toBeTruthy();
+    expect(f![0]).toMatch(/meta\.language === 'Markdown'/);
+    expect(f![0]).toMatch(/<= WYSIWYG_LIMIT/);
+    expect(f![0]).not.toMatch(/readonly/i);
   });
 });

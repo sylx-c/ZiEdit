@@ -235,14 +235,24 @@ export function rectSelectionCleared(preserve: boolean, dragging: boolean): bool
 
 // ── 视觉列（005 v2.0：CJK 占 2 格，矩形按视觉格对齐——行业通行口径） ──
 
-/** 字符的视觉宽度（CJK/全角=2，其余=1） */
+/** 字符的视觉宽度（CJK/全角=2，其余=1）。
+ *  非 Tab 簇的宽与 col 无关，按簇字符串记忆化：列操作对整块逐行反复测宽，同一字符
+ *  （尤其 CJK）重复命中，省去每次的 Unicode 属性正则测试。Tab 宽随 col 变，不缓存。
+ *  缓存有界（4096 簇即清空），输出与未缓存逐字符计算完全一致（引用透明）。 */
+const clusterWidthCache = new Map<string, number>();
 function charW(ch: string | undefined, col = 0): number {
   if (!ch) return 0;
   if (ch === '\t') return 4 - col % 4;
-  if (/\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(ch)) return 2;
+  const hit = clusterWidthCache.get(ch);
+  if (hit !== undefined) return hit;
   const c = ch.codePointAt(0) ?? 0;
   // CJK 统一表意/扩展/兼容 + 全角标点/假名/谚文等（宽松口径：>0x2E80 的东亚区块按 2 格）
-  return c >= 0x1100 && (c <= 0x115f || (c >= 0x2e80 && c <= 0xa4cf) || (c >= 0xac00 && c <= 0xd7a3) || (c >= 0xf900 && c <= 0xfaff) || (c >= 0xfe30 && c <= 0xfe6f) || (c >= 0xff00 && c <= 0xff60) || (c >= 0xffe0 && c <= 0xffe6) || (c >= 0x20000 && c <= 0x3fffd)) ? 2 : 1;
+  const wide = /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(ch)
+    || (c >= 0x1100 && (c <= 0x115f || (c >= 0x2e80 && c <= 0xa4cf) || (c >= 0xac00 && c <= 0xd7a3) || (c >= 0xf900 && c <= 0xfaff) || (c >= 0xfe30 && c <= 0xfe6f) || (c >= 0xff00 && c <= 0xff60) || (c >= 0xffe0 && c <= 0xffe6) || (c >= 0x20000 && c <= 0x3fffd)));
+  const w = wide ? 2 : 1;
+  if (clusterWidthCache.size >= 4096) clusterWidthCache.clear();
+  clusterWidthCache.set(ch, w);
+  return w;
 }
 
 /** 字符索引 → 视觉列（起点 0；按该行前缀累计宽度） */

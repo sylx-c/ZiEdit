@@ -5,6 +5,7 @@
 import * as ipc from '../common/ipc';
 import type { CsvRecordsResult } from '../common/ipc';
 import { t, tf } from '../common/i18n';
+import { clampFontSize } from '../common/fontSize';
 
 export const CSV_ROW_HEIGHT = 24;
 
@@ -341,7 +342,7 @@ export class CsvView {
    *  行高/虚拟滚动（from/visible/translateY/sizer 总高）全部按新行高重算并重渲染；
    *  首可见记录号保持。幂等：重复同值调用无副作用；mount 前调用仅记录，挂载时生效。 */
   setFontSize(fs: number): void {
-    const v = Math.min(18, Math.max(10, Math.round(fs))); // 与设置字号同域（10–18px）
+    const v = clampFontSize(fs);
     if (v === this.fontSize) return;
     const oldRowH = this.rowH;
     this.fontSize = v;

@@ -3,13 +3,13 @@
 // exe 走 ZIEDIT_GATE_EXE/RUN_DIR 约定；verdict=false 时退出码置 1（供 run-all.mjs 汇总）。
 // 用法: node tests/gates/native-gate-ac36.mjs <corpus.md> <out.json> [rounds=3]
 // 判据（007 v0.36 AC-36，release 构建，冷热 rounds 轮取中位）:
-//   键入事务分段（t3-t0，docChanged）p95 ≤ 16ms；单尾 max ≤ 50ms；输入期无 >100ms 长任务；
+//   键入事务分段（t3-t0，docChanged）p95 ≤ 40ms（密集语料分档，2026-11-04 用户决策；16ms 保留为长期目标）；单尾 max ≤ 50ms；输入期无 >100ms 长任务；
 //   机制锁观察：纯散文键入期 fullRebuildEvents 应为 0（B2 根修后；referencesReady/getLines）。
 // 依赖：B1 探针（globalThis.__ZIEDIT_IR_PERF__ 开关 + __ZIEDIT_IR_PERF_DATA__ 快照 getter）。
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { RUN_DIR, EXE, INIT_OBSERVERS, connectCDP, waitTargets, waitMounted, clickFocus, killTree, percentile, median } from './gate-lib.mjs';
+import { RUN_DIR, EXE, INIT_OBSERVERS, connectCDP, waitTargets, waitMounted, clickFocus, killTree, percentile, median, switchMdMode, waitFor } from './gate-lib.mjs';
 
 const corpusArg = process.argv[2];
 const outFileArg = process.argv[3];
@@ -52,6 +52,11 @@ async function runRound(roundIdx) {
     // 免 reload 时 .cm-content 3s 挂载、130 万字符全量在档）。等自动挂载后在活文档上注入 INIT——
     // 观测等价：longtask/loaf 只统计 pageStart 之后的条目，挂载期事件本就不入结果。
     await waitMounted(cdp);
+    // 显式进即时渲染再测：出厂默认已保存 md 进渲染预览（2026-10-29 用户拍板），且预览态并存一个空的
+    // 暂存 .cm-content——bare querySelector('.cm-content') 会误取空编辑器（base.len=0、整轮键入落空）。
+    // 切到 IR 并待 .md-ir 卸载 loading 后只剩唯一可见编辑器，与 gate-md-surfaces 的 IR 口径同源。
+    if (!await cdp.evaluate(`!!document.querySelector('.md-ir:not(.md-ir-loading) .cm-content')`)) await switchMdMode(cdp, '即时渲染');
+    await waitFor(cdp, `!!document.querySelector('.md-ir:not(.md-ir-loading) .cm-content')`, 180000);
     await cdp.evaluate(INIT_OBSERVERS);
     await new Promise(r => setTimeout(r, 3000)); // 挂载期异步（公式/图表/预热）跑完
 
@@ -161,13 +166,14 @@ async function runRound(roundIdx) {
         withTimes: events.map(e => ({ kind: e.kind, time: Math.round(e.time) })),
         sentenceWindows: sentenceWindows.map(w => ({ n: w.n, surface: w.surface, start: Math.round(w.start), end: Math.round(w.end) })) },
       inputLanded: finalLen > base.len,
-      bars: { p95: 16, max: 50, longtaskMs: 100, minSamples: 100 },
+      // 密集键入 P95 40ms（2026-11-04 用户决策，PRD 密集语料分档）；16ms 为长期目标。max/长任务/样本数不变。
+      bars: { p95: 40, max: 50, longtaskMs: 100, minSamples: 100 },
     };
     const reasons = [];
     if (!rec.result.inputLanded) reasons.push('input not landed');
     if (!sequence || !sequence.ordered || sequence.count < sentence) reasons.push(`sequence broken: ${JSON.stringify(sequence)} / typed ${sentence}`);
     if (rec.result.segments.docChanged < 100) reasons.push(`insufficient samples: ${rec.result.segments.docChanged}`);
-    if (rec.result.segments.p95 > 16) reasons.push(`p95 ${rec.result.segments.p95} > 16`);
+    if (rec.result.segments.p95 > 40) reasons.push(`p95 ${rec.result.segments.p95} > 40`);
     if (rec.result.segments.max > 50) reasons.push(`max ${rec.result.segments.max} > 50`);
     if (rec.result.longtasks.over100ms > 0) reasons.push(`longtask>100ms × ${rec.result.longtasks.over100ms}`);
     rec.failReasons = reasons;

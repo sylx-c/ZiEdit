@@ -1,4 +1,5 @@
 import { getLang, t, type Lang } from '../common/i18n';
+import { clampFontSize } from '../common/fontSize';
 import type { Settings } from '../common/ipc';
 import { overlayDialog, type OverlayMask } from './chrome';
 import './settings.css';
@@ -178,7 +179,7 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
       ...ctx.getSettings(),
       readOnlyMode: readOnly.checked,
       columnMarkers: markers.value.split(',').map(s => parseInt(s.trim(), 10)).filter(n => Number.isFinite(n) && n > 0).slice(0, 12),
-      fontSize: Math.min(18, Math.max(10, parseInt(fontSize.value, 10) || 12)),
+      fontSize: clampFontSize(parseInt(fontSize.value, 10) || 12),
       autoSaveSec: Math.max(0, parseInt(autosave.value, 10) || 0),
       autoSaveTarget: target.value as Settings['autoSaveTarget'],
       snapshotDir: snapshotDir || undefined,

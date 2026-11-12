@@ -45,10 +45,15 @@ describe('AC-007 切换免打扰', () => {
     expect(section('async function saveBufferedTab(', 'function noteSaved(')).toContain('state.sliceDoc()');
   });
 
-  it('IR 菜单使用 4MiB 闸，未知大小的真实文件不得默认放行（草稿按 0），9MiB 禁入', () => {
+  it('IR 菜单使用 4MiB 闸，未知体量乐观放行（与分屏/modeOf/挂载守卫同源），9MiB 禁入', () => {
     expect(WYSIWYG_LIMIT).toBe(4 * 1024 * 1024);
     expect(9 * 1024 * 1024 <= WYSIWYG_LIMIT).toBe(false);
-    expect(section('const wysiwygEligible', 'const mdSplitEligible')).toContain('? 0 : Infinity)) <= WYSIWYG_LIMIT');
+    // 批1c：体量判决收口 mode.ts（menuWysiwygEligible）。未知 size 按 0 乐观放行——修 v53
+    // 会话恢复异步窗口内 IR 菜单项被禁用（旧 ?? Infinity 与分屏 ?? 0 不对称，且与 modeOf、
+    // IR 挂载守卫、disabled 原因键三处 ?? 0 口径不一）。超限由挂载守卫（textOpen 复核 +
+    // WYSIWYG_LIMIT）权威拦截；真实文件默认形态恒为渲染预览（preview 阶梯），IR 从不是默认，
+    // 故乐观放行只影响手动切换、不改默认。未知体量乐观口径的纯函数回归锁在 mode.test.ts。
+    expect(section('const wysiwygEligible', 'const mdSplitEligible')).toContain('menuWysiwygEligible(tab.language, fileSizes.get(tab.path))');
     expect(section('function mdModeMenuItems(', '\n  function ')).toContain('wysiwygEligible(tab)');
     expect(app).toContain('enabled: () => isMdActive() && wysiwygEligible(activeTab()!)');
   });

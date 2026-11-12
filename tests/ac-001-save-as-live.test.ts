@@ -3,7 +3,10 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { shell, startShell, settle } from './shell-behavior-harness';
 import { openFile, settingsLoad, textReadAll, textSave } from '../src/common/ipc';
 const live = vi.hoisted(() => ({ instance: null as any }));
-vi.mock('../src/markdown-view/livepreview', () => ({ LivePreviewView: class {
+vi.mock('../src/markdown-view/livepreview', () => ({ cmScrollSurface: vi.fn(() => ({
+  element: document.createElement('div'), snapshot: vi.fn(() => ({ version: 0, top: 0, height: 0, viewport: 0 })),
+  capture: vi.fn(() => ({ line: 1, surface: 'ir' })), restore: vi.fn(), scrollTo: vi.fn(), overview: vi.fn(() => []),
+})), LivePreviewView: class {
   opts: any; constructor(_host: unknown, opts: any) { this.opts = opts; live.instance = this; }
   get path() { return this.opts.path; }
   getContent() { return '# 当前未保存的即时编辑内容'; }
