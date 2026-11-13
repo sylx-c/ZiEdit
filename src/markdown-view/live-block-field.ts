@@ -215,8 +215,9 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
     };
     if (geometryChanged) {
       // 几何变化与停滚补齐走共享帧队列，不能绕过预算同步重建整个视口。
-      // gap 装饰仍同步交付：停稳重建前窗口里可能还有滚动期树未就绪而迟到的空行。
-      return { ...mapped, layout: mergeLayoutNow(mapped.layout, sliceFrom, sliceTo), pending: { next: sliceFrom, end: sliceTo, token: {}, first: true, budgeted: true } };
+      // （不加 mergeLayoutNow：停稳事务把整窗 blockLayout 塞进单笔事务，dense-2m 实测
+      // 出 ≥100ms 长任务与异步超时；滚动路径的同步 gap 交付已覆盖迟到源，见下方 mergeLayoutNow。）
+      return { ...mapped, pending: { next: sliceFrom, end: sliceTo, token: {}, first: true, budgeted: true } };
     }
     if (tr.docChanged && !prev.pending && !prev.set.size && !tr.effects.length
       && tr.startState.readOnly === tr.state.readOnly
