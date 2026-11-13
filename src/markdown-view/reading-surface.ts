@@ -200,6 +200,7 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
     // 使增高与补偿对任何观察者原子化。决策集中在每帧一次的批量里做（先读后写，单次布局）——
     // 逐图 getComputedStyle/gBCR 会把大图量语料的挂载推过 100ms 长任务线（dense-2m 实测）。
     const viewport = this.element.getBoundingClientRect();
+    const band = this.element.scrollTop;
     const freeze: Array<[HTMLImageElement, number]> = [];
     for (const [image, remaining] of this.assets) {
       if (!this.root.contains(image) || image.complete && remaining <= 1) {
@@ -211,10 +212,15 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
         continue;
       }
       if (!this.frozenAssets.has(image) && !this.freezeEvaluated.has(image)) {
+        // 视口带预筛用已缓存块几何（零布局读）；几何未就绪则顺延下帧再判。
+        const owner = this.blockOf(image);
+        const box = owner ? this.geometry.get(owner) : undefined;
+        if (!box) continue;
         this.freezeEvaluated.add(image);
         if (!image.complete
           && !image.getAttribute('width') && !image.getAttribute('height')
-          && getComputedStyle(image).aspectRatio === 'auto') {
+          && getComputedStyle(image).aspectRatio === 'auto'
+          && box.top + box.height > band && box.top < band + this.element.clientHeight) {
           const rect = image.getBoundingClientRect();
           if (rect.bottom > viewport.top && rect.top < viewport.bottom) freeze.push([image, rect.height]);
         }
@@ -233,6 +239,13 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
     else if (this.visual?.element.isConnected && Math.abs((this.visual.range ?? this.visual.element).getBoundingClientRect().top - this.visual.top) > .5) this.layoutChanged();
     if (this.assets.size) this.assetFrame = requestAnimationFrame(this.checkAssets);
   };
+  /** 图片所属的登记块（沿 DOM 上行找 entries 已登记元素；纯指针行走，无布局读）。 */
+  private blockOf(image: HTMLImageElement): HTMLElement | undefined {
+    for (let node: HTMLElement | null = image; node && node !== this.root; node = node.parentElement) {
+      if (this.entries.has(node)) return node;
+    }
+    return undefined;
+  }
   private assetLoaded = (event: Event): void => {
     // 原生图片尺寸可能先于下一轮 RO 交付；只通知当前锚管理器，
     // 不保存或写回加载开始时的位置。新输入和销毁仍取消旧锚。
