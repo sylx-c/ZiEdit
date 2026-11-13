@@ -59,7 +59,10 @@ await (async () => { const t0 = Date.now(); for (;;) { if (await evaluate("!!doc
 await new Promise(r => setTimeout(r, 1000));
 out.checks.welcomeDismissed = await dismissWelcome();
 if (!out.checks.welcomeDismissed) { out.finished = new Date().toISOString(); save(); throw new Error('welcome modal not dismissible — keyboard cannot land (fail-closed)'); }
-// 焦点定案插桩：记录窗口/DOM 焦点事件与活动元素漂移
+// 焦点定案插桩：记录窗口/DOM 焦点事件与活动元素漂移。
+// 活动元素落在 .ov-box（模态框）时一并记录对话框标题（aria-label）——
+// 2026-11-13 实测：写作中途有模态框抢焦点，焦点离开编辑器后经 CDP 插入的正文丢失
+// （连续 6 句），顺序检查据此判败；记录标题才能定位是哪个对话框。
 await evaluate(`(() => {
   window.__foc = [];
   const log = m => window.__foc.push({ t: Math.round(performance.now()), m });
@@ -70,7 +73,12 @@ await evaluate(`(() => {
   window.__focScan = setInterval(() => {
     const el = document.activeElement;
     const id = el ? (el.className || el.tagName) : 'null';
-    if (id !== lastEl) { lastEl = id; log('active=' + String(id).slice(0, 40)); }
+    if (id !== lastEl) {
+      lastEl = id;
+      const box = el && el.closest ? el.closest('.ov-box') : null;
+      const title = box ? (box.getAttribute('aria-label') || '') : '';
+      log('active=' + String(id).slice(0, 40) + (title ? ' [dialog:' + title.slice(0, 40) + ']' : ''));
+    }
   }, 250);
   return 1;
 })()`);
