@@ -31,6 +31,8 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
   private assets = new Map<HTMLImageElement, number>();
   /** R1：加载期被冻结高度的图片 → 原内联 height（销毁/解冻时恢复）。 */
   private frozenAssets = new WeakMap<HTMLImageElement, string>();
+  /** R1：已做过冻结判定的图片（首帧一次，后续帧不再为其读布局）。 */
+  private freezeEvaluated = new WeakSet<HTMLImageElement>();
   private observed = new Set<HTMLElement>();
   private texts = new WeakMap<HTMLElement, { text: string; kind: string }>();
   private geometry = new Map<HTMLElement, { top: number; height: number }>();
@@ -208,11 +210,14 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
         this.assets.delete(image);
         continue;
       }
-      if (!this.frozenAssets.has(image) && !image.complete
-        && !image.getAttribute('width') && !image.getAttribute('height')
-        && getComputedStyle(image).aspectRatio === 'auto') {
-        const rect = image.getBoundingClientRect();
-        if (rect.bottom > viewport.top && rect.top < viewport.bottom) freeze.push([image, rect.height]);
+      if (!this.frozenAssets.has(image) && !this.freezeEvaluated.has(image)) {
+        this.freezeEvaluated.add(image);
+        if (!image.complete
+          && !image.getAttribute('width') && !image.getAttribute('height')
+          && getComputedStyle(image).aspectRatio === 'auto') {
+          const rect = image.getBoundingClientRect();
+          if (rect.bottom > viewport.top && rect.top < viewport.bottom) freeze.push([image, rect.height]);
+        }
       }
       this.assets.set(image, image.complete ? remaining - 1 : 2);
     }
