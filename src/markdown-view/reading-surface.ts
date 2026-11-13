@@ -29,8 +29,6 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
   private assetObserver?: MutationObserver;
   private assetFrame = 0;
   private assets = new Map<HTMLImageElement, number>();
-  /** R1：加载期被冻结高度的图片 → 原内联 height（销毁/解冻时恢复）。 */
-  private frozenAssets = new WeakMap<HTMLImageElement, string>();
   private observed = new Set<HTMLElement>();
   private texts = new WeakMap<HTMLElement, { text: string; kind: string }>();
   private geometry = new Map<HTMLElement, { top: number; height: number }>();
@@ -186,16 +184,6 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
   contentChanged(): void { this.layoutChanged(); }
   private watchAsset(image: HTMLImageElement): void {
     if (!this.root.contains(image)) return;
-    // R1（2026-11-13 调查）：无预留尺寸图片的固有高度在解码完成后，会在任意布局读取时进入排版，
-    // 早于下一帧的锚定补偿整整一个任务间隙（真机 224px 实录）。冻结加载期高度（通常为 0），
-    // 由 checkAssets 在同一 JS 回合内「解冻 → 读实时几何 → 补偿」，使增高与补偿对任何观察者原子化。
-    // 已用 width/height 属性或 CSS aspect-ratio 预留尺寸的图片不冻结（无跳变）。
-    if (!this.frozenAssets.has(image) && !image.complete
-      && !image.getAttribute('width') && !image.getAttribute('height')
-      && getComputedStyle(image).aspectRatio === 'auto') {
-      this.frozenAssets.set(image, image.style.height);
-      image.style.height = image.getBoundingClientRect().height + 'px';
-    }
     this.assets.set(image, 2);
     if (!this.assetFrame) this.assetFrame = requestAnimationFrame(this.checkAssets);
   }
@@ -203,19 +191,10 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
     this.assetFrame = 0;
     if (this.dead) return;
     for (const [image, remaining] of this.assets) {
-      if (!this.root.contains(image) || image.complete && remaining <= 1) {
-        // 同回合解冻：本函数随后的实时几何读取（强制布局）与锚定补偿在同一 JS 回合完成，
-        // 外部任务只能读到「增高前」或「已补偿后」的状态，读不到中间态。
-        const frozenHeight = this.frozenAssets.get(image);
-        if (frozenHeight !== undefined) { image.style.height = frozenHeight; this.frozenAssets.delete(image); }
-        this.assets.delete(image);
-      }
+      if (!this.root.contains(image) || image.complete && remaining <= 1) this.assets.delete(image);
       else this.assets.set(image, image.complete ? remaining - 1 : 2);
     }
     // 原生滚动可能已提交，但记锚的 rAF 尚未执行；不能把新滚动补偿回去。
-    // （分支序保持原样：scrollTop 回声优先判据区分「滚动位移→重记基线」与「布局位移→补偿」，
-    // 用几何推断交换顺序会把真实用户滚动误补偿回去——无预留尺寸图片场景原生锚定零调整，
-    // 会自然落入 visual 补偿分支，无需换序。）
     if (Math.abs(this.element.scrollTop - this.visualScrollTop) > .5) this.scrolled();
     else if (this.visual?.element.isConnected && Math.abs((this.visual.range ?? this.visual.element).getBoundingClientRect().top - this.visual.top) > .5) this.layoutChanged();
     if (this.assets.size) this.assetFrame = requestAnimationFrame(this.checkAssets);
@@ -511,11 +490,6 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
   }
   destroy(): void {
     this.dead = true; cancelAnimationFrame(this.frame); cancelAnimationFrame(this.assetFrame); this.observer?.disconnect(); this.assetObserver?.disconnect(); this.assets.clear();
-    // R1：解冻仍在加载期被冻结高度的图片，还原原内联样式。
-    for (const image of this.root.querySelectorAll('img')) {
-      const frozenHeight = this.frozenAssets.get(image);
-      if (frozenHeight !== undefined) { image.style.height = frozenHeight; this.frozenAssets.delete(image); }
-    }
     this.geometry.clear(); this.heights.clear(); this.pages.clear(); this.observed.clear();
     for (const page of this.pinnedPages) page.style.removeProperty('content-visibility');
     this.pinnedPages.clear(); this.entries = new WeakMap(); this.indices = new WeakMap();
