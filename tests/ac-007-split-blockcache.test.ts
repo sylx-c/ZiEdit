@@ -102,9 +102,6 @@ describe('AC-28 块级缓存渲染（注入假渲染器）', () => {
     const canonical = (root: HTMLElement): string => [...root.children].map(el => {
       const clone = el.cloneNode(true) as HTMLElement;
       for (const n of [clone, ...clone.querySelectorAll('[data-line]')]) n.removeAttribute('data-line');
-      // R1（2026-11-13）：加载期图片可能带 ReadingSurface 冻结高度的瞬态内联样式（flat 侧独有，
-      // 整篇侧无 surface）。语义比对与该瞬态无关，两侧对称剥离，与 data-line 剥离同构。
-      for (const img of clone.querySelectorAll('img')) img.removeAttribute('style');
       return clone.outerHTML;
     }).join('');
     for (const doc of corpus) {
