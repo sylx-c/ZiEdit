@@ -94,7 +94,9 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
     ['paper', 'theme.paper'], ['cool', 'theme.cool'], ['graphite', 'theme.graphite'], ['black', 'theme.black'],
   ]);
   const line = color('lineHl', 'set.lineHl', initial.lineHl, '#eaeef4');
-  group('set.grpAppearance', 'set.hintAppearance', row('set.theme', theme), row('set.lineHl', line.enabled, line.picker));
+  const treeShowAll = checkbox('fileTreeShowAll', initial.fileTreeShowAll === true);
+  group('set.grpAppearance', 'set.hintAppearance', row('set.theme', theme), row('set.lineHl', line.enabled, line.picker),
+    row('set.treeShowAll', treeShowAll));
 
   const readOnly = checkbox('readOnlyMode', initial.readOnlyMode === true);
   const fontSize = number('fontSize', initial.fontSize ?? 12, 10, 18);
@@ -193,6 +195,7 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
       diffColors: Object.keys(diffColors).length ? diffColors : undefined,
       language: language.value as Lang,
       closeBehavior: close.value as Settings['closeBehavior'],
+      fileTreeShowAll: treeShowAll.checked,
     });
     mask.close();
   };

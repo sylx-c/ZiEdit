@@ -89,10 +89,20 @@ export class FileTree {
     private container: HTMLElement,
     rootPath: string | TreeRoot[],
     private actions: TreeActions,
-    options: { expandRoots?: boolean } = {}
+    options: { expandRoots?: boolean; showAllFiles?: boolean } = {}
   ) {
     this.roots = Array.isArray(rootPath) ? rootPath : [{ label: 'Home', path: rootPath }];
     this.defaultExpandRoots = options.expandRoots ?? true;
+    this.showAllFiles = options.showAllFiles === true;
+  }
+
+  /** 已知二进制扩展名（read_dir 免嗅探标记）默认不出树：此类文件打开也只是文本面乱码。
+   *  设置 fileTreeShowAll 开启后全量展示（2026-11-13 用户需求）。 */
+  private showAllFiles = false;
+  async setShowAllFiles(showAll: boolean): Promise<void> {
+    if (this.showAllFiles === showAll) return;
+    this.showAllFiles = showAll;
+    await this.refresh(); // 清缓存重渲染（同根保留手动展开态，见 render 的 rootsChanged 判定）
   }
 
   async render(): Promise<void> {
@@ -427,6 +437,9 @@ export class FileTree {
     if (entries === 'loading' || entries === 'error') return;
     const frag = document.createDocumentFragment();
     for (const e of entries) {
+      // 默认隐藏已知二进制条目（exe/dll/压缩包/音视频等）：判定来自后端 detect_fast 免嗅探标记，
+      // 无额外 I/O；showAllFiles（设置 fileTreeShowAll）开启时全量展示。
+      if (!e.isDir && e.binary && !this.showAllFiles) continue;
       const childKey = this.nodePath(key, e.name);
       const node = this.makeNode(childKey, e.name, e.isDir, depth + 1, key);
       frag.appendChild(node);
