@@ -202,9 +202,21 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
     const deferred = geometryChanged || tr.docChanged ? false : vp ? vp.value.scrolling === true : prev.deferred;
     const mapped: LiveBlockState = { set, layout: prev.layout.map(tr.changes), from, to, tables, deferred, pending: tr.docChanged ? undefined : prev.pending };
     if (tr.state.field(compositionActive, false)) return mapped;
+    // 块间空行的行高装饰（mdir-gap）只改 line class/CSS 变量、不建 DOM，但决定行高：
+    // 跟随重型块件走预算分片会让新入视口的空行先按整行高渲染、分片到达后再塌成间距，
+    // 停滚后逐步收缩（真机 trace 实测单步 21.6→10.8px、锚漂 9.578125px 且不恢复）。
+    // 故视口/停稳事务内同步交付 gap 装饰（语法树可用时），重型块件（set）仍走预算分片。
+    const mergeLayoutNow = (kept: DecorationSet, from: number, to: number): DecorationSet => {
+      if (to <= from || !syntaxTreeAvailable(tr.state, to)) return kept;
+      if (irPerfEnabled()) recordBlockLayout(from, to);
+      const add: Range<Decoration>[] = [], starts = new Set<number>();
+      for (let c = blockLayout(tr.state, from, to).iter(); c.value; c.next()) { add.push(c.value.range(c.from, c.to)); starts.add(c.from); }
+      return kept.update({ filter: f => !starts.has(f), add, sort: true });
+    };
     if (geometryChanged) {
       // 几何变化与停滚补齐走共享帧队列，不能绕过预算同步重建整个视口。
-      return { ...mapped, pending: { next: sliceFrom, end: sliceTo, token: {}, first: true, budgeted: true } };
+      // gap 装饰仍同步交付：停稳重建前窗口里可能还有滚动期树未就绪而迟到的空行。
+      return { ...mapped, layout: mergeLayoutNow(mapped.layout, sliceFrom, sliceTo), pending: { next: sliceFrom, end: sliceTo, token: {}, first: true, budgeted: true } };
     }
     if (tr.docChanged && !prev.pending && !prev.set.size && !tr.effects.length
       && tr.startState.readOnly === tr.state.readOnly
@@ -240,9 +252,10 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
     const oldTo = tr.newDoc.lineAt(Math.min(tr.newDoc.length, prev.to + VIEWPORT_MARGIN)).to;
     // 向下滚动时已交付前缀仍有效，延续下一片而非从新视口头重来。
     if (pureViewport && prev.pending && !prev.pending.remaining?.length && sliceFrom >= oldFrom && sliceFrom < prev.pending.next && sliceTo >= prev.pending.next) {
+      const coveredEnd = Math.min(prev.pending.end, sliceTo);
       return { ...mapped,
         set: set.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo }),
-        layout: mapped.layout.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo }),
+        layout: mergeLayoutNow(mapped.layout.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo }), coveredEnd, sliceTo),
         pending: prev.pending.next < sliceTo ? { ...prev.pending, end: sliceTo } : undefined,
       };
     }
@@ -253,6 +266,7 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
       const edges = missingWindows({ from: sliceFrom, to: sliceTo }, [{ from: oldFrom, to: oldTo }]);
       if (deferred) {
         const edge = edges[0];
+        for (const uncovered of edges) nextLayout = mergeLayoutNow(nextLayout, uncovered.from, uncovered.to);
         return { ...mapped, set: nextSet, layout: nextLayout, pending: edge
           ? { next: edge.from, end: edge.to, token: {}, remaining: edges.slice(1), budgeted: true } : undefined };
       }
@@ -269,7 +283,8 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
       return { ...mapped, set: nextSet, layout: nextLayout, pending: undefined };
     }
     if (vp?.value.scrolling && forced && !pureCursor)
-      return { ...mapped, pending: { next: sliceFrom, end: sliceTo, token: {}, first: true, budgeted: true } };
+      return { ...mapped, layout: mergeLayoutNow(mapped.layout, sliceFrom, sliceTo),
+        pending: { next: sliceFrom, end: sliceTo, token: {}, first: true, budgeted: true } };
     if (forced && !pureCursor && tr.newDoc.length >= 256 * 1024 && sliceTo - sliceFrom > BLOCK_SLICE_CHARS)
       return advanceBlocks(tr.state, mapped, { next: sliceFrom, end: sliceTo, token: {},
         ...(!tr.docChanged && vp && prev.deferred ? { budgeted: true } : {}) }, true);
