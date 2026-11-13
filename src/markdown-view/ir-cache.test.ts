@@ -178,7 +178,11 @@ it('fast scrolling defers table construction, then replaces estimated placeholde
     irPerfReset();
     state = state.update({ effects: liveViewport.of({ from: 0, to: state.doc.length, scrolling: true }) }).state;
     expect(irPerfSnapshot().counters.blockDecos.count).toBe(0);
-    expect(irPerfSnapshot().counters.blockLayout.count).toBe(0);
+    // 2026-11-13 停滚锚漂修复：块间空行行高装饰（mdir-gap）不再随重型块件走预算分片——
+    // 分片迟到会把新入视口空行先按整行高渲染、停滚后再塌（真机 trace 实测 21.6→10.8px、
+    // 锚漂 9.578125px 不恢复）。滚动视口事务内同步交付 gap 装饰（语法树可用时），
+    // 块件（blockDecos）仍保持延迟分片（下方 BlockPlaceholder 断言不变）。
+    expect(irPerfSnapshot().counters.blockLayout.count).toBe(1);
     state = state.update({ effects: blockSliceReady.of(state.field(liveBlockField).pending!.token) }).state;
     const widgets = (value: typeof state) => {
       const names: string[] = [];
