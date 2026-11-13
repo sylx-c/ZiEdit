@@ -186,22 +186,19 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
   contentChanged(): void { this.layoutChanged(); }
   private watchAsset(image: HTMLImageElement): void {
     if (!this.root.contains(image)) return;
-    // R1（2026-11-13 调查）：无预留尺寸图片的固有高度在解码完成后，会在任意布局读取时进入排版，
-    // 早于下一帧的锚定补偿整整一个任务间隙（真机 224px 实录）。冻结加载期高度（通常为 0），
-    // 由 checkAssets 在同一 JS 回合内「解冻 → 读实时几何 → 补偿」，使增高与补偿对任何观察者原子化。
-    // 已用 width/height 属性或 CSS aspect-ratio 预留尺寸的图片不冻结（无跳变）。
-    if (!this.frozenAssets.has(image) && !image.complete
-      && !image.getAttribute('width') && !image.getAttribute('height')
-      && getComputedStyle(image).aspectRatio === 'auto') {
-      this.frozenAssets.set(image, image.style.height);
-      image.style.height = image.getBoundingClientRect().height + 'px';
-    }
     this.assets.set(image, 2);
     if (!this.assetFrame) this.assetFrame = requestAnimationFrame(this.checkAssets);
   }
   private checkAssets = (): void => {
     this.assetFrame = 0;
     if (this.dead) return;
+    // R1（2026-11-13 调查）：无预留尺寸图片的固有高度在解码完成后，会在任意布局读取时进入排版，
+    // 早于下一帧的锚定补偿整整一个任务间隙（真机 224px 实录）。冻结视口带内、未完成、
+    // 无尺寸预留图片的当前高度，并在完成后的同一 JS 回合内「解冻 → 读实时几何 → 补偿」，
+    // 使增高与补偿对任何观察者原子化。决策集中在每帧一次的批量里做（先读后写，单次布局）——
+    // 逐图 getComputedStyle/gBCR 会把大图量语料的挂载推过 100ms 长任务线（dense-2m 实测）。
+    const viewport = this.element.getBoundingClientRect();
+    const freeze: Array<[HTMLImageElement, number]> = [];
     for (const [image, remaining] of this.assets) {
       if (!this.root.contains(image) || image.complete && remaining <= 1) {
         // 同回合解冻：本函数随后的实时几何读取（强制布局）与锚定补偿在同一 JS 回合完成，
@@ -209,8 +206,19 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
         const frozenHeight = this.frozenAssets.get(image);
         if (frozenHeight !== undefined) { image.style.height = frozenHeight; this.frozenAssets.delete(image); }
         this.assets.delete(image);
+        continue;
       }
-      else this.assets.set(image, image.complete ? remaining - 1 : 2);
+      if (!this.frozenAssets.has(image) && !image.complete
+        && !image.getAttribute('width') && !image.getAttribute('height')
+        && getComputedStyle(image).aspectRatio === 'auto') {
+        const rect = image.getBoundingClientRect();
+        if (rect.bottom > viewport.top && rect.top < viewport.bottom) freeze.push([image, rect.height]);
+      }
+      this.assets.set(image, image.complete ? remaining - 1 : 2);
+    }
+    for (const [image, height] of freeze) {
+      this.frozenAssets.set(image, image.style.height);
+      image.style.height = height + 'px';
     }
     // 原生滚动可能已提交，但记锚的 rAF 尚未执行；不能把新滚动补偿回去。
     // （分支序保持原样：scrollTop 回声优先判据区分「滚动位移→重记基线」与「布局位移→补偿」，
