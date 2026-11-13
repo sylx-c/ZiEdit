@@ -174,13 +174,15 @@ export async function dismissOverlay(cdp) {
   return !(await cdp.evaluate("!!document.querySelector('.ov-mask')"));
 }
 /** Markdown 形态切换走真实菜单：Alt → 视图 → Markdown ▸ → 目标项（源码视图/分屏预览/即时渲染/渲染预览）。
- *  菜单交互存在悬停时序竞态（子菜单未及时展开/菜单被重绘）——整段重试一次，避免把门禁抖动记成产品失败。 */
-export async function switchMdMode(cdp, label, attempts = 2) {
+ *  菜单交互存在悬停时序竞态（子菜单未及时展开/菜单被重绘/异步装配窗口内项缺失）——整段重试，
+ *  避免把门禁抖动记成产品失败。2026-11-13：attempts 2→3（warm 轮实录过一次
+ *  "mode item missing/disabled" 间歇，v53/批1c 亦有记录；重试是量具稳健性，非判据变更）。 */
+export async function switchMdMode(cdp, label, attempts = 3) {
   for (let attempt = 1; ; attempt++) {
     try { return await switchMdModeOnce(cdp, label); }
     catch (error) {
       await pressKey(cdp, 'Escape', 'Escape', 27).catch(() => {});
-      await sleep(350);
+      await sleep(attempt >= 2 ? 600 : 350);
       if (attempt >= attempts) throw error;
     }
   }
