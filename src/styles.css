@@ -1388,7 +1388,7 @@ button{font:inherit}
 .welcome-box ul{margin:0 0 14px;padding-inline-start:18px;color:var(--fg);font-size:12.5px;line-height:1.9}
 .about-name{font-size:19px;font-weight:650;letter-spacing:.5px}
 .about-ver{color:var(--accent);font-size:12.5px;font-family:var(--mono)}
-.about-copy{display:flex;align-items:center;justify-content:center}
+.about-copy{display:flex;align-items:center;justify-content:center;gap:8px}
 .about-link{
   border:0;padding:0;background:transparent;color:inherit;cursor:pointer;
   font:inherit;font-size:inherit;line-height:inherit;vertical-align:baseline;

@@ -5499,7 +5499,7 @@ export async function boot(): Promise<void> {
     idf.textContent = $tf('about.identifier', 'dev.ziedit.app');
     const cr = document.createElement('div');
     cr.className = 'about-meta about-copy';
-    cr.append(document.createTextNode($t('about.copyright') + ' · '));
+    cr.append(document.createTextNode($t('about.copyright')));
     const site = document.createElement('button');
     site.type = 'button';
     site.className = 'about-link';
