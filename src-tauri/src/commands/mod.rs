@@ -25,6 +25,10 @@ pub struct DirEntry {
     pub len: u64,
     pub route: ViewRoute,
     pub language: Option<&'static str>,
+    /// 已知二进制扩展名（exe/dll/压缩包/音视频等，detect_fast 免嗅探标记）。
+    /// 文件树默认隐藏此类条目（设置 fileTreeShowAll 可全量展示）；serde default 兼容旧会话 JSON。
+    #[serde(default)]
+    pub binary: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -242,6 +246,7 @@ pub async fn read_dir(path: String) -> Result<Vec<DirEntry>, ZiEditError> {
                 len,
                 route: kind.route,
                 language: kind.language,
+                binary: kind.binary,
             });
         }
         // 目录优先，同类按名称（自然顺序，不区分大小写）；

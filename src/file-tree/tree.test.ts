@@ -7,11 +7,18 @@ vi.mock('../common/ipc', () => ({
   listDir: async (path: string) =>
     path.endsWith('ws')
       ? [
-          { name: 'a.txt', isDir: false, len: 1, route: 'text' as const, language: null },
-          { name: 'b.txt', isDir: false, len: 1, route: 'text' as const, language: null },
-          { name: 'c.txt', isDir: false, len: 1, route: 'text' as const, language: null },
+          { name: 'a.txt', isDir: false, len: 1, route: 'text' as const, language: null, binary: false },
+          { name: 'b.txt', isDir: false, len: 1, route: 'text' as const, language: null, binary: false },
+          { name: 'c.txt', isDir: false, len: 1, route: 'text' as const, language: null, binary: false },
         ]
-      : [],
+      : path.endsWith('bin')
+        ? [
+            { name: 'a.txt', isDir: false, len: 1, route: 'text' as const, language: null, binary: false },
+            { name: 'b.exe', isDir: false, len: 9, route: 'text' as const, language: null, binary: true },
+            { name: 'c.zip', isDir: false, len: 9, route: 'text' as const, language: null, binary: true },
+            { name: 'sub', isDir: true, len: 0, route: 'text' as const, language: null, binary: false },
+          ]
+        : [],
 }));
 
 // @vitest-environment jsdom
@@ -119,6 +126,49 @@ describe('FileTree 根目录展开策略（目录默认收起交互）', () => {
     expect(rootGroup(host).classList.contains('collapsed')).toBe(false);
     const a = [...host.querySelectorAll('.tr')].find(r => r.querySelector('.tr-name')?.textContent === 'a.txt');
     expect(a?.classList.contains('active')).toBe(true);
+    host.remove();
+  });
+});
+
+describe('FileTree 二进制条目过滤（2026-11-13：默认只展示可查看格式）', () => {
+  const roots: TreeRoot[] = [{ path: 'C:\\bin', label: 'bin' }];
+  const noop = () => {};
+  const names = (host: HTMLElement) => [...host.querySelectorAll('.tr-name')].map(n => n.textContent);
+
+  it('默认隐藏已知二进制扩展名（exe/zip），文本与目录保留', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const tree = new FileTree(host, roots, { onOpenFile: noop });
+    await tree.render();
+    const shown = names(host);
+    expect(shown).toContain('a.txt');
+    expect(shown).toContain('sub');
+    expect(shown).not.toContain('b.exe');
+    expect(shown).not.toContain('c.zip');
+    host.remove();
+  });
+
+  it('showAllFiles 选项全量展示', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const tree = new FileTree(host, roots, { onOpenFile: noop }, { showAllFiles: true });
+    await tree.render();
+    const shown = names(host);
+    expect(shown).toContain('b.exe');
+    expect(shown).toContain('c.zip');
+    host.remove();
+  });
+
+  it('setShowAllFiles 运行时切换并保留展开状态', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const tree = new FileTree(host, roots, { onOpenFile: noop });
+    await tree.render();
+    await tree.setShowAllFiles(true);
+    expect(names(host)).toContain('b.exe');
+    await tree.setShowAllFiles(false);
+    expect(names(host)).not.toContain('b.exe');
+    expect(names(host)).toContain('a.txt'); // 同根重渲染不塌展开
     host.remove();
   });
 });

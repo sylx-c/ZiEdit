@@ -5449,7 +5449,7 @@ export async function boot(): Promise<void> {
         onOpenPath: (path, isDir) => void openPath(path, undefined, isDir),
         onContextFile: (path, x, y, sel) => treeMenu(path, x, y, sel),
         onContextDir: (path, x, y) => treeDirMenu(path, x, y),
-      }, { expandRoots });
+      }, { expandRoots, showAllFiles: settings.fileTreeShowAll === true });
       await tree.render();
     }
     tree.setActive(activeTab()?.path ?? null);
@@ -5713,6 +5713,7 @@ export async function boot(): Promise<void> {
         applySavedTheme(settings);
         applyOutlineColorOverride();
         applyLineHlOverride();
+        void tree?.setShowAllFiles(settings.fileTreeShowAll === true);
         void settingsSave(settings as Record<string, unknown>);
         updateMarkers();
         applyFontSize(next.fontSize ?? 12);
