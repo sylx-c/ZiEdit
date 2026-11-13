@@ -36,7 +36,7 @@ test('工程通过只产生候选，必须同源、同包、全部验收才能�
         installerSha256: manifest.artifacts[0].sha256, independentEnvironment: true, runUrl: 'https://github.com/test/repo/actions/runs/123',
         durationMs: 1200000, files: [fileEvidence(root, path.join(root, 'native.json'))],
         matrix: { verdict: true, displayChanged: false, webviewEnvironment: { scale: 1, gpu: 'GPU' }, results: Array.from({ length: 19 }, () => ({ verdict: true })) },
-        days: ['2026-01-01', '2026-01-02'].map(date => ({ date, minutes: 60, tester: 'Tester', notes: 'editing, Markdown, formats', blockers: 0 })) };
+        days: [{ date: '2026-01-01', minutes: 60, tester: 'Tester', notes: 'editing, Markdown, formats', blockers: 0 }] };
       const file = path.join(root, kind + '.json'); writeJson(file, report); records[kind] = fileEvidence(root, file);
     }
     assert.equal(releaseAcceptance(root, manifest, records).releaseReady, true);

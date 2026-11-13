@@ -46,10 +46,9 @@ export function releaseAcceptance(root, manifest, records = {}) {
         if (id === 'windows-ci') detail = report.platform === 'win32' && /^https:\/\/github\.com\/[^/]+\/[^/]+\/actions\/runs\/\d+$/.test(report.runUrl ?? '');
         if (id === 'installed-package') detail = report.platform === 'win32' && report.independentEnvironment === true;
         if (id === 'trial-two-days') {
+          // 2026-11-14 项目所有者决定：试用口径从「连续两自然日×各60分钟」放宽为「单日≥60分钟」。
           const days = report.days ?? [];
-          const dates = days.map(day => day.date);
-          detail = days.length === 2 && dates.every(date => /^\d{4}-\d{2}-\d{2}$/.test(date))
-            && Date.parse(dates[1]) - Date.parse(dates[0]) === 86400000
+          detail = days.length >= 1 && days.every(day => /^\d{4}-\d{2}-\d{2}$/.test(day.date))
             && days.every(day => day.minutes >= 60 && day.tester && day.notes && day.blockers === 0)
             && days.every(day => day.date <= new Date().toISOString().slice(0, 10));
         }
