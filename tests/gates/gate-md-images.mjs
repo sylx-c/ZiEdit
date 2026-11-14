@@ -67,6 +67,13 @@ try {
   for (const [mode, label, contentSel, scrollerSel] of MODES) {
     if (!await cdp.evaluate(`!!document.querySelector(${JSON.stringify(contentSel)})`)) await switchMdMode(cdp, label);
     await waitFor(cdp, `!!document.querySelector(${JSON.stringify(contentSel)})`, 180000);
+    // 模式切换过渡期元素会短暂消失再重建（split 挂载实测 waitFor 命中后重渲染清掉选择器）。
+    // 等 DOM 稳定：连续 5×200ms 选择器都在场才继续，替代修前「waitFor 命中即用」的竞态。
+    for (let stable = 0; stable < 5; ) {
+      await sleep(200);
+      if (await cdp.evaluate(`!!document.querySelector(${JSON.stringify(contentSel)})`).catch(() => false)) stable++;
+      else stable = 0;
+    }
     const seen = new Map(); // key=src（或占位文本），新记录已解码/带降级标记时覆盖旧记录
     const merge = list => { for (const i of list || []) {
       const k = i.placeholder ? 'ph:' + i.placeholder : (norm(i.src) || '(empty)');
