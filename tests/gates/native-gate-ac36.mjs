@@ -1,27 +1,72 @@
 // native-gate-ac36.mjs — AC-36 键入跟手度门禁（5 分钟持续键入 + IR 探针事务分段）
 // 迁移自 docs/tmp/audit-r2/native-gate-ac36.mjs（只读源）。整备：CDP/清理改用 ./gate-lib.mjs（同口径抽取源），
 // exe 走 ZIEDIT_GATE_EXE/RUN_DIR 约定；verdict=false 时退出码置 1（供 run-all.mjs 汇总）。
-// 用法: node tests/gates/native-gate-ac36.mjs <corpus.md> <out.json> [rounds=3]
+// 用法: node tests/gates/native-gate-ac36.mjs <corpus.md> <out.json> [rounds=3] [durationMs=300000] [--perf]
+//   --perf（或环境变量 AC36_PERF=1）：跳过 MD-06 诊断注入与全部逐句 checkpoint（Enter 直接 enterKey、Tab 直发），
+//   保留修正聚焦协议/INIT 观测/IR 探针/分相统计/轮末键序检查与 finalMarkers；仅此模式的计时可作 MD-07 放行依据。
 // 判据（007 v0.36 AC-36，release 构建，冷热 rounds 轮取中位）:
 //   键入事务分段（t3-t0，docChanged）p95 ≤ 40ms（密集语料分档，2026-11-04 用户决策；16ms 保留为长期目标）；单尾 max ≤ 50ms；输入期无 >100ms 长任务；
 //   机制锁观察：纯散文键入期 fullRebuildEvents 应为 0（B2 根修后；referencesReady/getLines）。
 // 依赖：B1 探针（globalThis.__ZIEDIT_IR_PERF__ 开关 + __ZIEDIT_IR_PERF_DATA__ 快照 getter）。
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
-import { RUN_DIR, EXE, INIT_OBSERVERS, connectCDP, waitTargets, waitMounted, clickFocus, killTree, percentile, median, switchMdMode, waitFor } from './gate-lib.mjs';
+import { RUN_DIR, EXE, INIT_OBSERVERS, connectCDP, waitTargets, waitMounted, killTree, percentile, median, switchMdMode, waitFor, sleep } from './gate-lib.mjs';
 
 const corpusArg = process.argv[2];
 const outFileArg = process.argv[3];
 const ROUNDS = Math.max(1, parseInt(process.argv[4] || '3', 10));
-const TYPING_MS = 5 * 60 * 1000;
-if (!corpusArg || !outFileArg) { console.error('用法: node tests/gates/native-gate-ac36.mjs <corpus.md> <out.json> [rounds]'); process.exit(1); }
+const durationArg = parseInt(process.argv[5] || '', 10);
+const TYPING_MS = Number.isFinite(durationArg) && durationArg > 0 ? durationArg : 5 * 60 * 1000;
+// --perf / AC36_PERF=1：无诊断计时模式（MD-07 放行口径）；默认保留 MD-06 诊断采样（计时仅诊断参考）。
+const PERF = process.argv.includes('--perf') || process.env.AC36_PERF === '1';
+if (!corpusArg || !outFileArg) { console.error('用法: node tests/gates/native-gate-ac36.mjs <corpus.md> <out.json> [rounds] [durationMs] [--perf]'); process.exit(1); }
 const outFile = path.resolve(outFileArg);
 const corpus = path.resolve(corpusArg);
 const webviewDir = path.join(RUN_DIR, 'profiles/ac36');
 
-const out = { build: { exe: EXE, corpus, corpusBytes: fs.statSync(corpus).size, typingMs: TYPING_MS, rounds: ROUNDS, machine: { platform: process.platform, node: process.version } }, rounds: [] };
+const FOCUS_PROTOCOL = 'close-open-menu-click-only-when-editor-unfocused-visible-intersection-settle-100ms-then-original-document-end-selection';
+const out = { protocol: PERF
+  ? { focus: FOCUS_PROTOCOL, diagnostics: false, timing: 'perf-no-diagnostic-sampling' }
+  : { focus: FOCUS_PROTOCOL, diagnostics: true, timing: 'diagnostic-sampling-not-performance-acceptance' },
+  build: { exe: EXE, sha256: crypto.createHash('sha256').update(fs.readFileSync(EXE)).digest('hex'), corpus, corpusBytes: fs.statSync(corpus).size, typingMs: TYPING_MS, rounds: ROUNDS, machine: { platform: process.platform, node: process.version } }, rounds: [] };
 const save = () => fs.writeFileSync(outFile, JSON.stringify(out, null, 2));
+
+// MD-06 诊断仅观察现有输入；不改变节奏、焦点或选区，不替代未采样的性能基线。
+function installInputDiagnostics() {
+  const ids = new WeakMap(); let nextId = 0;
+  const identity = value => { if (!ids.has(value)) ids.set(value, ++nextId); return ids.get(value); };
+  const describe = element => element ? { tag: element.tagName, id: element.id, className: String(element.className).slice(0, 160),
+    connected: element.isConnected, table: !!element.closest('.mdir-tablebox'), editorId: element.closest('.cm-editor') ? identity(element.closest('.cm-editor')) : null } : null;
+  const selection = view => {
+    if (!view) return null;
+    const { state } = view, { anchor, head } = state.selection.main, line = state.doc.lineAt(head);
+    return { editorId: identity(view.dom), connected: view.dom.isConnected, hasFocus: view.hasFocus, docLength: state.doc.length,
+      anchor, head, line: line.number, column: head - line.from, contextFrom: Math.max(0, head - 70),
+      context: state.doc.sliceString(Math.max(0, head - 70), Math.min(state.doc.length, head + 70)) };
+  };
+  const snapshot = () => {
+    const editors = [...document.querySelectorAll('.cm-content')];
+    const main = editors.find(e => e.closest('.md-ir:not(.md-ir-loading)') && !e.closest('.mdir-tablebox'));
+    const active = document.activeElement, content = active?.closest('.cm-content');
+    return { time: performance.now(), documentHasFocus: document.hasFocus(), active: describe(active),
+      main: selection(main?.cmTile?.view), activeEditor: selection(content?.cmTile?.view),
+      editors: editors.map(e => describe(e)), domSelection: (() => { const s = document.getSelection();
+        return s ? { anchor: describe(s.anchorNode?.parentElement), anchorOffset: s.anchorOffset,
+          focus: describe(s.focusNode?.parentElement), focusOffset: s.focusOffset } : null; })() };
+  };
+  const events = []; let droppedEvents = 0;
+  for (const name of ['focusin', 'focusout', 'selectionchange']) document.addEventListener(name, event => {
+    if (events.length >= 256) { events.shift(); droppedEvents++; }
+    events.push({ event: name, target: describe(event.target instanceof Element ? event.target : null), ...snapshot() });
+  }, true);
+  for (const name of ['focus', 'blur']) window.addEventListener(name, () => {
+    if (events.length >= 256) { events.shift(); droppedEvents++; }
+    events.push({ event: 'window.' + name, ...snapshot() });
+  });
+  window.__ac36Diagnostics = { snapshot, drain: () => ({ events: events.splice(0), droppedEvents }) };
+}
 
 const key = async (cdp, ch) => {
   const code = ch.length === 1 && /[a-z]/i.test(ch) ? 'Key' + ch.toUpperCase() : 'Unidentified';
@@ -32,6 +77,45 @@ const enterKey = async (cdp) => {
   await cdp.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
   await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
 };
+
+// 仅在原有逐句重新聚焦阶段使用；不在键入中修正光标。
+// contentDOM 覆盖完整大文档，top 可为百万负值，不能拿 top+40 当窗口坐标。
+async function focusForWriting(cdp) {
+  if (await cdp.evaluate(`!!document.querySelector('.menu-item.open,.ctx-menu')`)) {
+    await cdp.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await sleep(100);
+  }
+  // 回收语义：编辑器仍有焦点时无需点击。实测 v2 第三轮：点击在 DOM 命中校验通过的情况下
+  // 仍被原生焦点处理落到菜单栏项，程序化 focus() 约 1.7s 后又被迟到的焦点恢复覆盖，
+  // 整句按键进了菜单（30 项对照中 focus-only 大文档 3/3 通过）。
+  const needsClick = await cdp.evaluate(`(() => { const e = [...document.querySelectorAll('.md-ir:not(.md-ir-loading) .cm-content')].find(e => !e.closest('.mdir-tablebox'));
+    return !(e?.cmTile?.view?.hasFocus); })()`);
+  if (needsClick) {
+    const point = await cdp.evaluate(`(() => {
+    const e = [...document.querySelectorAll('.md-ir:not(.md-ir-loading) .cm-content')].find(e => !e.closest('.mdir-tablebox'));
+    const v = e?.cmTile?.view; if (!v) throw Error('main IR editor missing');
+    const r = e.getBoundingClientRect(), s = v.scrollDOM.getBoundingClientRect();
+    const left = Math.max(0, r.left, s.left), right = Math.min(innerWidth, r.right, s.right);
+    const top = Math.max(0, r.top, s.top), bottom = Math.min(innerHeight, r.bottom, s.bottom);
+    if (right - left < 4 || bottom - top < 4) throw Error('main IR editor has no visible click target');
+    const x = Math.min(left + 40, right - 2), y = Math.min(top + 40, bottom - 2);
+    const hit = document.elementFromPoint(x, y);
+    if (!hit || !v.dom.contains(hit)) throw Error('click target is outside main IR editor');
+    return { x, y, target: hit.className };
+  })()`);
+    await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: point.x, y: point.y, button: 'left', clickCount: 1 });
+    await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x, y: point.y, button: 'left', clickCount: 1 });
+    // 原生鼠标/selectionchange 可晚于 CDP 返回；先稳定点击，再执行原有文末设置。
+    await sleep(100);
+    return cdp.evaluate(`(() => { const e = [...document.querySelectorAll('.md-ir:not(.md-ir-loading) .cm-content')].find(e => !e.closest('.mdir-tablebox'));
+      const v = e.cmTile.view; v.focus(); v.dispatch({ selection: { anchor: v.state.doc.length } });
+      return { len: v.state.doc.length }; })()`);
+  }
+  return cdp.evaluate(`(() => { const e = [...document.querySelectorAll('.md-ir:not(.md-ir-loading) .cm-content')].find(e => !e.closest('.mdir-tablebox'));
+    const v = e.cmTile.view; v.focus(); v.dispatch({ selection: { anchor: v.state.doc.length } });
+    return { len: v.state.doc.length, keptFocus: true }; })()`);
+}
 
 async function runRound(roundIdx) {
   const cold = roundIdx === 0;
@@ -61,7 +145,7 @@ async function runRound(roundIdx) {
     await new Promise(r => setTimeout(r, 3000)); // 挂载期异步（公式/图表/预热）跑完
 
     // 真实鼠标点击 + DOM 聚焦 + 光标置文档末（native-writing-20min 已验证口径）
-    const base = await clickFocus(cdp, null);
+    const base = await focusForWriting(cdp);
 
     // 启用 IR 探针（B1：挂载后开启，开启前零记录）
     // 在探针开启/首字符注入前定界；不用 round（可能向未来进位，严格 > 会漏掉边界样本）。
@@ -84,46 +168,70 @@ async function runRound(roundIdx) {
 
     const t0 = Date.now();
     let sentence = 0;
+    if (!PERF) {
+      await cdp.evaluate(`(${installInputDiagnostics.toString()})()`);
+      rec.inputDiagnostics = { scope: 'MD-06 observation; extra CDP reads and event sampling may affect timing; no caret correction added',
+        limits: { checkpoints: 2048, events: 4096, pageEvents: 256 }, checkpoints: [], events: [], droppedCheckpoints: 0, droppedEvents: 0, pageDroppedEvents: 0 };
+    }
+    // --perf：checkpoint 为空操作——零额外 CDP 往返，Enter/Tab 与逐句节奏同原门禁直发。
+    const checkpoint = PERF ? async () => {} : async stage => {
+      const sample = await cdp.evaluate(`(() => { const d = window.__ac36Diagnostics, snap = d.snapshot();
+        const v = [...document.querySelectorAll('.md-ir:not(.md-ir-loading) .cm-content')].find(e => !e.closest('.mdir-tablebox'))?.cmTile?.view;
+        const doc = v?.state.doc.toString() ?? ''; return { ...snap, ...d.drain(), markerPosition: doc.indexOf('z${sentence}x'),
+          previousMarkerPosition: doc.indexOf('z${sentence - 1}x') }; })()`);
+      const { events, droppedEvents, ...state } = sample, trace = rec.inputDiagnostics;
+      if (trace.checkpoints.length >= trace.limits.checkpoints) { trace.checkpoints.shift(); trace.droppedCheckpoints++; }
+      trace.checkpoints.push({ sentence, stage, ...state });
+      trace.events.push(...events);
+      if (trace.events.length > trace.limits.events) { const count = trace.events.length - trace.limits.events;
+        trace.events.splice(0, count); trace.droppedEvents += count; }
+      trace.pageDroppedEvents = droppedEvents;
+    };
+    const diagnosticEnter = async () => { await checkpoint('before-enter'); await enterKey(cdp); await checkpoint('after-enter'); };
     const focusAgain = async () => {
-      const rect = await cdp.evaluate(`(() => { const r = document.querySelector('.cm-content').getBoundingClientRect(); return { x: r.left + 40, y: r.top + 40 }; })()`);
-      await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: rect.x, y: rect.y, button: 'left', clickCount: 1 });
-      await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: rect.x, y: rect.y, button: 'left', clickCount: 1 });
-      await cdp.evaluate(`(() => { const v = document.querySelector('.cm-content').cmTile.view; v.dispatch({ selection: { anchor: v.state.doc.length } }); v.focus(); return 1; })()`);
+      await checkpoint('before-refocus');
+      await focusForWriting(cdp);
+      await checkpoint('after-refocus');
     };
     // 多面覆盖：散文 ×2、列表续写、代码围栏、表格（表头建表+格内键入+Tab 跨格）。
     // 每模式后强制重锚焦点回主视图（表格格编辑器会吞掉后续键入——实测焦点被困后整轮测量被污染）；
     // 每行嵌入 zN 序号标记 + 按句时间窗分桶，分面出数。
-    const typeLine = async (text) => { for (const ch of text) { await key(cdp, ch); await new Promise(r => setTimeout(r, 90 + Math.floor(Math.random() * 60))); } };
+    const typeLine = async (text) => { for (const ch of text) { await key(cdp, ch); await new Promise(r => setTimeout(r, 90 + Math.floor(Math.random() * 60))); } await checkpoint('after-type-line'); };
     const sentenceWindows = [];
     while (Date.now() - t0 < TYPING_MS) {
       sentence++;
       const n = sentence, marker = `z${n}x`, pattern = n % 5;
+      await checkpoint('sentence-start');
       const wStart = await cdp.evaluate('Math.round(performance.now())');
       if (pattern === 3) { // 围栏：```js + Enter(自动闭合) + 代码行 + Enter + Enter(经闭合行退出)
         await typeLine('```js');
-        await enterKey(cdp); await new Promise(r => setTimeout(r, 300));
+        await diagnosticEnter(); await new Promise(r => setTimeout(r, 300));
         await typeLine(`const v${n} = ${n}; // ${marker}`);
-        await enterKey(cdp); await new Promise(r => setTimeout(r, 250));
-        await enterKey(cdp); await new Promise(r => setTimeout(r, 250));
+        await diagnosticEnter(); await new Promise(r => setTimeout(r, 250));
+        await diagnosticEnter(); await new Promise(r => setTimeout(r, 250));
       } else if (pattern === 4) { // 表格：完整表头 + Enter(建表入格) + 格内键入 + Tab + 第二格 + Enter(提交)
         await typeLine(`| 头A${n} | 头B |`);
-        await enterKey(cdp); await new Promise(r => setTimeout(r, 350));
+        await diagnosticEnter(); await new Promise(r => setTimeout(r, 350));
         await typeLine(`值${marker}`);
+        await checkpoint('before-tab');
         await cdp.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
         await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+        await checkpoint('after-tab');
         await new Promise(r => setTimeout(r, 250));
         await typeLine(`二${n}`);
-        await enterKey(cdp); await new Promise(r => setTimeout(r, 250));
+        await diagnosticEnter(); await new Promise(r => setTimeout(r, 250));
       } else if (pattern === 2) { // 列表续写
         await typeLine(`- 列表项${marker} 持续键入`);
-        await enterKey(cdp);
+        await diagnosticEnter();
       } else { // 散文
         await typeLine(`第${n}句 性能门禁持续键入 ZiEdit ac36 ${marker}。`);
-        await enterKey(cdp);
+        await diagnosticEnter();
       }
+      await checkpoint('sentence-end');
       const wEnd = await cdp.evaluate('Math.round(performance.now())');
       sentenceWindows.push({ n, surface: ['prose', 'prose', 'list', 'fence', 'table'][pattern], start: wStart, end: wEnd });
       await focusAgain(); // 重锚：模式（尤其表格格）可能吞焦点，逐句回收
+      save();
       await new Promise(r => setTimeout(r, 1200));
       if (n <= 3 || n % 5 === 0) {
         const len = await cdp.evaluate('document.querySelector(".cm-content").cmTile.view.state.doc.length');
@@ -132,12 +240,17 @@ async function runRound(roundIdx) {
       }
     }
     await new Promise(r => setTimeout(r, 2000)); // 收尾防抖（最后一次 reportHeadings）
+    await checkpoint('settled');
     await readProbe();
 
     // —— 汇总与判据（fail-closed：输入未落地/样本不足/序号断裂即败）——
     const finalLen = await cdp.evaluate('document.querySelector(".cm-content").cmTile.view.state.doc.length');
     const tail = await cdp.evaluate('document.querySelector(".cm-content").cmTile.view.state.doc.sliceString(-80)');
     const sequence = await cdp.evaluate(`(() => { const doc = document.querySelector('.cm-content').cmTile.view.state.doc.toString(); const ns = [...doc.matchAll(/z(\\d+)x/g)].map(m => +m[1]); let ok = ns.length > 0; for (let i = 1; i < ns.length; i++) if (ns[i] !== ns[i-1] + 1) ok = false; return { count: ns.length, last: ns[ns.length-1] || 0, ordered: ok }; })()`);
+    // 键序定位表两模式都在轮末读取一次（属键序检查，非逐句诊断）；--perf 下不挂在 inputDiagnostics 下。
+    const finalMarkers = await cdp.evaluate(`(() => { const doc = document.querySelector('.cm-content').cmTile.view.state.doc;
+      return [...doc.toString().matchAll(/z(\\d+)x/g)].map(m => ({ n: +m[1], position: m.index, line: doc.lineAt(m.index).number })); })()`);
+    if (PERF) rec.finalMarkers = finalMarkers; else rec.inputDiagnostics.finalMarkers = finalMarkers;
     const durations = [...segMap.values()].filter(s => s.docChanged).map(s => s.t3 - s.t0).sort((a, b) => a - b);
     const changedSegs = [...segMap.values()].filter(s => s.docChanged);
     const phaseMed = (pick) => { const vs = changedSegs.map(pick).sort((a, b) => a - b); return vs.length ? vs[Math.floor(vs.length / 2)] : 0; };
