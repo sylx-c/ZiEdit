@@ -407,6 +407,10 @@ export class SidebarCtl {
     this.tabOutline.style.display = showLeft ? '' : 'none';
     this.tabRecent.style.display = showLeft ? 'none' : '';
     this.tabFav.style.display = showLeft ? 'none' : '';
+    this.tabFiles.setAttribute('aria-pressed', String(this.pane === 'files'));
+    this.tabOutline.setAttribute('aria-pressed', String(this.pane === 'outline'));
+    this.tabRecent.setAttribute('aria-pressed', String(this.pane === 'recent'));
+    this.tabFav.setAttribute('aria-pressed', String(this.pane === 'fav'));
     this.tabFiles.classList.toggle('active', this.pane === 'files');
     this.tabOutline.classList.toggle('active', this.pane === 'outline');
     this.tabRecent.classList.toggle('active', this.pane === 'recent');

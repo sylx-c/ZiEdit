@@ -76,6 +76,9 @@ export class Minimap {
   private context: CanvasRenderingContext2D | null = null;
   private themeObserver: MutationObserver | null = null;
   private palette: string[] | null = null;
+  private enabled = true;
+  private autoHideShort = false;
+  private manualVisible: boolean | null = null;
   private readonly railAnimator = new RailScrollAnimator(y => this.adapter.scrollTo(y), () => this.adapter.scrollTop());
 
   constructor(
@@ -251,7 +254,31 @@ export class Minimap {
   }
 
   setVisible(v: boolean): void {
-    for (const el of [this.root, this.resizeEl, this.vscrollEl]) el.style.display = v ? '' : 'none';
+    this.enabled = v;
+    this.manualVisible = null;
+    this.updateVisibility();
+  }
+
+  setManualVisible(v: boolean): void {
+    this.enabled = v;
+    this.manualVisible = v;
+    this.updateVisibility();
+  }
+
+  setAutoHideShort(v: boolean): void {
+    if (this.autoHideShort !== v) this.manualVisible = null;
+    this.autoHideShort = v;
+    this.updateVisibility();
+  }
+
+  private updateVisibility(): void {
+    const viewport = this.adapter.clientHeight();
+    const fits = viewport > 0 && this.adapter.scrollHeight() <= viewport + 1;
+    const visible = this.enabled && (this.manualVisible ?? !(this.autoHideShort && fits));
+    const display = visible ? '' : 'none';
+    for (const el of [this.root, this.resizeEl, this.vscrollEl]) {
+      if (el.style.display !== display) el.style.display = display;
+    }
   }
 
   /** 视图暂存（切标签保留视图）：三件套移出编辑行，监听与状态保留，attach 后原样恢复 */
@@ -284,6 +311,7 @@ export class Minimap {
 
   /** TextView 渲染/滚动后调用：密度条仅在行缓存/行数/语法分段版本变化时重建；视口框与滚动条每次同步 */
   sync(): void {
+    this.updateVisibility();
     const h = this.root.clientHeight;
     if (h <= 0) return;
     const layout = this.adapter.surface?.snapshot();

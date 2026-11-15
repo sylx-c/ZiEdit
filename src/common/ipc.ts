@@ -527,11 +527,17 @@ export interface Settings {
   s3AllowInsecure?: boolean;
   /** 粘贴图片默认动作（009 规则 4：'ask'=三选（出厂）/ 'upload'=直接上传 / 'local'=保存本地） */
   pasteImageAction?: 'auto' | 'ask' | 'upload' | 'local';
-  /** 文件树展示全部文件格式（默认 false：隐藏已知二进制扩展名——exe/dll/压缩包/音视频等
+  /** Markdown preview reading column width; absent values retain current standard width. */
+  mdReadingWidth?: 'narrow' | 'standard' | 'wide';
+  /** Use larger chrome and navigation hit targets. */
+  uiDensity?: 'compact' | 'comfortable';
+  /** Hide the minimap when the entire document fits in the editor viewport. */
+  minimapAutoHideShort?: boolean;
+  /** File tree 展示全部文件格式
    *  不可查看条目；true 时全量展示。判定来自后端 read_dir 的 detect_fast 免嗅探 binary 标记） */
   fileTreeShowAll?: boolean;
 }
-export const DEFAULT_SETTINGS: Settings = { closeAutoSave: false, columnMarkers: [], theme: 'paper', showMinimap: true, showRuler: true, showLineNumbers: true, selectionHl: true, autoSaveSec: 15, autoSaveTarget: 'sidecar', backupKeep: 3, fontSize: 12, pasteImageAction: 'auto', readOnlyMode: false, closeBehavior: 'ask', fileTreeShowAll: false };
+export const DEFAULT_SETTINGS: Settings = { closeAutoSave: false, columnMarkers: [], theme: 'paper', uiDensity: 'compact', mdReadingWidth: 'standard', minimapAutoHideShort: false, showMinimap: true, showRuler: true, showLineNumbers: true, selectionHl: true, autoSaveSec: 15, autoSaveTarget: 'sidecar', backupKeep: 3, fontSize: 12, pasteImageAction: 'auto', readOnlyMode: false, closeBehavior: 'ask', fileTreeShowAll: false };
 // (2026-10-29) mdDefaultMode 不设出厂值：mode.ts 按上下文分流——已保存文件默认 preview（渲染预览，用户拍板），草稿默认 ir（空草稿进预览无意义）。
 
 /** WebView2 maps custom schemes to http://<scheme>.localhost (Tauri protocol contract).

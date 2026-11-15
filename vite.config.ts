@@ -30,7 +30,7 @@ export default defineConfig(() => ({
   // (2026-10-29 ac-011) dev/build 均从同源 public 目录供应 PDF 解码资产。
   plugins: [licenseBuildInventory(process.cwd()), codeMirrorParserBudget(), { name: 'sync-offline-assets', buildStart() { syncPdfjsAssets(); syncMathFont(); execSync('node scripts/verify-font-licenses.mjs', { stdio: 'inherit' }); if (process.env.ZIEDIT_CHANNEL === 'release') execSync('node scripts/verify-license-compliance.mjs', { stdio: 'inherit' }); } }],
   // 开发态也经过同一预算补丁，不能由依赖预打包绕开 transform。
-  optimizeDeps: { exclude: ['@codemirror/language'] },
+  optimizeDeps: { entries: ['index.html'], exclude: ['@codemirror/language'] },
   // 版本号单一来源 = tauri.conf.json（001 规则 30 关于对话框：Web 开发模式回退此构建期注入值）
   // 构建渠道：ZIEDIT_CHANNEL=release 为正式版，缺省为开发版（dev）
   define: {
@@ -90,7 +90,8 @@ export default defineConfig(() => ({
       : undefined,
     watch: {
       // 3. tell Vite to ignore watching `src-tauri`
-      ignored: ["**/src-tauri/**"],
+      // 历史整仓副本与版权源码归档不参与开发热更新，避免递归监听拖住首屏加载。
+      ignored: ['**/src-tauri/**', '**/docs/tmp/**', '**/compliance/**'],
     },
   },
 }));

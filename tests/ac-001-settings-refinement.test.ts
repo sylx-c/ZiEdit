@@ -45,6 +45,21 @@ describe('设置结构与状态', () => {
     expect(f.mask.querySelector('[role=region]')?.getAttribute('tabindex')).toBe('0');
   });
 
+  it('兼容默认值并保存密度、Markdown 宽度与缩略图偏好；搜索可过滤分组', () => {
+    const f = fixture();
+    expect(f.select('uiDensity').value).toBe('compact');
+    expect(f.select('mdReadingWidth').value).toBe('standard');
+    expect(f.input('minimapAutoHideShort').checked).toBe(false);
+    change(f.select('uiDensity'), 'comfortable');
+    change(f.select('mdReadingWidth'), 'wide');
+    change(f.input('minimapAutoHideShort'), true);
+    const search = f.mask.querySelector<HTMLInputElement>('.settings-search')!;
+    search.value = '字号'; search.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(f.mask.querySelectorAll('fieldset:not([hidden])')).toHaveLength(1);
+    f.button('ed.save').click();
+    expect(f.current()).toMatchObject({ uiDensity: 'comfortable', mdReadingWidth: 'wide', minimapAutoHideShort: true });
+  });
+
   it('编辑暂存，取消不保存；保存限制数值并保留无关设置', () => {
     const cancel = fixture({ imageHostEnabled: true, s3Region: 'existing' });
     change(cancel.select('theme'), 'black');

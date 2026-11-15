@@ -359,6 +359,7 @@ export class TextView {
       language?: string | null;
       /** 缩略图（002 规则 23）：缺省开启 */
       minimap?: boolean;
+      minimapAutoHideShort?: boolean;
       /** 行号可见性（002 规则 10 v2.8：缺省开可切；与编辑面一致） */
       showLineNumbers?: boolean;
       /** 字号（001 规则 31：10–18，持久化值传入） */
@@ -512,7 +513,12 @@ export class TextView {
   /** shell 视图菜单接线（002 规则 23：可隐藏） */
   setMinimapVisible(v: boolean): void {
     this.minimapEnabled = v;
-    this.minimap?.setVisible(v);
+    this.minimap?.setManualVisible(v);
+  }
+
+  setMinimapAutoHideShort(v: boolean): void {
+    this.opts.minimapAutoHideShort = v;
+    this.minimap?.setAutoHideShort(v);
   }
 
   /** 不可见字符高亮开关（002 规则 25） */
@@ -615,6 +621,7 @@ export class TextView {
       cacheVersion: () => this.cacheVersion,
       spansVersion: () => (this.hlLang ? this.hlVer : 0),
     });
+    this.minimap.setAutoHideShort(this.opts.minimapAutoHideShort === true);
     this.minimap.setVisible(this.minimapEnabled);
     await this.fill();
     this.reportStatus();

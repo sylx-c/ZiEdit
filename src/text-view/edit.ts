@@ -302,6 +302,7 @@ export class EditView {
   private initShowLineNumbers = true;
   private initSelectionHl = true;
   private initInvisible = false;
+  private initMinimapAutoHideShort = false;
   private wrapComp = new Compartment();
   /** 行号可见性（002 规则 10：默认开可切——Compartment 动态增删 lineNumbers 扩展） */
   private lnComp = new Compartment();
@@ -331,6 +332,7 @@ export class EditView {
       wrap?: boolean;
       /** 初始行号可见性（002 规则 10；缺省开） */
       showLineNumbers?: boolean;
+      minimapAutoHideShort?: boolean;
       /** 初始选中词高亮开关（002 规则 13；缺省开） */
       selectionHl?: boolean;
       /** 初始不可见字符高亮（002 规则 25；缺省关） */
@@ -371,6 +373,7 @@ export class EditView {
     this.initShowLineNumbers = opts.showLineNumbers !== false;
     this.initSelectionHl = opts.selectionHl !== false;
     this.initInvisible = opts.invisibleOn === true;
+    this.initMinimapAutoHideShort = opts.minimapAutoHideShort === true;
     this.onStatus = opts.onStatus;
     this.onSaveAsNeeded = opts.onSaveAsNeeded;
     this.onFlash = opts.onFlash;
@@ -1287,6 +1290,7 @@ export class EditView {
       visibleLines: () => (this.view ? cmVisibleLines(this.view) : null),
     });
     this.view.scrollDOM.addEventListener('scroll', () => this.mm?.sync(), { passive: true });
+    this.mm.setAutoHideShort(this.initMinimapAutoHideShort);
     requestAnimationFrame(() => this.mm?.sync());
     return this.mm;
   }
@@ -1311,7 +1315,12 @@ export class EditView {
   }
 
   setMinimapVisible(on: boolean): void {
-    this.mm?.setVisible(on);
+    this.mm?.setManualVisible(on);
+  }
+
+  setMinimapAutoHideShort(on: boolean): void {
+    this.initMinimapAutoHideShort = on;
+    this.mm?.setAutoHideShort(on);
   }
 
   /** 列模式是否开启（#10：列模式开时「列操作 ▸」恒可达，不依赖多选区形态） */

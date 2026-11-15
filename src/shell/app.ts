@@ -78,6 +78,7 @@ import { Minimap } from '../text-view/minimap';
 import type { ScrollAnchor } from '../common/scroll-anchor';
 import type { MarkdownDocumentClient } from '../markdown-view/document-client';
 import { markUserScroll } from '../common/user-scroll';
+import { snapshotEditorBufferState } from '../common/editor-buffer';
 import { SplitScrollCoordinator } from '../markdown-view/split-scroll';
 import type { ScrollSurfaceAdapter } from '../common/scroll-surface';
 import type { EditStatus, EditView as EditViewT, LineBatchOp } from '../text-view/edit';
@@ -481,7 +482,14 @@ export async function boot(): Promise<void> {
     delete persisted.s3Credentials;
     void settingsSaveRaw(persisted);
   };
-  const applySavedTheme = (s: Settings) => applyTheme(s.theme ?? 'paper');
+  function applyUiPreferences(s: Settings): void {
+    const root = document.documentElement;
+    root.classList.toggle('ui-comfortable', s.uiDensity === 'comfortable');
+    const width = s.mdReadingWidth ?? 'standard';
+    root.style.setProperty('--md-col', width === 'narrow' ? 'min(800px, 100%)' : width === 'wide' ? 'min(1400px, 100%)' : 'clamp(860px, 66vw, 1200px)');
+  }
+
+  const applySavedTheme = (s: Settings) => { applyTheme(s.theme ?? 'paper'); applyUiPreferences(s); applyMinimapAutoHideShort(s); };
 
   let saveTimer: ReturnType<typeof setTimeout> | undefined;
   // 解密失败时保持磁盘原文件。启动流程和退出流程都不得再把空会话写回去。
@@ -599,6 +607,15 @@ export async function boot(): Promise<void> {
   const restorePreviewAnchor = (scroller: HTMLElement, anchor: ScrollAnchor): void => restorePreviewAnchorAt(scroller, anchor, previewScrollToLine);
   let previewFind: PreviewFind | null = null;
   let wyMinimap: Minimap | null = null; // WYSIWYG 缩略图（同上）
+  function applyMinimapAutoHideShort(s: Settings): void {
+    const enabled = s.minimapAutoHideShort === true;
+    if (currentView instanceof TextView || currentView instanceof EditView) currentView.setMinimapAutoHideShort(enabled);
+    wyMinimap?.setAutoHideShort(enabled);
+    for (const parked of parkedViews.values()) {
+      if (parked.view instanceof EditView) parked.view.setMinimapAutoHideShort(enabled);
+      else parked.minimap?.setAutoHideShort(enabled);
+    }
+  }
   /** (2026-10-29 图片插入走查) 渲染预览('md')增量刷新句柄：仅当该挂载仍是当前 'md' 视图时生效；视图拆除时置空 */
   let mdPreviewRefresh: ((path: string, newText: string) => Promise<boolean>) | null = null;
   let previewMinimapCleanup: (() => void) | null = null;
@@ -1554,7 +1571,7 @@ export async function boot(): Promise<void> {
         // 位置锚按源码行记录（渲染预览的隐藏源缓冲不显示，取预览面自身的行位置）——跨形态还原的唯一依据
         const anchor = fromPreview ? capturePreviewAnchor() ?? editorBuffers.get(path)?.anchor : currentView.captureScrollAnchor();
         const doc = currentView.view.state.doc.toString();
-        editorBuffers.set(path, { state: currentView.view.state, dirty, scrollTop, anchor });
+        editorBuffers.set(path, { state: snapshotEditorBufferState(currentView.view.state), dirty, scrollTop, anchor });
         if (path.startsWith('draft://')) {
           draftContent.set(path, doc); // 重挂 initialDoc 的依据；EditView onStatus 会在就绪后继续同步
           const dt = store.tabs.find(t => t.path === path);
@@ -1989,6 +2006,7 @@ export async function boot(): Promise<void> {
           readOnly: settings.readOnlyMode === true || tabLock.has(tab.path),
           wrap: wrapMap.get(tab.path) === true,
           showLineNumbers: settings.showLineNumbers !== false,
+          minimapAutoHideShort: settings.minimapAutoHideShort === true,
           selectionHl: settings.selectionHl !== false,
           invisibleOn: settings.showInvisible === true,
           restoreBookmarks: tab.bookmarks,
@@ -2394,6 +2412,7 @@ export async function boot(): Promise<void> {
           readOnly: settings.readOnlyMode === true || tabLock.has(tab.path),
           wrap: wrapMap.get(tab.path) === true,
           showLineNumbers: settings.showLineNumbers !== false,
+          minimapAutoHideShort: settings.minimapAutoHideShort === true,
           selectionHl: settings.selectionHl !== false,
           invisibleOn: settings.showInvisible === true,
           restoreBookmarks: tab.bookmarks,
@@ -2588,6 +2607,7 @@ export async function boot(): Promise<void> {
         restoreBookmarks: tab.bookmarks ?? [],
         language: tab.language,
         minimap: settings.showMinimap !== false,
+        minimapAutoHideShort: settings.minimapAutoHideShort === true,
         showLineNumbers: settings.showLineNumbers !== false,
         fontSize: settings.fontSize ?? 12,
         onFontSize: n => applyFontSize(n),
@@ -2646,6 +2666,7 @@ export async function boot(): Promise<void> {
       cancelAnimationFrame(frame);
     };
     mm.setVisible(settings.showMinimap !== false);
+    mm.setAutoHideShort(settings.minimapAutoHideShort === true);
     return mm;
   }
 
@@ -4927,9 +4948,10 @@ export async function boot(): Promise<void> {
         else if (on) {
           const row = document.getElementById('editorRail');
           if (row) currentView.attachMinimap(row);
+          currentView.setMinimapVisible(on);
         }
       }
-      wyMinimap?.setVisible(on);
+      wyMinimap?.setManualVisible(on);
       if (on) wyMinimap?.sync();
     },
   });

@@ -127,4 +127,70 @@ describe('minimap 极短文档', () => {
       minimap.remove();
     }
   });
+
+  it('short-document auto-hide requires a laid-out viewport and preserves unchanged manual overrides', () => {
+    const parent = document.createElement('div');
+    let viewportHeight = 0;
+    let contentHeight = 0;
+    const minimap = new Minimap(parent, {
+      totalLines: () => 1,
+      scrollTop: () => 0,
+      scrollHeight: () => contentHeight,
+      clientHeight: () => viewportHeight,
+      scrollTo: () => {},
+      lineText: () => 'text',
+    });
+    try {
+      minimap.setAutoHideShort(true);
+      expect(minimap.root.style.display).toBe('');
+      viewportHeight = 400;
+      contentHeight = 200;
+      minimap.setManualVisible(true);
+      minimap.setAutoHideShort(true);
+      expect(minimap.root.style.display).toBe('');
+      minimap.setAutoHideShort(false);
+      expect(minimap.root.style.display).toBe('');
+      minimap.setAutoHideShort(true);
+      expect(minimap.root.style.display).toBe('none');
+    } finally {
+      minimap.remove();
+    }
+  });
+
+  it('短文档自动隐藏，溢出后恢复，并允许手动显隐覆盖', () => {
+    const parent = document.createElement('div');
+    let contentHeight = 400;
+    const minimap = new Minimap(parent, {
+      totalLines: () => 10,
+      scrollTop: () => 0,
+      scrollHeight: () => contentHeight,
+      clientHeight: () => 400,
+      scrollTo: () => {},
+      lineText: () => 'text',
+    });
+    try {
+      minimap.setAutoHideShort(true);
+      expect(minimap.root.style.display).toBe('none');
+      contentHeight = 800;
+      minimap.sync();
+      expect(minimap.root.style.display).toBe('');
+      contentHeight = 400;
+      minimap.sync();
+      expect(minimap.root.style.display).toBe('none');
+
+      minimap.setManualVisible(true);
+      expect(minimap.root.style.display).toBe('');
+      minimap.sync();
+      expect(minimap.root.style.display).toBe('');
+      minimap.setManualVisible(false);
+      expect(minimap.root.style.display).toBe('none');
+
+      minimap.setVisible(true);
+      expect(minimap.root.style.display).toBe('none');
+      minimap.setAutoHideShort(false);
+      expect(minimap.root.style.display).toBe('');
+    } finally {
+      minimap.remove();
+    }
+  });
 });

@@ -27,6 +27,9 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
   };
   const body = node('div', 'settings-content');
   const intro = node('p', 'settings-intro', t('set.intro'));
+  const search = node('input', 'settings-search');
+  search.type = 'search'; search.placeholder = t('set.search'); search.setAttribute('aria-label', t('set.search'));
+  const nav = node('nav', 'settings-nav'); nav.setAttribute('aria-label', t('set.title'));
   const scroll = node('div', 'settings-scroll');
   scroll.tabIndex = 0;
   scroll.setAttribute('role', 'region');
@@ -39,7 +42,6 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
   save.type = 'submit';
   footer.append(cancel, save);
   scroll.append(form);
-  body.append(intro, scroll, footer);
 
   const identify = <T extends HTMLInputElement | HTMLSelectElement>(input: T, name: string): T => {
     input.id = `${prefix}-${++controlSequence}`;
@@ -93,9 +95,10 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
   const theme = select('theme', initial.theme ?? 'paper', [
     ['paper', 'theme.paper'], ['cool', 'theme.cool'], ['graphite', 'theme.graphite'], ['black', 'theme.black'],
   ]);
+  const density = select('uiDensity', initial.uiDensity ?? 'compact', [['compact', 'set.densityCompact'], ['comfortable', 'set.densityComfortable']]);
   const line = color('lineHl', 'set.lineHl', initial.lineHl, '#eaeef4');
   const treeShowAll = checkbox('fileTreeShowAll', initial.fileTreeShowAll === true);
-  group('set.grpAppearance', 'set.hintAppearance', row('set.theme', theme), row('set.lineHl', line.enabled, line.picker),
+  group('set.grpAppearance', 'set.hintAppearance', row('set.theme', theme), row('set.density', density), row('set.lineHl', line.enabled, line.picker),
     row('set.treeShowAll', treeShowAll));
 
   const readOnly = checkbox('readOnlyMode', initial.readOnlyMode === true);
@@ -107,7 +110,9 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
   const markdown = select('mdDefaultMode', initial.mdDefaultMode ?? 'ir', [
     ['ir', 'set.mdIr'], ['source', 'set.mdSource'], ['preview', 'act.mdPreview'],
   ]);
-  group('set.grpMarkdown', 'set.hintMarkdown', row('set.mdDefault', markdown));
+  const readingWidth = select('mdReadingWidth', initial.mdReadingWidth ?? 'standard', [['narrow', 'set.widthNarrow'], ['standard', 'set.widthStandard'], ['wide', 'set.widthWide']]);
+  const autoHideMinimap = checkbox('minimapAutoHideShort', initial.minimapAutoHideShort === true);
+  group('set.grpMarkdown', 'set.hintMarkdown', row('set.mdDefault', markdown), row('set.mdWidth', readingWidth), row('set.minimapAutoHide', autoHideMinimap));
 
   const diffKeys = ['add', 'del', 'chg'] as const;
   const diffLabels = ['set.diffAdd', 'set.diffDel', 'set.diffChg'];
@@ -172,6 +177,37 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
   close.addEventListener('change', refreshClear); refreshClear();
   group('set.grpAdvanced', 'set.hintAdvanced', row('common.language', language), row('set.closeBehavior', close, clear));
 
+  // Category navigation and search operate on the existing fieldsets; no setting state is recreated.
+  const groups = Array.from(form.querySelectorAll<HTMLElement>('.settings-group'));
+  const navItems = new Map<HTMLElement, HTMLButtonElement>();
+  for (const fieldset of groups) {
+    const legend = fieldset.querySelector('legend')?.textContent ?? '';
+    const button = node('button', 'settings-nav-item', legend);
+    button.type = 'button';
+    button.addEventListener('click', () => { search.value = ''; filterSettings(); fieldset.scrollIntoView({ block: 'start' }); });
+    navItems.set(fieldset, button);
+    nav.append(button);
+  }
+  function filterSettings(): void {
+    const query = search.value.trim().toLocaleLowerCase();
+    for (const fieldset of groups) {
+      let visibleRows = 0;
+      for (const child of Array.from(fieldset.children)) {
+        if (!(child instanceof HTMLElement) || !child.classList.contains('settings-row')) continue;
+        const visible = !query || child.textContent?.toLocaleLowerCase().includes(query) === true;
+        child.hidden = !visible;
+        if (visible) visibleRows++;
+      }
+      const hidden = !!query && visibleRows === 0;
+      fieldset.hidden = hidden;
+      const navItem = navItems.get(fieldset);
+      if (navItem) navItem.hidden = hidden;
+    }
+  }
+  search.addEventListener('input', filterSettings);
+  const workspace = node('div', 'settings-workspace'); workspace.append(nav, scroll);
+  body.append(intro, search, workspace, footer);
+
   let mask: OverlayMask;
   cancel.addEventListener('click', () => mask.close());
   const saveSettings = (): void => {
@@ -190,6 +226,9 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
       backupEnabled: backup.checked,
       theme: theme.value as Settings['theme'],
       mdDefaultMode: markdown.value as Settings['mdDefaultMode'],
+      mdReadingWidth: readingWidth.value as Settings['mdReadingWidth'],
+      uiDensity: density.value as Settings['uiDensity'],
+      minimapAutoHideShort: autoHideMinimap.checked,
       lineHl: line.enabled.checked ? line.picker.value : undefined,
       outlineCur: outline.enabled.checked ? outline.picker.value : undefined,
       diffColors: Object.keys(diffColors).length ? diffColors : undefined,

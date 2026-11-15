@@ -459,6 +459,20 @@ button{font:inherit}
   border-radius:4px;
 }
 .sidebar-swap:hover{color:var(--fg);background:var(--hover)}
+.tr:focus-visible,.sidebar-tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tr{border-radius:3px}
+.statusbar .st-cell.ext-mod,.statusbar .st-cell.ext-del{order:-1;min-height:22px;font-weight:700}
+.statusbar .st-cell.ext-del{background:color-mix(in srgb,var(--c-red) 12%,var(--chrome));border-color:var(--c-red)}
+.statusbar .st-cell.ext-mod{background:color-mix(in srgb,var(--c-amber) 12%,var(--chrome));border-color:var(--c-amber)}
+:root.ui-comfortable .toolbar{height:38px}
+:root.ui-comfortable .toolbar .tb{height:30px;min-width:30px}
+:root.ui-comfortable .seg .tb{height:26px}
+:root.ui-comfortable .panel-seg{min-height:30px}
+:root.ui-comfortable .sidebar-tab{height:26px}
+:root.ui-comfortable .tr{height:26px}
+:root.ui-comfortable .statusbar{height:32px}
+:root.ui-comfortable .st-cell{height:24px}
+@media(max-width:760px){.toolbar{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}.toolbar>*{flex-shrink:0}.toolbar .tb-spacer{flex:0 0 8px}.toolbar-right{margin-left:auto}.sidebar{width:200px}.statusbar{gap:2px}.st-cell{padding:0 4px}.st-hint{max-width:20%}}
 .sidebar-body{flex:1;overflow-y:auto;padding:6px 6px 10px}
 
 /* 文件树行（.tr，定稿结构） */
