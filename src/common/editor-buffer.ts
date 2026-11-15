@@ -25,6 +25,15 @@ export function bufferHistory(buffer?: EditorBuffer): Extension {
   return buffer ? historyField.init(() => buffer.state.field(historyField)) : [];
 }
 
+/** Keep only remount data; view extensions may close over the destroyed view. */
+export function snapshotEditorBufferState(state: EditorState): EditorState {
+  const history = state.field(historyField, false);
+  return EditorState.create({
+    doc: state.doc,
+    selection: state.selection,
+    extensions: [EditorState.allowMultipleSelections.of(true), history ? historyField.init(() => history) : []],
+  });
+}
 /** 只读同时约束用户输入和程序化事务；重配置本身不触碰文档及历史。 */
 export class ReadOnlyControl {
   private compartment = new Compartment();

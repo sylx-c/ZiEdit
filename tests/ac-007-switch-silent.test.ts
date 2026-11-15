@@ -32,7 +32,7 @@ describe('AC-007 切换免打扰', () => {
 
   it('切走先保留 EditorBuffer 与脏标并写快照，关闭仍查 dirtyPaths', () => {
     const mount = section('function maybeRenderView(', 'function restoreSwitchAnchor(');
-    expect(mount).toContain('editorBuffers.set(path, { state: currentView.view.state, dirty, scrollTop, anchor })');
+    expect(mount).toContain('editorBuffers.set(path, { state: snapshotEditorBufferState(currentView.view.state), dirty, scrollTop, anchor })');
     expect(mount.indexOf('editorBuffers.set(')).toBeLessThan(mount.indexOf('destroyView()'));
     expect(mount).toContain('if (dirty) writeSnapshot(');
     const close = section('function closeTabGuarded(', 'async function saveTextAs(');

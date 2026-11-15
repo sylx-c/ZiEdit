@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EditorView } from '@codemirror/view';
-import { undo } from '@codemirror/commands';
+import { redo, undo } from '@codemirror/commands';
+import { ensureSyntaxTree } from '@codemirror/language';
 import { startCompletion, currentCompletions, setSelectedCompletion } from '@codemirror/autocomplete';
 import { LivePreviewView } from '../src/markdown-view/livepreview';
 import { parseTablePaste, pasteTable, resizeTable, runTableOperation, tableModel } from '../src/markdown-view/table-model';
@@ -33,6 +34,36 @@ function type(view: EditorView, text: string) {
       view.dispatch({ ...view.state.replaceSelection(char), userEvent: 'input.type' });
   }
 }
+describe('MD-06 正在键入的闭合围栏', () => {
+  it.each([
+    ['```js\nprevious z12x\n', '```'],
+    ['```js\n', '```'],
+    ['~~~js\nprevious z12x\n', '~~~'],
+    ['> ```js\n> previous z12x\n> ', '```'],
+    ['- ```js\n  previous z12x\n  ', '```'],
+  ])('%s 逐字补齐时保留闭合行的可编辑 DOM，离行后折叠', async (source, mark) => {
+    const { main } = await mount(source);
+    main.dispatch({ selection: { anchor: source.length } }); type(main, mark);
+    expect(main.state.doc.toString()).toBe(source + mark);
+    await until(() => main.contentDOM.textContent?.endsWith(mark) === true);
+    const { liveBlockField } = await import('../src/markdown-view/live-block-field');
+    const close = main.state.doc.lineAt(main.state.doc.length);
+    const hidden: number[] = [];
+    main.state.field(liveBlockField).set.between(close.from, close.to, (from, to) => {
+      if (from <= close.from && to >= close.to) hidden.push(from);
+    });
+    expect(hidden).toEqual([]);
+    type(main, 'js');
+    expect(main.state.doc.toString()).toBe(source + mark + 'js');
+    expect(main.state.selection.main.head).toBe(main.state.doc.length);
+    // 语言后缀让它成为代码体；保留容器前缀另起一行重新输入合法闭合，离行才折叠。
+    type(main, '\n' + (/^[ >\t]*/.exec(source.split('\n').at(-1)!)?.[0] ?? '') + mark);
+    await until(() => main.contentDOM.textContent?.endsWith(mark) === true);
+    main.dispatch({ selection: { anchor: 0 } });
+    await until(() => !main.contentDOM.textContent?.endsWith(mark));
+  });
+});
+
 const SOURCE = '前\n\n| A | B | C |\n|:---|---:|---|\n| a | b | c |\n| d | e | f |\n\n后';
 
 describe('007 AC-30 连续写作', () => {
@@ -248,6 +279,54 @@ describe('007 AC-30 连续写作', () => {
     expect(main.state.doc.toString()).toBe('```js\n\n```\n');
     main.dispatch({ selection: { anchor: 5 } }); key(main, 'Enter');
     expect(main.state.doc.toString().match(/```/g)).toHaveLength(2);
+  });
+  it.each([
+    ['- item\n- ```js', '  ', '```'],
+    ['* ```js', '  ', '```'],
+    ['+ ~~~js', '  ', '~~~'],
+    ['12. ```js', '    ', '```'],
+    ['3) ```js', '   ', '```'],
+    ['- parent\n  - ```js', '    ', '```'],
+    ['> - ```js', '>   ', '```'],
+    ['- > ```js', '  > ', '```'],
+    ['> 10. ````js', '>     ', '````'],
+    ['> ```js', '> ', '```'],
+  ])('列表/引用围栏 %s 的 Enter 补齐代码体与闭合缩进', async (source, prefix, fence) => {
+    const { main } = await mount(source);
+    main.dispatch({ selection: { anchor: source.length } }); key(main, 'Enter');
+    const expected = source + '\n' + prefix + '\n' + prefix + fence;
+    expect(main.state.doc.toString()).toBe(expected);
+    expect(main.state.selection.main.head).toBe(source.length + 1 + prefix.length);
+    expect(undo(main)).toBe(true); expect(main.state.doc.toString()).toBe(source);
+    expect(redo(main)).toBe(true); expect(main.state.doc.toString()).toBe(expected);
+    main.dispatch({ selection: { anchor: source.length + 1 + prefix.length } });
+    type(main, 'const nested = 1;');
+    expect(main.state.doc.toString()).toBe(source + '\n' + prefix + 'const nested = 1;\n' + prefix + fence);
+    const blocks: { from: number; to: number; marks: number }[] = [];
+    ensureSyntaxTree(main.state, main.state.doc.length, 100)!.iterate({ enter: node => {
+      if (node.name === 'FencedCode') blocks.push({ from: node.from, to: node.to, marks: node.node.getChildren('CodeMark').length });
+    } });
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0]!.marks).toBe(2);
+    expect(blocks[0]!.to).toBe(main.state.doc.length);
+  });
+  it('列表围栏已有闭合时不重复补齐，语言编辑入口回到原代码体', async () => {
+    const source = '- ```js\n  body\n  ```';
+    const { main } = await mount(source);
+    const { fenceSourceChanged } = await import('../src/markdown-view/writing');
+    main.dispatch({ selection: { anchor: 7 }, effects: fenceSourceChanged.of(0) }); key(main, 'Enter');
+    expect(main.state.doc.toString()).toBe(source);
+    expect(main.state.selection.main.head).toBe(source.indexOf('body'));
+    main.dispatch({ selection: { anchor: 7 } }); key(main, 'Enter');
+    expect(main.state.doc.toString()).toBe('- ```js\n  \n  body\n  ```');
+  });
+  it('列表新键入围栏不借用后文已有围栏闭合，任务正文不误当围栏', async () => {
+    const { main } = await mount('- \n\n```js\nold\n```');
+    main.dispatch({ selection: { anchor: 2 } }); type(main, '```js'); key(main, 'Enter');
+    expect(main.state.doc.toString()).toBe('- ```js\n  \n  ```\n\n```js\nold\n```');
+    const { main: task } = await mount('- [ ] ```js');
+    task.dispatch({ selection: { anchor: task.state.doc.length } }); key(task, 'Enter');
+    expect(task.state.doc.toString().match(/```/g)).toHaveLength(1);
   });
   it('代码体及闭合行光标均不泄漏围栏；语言入口只展开起始行，退出后原文不变', async () => {
     const source = '```js\nconst x = 1;\n```\n\n后';

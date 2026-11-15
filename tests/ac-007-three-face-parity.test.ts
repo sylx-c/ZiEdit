@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { extractMarkdownMetadata } from '../src/markdown-view/headings';
 import { renderStaticHtml, staticMarkdownParser } from '../src/markdown-view/static-html';
 import { renderMarkdown, renderMarkdownInline } from '../src/markdown-view/preview';
+import { cellInlineText } from '../src/markdown-view/table-model';
 
 const staticFace = (source: string): HTMLElement => {
   const tree = staticMarkdownParser.parse(source);
@@ -54,6 +55,7 @@ describe('D-T2-05 三面块级序列等价（静态 vs 回退）', () => {
     ['段落、引用与懒连续', '第一段。\n\n> 引用一\n> 引用二\n\n一\n二'],
     ['三类列表与任务勾选', '- 甲\n  乙\n- [ ] 未完成\n- [x] 完成\n\n1. 一\n2. 二\n\n3. 起点\n4. 次'],
     ['表格对齐', '| A | B | C |\n|:--|:-:|--:|\n| a | b | c |'],
+    ['表格代码转义竖线（MD-03）', '| A | B |\n| -- | -- |\n| `c\\|d` | a\\|b |'],
     ['围栏与缩进代码', '```js\nconst x = 1;\n```\n\n    缩进\n    第二行'],
     ['链接、图片与自动地址', '[标签](/target "题") ![替代](./a.png) <https://x.test/a> www.example.com'],
     ['公式与未闭合', '$x^2$ 与 $$\ny=2\n$$\n\n$$\n未闭合'],
@@ -93,6 +95,15 @@ describe('D-T2-05 IR 行内语义对照（renderMarkdownInline vs 静态行内�
     expect(renderMarkdownInline('a *b* ~~c~~ ==d== x^2^')).toBe('a <em>b</em> <s>c</s> <mark>d</mark> x<sup>2</sup>');
     expect(staticFace('a *b* ~~c~~ ==d== x^2^').querySelector('p')?.innerHTML)
       .toBe('a <em>b</em> <del>c</del> <mark>d</mark> x<sup>2</sup>');
+  });
+  it('MD-03 表格 code span 内转义竖线：单元格还原为字面竖线，表外保持字面', () => {
+    const cellCode = staticFace('| A |\n| -- |\n| `c\\|d` |').querySelector('td code');
+    expect(cellCode?.textContent).toBe('c|d');
+    // 表外是普通 code span：反斜杠转义不进代码跨度，字面保留。
+    expect(staticFace('段落 `c\\|d` 结束').querySelector('p code')?.textContent).toBe('c\\|d');
+    // IR 面与静态面同口径：cellInlineText 归一化后再走行内渲染。
+    expect(cellInlineText('`c\\|d` a\\|b')).toBe('`c|d` a|b');
+    expect(renderMarkdownInline(cellInlineText('`c\\|d`'))).toContain('<code>c|d</code>');
   });
   it('语义族对照：同一格式在两面产出同名标签', () => {
     const families: Array<[string, string, string]> = [

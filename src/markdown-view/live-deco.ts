@@ -259,9 +259,11 @@ function buildLiveDecoInner(
             attributes: { style: `--mdir-code-inset:${inset}px;--mdir-quote-depth:${quoted}` } }).range(doc.line(line).from));
         };
         const editing = editingFence(view.state, open.from);
+        const editingClose = close !== null && editingFence(view.state, close.from);
         if (editing || first > last) {
           codeLine(open.number, 'mdir-code mdir-code-open');
         }
+        if (editingClose) codeLine(close!.number, 'mdir-code mdir-code-last');
         for (let n = Math.max(first, doc.lineAt(from).number); n <= Math.min(last, doc.lineAt(to).number); n++) {
           codeLine(n, 'mdir-code' + (n === last ? ' mdir-code-last' : ''));
           const line = doc.line(n);
@@ -271,8 +273,8 @@ function buildLiveDecoInner(
         for (let child = node.childAfter(from); child && child.from <= to; child = child.nextSibling) {
           if (child.name === 'QuoteMark' && child.to > doc.lineAt(child.from).from + prefixLength)
             hide(out, child.from, child.to + (doc.sliceString(child.to, child.to + 1) === ' ' ? 1 : 0));
-          // 状态块装饰在解析/视口通知后才就绪；其间也不能闪出闭合围栏。
-          if (child.name === 'CodeMark' && (child.from !== node.from || (!editing && first <= last))) hide(out, child.from, child.to);
+          // 正在键入的闭合行必须保留 DOM 光标落点，离行后再隐藏。
+          if (child.name === 'CodeMark' && (child.from === node.from ? !editing && first <= last : !editingClose)) hide(out, child.from, child.to);
           if (child.name === 'CodeInfo' && !editing && first <= last) hide(out, child.from, child.to);
         }
         if (!close && first > last) out.push(Decoration.line({ class: 'mdir-code-last' }).range(open.from));

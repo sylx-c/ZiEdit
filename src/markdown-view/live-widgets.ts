@@ -9,6 +9,7 @@ import { t } from '../common/i18n';
 import { isComposing } from '../common/composition';
 import { userScrolledRecently } from '../common/user-scroll';
 import { cellRange, activeCell, openCellEditor, syncCellEditor, destroyCellEditor, createTableTools, refreshTableTools } from './table-editor';
+import { cellInlineText } from './table-model';
 import { TableViewport, tableCellAt, tableRowNumber } from './table-viewport';
 import { fenceSourceChanged, fenceSourceField, fenceDraftField } from './writing';
 import { localImagePath, renderMarkdownInline, type HeadingItem } from './preview';
@@ -535,7 +536,7 @@ export class TableWidget extends WidgetType {
         const text = values[col] ?? '';
         let html = cache.get(text);
         if (html === undefined) {
-          html = renderMarkdownInline(text, this.references?.definitions, this.emojis, this.references?.footnotes);
+          html = renderMarkdownInline(cellInlineText(text), this.references?.definitions, this.emojis, this.references?.footnotes);
           if (cache.size < 1024) cache.set(text, html);
         }
         if (cell.dataset.mdCellHtml !== html) { cell.innerHTML = html; cell.dataset.mdCellHtml = html; }
@@ -583,7 +584,7 @@ export class TableWidget extends WidgetType {
       const { row, col } = (e as CustomEvent<{ row: number; col: number }>).detail;
       const range = cellRange(view, box, row, col);
       const index = view.state.field(referenceField);
-      if (range) cell.innerHTML = renderMarkdownInline(view.state.doc.sliceString(range.from, range.to), index.definitions, view.state.field(emojiField), index.footnotes);
+      if (range) cell.innerHTML = renderMarkdownInline(cellInlineText(view.state.doc.sliceString(range.from, range.to)), index.definitions, view.state.field(emojiField), index.footnotes);
       hydrateTableImages(box, view);
       hydrateTableNotes(box, view);
       hydrateTableRenders(box, view);

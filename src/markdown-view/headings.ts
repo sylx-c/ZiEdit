@@ -1,4 +1,4 @@
-import { parser as baseParser, GFM, Superscript, Subscript, Emoji } from '@lezer/markdown';
+import { parser as baseParser, GFM, Superscript, Subscript } from '@lezer/markdown';
 import { liveMarkdownExtensions } from './extensions';
 import type { Tree, SyntaxNode } from '@lezer/common';
 import { renderBlockAt, renderPlaceholder, escapeRenderText, type RenderBlock } from './render-model';
@@ -36,7 +36,7 @@ export interface MarkdownMetadata {
 // markdown-it 链接/实体工具经同步接缝获取（./md-link，perf-silk Pass 1 FC① 收尾）：
 // 主线程由 md.ts 共享单例注入、worker 由 headings-worker 入口注入——本文件不再静态
 // import markdown-it，主 chunk 首屏体积随之解除该依赖。
-const indexParser = baseParser.configure([GFM, Superscript, Subscript, Emoji, liveMarkdownExtensions]);
+const indexParser = baseParser.configure([GFM, Superscript, Subscript, liveMarkdownExtensions]);
 export const normalizeReference = (label: string): string => label.trim().replace(/\s+/g, ' ').toLowerCase().toUpperCase();
 
 /** 输入必须来自已解析的URL或Autolink节点，不能把任意正文猜成地址。 */

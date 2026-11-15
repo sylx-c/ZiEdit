@@ -14,7 +14,7 @@ vi.mock('../src/common/render-queue', () => ({
   cancelIrFrame: () => {},
 }));
 
-import { hydrateRenders, HYDRATE_SLICE_TARGETS } from '../src/markdown-view/render-service';
+import { hydrateRenders, destroyHydratedRenders, HYDRATE_SLICE_TARGETS } from '../src/markdown-view/render-service';
 import { renderPlaceholder, type RenderBlock } from '../src/markdown-view/render-model';
 
 /** 冻结时钟：时间预算永不触顶，分片只按目标数上限推进（真实运行两条边界都在） */
@@ -68,5 +68,43 @@ describe('D-T2-04 水合分片派发（结构锁）', () => {
     alive = false; // 视图销毁/代际作废
     for (let i = 0; i < 4; i++) await tick();
     expect(mountedCount(root)).toBe(HYDRATE_SLICE_TARGETS);
+  });
+});
+
+describe('MD-05 输入撤离邻域（分屏滚动同步不得饿死水合）', () => {
+  function guardedScene(): { root: HTMLElement; near: HTMLElement; far: HTMLElement } {
+    const root = document.createElement('div');
+    root.className = 'md-preview';
+    Object.defineProperty(root, 'clientHeight', { value: 400, configurable: true });
+    const template = document.createElement('template');
+    template.innerHTML = renderPlaceholder({ kind: 'math', source: 'near', display: false, from: 0, to: 4 });
+    const near = template.content.firstElementChild as HTMLElement;
+    template.innerHTML = renderPlaceholder({ kind: 'math', source: 'far', display: false, from: 5, to: 8 });
+    const far = template.content.firstElementChild as HTMLElement;
+    Object.defineProperty(far, 'offsetTop', { value: 100_000, configurable: true });
+    root.append(near, far);
+    return { root, near, far };
+  }
+  it('md-user-input 保留视口内在途挂载，只把离屏目标放回待派发队列', async () => {
+    const { root, near, far } = guardedScene();
+    try {
+      await hydrateRenders(root, [
+        { kind: 'math', source: 'near', display: false, from: 0, to: 4 },
+        { kind: 'math', source: 'far', display: false, from: 5, to: 8 },
+      ], false, () => true);
+      // 视口内目标立即派发为 loading；离屏目标保持待派发标记。
+      expect(near.dataset.renderState).toBe('loading');
+      expect(near.dataset.renderPending).toBeUndefined();
+      expect(far.dataset.renderPending).toBe('1');
+      // 分屏左右同步以编程滚动持续派发 md-user-input：视口内挂载不得被作废重挂。
+      root.dispatchEvent(new Event('md-user-input'));
+      expect(near.dataset.renderState).toBe('loading');
+      expect(near.dataset.renderPending).toBeUndefined();
+      expect(far.dataset.renderPending).toBe('1');
+      // 目标真正离屏后仍按原语义撤离：取消在途、回待派发队列。
+      Object.defineProperty(near, 'offsetTop', { value: 100_000, configurable: true });
+      root.dispatchEvent(new Event('md-user-input'));
+      expect(near.dataset.renderPending).toBe('1');
+    } finally { destroyHydratedRenders(root); }
   });
 });

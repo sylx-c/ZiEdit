@@ -1,11 +1,22 @@
-import { GFM, Superscript, Subscript, Emoji, type MarkdownConfig } from '@lezer/markdown';
+import { GFM, Superscript, Subscript, type MarkdownConfig } from '@lezer/markdown';
+import { tags } from '@lezer/highlight';
 import { cooperativeTableNodes, cooperativeTableParser } from './cooperative-table';
 
 /** 已有静态渲染扩展的源位置语义，编辑时仍保留原 Markdown。 */
 export const liveMarkdownExtensions: MarkdownConfig = {
   defineNodes: ['FootnoteReference', 'FootnoteDefinition', 'FootnoteLabel', 'FootnoteIndent', 'Highlight', 'HighlightMark', 'TableOfContents',
-    'InlineMath', 'MathBlock', 'MathUnclosed', 'MathContent', 'MathMark'],
-  parseInline: [{ name: 'InlineMath', before: 'Emphasis', parse(cx, next, pos) {
+    'InlineMath', 'MathBlock', 'MathUnclosed', 'MathContent', 'MathMark',
+    // 库内置 Emoji 只认 [a-zA-Z_0-9]，而内置别名表含 `+1`、`-1`、`flag-sark` 等 +/- 别名
+    // （MD-04：四个别名三面不转换）。这里按别名表实际字符集放宽，节点名/样式与库一致。
+    { name: 'Emoji', style: tags.character }],
+  parseInline: [{ name: 'Emoji', parse(cx, next, pos) {
+    if (next !== 58 /* ':' */) return -1;
+    const match = /^:([\w+-]+):/.exec(cx.slice(pos, cx.end));
+    // 至少含一个字母/数字/下划线：表格分隔行 `:-:`、`:---:` 全是冒号与短横，
+    // 不得被当成别名节点（MD-04 放宽字符集时引入的冲突，合作表格测试锁定）。
+    if (!match || !/[A-Za-z0-9_]/.test(match[1]!)) return -1;
+    return cx.addElement(cx.elt('Emoji', pos, pos + match[0].length));
+  } }, { name: 'InlineMath', before: 'Emphasis', parse(cx, next, pos) {
     if (next !== 36 || cx.char(pos - 1) === 36 || cx.char(pos + 1) === 36 || /\s/.test(cx.slice(pos + 1, pos + 2))) return -1;
     for (let end = pos + 1; end < cx.end; end++) {
       const ch = cx.char(end);
@@ -82,4 +93,4 @@ export const liveMarkdownExtensions: MarkdownConfig = {
 };
 
 /** Worker、源码与即时渲染共享语法；大表不能在源码面退化成整篇超大段落。 */
-export const markdownSyntaxExtensions = [cooperativeTableNodes, GFM, cooperativeTableParser, Superscript, Subscript, Emoji, liveMarkdownExtensions];
+export const markdownSyntaxExtensions = [cooperativeTableNodes, GFM, cooperativeTableParser, Superscript, Subscript, liveMarkdownExtensions];

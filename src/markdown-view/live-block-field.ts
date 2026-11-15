@@ -112,15 +112,16 @@ function buildBlockDecosInner(state: EditorState, from: number, to: number, tabl
     }
     if (node.name === 'FencedCode') {
       const { open, close, first, last } = fenceLines(node.node, doc);
+      const editingClose = close !== null && editingFence(state, close.from);
       if (first <= last || close) {
         if (!editingFence(state, open.from)) {
           const info = node.node.getChild('CodeInfo'), mark = node.node.getChild('CodeMark')!;
           const { inset, quoted } = codeContainer(node.node);
           out.push(Decoration.replace({ block: true, inclusiveEnd: false, fence: true,
-            widget: new CodeLabelWidget(info ? doc.sliceString(info.from, info.to).trim() : '', info?.from ?? mark.to, info?.to ?? mark.to, inset, quoted, state.readOnly, first > last),
-          }).range(open.from, first > last ? close!.to : doc.line(first).from));
+            widget: new CodeLabelWidget(info ? doc.sliceString(info.from, info.to).trim() : '', info?.from ?? mark.to, info?.to ?? mark.to, inset, quoted, state.readOnly, first > last && !editingClose),
+          }).range(open.from, first > last ? (editingClose ? close!.from : close!.to) : doc.line(first).from));
         }
-        if (close && (first <= last || editingFence(state, open.from)))
+        if (close && !editingClose && (first <= last || editingFence(state, open.from)))
           out.push(Decoration.replace({ block: true, fence: true }).range(close.from, close.to));
       }
       return false;
@@ -320,14 +321,16 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
         const isSetext = name.startsWith('SetextHeading');
         const isFence = name === 'FencedCode';
         if (!tracked && !isSetext && !isFence) return name === 'Document' || name === 'Blockquote' || name === 'BulletList' || name === 'OrderedList' || name === 'ListItem';
-        let was: boolean, is: boolean;
+        let was: boolean | number, is: boolean | number;
         if (isSetext) {
           was = prevTouched && prevProbe(node.from, node.to);
           is = currTouched && currProbe(node.from, node.to);
         } else if (isFence) {
-          const openFrom = tr.state.doc.lineAt(node.from).from;
-          was = editingFence(tr.startState, openFrom);
-          is = editingFence(tr.state, openFrom);
+          const { open, close } = fenceLines(node.node, tr.state.doc);
+          const fenceEditing = (state: EditorState): number => Number(editingFence(state, open.from))
+            + (close !== null && editingFence(state, close.from) ? 2 : 0);
+          was = fenceEditing(tr.startState);
+          is = fenceEditing(tr.state);
         } else {
           was = prevProbe(node.from, node.to);
           is = currProbe(node.from, node.to);

@@ -122,6 +122,36 @@ describe('渲染正确性：自定义语法期值断言', () => {
     expect(host.textContent).not.toContain(':smile:');
   });
 
+  it('MD-04 含 +/连字符的四个内置别名替换为字符，未知别名保持字面', async () => {
+    const host = await render(':+1: :-1: :hand_with_index_finger_and_thumb-crossed: :flag-sark: :smile: :+no_such: ::\n');
+    expect(host.textContent).toContain('👍');
+    expect(host.textContent).toContain('👎');
+    expect(host.textContent).toContain('🫰');
+    expect(host.textContent).toContain('🇨🇶');
+    expect(host.textContent).toContain('😄');
+    expect(host.textContent).toContain(':+no_such:');
+    expect(host.textContent).toContain('::');
+  });
+
+  it('MD-04 全量别名表都能被语法层识别为 Emoji 节点（字符集回归锁）', async () => {
+    const { staticMarkdownParser } = await import('./static-html');
+    const emojis = (await import('./unicode-emojis.json')).default as Record<string, string>;
+    const bad: string[] = [];
+    for (const alias of Object.keys(emojis)) {
+      const names: string[] = [];
+      staticMarkdownParser.parse(`:${alias}:`).iterate({ enter: node => { if (node.name === 'Emoji') names.push(node.name); } });
+      if (names.length !== 1) bad.push(alias);
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('MD-04 表格分隔行 ：-: / :---: 不被误判为 Emoji 节点', async () => {
+    const { staticMarkdownParser } = await import('./static-html');
+    const names: string[] = [];
+    staticMarkdownParser.parse('| a | b |\n| --- | :---: |\n| x | y |').iterate({ enter: node => { if (node.name === 'Emoji') names.push(node.name); } });
+    expect(names).toEqual([]);
+  });
+
   it('目录 [toc] 渲染为导航件', async () => {
     const host = await render('[toc]\n\n# 一级标题\n\n正文。\n');
     expect(host.querySelector('nav.md-toc')).toBeTruthy();

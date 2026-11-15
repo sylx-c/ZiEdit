@@ -92,7 +92,7 @@ describe('007-AC-33 离线公式与图表', () => {
     expect(document.querySelector('.md-render-stage')).toBeNull();
   });
 
-  it('用户跳离后暂停旧视口公式，回到原处时重新交付', async () => {
+  it('用户跳离邻域后暂停旧视口公式，回到原处时重新交付；视口内挂载不受编程滚动干扰', async () => {
     vi.resetModules();
     let complete!: () => void;
     const typeset = vi.fn(async (elements: HTMLElement[]) => {
@@ -118,7 +118,10 @@ describe('007-AC-33 离线公式与图表', () => {
     const block = { kind: 'math' as const, source: 'x^2', display: false, from: 0, to: 5 };
     await hydrateRenders(root, [block], false, () => true);
     await vi.waitFor(() => expect(typeset).toHaveBeenCalledTimes(1));
-    scroller.dispatchEvent(new Event('md-user-input')); scroller.scrollTop = 5000; scroller.dispatchEvent(new Event('scroll'));
+    // 用户跳离：先离开邻域（scrollTop=5000），随后的 md-user-input 按几何撤离离屏在途挂载。
+    // MD-05 修正后撤离只针对离屏目标——分屏同步的编程滚动不再无条件作废视口内挂载。
+    scroller.scrollTop = 5000; scroller.dispatchEvent(new Event('scroll'));
+    scroller.dispatchEvent(new Event('md-user-input'));
     complete(); await new Promise(resolve => setTimeout(resolve, 50));
     expect(target.dataset.renderPending).toBe('1');
     expect(target.querySelector('svg')).toBeNull();

@@ -608,15 +608,19 @@ function attachLane(scroller: HTMLElement): void {
     const lane = hydrateLanes.get(scroller);
     if (!lane) return;
     lane.inputVersion++;
-    // 已离开旧视口的公式不能在离屏子树中迟到写入。取消在途挂载，回到待派发队列，
-    // 用户停手后只重新挂载当前邻域；已完成的正文节点保留不动。
-    for (const [target, active] of lane.active) {
+    // 已离开旧视口的公式不能在离屏子树中迟到写入：离屏目标取消在途挂载、回到待派发队列，
+    // 用户停手后只重新挂载当前邻域。视口内的在途挂载保留——分屏左右同步的编程滚动也会
+    // 派发 md-user-input（reading-surface.scrollTo → userInput），修前每个同步脉冲都把
+    // 在途挂载全数作废，重挂-取消每 ~200ms 循环，渲染请求与交付帧反复被清，永不完成
+    // （MD-05 无效 Mermaid 分屏停留 loading/pending）。交付侧仍有世代/忙碌检查，保留挂载无碍。
+    for (const [target, active] of [...lane.active]) {
+      if (withinNeighborhood(target, scroller)) continue;
       active.cancel();
       hydrateCleanups.get(lane.root)?.delete(target);
       target.dataset.renderPending = '1';
       lane.pending.push([target, active.block]);
+      lane.active.delete(target);
     }
-    lane.active.clear();
     scheduleLaneCheck(scroller);
   };
   hydrateScrollListeners.set(scroller, () => {

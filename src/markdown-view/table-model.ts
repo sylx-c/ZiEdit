@@ -32,6 +32,12 @@ export function splitTableRow(line: string): string[] {
   return cells;
 }
 
+/** GFM 表格：单元格内的 `\|` 表示字面竖线——包括 code span 内（CommonMark 的反斜杠转义不进代码跨度）。
+ *  行内解析前统一还原，与 markdown-it 回退面 escapedSplit 的切分行为对齐。 */
+export function cellInlineText(cell: string): string {
+  return cell.replace(/\\\|/g, '|');
+}
+
 export function safeCell(text: string): string {
   let out = '', slashes = 0;
   for (const char of text.replace(/\r\n?/g, '\n')) {

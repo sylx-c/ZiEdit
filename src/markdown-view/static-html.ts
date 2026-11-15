@@ -27,6 +27,9 @@ export function renderStaticHtml(text: string, tree: Tree, metadata: MarkdownMet
     return false;
   };
   const literal = (s: string, list = false): string => esc(s.replace(/\n[ \t]*/g, '\n')).replace(/\n/g, list ? '<br />\n' : '\n');
+  // GFM：单元格内的 `\|` 是字面竖线，包括 code span 内（反斜杠转义不进代码跨度）。
+  // 渲染是同步单趟递归，闭包标志随 Table 进出翻转即可覆盖嵌套行内节点。
+  let inTableCell = false;
   const inline = (node: SyntaxNode, start = node.from, end = node.to): string => {
     let result = '', offset = start;
     for (let child = node.firstChild; child; child = child.nextSibling) {
@@ -136,6 +139,7 @@ export function renderStaticHtml(text: string, tree: Tree, metadata: MarkdownMet
         const marks = node.getChildren('CodeMark');
         let value = text.slice(marks[0]?.to ?? node.from, marks[1]?.from ?? node.to).replace(/\n/g, ' ');
         if (/^ .* $/.test(value) && /\S/.test(value)) value = value.slice(1, -1);
+        if (inTableCell) value = value.replace(/\\\|/g, '|');
         return '<code>' + esc(value) + '</code>';
       }
       case 'Link': case 'Image': return link(node);
@@ -164,7 +168,10 @@ export function renderStaticHtml(text: string, tree: Tree, metadata: MarkdownMet
         const row = (item: SyntaxNode, header: boolean): string => '<tr>' + Array.from({ length: width }, (_, i) => {
           const cell = item.getChildren('TableCell')[i];
           const tag = header ? 'th' : 'td';
-          return '<' + tag + (aligns[i] ? ' align="' + aligns[i] + '"' : '') + '>' + (cell ? inline(cell) : '') + '</' + tag + '>';
+          const prev = inTableCell; inTableCell = true;
+          const content = cell ? inline(cell) : '';
+          inTableCell = prev;
+          return '<' + tag + (aligns[i] ? ' align="' + aligns[i] + '"' : '') + '>' + content + '</' + tag + '>';
         }).join('') + '</tr>';
         const header = node.getChild('TableHeader');
         return '<table><thead>' + (header ? row(header, true) : '') + '</thead><tbody>' + node.getChildren('TableRow').map(item => row(item, false)).join('') + '</tbody></table>';

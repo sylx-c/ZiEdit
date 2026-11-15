@@ -61,7 +61,7 @@ const inlineFormatInput = EditorState.transactionFilter.of(tr => {
   }];
 });
 
-const fenceStart = /^(\s*(?:>\s*)*)(`{3,}|~{3,})([^`]*)$/;
+const fenceStart = /^((?:[ \t]|>[ \t]*|(?:[-+*]|\d{1,9}[.)])[ \t]+)*)(`{3,}|~{3,})([^`]*)$/;
 export const fenceSourceChanged = StateEffect.define<number>();
 export const fenceSourceField = StateField.define<number | null>({
   create: () => null,
@@ -276,7 +276,8 @@ function enter(view: EditorView): boolean {
     while (node.parent && node.name !== 'FencedCode') node = node.parent;
     if (node.name !== 'FencedCode' || node.from < line.from) return false;
     closeCompletion(view);
-    const prefix = match[1]!;
+    // 列表标记只出现在开启行；代码体和闭合行用等列空白续写，引用标记保留。
+    const prefix = match[1]!.replace(/[^ \t>]/g, ' ');
     const closed = node.getChildren('CodeMark').length > 1 && view.state.field(fenceDraftField) !== line.from;
     if (closed && view.state.field(fenceSourceField) === line.from) {
       const body = view.state.doc.line(line.number + 1), marks = node.getChildren('CodeMark'), close = marks[marks.length - 1]!;
