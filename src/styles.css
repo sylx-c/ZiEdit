@@ -1944,3 +1944,25 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 @media (prefers-reduced-motion: reduce) {
   .md-render-target.is-loading { animation: none; }
 }
+
+/* 批 3：结构差异清单 / 修订报告面板（xlsx 单元格级差异 + docx 审阅通道） */
+.cmp-list{position:absolute;top:var(--cmp-top,89px);right:var(--cmp-map-w,12px);bottom:0;width:min(420px,60%);z-index:5;
+  display:flex;flex-direction:column;background:var(--bg-raised,var(--bg));border-left:1px solid var(--border);
+  box-shadow:-4px 0 12px rgba(0,0,0,.12);font-size:12px}
+.cmp-list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);font-weight:600}
+.cmp-list-key{display:flex;align-items:center;gap:4px;font-weight:400}
+.cmp-list-key input{width:64px}
+.cmp-list-body{overflow:auto;flex:1;padding:4px 0}
+.cmp-list-loading,.cmp-list-empty{padding:12px 10px;color:var(--muted)}
+.cmp-list-sheet{display:block;width:100%;text-align:left;padding:5px 10px;border:0;background:transparent;cursor:pointer;font-weight:600}
+.cmp-list-entries.collapsed{display:none}
+.cmp-list-row{display:grid;grid-template-columns:minmax(90px,150px) 1fr 14px 1fr;gap:6px;padding:3px 10px;align-items:baseline}
+.cmp-list-row.cmp-jump{cursor:pointer}
+.cmp-list-row.cmp-jump:hover{background:color-mix(in oklch,var(--diff-chg) 20%,transparent)}
+.cmp-list-ref{font-family:var(--mono,monospace);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmp-list-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmp-list-val.before{color:var(--diff-del)}
+.cmp-list-val.after{color:var(--diff-add)}
+.cmp-list-arrow{color:var(--muted)}
+.cmp-list-row.rev-ins .cmp-list-val.rev-text{color:var(--diff-add)}
+.cmp-list-row.rev-del .cmp-list-val.rev-text{color:var(--diff-del)}

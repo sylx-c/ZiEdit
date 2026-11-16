@@ -5,12 +5,17 @@
 import {
   compareDetail,
   compareOpen,
+  docxRevisionReport,
   fileStat,
   officeLines,
   textLines,
+  xlsxOpen,
+  xlsxXiff,
   type CmpDetailLine,
   type CmpOpenResult,
   type CmpSpanCat,
+  type DocxRevisionRecord,
+  type XlsxDiffEntry,
 } from '../common/ipc';
 import { normalizeSaveDialog, encodeConvertDialog } from '../shell/panels';
 import { t, tf } from '../common/i18n';
@@ -100,6 +105,12 @@ export class CompareView {
   private revisions = false;
   /** xlsx 公式投影模式（批 2）：true 投影公式原文（对比口径切换，行结构不变） */
   private formulaMode = false;
+  /** docx 扩围模式（批 3）：true 投影附加页眉脚/脚注/批注段与标题前缀 */
+  private extendedMode = false;
+  /** 结构差异清单（批 3）：xlsx 对的单元格级清单面板 */
+  private listPanel: HTMLDivElement | null = null;
+  private sheetLineOffsets: Map<string, number> = new Map();
+  private keyColumn = 0;
   private degraded = false;
   /** 当前差异序号（1-based；0=未定位/无差异） */
   private curDiff = 0;
@@ -124,11 +135,13 @@ export class CompareView {
     a: string,
     b: string,
     private opts: { isReadOnly?: () => boolean; onClose: () => void; onStatus: (s: CompareStatus) => void; flash: (msg: string) => void; onJump?: (path: string, line: number) => void },
-    formula = false
+    formula = false,
+    extended = false
   ) {
     this.pathA = a;
     this.pathB = b;
     this.formulaMode = formula;
+    this.extendedMode = extended;
     void this.init();
   }
 
@@ -140,7 +153,7 @@ export class CompareView {
     this.head.firstElementChild!.appendChild(cancel);
     let res: CmpOpenResult;
     try {
-      res = await compareOpen(this.pathA, this.pathB, this.formulaMode);
+      res = await compareOpen(this.pathA, this.pathB, this.formulaMode, this.extendedMode);
     } catch (err) {
       if (this.destroyed || generation !== this.generation) return;
       this.sizer.textContent = tf('cmp.openFail', String(err));
@@ -329,10 +342,34 @@ export class CompareView {
       fbtn.title = t('cmp.formulaModeTitle');
       fbtn.addEventListener('click', () => {
         this.destroy();
-        this.reloaded = new CompareView(this.host, this.pathA, this.pathB, this.opts, !this.formulaMode);
+        this.reloaded = new CompareView(this.host, this.pathA, this.pathB, this.opts, !this.formulaMode, this.extendedMode);
         this.reloaded.setFontSize(this.fontSize);
       });
       counts.appendChild(fbtn);
+      // 结构差异清单（批 3）：xlsx 对的单元格级清单（Sheet2!C5: 100→200），
+      // 点击定位到投影行；键列输入按列号对齐行（插入行不错位）
+      const listBtn = mk('button', 'cmp-btn' + (this.listPanel ? ' on' : ''), t('cmp.diffList'));
+      listBtn.title = t('cmp.diffListTitle');
+      listBtn.addEventListener('click', () => this.toggleDiffList());
+      counts.appendChild(listBtn);
+    }
+    // 扩围开关（批 3）：任一侧 docx 时投影附加页眉脚/脚注/批注段与标题前缀
+    if (this.officeA === 'docx' || this.officeB === 'docx') {
+      const ebtn = mk('button', 'cmp-btn' + (this.extendedMode ? ' on' : ''), t('cmp.extended'));
+      ebtn.title = t('cmp.extendedTitle');
+      ebtn.addEventListener('click', () => {
+        this.destroy();
+        this.reloaded = new CompareView(this.host, this.pathA, this.pathB, this.opts, this.formulaMode, !this.extendedMode);
+        this.reloaded.setFontSize(this.fontSize);
+      });
+      counts.appendChild(ebtn);
+      // 按修订对比（批 3）：docx 侧含修订标记时，修订记录直接读成差异清单
+      if (this.revisions) {
+        const rbtn = mk('button', 'cmp-btn', t('cmp.revisionMode'));
+        rbtn.title = t('cmp.revisionModeTitle');
+        rbtn.addEventListener('click', () => void this.showRevisionReport());
+        counts.appendChild(rbtn);
+      }
     }
     headline.appendChild(counts);
     headline.appendChild(mk('span', 'tb-spacer'));
@@ -614,7 +651,7 @@ export class CompareView {
         // 投影对（批 1）：A 侧为 docx/xlsx 时相等块取行走 office_lines（同一分流口径；
         // 批 2：公式模式同口径透传）
         const fetched = this.officeA
-          ? (await officeLines(this.pathA, blk.aStart, blk.aEnd, this.formulaMode)).lines
+          ? (await officeLines(this.pathA, blk.aStart, blk.aEnd, this.formulaMode, this.extendedMode)).lines
           : await textLines(this.pathA, blk.aStart, blk.aEnd);
         if (this.destroyed) return;
         const texts = fetched.map(l => l.text);
@@ -633,7 +670,7 @@ export class CompareView {
     }
     try {
       const [la, lb] = await compareDetail(
-        this.pathA, this.pathB, blk.aStart, blk.aEnd, blk.bStart, blk.bEnd, this.formulaMode
+        this.pathA, this.pathB, blk.aStart, blk.aEnd, blk.bStart, blk.bEnd, this.formulaMode, this.extendedMode
       );
       if (this.destroyed) return;
       this.detailCache.set(d.idx, [la, lb]);
@@ -720,6 +757,166 @@ export class CompareView {
       pathNote: tf('cmp.applyToA', this.pathA),
       onError: msg => this.opts.flash(msg),
     });
+  }
+
+  // ---- 批 3：结构差异清单 / 修订报告面板 ----
+
+  /** 投影行定位：sheet 行偏移（头行 1 + 数据行），A 侧工作簿序 */
+  private async ensureSheetOffsets(): Promise<void> {
+    if (this.sheetLineOffsets.size > 0) return;
+    try {
+      const wb = this.officeA ? await xlsxOpen(this.pathA) : await xlsxOpen(this.pathB);
+      let off = 1;
+      for (const s of wb.sheets) {
+        this.sheetLineOffsets.set(s.name, off);
+        off += 1 + s.rows;
+      }
+    } catch { /* 打开失败时清单点击退化为无跳转 */ }
+  }
+
+  private toggleDiffList(): void {
+    if (this.listPanel) {
+      this.listPanel.remove();
+      this.listPanel = null;
+      return;
+    }
+    const panel = mk('div', 'cmp-list');
+    panel.appendChild(mk('div', 'cmp-list-head', t('cmp.diffList')));
+    this.host.appendChild(panel);
+    this.listPanel = panel;
+    void this.fillDiffList();
+  }
+
+  private async fillDiffList(): Promise<void> {
+    const panel = this.listPanel;
+    if (!panel || this.destroyed) return;
+    panel.appendChild(mk('div', 'cmp-list-loading', t('common.loading')));
+    try {
+      await this.ensureSheetOffsets();
+      const res = await xlsxXiff(this.pathA, this.pathB, this.keyColumn || undefined);
+      if (this.destroyed || panel !== this.listPanel) return;
+      panel.textContent = '';
+      const head = mk('div', 'cmp-list-head');
+      head.appendChild(mk('span', '', t('cmp.diffList')));
+      // 键列输入（1 基；0/空 = 行号对齐）
+      const keyWrap = mk('span', 'cmp-list-key');
+      keyWrap.appendChild(mk('span', '', t('cmp.keyColumn')));
+      const keyInput = document.createElement('input');
+      keyInput.type = 'number';
+      keyInput.min = '0';
+      keyInput.value = String(this.keyColumn || '');
+      keyInput.title = t('cmp.keyColumnTitle');
+      keyInput.addEventListener('change', () => {
+        this.keyColumn = Math.max(0, Math.floor(Number(keyInput.value) || 0));
+        panel.textContent = '';
+        panel.appendChild(mk('div', 'cmp-list-loading', t('common.loading')));
+        void this.fillDiffList();
+      });
+      keyWrap.appendChild(keyInput);
+      head.appendChild(keyWrap);
+      panel.appendChild(head);
+      if (!res.diffs.length) {
+        panel.appendChild(mk('div', 'cmp-list-empty', t('cmp.diffListEmpty')));
+        return;
+      }
+      // 按 sheet 分组折叠；条目点击 → 定位投影行（sheet 头 + 行号）
+      const body = mk('div', 'cmp-list-body');
+      let curSheet = null as string | null;
+      let group: HTMLDivElement | null = null;
+      let entries: HTMLDivElement | null = null;
+      for (const d of res.diffs) {
+        if (d.sheet !== curSheet) {
+          curSheet = d.sheet;
+          const count = res.groups.find(([n]) => n === d.sheet)?.[1] ?? 0;
+          group = mk('div', 'cmp-list-group');
+          const gbtn = mk('button', 'cmp-list-sheet', `${d.sheet} (${count})`);
+          gbtn.addEventListener('click', () => entries?.classList.toggle('collapsed'));
+          group.appendChild(gbtn);
+          entries = mk('div', 'cmp-list-entries');
+          group.appendChild(entries);
+          body.appendChild(group);
+        }
+        entries!.appendChild(this.renderDiffEntry(d));
+      }
+      panel.appendChild(body);
+    } catch (err) {
+      if (this.destroyed || panel !== this.listPanel) return;
+      panel.textContent = '';
+      panel.appendChild(mk('div', 'cmp-list-empty', tf('cmp.detailFail', String(err))));
+    }
+  }
+
+  private renderDiffEntry(d: XlsxDiffEntry): HTMLDivElement {
+    const row = mk('div', 'cmp-list-row');
+    const colName = (c: number): string => {
+      let n = c + 1, s = '';
+      while (n > 0) { n--; s = String.fromCharCode(65 + n % 26) + s; n = Math.floor(n / 26); }
+      return s;
+    };
+    let ref: string;
+    let before = d.before;
+    let after = d.after;
+    if (d.kind === 'cell') ref = `${d.sheet}!${colName(d.col)}${d.row}`;
+    else if (d.kind === 'rowAdd') ref = tf('cmp.rowAddRef', d.row);
+    else if (d.kind === 'rowDel') ref = tf('cmp.rowDelRef', d.row);
+    else if (d.kind === 'sheetAdd') ref = tf('cmp.sheetAddRef', d.rows);
+    else ref = tf('cmp.sheetDelRef', d.rows);
+    row.appendChild(mk('span', 'cmp-list-ref', ref));
+    row.appendChild(mk('span', 'cmp-list-val before', before || '∅'));
+    row.appendChild(mk('span', 'cmp-list-arrow', '→'));
+    row.appendChild(mk('span', 'cmp-list-val after', after || '∅'));
+    // 定位：投影行 = sheet 偏移 + 行号（sheetAdd/Del 定位到 sheet 头）
+    if (d.kind !== 'sheetAdd' && d.kind !== 'sheetDel') {
+      row.classList.add('cmp-jump');
+      row.addEventListener('click', () => {
+        const base = this.sheetLineOffsets.get(d.sheet);
+        if (base == null) return;
+        const line = base + (d.kind === 'cell' || d.kind === 'rowAdd' || d.kind === 'rowDel' ? d.row : 0);
+        const target = this.display.find(x => line >= x.blk.aStart && line <= x.blk.aEnd)
+          ?? this.display.find(x => x.top >= (line - 1) * this.rowH);
+        if (target) this.scroller.scrollTop = Math.max(0, (line - 1) * this.rowH - 40);
+        else this.scroller.scrollTop = Math.max(0, (line - 1) * this.rowH - 40);
+      });
+    }
+    return row;
+  }
+
+  /** 按修订对比（批 3）：修订记录直接读成差异清单（审阅语义） */
+  private async showRevisionReport(): Promise<void> {
+    if (this.listPanel) {
+      this.listPanel.remove();
+      this.listPanel = null;
+    }
+    const panel = mk('div', 'cmp-list');
+    panel.appendChild(mk('div', 'cmp-list-head', t('cmp.revisionMode')));
+    panel.appendChild(mk('div', 'cmp-list-loading', t('common.loading')));
+    this.host.appendChild(panel);
+    this.listPanel = panel;
+    const target = this.officeA === 'docx' ? this.pathA : this.pathB;
+    try {
+      const report = await docxRevisionReport(target);
+      if (this.destroyed || panel !== this.listPanel) return;
+      panel.textContent = '';
+      panel.appendChild(mk('div', 'cmp-list-head', t('cmp.revisionMode')));
+      if (!report.records.length) {
+        panel.appendChild(mk('div', 'cmp-list-empty', t('cmp.revisionEmpty')));
+        return;
+      }
+      const body = mk('div', 'cmp-list-body');
+      for (const r of report.records as DocxRevisionRecord[]) {
+        const row = mk('div', `cmp-list-row rev-${r.kind}`);
+        row.appendChild(mk('span', 'cmp-list-ref', r.kind === 'ins' ? t('cmp.revIns') : t('cmp.revDel')));
+        row.appendChild(mk('span', 'cmp-list-val', r.author || '-'));
+        row.appendChild(mk('span', 'cmp-list-val', (r.date || '').replace('T', ' ').slice(0, 19)));
+        row.appendChild(mk('span', 'cmp-list-val rev-text', r.text || '∅'));
+        body.appendChild(row);
+      }
+      panel.appendChild(body);
+    } catch (err) {
+      if (this.destroyed || panel !== this.listPanel) return;
+      panel.textContent = '';
+      panel.appendChild(mk('div', 'cmp-list-empty', tf('cmp.detailFail', String(err))));
+    }
   }
 
   destroy(): void {

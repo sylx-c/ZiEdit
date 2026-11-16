@@ -18,6 +18,9 @@ pub(crate) enum Content {
 struct Entry {
     len: u64,
     modified: Option<std::time::SystemTime>,
+    /// 内容变体（0=docx 基础 / 1=xlsx / 2=pdf / 3=docx 扩围）：同路径不同
+    /// 变体不得互相命中（批 3），否则扩围投影会读到基础缓存的正文。
+    kind: u8,
     content: Arc<Content>,
 }
 #[derive(Default)]
@@ -31,6 +34,7 @@ fn publish_entry(
     path: &str,
     len: u64,
     modified: Option<std::time::SystemTime>,
+    kind: u8,
     content: Arc<Content>,
 ) -> Arc<Content> {
     if let Some(entry) = entries.get(path)
@@ -49,6 +53,7 @@ fn publish_entry(
         Entry {
             len,
             modified,
+            kind,
             content: content.clone(),
         },
     );
@@ -77,10 +82,7 @@ pub(crate) fn load(
         if let Some(entry) = entries.get(path)
             && entry.len == meta.len()
             && entry.modified == modified
-            && matches!(
-                (&*entry.content, kind),
-                (Content::Docx(_), 0) | (Content::Xlsx(_), 1) | (Content::Pdf(_), 2)
-            )
+            && entry.kind == kind
         {
             return Ok(entry.content.clone());
         }
@@ -89,6 +91,9 @@ pub(crate) fn load(
         Content::Pdf(pdf::open(path).map_err(ZiEditError::Msg)?)
     } else if kind == 1 {
         Content::Xlsx(xlsx::open(path).map_err(ZiEditError::Msg)?)
+    } else if kind == 3 {
+        // 批 3 扩围变体（页眉脚/脚注/批注/标题前缀）：与基础 docx 分槽缓存
+        Content::Docx(docx::open_with_scope(path, true).map_err(ZiEditError::Msg)?)
     } else {
         Content::Docx(docx::open(path).map_err(ZiEditError::Msg)?)
     });
@@ -96,14 +101,11 @@ pub(crate) fn load(
         .0
         .lock()
         .map_err(|e| ZiEditError::Msg(e.to_string()))?;
-    // 失效校验：并发同路径解析已插入等价条目时直接复用，避免无谓淘汰
+    // 失效校验：并发同路径同变体解析已插入等价条目时直接复用，避免无谓淘汰
     if let Some(entry) = entries.get(path)
         && entry.len == meta.len()
         && entry.modified == modified
-        && matches!(
-            (&*entry.content, kind),
-            (Content::Docx(_), 0) | (Content::Xlsx(_), 1) | (Content::Pdf(_), 2)
-        )
+        && entry.kind == kind
     {
         return Ok(entry.content.clone());
     }
@@ -112,6 +114,7 @@ pub(crate) fn load(
         path,
         meta.len(),
         modified,
+        kind,
         content,
     ))
 }
@@ -313,6 +316,7 @@ mod tests {
             lines: vec![tag.into()],
             total_chars: tag.len(),
             revisions: false,
+            revision_records: Vec::new(),
         }))
     }
 
@@ -332,12 +336,13 @@ mod tests {
             Entry {
                 len: v2_len,
                 modified: v2_mtime,
+                kind: 0,
                 content: v2.clone(),
             },
         );
         // 晚到的 v1 结果发布：不覆盖（注册表仍是 v2）、返回本次 Arc
         let v1 = doc_content("older");
-        let returned = publish_entry(&mut entries, "a.docx", v1_len, v1_mtime, v1.clone());
+        let returned = publish_entry(&mut entries, "a.docx", v1_len, v1_mtime, 0, v1.clone());
         assert!(std::sync::Arc::ptr_eq(&returned, &v1), "返回本次解析结果");
         let entry = entries.get("a.docx").unwrap();
         assert_eq!(entry.len, v2_len, "注册表内更新版本不被覆盖");
@@ -345,7 +350,7 @@ mod tests {
 
         // meta 相同（重解析竞争）：照旧插入覆盖
         let again = doc_content("same-meta");
-        publish_entry(&mut entries, "a.docx", v2_len, v2_mtime, again.clone());
+        publish_entry(&mut entries, "a.docx", v2_len, v2_mtime, 0, again.clone());
         assert!(std::sync::Arc::ptr_eq(
             &entries.get("a.docx").unwrap().content,
             &again
@@ -359,6 +364,7 @@ mod tests {
                     Entry {
                         len: i as u64,
                         modified: None,
+                        kind: 0,
                         content: doc_content(&format!("f{i}")),
                     },
                 );
@@ -367,7 +373,7 @@ mod tests {
         let mut fresh = HashMap::new();
         cap_fill(&mut fresh, 4);
         let inserted = doc_content("newpath");
-        let ret = publish_entry(&mut fresh, "new.docx", 1, None, inserted.clone());
+        let ret = publish_entry(&mut fresh, "new.docx", 1, None, 0, inserted.clone());
         assert!(std::sync::Arc::ptr_eq(&ret, &inserted));
         assert!(fresh.contains_key("new.docx"));
         assert_eq!(fresh.len(), 4, "满容量插入淘汰一个旧条目");

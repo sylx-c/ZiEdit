@@ -272,6 +272,7 @@ fn extract(mut r: impl BufRead) -> Result<Document> {
         lines,
         total_chars,
         revisions: false,
+        revision_records: Vec::new(),
     })
 }
 pub fn open(path: &str) -> Result<Document> {

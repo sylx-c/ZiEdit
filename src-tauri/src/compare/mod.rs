@@ -6,6 +6,7 @@
 pub mod detect;
 mod input;
 pub mod office;
+pub mod xdiff;
 pub use input::{InputState, input_binary, input_state, inputs_binary};
 
 use std::collections::hash_map::DefaultHasher;

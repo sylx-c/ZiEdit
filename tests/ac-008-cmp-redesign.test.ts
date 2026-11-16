@@ -435,13 +435,13 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
       expect(rsSrc).toContain('formula: Option<bool>');
       expect(ipcSrc).toContain("invoke<CmpOpenResult>('compare_open', { a, b, formula");
       expect(ipcSrc).toContain("invoke<OfficeLinesResult>('office_lines', { path, from, to, formula");
-      expect(viewSrc).toContain('compareOpen(this.pathA, this.pathB, this.formulaMode)');
-      expect(viewSrc).toContain('officeLines(this.pathA, blk.aStart, blk.aEnd, this.formulaMode)');
+      expect(viewSrc).toMatch(/compareOpen\(this\.pathA, this\.pathB, this\.formulaMode/);
+      expect(viewSrc).toMatch(/officeLines\(this\.pathA, blk\.aStart, blk\.aEnd, this\.formulaMode/);
       expect(viewSrc).toContain('compareDetail(');
-      expect(viewSrc).toContain("this.formulaMode\n      );");
+      expect(viewSrc).toMatch(/compareDetail\([\s\S]{0,140}this\.formulaMode/);
       // 开关只在 xlsx 侧出现；切换走整视图重建（口径变化 → 块坐标全部失效）
       expect(viewSrc).toMatch(/this\.officeA === 'xlsx' \|\| this\.officeB === 'xlsx'/);
-      expect(viewSrc).toContain('new CompareView(this.host, this.pathA, this.pathB, this.opts, !this.formulaMode)');
+      expect(viewSrc).toMatch(/new CompareView\(this\.host, this\.pathA, this\.pathB, this\.opts, !this\.formulaMode/);
       for (const k of ['cmp.formulaMode', 'cmp.formulaModeTitle']) {
         expect(dict('zh-CN')[k], `zh ${k}`).toBeTruthy();
         expect(dict('en-US')[k], `en ${k}`).toBeTruthy();
@@ -463,6 +463,66 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
       expect(odsRs).toContain('ODS_TRUNCATED_CONTENT');
       expect(odsRs).toContain('truncated_content_errors_instead_of_hanging');
       expect(xlsxRs).toContain('super::ods::to_workbook(super::ods::open(path)?)');
+    });
+  });
+
+  describe('008 扩展·批 3：结构化差异清单与修订报告', () => {
+    const xdiffRs = read('src-tauri/src/compare/xdiff.rs');
+
+    it('xlsx_diff 命令：行对齐/键列模式/清单形态/总量哨兵（纯函数 + 命令注册）', () => {
+      expect(xdiffRs).toContain('pub fn xlsx_diff');
+      expect(xdiffRs).toContain('key_column');
+      expect(xdiffRs).toContain('diff_hashes'); // 键列模式 Myers 对齐复用同一内核
+      expect(xdiffRs).toContain('XLSX_DIFF_LIMIT:20000');
+      for (const kind of ['cell', 'rowAdd', 'rowDel', 'sheetAdd', 'sheetDel']) {
+        expect(xdiffRs).toContain(`"${kind}"`);
+      }
+      expect(rsSrc).toContain('pub async fn xlsx_diff');
+      expect(libRs).toContain('commands::compare::xlsx_diff');
+      expect(ipcSrc).toContain("invoke<XlsxDiffResult>('xlsx_diff'");
+      expect(viewSrc).toContain('xlsxXiff(this.pathA, this.pathB');
+    });
+
+    it('差异清单 UI：分组折叠 + 键列输入 + 点击定位投影行（替换批 1 的 xlsx 不挂跳转）', () => {
+      expect(viewSrc).toContain("mk('button', 'cmp-btn' + (this.listPanel ? ' on' : ''), t('cmp.diffList'))");
+      expect(viewSrc).toContain('cmp-list-group');
+      expect(viewSrc).toContain('cmp-list-entries');
+      expect(viewSrc).toContain('this.keyColumn');
+      expect(viewSrc).toMatch(/sheetLineOffsets\.get\(d\.sheet\)/);
+      expect(css).toContain('.cmp-list');
+      expect(css).toContain('.cmp-list-row.cmp-jump:hover');
+    });
+
+    it('修订报告：docx_revision_report 命令 + 按修订对比入口（作者/时间/增删文本）', () => {
+      expect(rsSrc).toContain('pub async fn docx_revision_report');
+      expect(libRs).toContain('commands::compare::docx_revision_report');
+      expect(ipcSrc).toContain("invoke<DocxRevisionReport>('docx_revision_report'");
+      expect(viewSrc).toContain('showRevisionReport');
+      expect(viewSrc).toContain("t('cmp.revisionMode')");
+      // 后端：w:ins/w:del 作者/时间/文本采集
+      const docxRs = read('src-tauri/src/ooxml/docx.rs');
+      expect(docxRs).toContain('pub struct RevisionRecord');
+      expect(docxRs).toContain('DOCX_REVISION_LIMIT:10000');
+    });
+
+    it('扩围开关：extended 透传（默认关=批 1 口径不变）+ 页眉脚/脚注/批注/标题前缀', () => {
+      const docxRs = read('src-tauri/src/ooxml/docx.rs');
+      expect(docxRs).toContain('pub fn open_with_scope');
+      expect(docxRs).toContain('append_scoped');
+      expect(docxRs).toContain('DOCX_SCOPE_LIMIT:32');
+      expect(docxRs).toMatch(/"页眉" => 0/);
+      expect(ipcSrc).toContain('extended: extended ?? null');
+      expect(viewSrc).toContain("new CompareView(this.host, this.pathA, this.pathB, this.opts, this.formulaMode, !this.extendedMode)");
+      // 注册表分槽：同路径 docx 基础/扩围变体不得互相命中
+      const ooxmlRs = read('src-tauri/src/commands/ooxml.rs');
+      expect(ooxmlRs).toContain('entry.kind == kind');
+    });
+
+    it('i18n 两语齐全：清单/键列/扩围/修订', () => {
+      for (const k of ['cmp.diffList', 'cmp.diffListEmpty', 'cmp.keyColumn', 'cmp.rowAddRef', 'cmp.rowDelRef', 'cmp.sheetAddRef', 'cmp.sheetDelRef', 'cmp.extended', 'cmp.revisionMode', 'cmp.revisionEmpty', 'cmp.revIns', 'cmp.revDel']) {
+        expect(dict('zh-CN')[k], `zh ${k}`).toBeTruthy();
+        expect(dict('en-US')[k], `en ${k}`).toBeTruthy();
+      }
     });
   });
 

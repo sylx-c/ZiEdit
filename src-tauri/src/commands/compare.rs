@@ -6,6 +6,7 @@ use crate::commands::ooxml::{self, Content, OoxmlRegistry};
 use crate::compare::{self, detect, office::OfficeKind};
 use crate::encoding;
 use crate::error::ZiEditError;
+use crate::ooxml::docx;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::Manager;
@@ -76,10 +77,13 @@ pub async fn compare_open(
     // xlsx 投影公式模式（批 2）：Some(true) 投影公式原文；缺省=显示值。
     // 可选参数向后兼容——既有调用不传即维持值投影。
     formula: Option<bool>,
+    // docx 扩围模式（批 3）：Some(true) 投影附加页眉脚/脚注/批注段与标题前缀。
+    extended: Option<bool>,
 ) -> Result<CompareResult, ZiEditError> {
     crate::paths::reject_device_path(&a)?;
     crate::paths::reject_device_path(&b)?;
     let formula = formula.unwrap_or(false);
+    let extended = extended.unwrap_or(false);
     // 行哈希 diff / 编码探测 / 元信息读取均为阻塞 IO+CPU，移阻塞线程不冻结异步运行时（照 misc.rs 范例）。
     tauri::async_runtime::spawn_blocking(move || {
         let pa = PathBuf::from(&a);
@@ -89,7 +93,16 @@ pub async fn compare_open(
         let kind_b = compare::office::office_kind(&pb);
         if kind_a.is_some() || kind_b.is_some() {
             let registry = app.state::<OoxmlRegistry>();
-            return compare_open_office(&registry, &a, &b, kind_a, kind_b, input_state, formula);
+            return compare_open_office(
+                &registry,
+                &a,
+                &b,
+                kind_a,
+                kind_b,
+                input_state,
+                formula,
+                extended,
+            );
         }
         let binary = compare::inputs_binary(&pa, &pb)?;
         if binary {
@@ -199,10 +212,12 @@ fn office_side(
     path: &str,
     kind: OfficeKind,
     formula: bool,
+    extended: bool,
 ) -> Result<OfficeSide, ZiEditError> {
     match kind {
         OfficeKind::Docx => {
-            let content = ooxml::load(registry, path, 0)?;
+            // 扩围变体走注册表 kind 3（独立缓存槽）：页眉脚/脚注/批注/标题前缀
+            let content = ooxml::load(registry, path, if extended { 3 } else { 0 })?;
             let Content::Docx(doc) = &*content else {
                 unreachable!()
             };
@@ -231,6 +246,8 @@ fn office_side(
 
 /// Office 投影路径主流程（任一侧 docx/xlsx 时进入；混合 office↔text 亦支持——
 /// 提取文本对原始文本的对比同样成立）。
+// 内部聚合函数：两侧路径+类别+口径开关，7 参数上限豁免（IPC 命令形态，无合理聚组对象）
+#[allow(clippy::too_many_arguments)]
 fn compare_open_office(
     registry: &OoxmlRegistry,
     a: &str,
@@ -239,6 +256,7 @@ fn compare_open_office(
     kind_b: Option<OfficeKind>,
     input_state: compare::InputState,
     formula: bool,
+    extended: bool,
 ) -> Result<CompareResult, ZiEditError> {
     // 非投影侧仍按既有二进制判决拒绝；投影侧跳过（容器是 ZIP，binary 判据不适用）
     if (kind_a.is_none() && compare::input_binary(std::path::Path::new(a))?)
@@ -266,7 +284,7 @@ fn compare_open_office(
      -> Result<(Vec<compare::LineHash>, u64, String, bool), ZiEditError> {
         match kind {
             Some(k) => {
-                let side = office_side(registry, path, k, formula)?;
+                let side = office_side(registry, path, k, formula, extended)?;
                 Ok((side.hashes, side.lines, "-".into(), side.revisions))
             }
             None => {
@@ -544,6 +562,73 @@ pub async fn compare_detail(
             lb[i].spans = spans;
         }
         Ok(vec![la, lb])
+    })
+    .await
+    .map_err(|e| ZiEditError::Msg(e.to_string()))?
+}
+
+// ---- 批 3：结构化差异清单（xlsx_diff）与修订报告（docx_revision_report）----
+
+/// 结构化差异结果：差异清单（Sheet2!C5: 100→200 形态）+ 按 sheet 分组计数
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct XlsxDiffResult {
+    pub diffs: Vec<compare::xdiff::CellDiff>,
+    /// (sheet 名, 条数)，按首次出现序
+    pub groups: Vec<(String, usize)>,
+}
+
+/// xlsx 结构化差异：同名 sheet 配对（增删单独报告）→ 行对齐（默认行号；键列
+/// 模式 Myers）→ 逐坐标比单元格。总量上限哨兵（XLSX_DIFF_LIMIT:20000）。
+#[tauri::command]
+pub async fn xlsx_diff(
+    app: tauri::AppHandle,
+    a: String,
+    b: String,
+    opts: compare::xdiff::XlsxDiffOpts,
+) -> Result<XlsxDiffResult, ZiEditError> {
+    crate::paths::reject_device_path(&a)?;
+    crate::paths::reject_device_path(&b)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let registry = app.state::<OoxmlRegistry>();
+        let ca = ooxml::load(&registry, &a, 1)?;
+        let cb = ooxml::load(&registry, &b, 1)?;
+        let (Content::Xlsx(ba), Content::Xlsx(bb)) = (&*ca, &*cb) else {
+            unreachable!()
+        };
+        let diffs = compare::xdiff::xlsx_diff(ba, bb, &opts).map_err(ZiEditError::Msg)?;
+        let mut groups: Vec<(String, usize)> = Vec::new();
+        for d in &diffs {
+            match groups.last_mut() {
+                Some((name, n)) if name == &d.sheet => *n += 1,
+                _ => groups.push((d.sheet.clone(), 1)),
+            }
+        }
+        Ok(XlsxDiffResult { diffs, groups })
+    })
+    .await
+    .map_err(|e| ZiEditError::Msg(e.to_string()))?
+}
+
+/// docx 修订报告（批 3 审阅通道）：w:ins/w:del 明细（作者/时间/文本）直接读成
+/// 差异清单——「按修订对比」模式的数据源。
+#[tauri::command]
+pub async fn docx_revision_report(
+    app: tauri::AppHandle,
+    path: String,
+) -> Result<docx::RevisionReport, ZiEditError> {
+    crate::paths::reject_device_path(&path)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let registry = app.state::<OoxmlRegistry>();
+        let content = ooxml::load(&registry, &path, 0)?;
+        let Content::Docx(doc) = &*content else {
+            unreachable!()
+        };
+        Ok(docx::RevisionReport {
+            total: doc.revision_records.len(),
+            truncated: false,
+            records: doc.revision_records.clone(),
+        })
     })
     .await
     .map_err(|e| ZiEditError::Msg(e.to_string()))?
@@ -924,6 +1009,7 @@ mod tests {
             Some(OfficeKind::Docx),
             state,
             false,
+            false,
         )
         .unwrap();
         assert!(!same.binary);
@@ -951,6 +1037,7 @@ mod tests {
             Some(OfficeKind::Docx),
             state2,
             false,
+            false,
         )
         .unwrap();
         let replaces: Vec<_> = diff.blocks.iter().filter(|b| b.kind == "replace").collect();
@@ -977,6 +1064,7 @@ mod tests {
             Some(OfficeKind::Docx),
             state,
             false,
+            false,
         )
         .unwrap();
         assert!(res.revisions, "B 侧含修订 → 标志置位");
@@ -999,6 +1087,7 @@ mod tests {
             Some(OfficeKind::Xlsx),
             state,
             false,
+            false,
         )
         .unwrap();
         assert_eq!(res.office_a, Some("xlsx"));
@@ -1019,6 +1108,7 @@ mod tests {
             Some(OfficeKind::Xlsx),
             Some(OfficeKind::Xlsx),
             state2,
+            false,
             false,
         )
         .unwrap();
@@ -1042,6 +1132,7 @@ mod tests {
             None,
             state,
             false,
+            false,
         )
         .unwrap();
         assert_eq!(res.office_a, Some("docx"));
@@ -1064,11 +1155,71 @@ mod tests {
             None,
             state2,
             false,
+            false,
         )
         .unwrap();
         assert!(refused.binary);
         assert!(refused.blocks.is_empty());
         assert_eq!(refused.office_a, Some("docx"));
+    }
+
+    /// 批 3：扩围模式（docx 对）——页眉附加段 + 标题前缀参与 diff
+    #[test]
+    fn office_compare_extended_scope_changes_projection() {
+        let doc_xml = "<w:document xmlns:w='w'><w:p><w:pPr><w:pStyle w:val='Heading1'/></w:pPr><w:r><w:t>标题</w:t></w:r></w:p></w:document>";
+        let a = crate::ooxml::fixture(
+            &[
+                ("word/document.xml", doc_xml),
+                (
+                    "word/header1.xml",
+                    "<w:hdr xmlns:w='w'><w:p><w:r><w:t>页眉A</w:t></w:r></w:p></w:hdr>",
+                ),
+            ],
+            "ext-a.docx",
+        );
+        let b = crate::ooxml::fixture(
+            &[
+                ("word/document.xml", doc_xml),
+                (
+                    "word/header1.xml",
+                    "<w:hdr xmlns:w='w'><w:p><w:r><w:t>页眉B</w:t></w:r></w:p></w:hdr>",
+                ),
+            ],
+            "ext-b.docx",
+        );
+        let registry = OoxmlRegistry::default();
+        let state =
+            compare::input_state(std::path::Path::new(&a), std::path::Path::new(&b)).unwrap();
+        // 默认（扩围关）：正文相同 → 0 差异（批 1 口径不变）
+        let plain = compare_open_office(
+            &registry,
+            &a,
+            &b,
+            Some(OfficeKind::Docx),
+            Some(OfficeKind::Docx),
+            state,
+            false,
+            false,
+        )
+        .unwrap();
+        assert!(plain.blocks.iter().all(|x| x.kind == "equal"));
+        // 扩围开：正文带 H1 前缀 + 页眉附加段，页眉 A≠B → 差异恰好落在页眉行（第 3 行）
+        let state2 =
+            compare::input_state(std::path::Path::new(&a), std::path::Path::new(&b)).unwrap();
+        let ext = compare_open_office(
+            &registry,
+            &a,
+            &b,
+            Some(OfficeKind::Docx),
+            Some(OfficeKind::Docx),
+            state2,
+            false,
+            true,
+        )
+        .unwrap();
+        let replaces: Vec<_> = ext.blocks.iter().filter(|x| x.kind == "replace").collect();
+        assert_eq!(replaces.len(), 1, "got {:?}", ext.blocks);
+        assert_eq!(replaces[0].a_start, 3);
     }
 
     /// 批 2 判据：值同公式不同可检出——值投影 0 差异，公式投影恰好报一处
@@ -1116,6 +1267,7 @@ mod tests {
             Some(OfficeKind::Xlsx),
             state,
             false,
+            false,
         )
         .unwrap();
         assert!(
@@ -1133,6 +1285,7 @@ mod tests {
             Some(OfficeKind::Xlsx),
             state2,
             true,
+            false,
         )
         .unwrap();
         let replaces: Vec<_> = formulas
@@ -1188,7 +1341,8 @@ mod tests {
             let state =
                 compare::input_state(std::path::Path::new(a), std::path::Path::new(b)).unwrap();
             let t = Instant::now();
-            let res = compare_open_office(&registry, a, b, kind_a, kind_b, state, false).unwrap();
+            let res =
+                compare_open_office(&registry, a, b, kind_a, kind_b, state, false, false).unwrap();
             (t.elapsed().as_millis(), res)
         };
 

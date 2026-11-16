@@ -350,19 +350,41 @@ export interface NormalizeOpts {
   fullToHalf: boolean;
 }
 
-/** formula（批 2）：xlsx 对投影公式原文而非显示值（对比口径切换，行结构不变） */
-export const compareOpen = (a: string, b: string, formula?: boolean) =>
-  invoke<CmpOpenResult>('compare_open', { a, b, formula: formula ?? null });
+/** formula（批 2）：xlsx 对投影公式原文而非显示值（对比口径切换，行结构不变）；
+ *  extended（批 3）：docx 对投影附加页眉脚/脚注/批注段与标题前缀（默认关） */
+export const compareOpen = (a: string, b: string, formula?: boolean, extended?: boolean) =>
+  invoke<CmpOpenResult>('compare_open', { a, b, formula: formula ?? null, extended: extended ?? null });
 export const compareDetail = (
-  a: string, b: string, aFrom: number, aTo: number, bFrom: number, bTo: number, formula?: boolean
-) => invoke<CmpDetailLine[][]>('compare_detail', { a, b, aFrom, aTo, bFrom, bTo, formula: formula ?? null });
+  a: string, b: string, aFrom: number, aTo: number, bFrom: number, bTo: number, formula?: boolean, extended?: boolean
+) => invoke<CmpDetailLine[][]>('compare_detail', { a, b, aFrom, aTo, bFrom, bTo, formula: formula ?? null, extended: extended ?? null });
 /** 对比视图相等块取行（批 1）：按 compare_open 同一分流取 Office 投影行窗口 */
 export interface OfficeLine { no: number; text: string }
 export interface OfficeLinesResult { lines: OfficeLine[]; total: number }
-export const officeLines = (path: string, from: number, to: number, formula?: boolean) =>
-  invoke<OfficeLinesResult>('office_lines', { path, from, to, formula: formula ?? null });
+export const officeLines = (path: string, from: number, to: number, formula?: boolean, extended?: boolean) =>
+  invoke<OfficeLinesResult>('office_lines', { path, from, to, formula: formula ?? null, extended: extended ?? null });
 export const normalizeSave = (src: string, dst: string, opts: NormalizeOpts, encodingName?: string) =>
   invoke<number>('normalize_save', { src, dst, opts, encodingName: encodingName ?? null });
+
+// ---- 结构化差异与修订报告（批 3）----
+export interface XlsxDiffEntry {
+  sheet: string;
+  kind: 'cell' | 'rowAdd' | 'rowDel' | 'sheetAdd' | 'sheetDel';
+  row: number;
+  rows: number;
+  col: number;
+  before: string;
+  after: string;
+}
+export interface XlsxDiffResult {
+  diffs: XlsxDiffEntry[];
+  groups: Array<[string, number]>;
+}
+export const xlsxXiff = (a: string, b: string, keyColumn?: number) =>
+  invoke<XlsxDiffResult>('xlsx_diff', { a, b, opts: { keyColumn: keyColumn ?? null } });
+export interface DocxRevisionRecord { kind: string; author: string; date: string; text: string }
+export interface DocxRevisionReport { records: DocxRevisionRecord[]; total: number; truncated: boolean }
+export const docxRevisionReport = (path: string) =>
+  invoke<DocxRevisionReport>('docx_revision_report', { path });
 
 /** 规范化预览（008 规则 12 v0.6）：按当前选项计算修复 diff 概要（计数+≤20 行样本），不落盘 */
 export interface NormalizePreviewLine { line: number; before: string; after: string }

@@ -306,6 +306,8 @@ pub fn run() {
             commands::compare::normalize_save,
             commands::compare::normalize_preview,
             commands::compare::encode_convert_save,
+            commands::compare::xlsx_diff,
+            commands::compare::docx_revision_report,
             commands::recovery::recovery_snapshot,
             commands::recovery::recovery_list,
             commands::recovery::recovery_read,
