@@ -43,6 +43,9 @@ pub struct CompareResult {
     pub office_b: Option<&'static str>,
     /// 任一 docx 侧含修订标记（对比口径=接受修订后终态，头部如实告知）
     pub revisions: bool,
+    /// PDF 侧（阶段 4 决策·方案 A）：PDF 对比暂不支持——文本层常为空，空对空
+    /// 会误报 0 差异；诚实提示改用导出的文本/PDF 查看源文件，不出噪声 diff。
+    pub pdf_unsupported: bool,
 }
 
 fn meta_of(path: &str, enc: &str, lines: u64) -> std::io::Result<FileMeta> {
@@ -104,6 +107,26 @@ pub async fn compare_open(
                 extended,
             );
         }
+        // PDF（阶段 4 决策·方案 A）：对比暂不支持——文本层常为空，空对空会误报 0
+        // 差异；诚实提示，不按原始字节出噪声 diff。
+        let pdf_side =
+            |p: &std::path::Path| crate::kind_detect::detect_fast(p).language == Some("Pdf");
+        if pdf_side(&pa) || pdf_side(&pb) {
+            return Ok(CompareResult {
+                binary: false,
+                input_state,
+                blocks: Vec::new(),
+                meta_a: meta_of(&a, "-", 0)?,
+                meta_b: meta_of(&b, "-", 0)?,
+                enc_marks_a: Vec::new(),
+                enc_marks_b: Vec::new(),
+                degraded: false,
+                office_a: None,
+                office_b: None,
+                revisions: false,
+                pdf_unsupported: true,
+            });
+        }
         let binary = compare::inputs_binary(&pa, &pb)?;
         if binary {
             return Ok(CompareResult {
@@ -118,6 +141,7 @@ pub async fn compare_open(
                 office_a: None,
                 office_b: None,
                 revisions: false,
+                pdf_unsupported: false,
             });
         }
         let enc_a = enc_name_of(&a)?;
@@ -184,6 +208,7 @@ pub async fn compare_open(
             office_a: None,
             office_b: None,
             revisions: false,
+            pdf_unsupported: false,
         })
     })
     .await
@@ -274,6 +299,7 @@ fn compare_open_office(
             office_a: office_tag(kind_a),
             office_b: office_tag(kind_b),
             revisions: false,
+            pdf_unsupported: false,
         });
     }
     // 统一侧快照：Office 走投影（enc "-"，docx 带修订标志），文本走既有探测+行哈希。
@@ -357,6 +383,7 @@ fn compare_open_office(
         office_a: office_tag(kind_a),
         office_b: office_tag(kind_b),
         revisions: rev_a || rev_b,
+        pdf_unsupported: false,
     })
 }
 
@@ -1161,6 +1188,23 @@ mod tests {
         assert!(refused.binary);
         assert!(refused.blocks.is_empty());
         assert_eq!(refused.office_a, Some("docx"));
+    }
+
+    /// 阶段 4（方案 A）：PDF 对——诚实提示位，不出噪声 diff / 不误报 0 差异
+    #[test]
+    fn pdf_compare_reports_unsupported_without_noise() {
+        let dir = std::env::temp_dir().join(format!("ZiEdit-cmp-pdf-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let a = dir.join("a.pdf");
+        let b = dir.join("b.pdf");
+        std::fs::write(&a, b"%PDF-1.4 fake").unwrap();
+        std::fs::write(&b, b"%PDF-1.4 other").unwrap();
+        let kind_a = compare::office::office_kind(&a);
+        let kind_b = compare::office::office_kind(&b);
+        assert_eq!((kind_a, kind_b), (None, None), "PDF 不走投影通道");
+        // 命令层分支（compare_open 的 pdf_side 判定）：经 detect_fast 路由
+        assert_eq!(crate::kind_detect::detect_fast(&a).language, Some("Pdf"));
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// 批 3：扩围模式（docx 对）——页眉附加段 + 标题前缀参与 diff

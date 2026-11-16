@@ -170,6 +170,16 @@ export class CompareView {
       this.startPolling();
       return;
     }
+    // PDF（阶段 4 决策·方案 A）：诚实提示「暂不支持」——不出噪声 diff、不误报 0 差异
+    if (res.pdfUnsupported) {
+      const note = mk('div', 'cmp-pdf-note', t('cmp.pdfUnsupported'));
+      this.sizer.appendChild(note);
+      const close = mk('button', 'cmp-btn', t('common.close'));
+      close.addEventListener('click', () => this.opts.onClose());
+      this.head.firstElementChild!.appendChild(close);
+      this.startPolling();
+      return;
+    }
     this.blocks = toViewBlocks(res.blocks);
     this.metaA = res.metaA;
     this.metaB = res.metaB;

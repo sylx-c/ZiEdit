@@ -526,6 +526,23 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
     });
   });
 
+  describe('阶段 4：PDF 对比收口（方案 A：诚实提示，不出噪声 diff）', () => {
+    it('compare_open 的 PDF 分支：pdf_unsupported 标记 + 前端提示不出 diff', () => {
+      expect(rsSrc).toContain('pdf_unsupported: true');
+      expect(rsSrc).toMatch(/detect_fast\(p\)\.language == Some\("Pdf"\)/);
+      expect(ipcSrc).toContain('pdfUnsupported?: boolean');
+      expect(viewSrc).toContain("res.pdfUnsupported");
+      expect(viewSrc).toContain("t('cmp.pdfUnsupported')");
+      expect(css).toContain('.cmp-pdf-note');
+      // 注释里的决策依据（方案 A：文本层常为空，空对空误报 0 差异）
+      expect(rsSrc).toContain('误报 0');
+    });
+    it('i18n 两语齐全：PDF 暂不支持提示', () => {
+      expect(dict('zh-CN')['cmp.pdfUnsupported']).toContain('PDF');
+      expect(dict('en-US')['cmp.pdfUnsupported']).toContain('PDF');
+    });
+  });
+
   it('投影头部：office 侧隐藏编码/BOM/EOL 改示投影说明；修订徽标；xlsx 侧不挂行跳转', () => {
     expect(viewSrc).toContain("t(office === 'docx' ? 'cmp.proj.docx' : 'cmp.proj.xlsx')");
     expect(viewSrc).toContain('cmp-rev-badge');

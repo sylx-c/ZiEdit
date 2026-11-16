@@ -328,6 +328,8 @@ export interface CmpOpenResult {
   officeB: 'docx' | 'xlsx' | null;
   /** 任一 docx 侧含修订标记（对比口径=接受修订后终态，头部如实告知） */
   revisions: boolean;
+  /** PDF 侧（阶段 4）：对比暂不支持，前端出示诚实提示（不出噪声 diff） */
+  pdfUnsupported?: boolean;
 }
 export type CmpSpanCat = 'homoglyph' | 'normalize' | 'invisible' | 'whitespace' | 'content';
 export interface CmpSpan {

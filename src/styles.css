@@ -1966,3 +1966,6 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .cmp-list-arrow{color:var(--muted)}
 .cmp-list-row.rev-ins .cmp-list-val.rev-text{color:var(--diff-add)}
 .cmp-list-row.rev-del .cmp-list-val.rev-text{color:var(--diff-del)}
+
+/* 阶段 4：PDF 对比诚实提示（不出噪声 diff） */
+.cmp-pdf-note{padding:24px 20px;max-width:64ch;color:var(--fg);line-height:1.7}
