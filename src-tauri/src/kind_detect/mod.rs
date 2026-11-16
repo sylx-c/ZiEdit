@@ -34,8 +34,10 @@ fn language_of(ext: &str) -> Option<&'static str> {
         "json" | "jsonc" => "JSON",
         // Office 家族扩展（批 2）：Word 家族走 Docx 文本管线（odt 读 content.xml），
         // Excel 家族 + ODF 电子表格走 Xlsx 显示值管线（calamine/自有 ODS 解析）
-        "docx" | "docm" | "dotx" | "dotm" | "odt" => "Docx",
+        "docx" | "docm" | "dotx" | "dotm" | "odt" | "wps" => "Docx",
         "pdf" => "Pdf",
+        "pptx" | "dps" => "Pptx",
+        "et" => "Xlsx",
         "xlsx" | "xlsm" | "xltx" | "xltm" | "xlam" | "xls" | "xlsb" | "ods" => "Xlsx",
         "js" | "mjs" | "cjs" | "jsx" => "JavaScript",
         "ts" | "tsx" => "TypeScript",
@@ -105,7 +107,6 @@ fn is_binary_ext(ext: &str) -> bool {
             | "wav"
             | "doc"
             | "ppt"
-            | "pptx"
             | "jar"
             | "class"
             | "wasm"
@@ -169,7 +170,7 @@ pub fn detect(path: &Path) -> std::io::Result<FileKind> {
 /// `key`：调用方已持有探测键时复用（`detect_cached` 免二次 stat）。
 fn detect_inner(path: &Path, key: Option<crate::encoding::ProbeKey>) -> std::io::Result<FileKind> {
     let fast = detect_fast(path);
-    if matches!(fast.language, Some("Docx" | "Xlsx" | "Pdf")) {
+    if matches!(fast.language, Some("Docx" | "Xlsx" | "Pdf" | "Pptx")) {
         return Ok(fast);
     }
     match fast.route {

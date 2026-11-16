@@ -16,7 +16,7 @@ const settingsDialog = readFileSync('src/shell/settings.ts', 'utf8');
 const text = readFileSync('src/text-view/view.ts', 'utf8');
 describe('打磨接线', () => {
   it('OOXML 分派与窗口提供器', async () => {
-    expect(app).toContain("if (tab.language === 'Docx' || tab.language === 'Pdf') return 'view'");
+    expect(app).toMatch(/tab\.language === 'Docx' \|\| tab\.language === 'Pptx' \|\| tab\.language === 'Pdf'\) return 'view'/);
     expect(app).toContain("if (tab.language === 'Xlsx') return 'csv'");
     expect((await docxOpen('a.docx')).paraCount).toBe(2);
     expect((await docxLines('a.docx', 1, 2)).lines[0].text).toBe('正文');
@@ -34,7 +34,7 @@ describe('打磨接线', () => {
     expect(text).toContain('docxLines(path, from, to)');
   });
   it('只读动作与关闭释放共用装配点', async () => {
-    expect(app).toContain("!['Docx', 'Xlsx', 'Pdf'].includes(activeTab()?.language ?? '')");
+    expect(app).toContain("!['Docx', 'Pptx', 'Xlsx', 'Pdf'].includes(activeTab()?.language ?? '')");
     expect(app).toContain("def.id === 'file.saveAs' || def.id === 'tbcsv.delim'");
     expect(app).toContain('void ooxmlClose(t.path)');
     await ooxmlClose('a.docx');

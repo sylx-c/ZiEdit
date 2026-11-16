@@ -120,6 +120,29 @@ pub fn resolve_ref(name: &str) -> Result<String> {
         .map(|c| c.to_string())
         .ok_or("OOXML_UNKNOWN_ENTITY".into())
 }
+/// WPS 私有格式哨兵（批 4）：.wps/.et/.dps 扩展但容器非 ZIP（OLE/私有二进制）
+/// → 显式「另存为」指引（WPS 打开 → 另存为 docx/xlsx/pptx），不猜测解析、
+/// 不静默。PK 头（实为 OOXML/ODF 包，WPS 新格式或改名文件）照常走对应管线。
+pub fn reject_legacy_wps(path: &str) -> Result<()> {
+    let ext = std::path::Path::new(path)
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(str::to_ascii_lowercase)
+        .unwrap_or_default();
+    if !matches!(ext.as_str(), "wps" | "et" | "dps") {
+        return Ok(());
+    }
+    use std::io::Read as _;
+    let mut head = [0u8; 2];
+    let read = std::fs::File::open(path)
+        .and_then(|mut f| f.read_exact(&mut head).map(|()| 2usize))
+        .unwrap_or(0);
+    if read == 2 && &head != b"PK" {
+        return Err("WPS_LEGACY_PACKAGE:请用 WPS 打开后另存为 docx/xlsx/pptx 再试".into());
+    }
+    Ok(())
+}
+
 pub fn window(from: u64, to: u64) -> Result<std::ops::Range<usize>> {
     if from == 0 || to < from {
         return Err("OOXML_WINDOW:1-based, to >= from".into());
@@ -142,4 +165,30 @@ pub fn fixture(entries: &[(&str, &str)], name: &str) -> String {
     }
     zip.finish().unwrap();
     path.to_string_lossy().into_owned()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    /// 批 4：WPS 私有容器哨兵——.wps/.et/.dps 非 ZIP → 显式另存为指引；
+    /// PK 头（OOXML/ODF 内容）与其它扩展不受影响。
+    #[test]
+    fn legacy_wps_package_rejected_with_guidance() {
+        let dir = std::env::temp_dir().join("ZiEdit-wps-sniff");
+        std::fs::create_dir_all(&dir).unwrap();
+        let ole = dir.join("old.wps");
+        std::fs::write(&ole, [0xD0u8, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]).unwrap();
+        let err = reject_legacy_wps(ole.to_str().unwrap()).err().unwrap();
+        assert!(err.starts_with("WPS_LEGACY_PACKAGE:"), "{err}");
+        assert!(err.contains("另存为"));
+        // PK 头的 .wps（OOXML/ODF 内容）：放行走对应管线
+        let pk = dir.join("new.et");
+        std::fs::write(&pk, b"PK\x03\x04 rest").unwrap();
+        assert!(reject_legacy_wps(pk.to_str().unwrap()).is_ok());
+        // 其它扩展不判
+        let doc = dir.join("a.doc");
+        std::fs::write(&doc, [0xD0u8, 0xCF]).unwrap();
+        assert!(reject_legacy_wps(doc.to_str().unwrap()).is_ok());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 }

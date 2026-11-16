@@ -417,9 +417,9 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
     const odsRs = read('src-tauri/src/ooxml/ods.rs');
 
     it('office_kind 扩面：Excel 家族（含 xls/xlsb/ods）→ Xlsx，Word 家族（含 odt）→ Docx', () => {
-      expect(officeRs).toContain('Some("docx" | "docm" | "dotx" | "dotm" | "odt") => Some(OfficeKind::Docx)');
+      expect(officeRs).toContain('Some("docx" | "docm" | "dotx" | "dotm" | "odt" | "pptx" | "wps" | "dps")');
       expect(officeRs).toContain(
-        'Some("xlsx" | "xlsm" | "xltx" | "xltm" | "xlam" | "xls" | "xlsb" | "ods")'
+        'Some("xlsx" | "xlsm" | "xltx" | "xltm" | "xlam" | "xls" | "xlsb" | "ods" | "et")'
       );
       // .xls 移出二进制黑名单（可打开可对比），.doc/.ppt 维持拒绝（spike 未决）
       const binaryFn = kindRs.slice(kindRs.indexOf('fn is_binary_ext'), kindRs.indexOf('/// 快速识别'));
@@ -427,7 +427,7 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
       expect(binaryFn).toContain('"doc"');
       expect(binaryFn).toContain('"ppt"');
       // 语言路由扩面：odt → Docx 文本管线，xls/xlsb/ods → Xlsx 表格管线
-      expect(kindRs).toContain('"docx" | "docm" | "dotx" | "dotm" | "odt" => "Docx"');
+      expect(kindRs).toContain('"docx" | "docm" | "dotx" | "dotm" | "odt" | "wps" => "Docx"');
       expect(kindRs).toMatch(/"xlsx" \| "xlsm"[\s\S]*?"xls"[\s\S]*?"ods" =>/);
     });
 

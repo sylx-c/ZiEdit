@@ -567,7 +567,7 @@ export class TextView {
       this.reportStatus();
     });
     try {
-      if (this.opts.language === 'Docx' || this.opts.language === 'Pdf') {
+      if (this.opts.language === 'Docx' || this.opts.language === 'Pdf' || this.opts.language === 'Pptx') {
         const info = await (this.opts.language === 'Pdf' ? pdfOpen : docxOpen)(this.path);
         this.totalLines = info.paraCount;
         this.size = info.totalChars;
@@ -578,6 +578,7 @@ export class TextView {
         if (this.opts.onNotice) {
           const parts: string[] = [];
           if (this.opts.language === 'Docx') parts.push(t('ooxml.docxScope'));
+          if (this.opts.language === 'Pptx') parts.push(t('ooxml.pptxScope'));
           if (info.truncated) parts.push(t('ooxml.truncated'));
           if (parts.length) this.opts.onNotice(parts.join(' '));
         }

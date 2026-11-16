@@ -52,4 +52,32 @@ describe('ac-013 批 2：Excel 显示值查看与公式开关', () => {
     expect(ipcSrc).toContain('is1904?: boolean');
     expect(xlsxRs).toContain('pub is_1904: bool');
   });
+
+  it('批 4：pptx 可看可对比（Docx 同管线路由 + 数字序幻灯片投影）', () => {
+    const kindRs = read('src-tauri/src/kind_detect/mod.rs');
+    const officeRs = read('src-tauri/src/compare/office.rs');
+    const docxRs = read('src-tauri/src/ooxml/docx.rs');
+    expect(kindRs).toContain('"pptx" | "dps" => "Pptx"');
+    expect(officeRs).toMatch(/"odt" \| "pptx" \| "wps" \| "dps"/);
+    expect(docxRs).toContain('fn open_pptx');
+    expect(docxRs).toContain('PPTX_SLIDE_LIMIT:512');
+    // pptx 移出二进制黑名单（可打开可对比）
+    const binaryFn = kindRs.slice(kindRs.indexOf('fn is_binary_ext'), kindRs.indexOf('/// 快速识别'));
+    expect(binaryFn).not.toContain('"pptx"');
+    // 视图走 Docx 同管线（app.ts/text-view 含 Pptx 分支）
+    expect(appSrc).toContain("tab.language === 'Pptx'");
+    expect(read('src/text-view/view.ts')).toContain("'Pptx'");
+    expect(dict('zh-CN')['ooxml.pptxScope']).toBeTruthy();
+    expect(dict('en-US')['ooxml.pptxScope']).toBeTruthy();
+  });
+
+  it('批 4：.wps/.et/.dps——OOXML 内容路由尝试，OLE 私有包给另存为指引哨兵', () => {
+    const ooxmlMod = read('src-tauri/src/ooxml/mod.rs');
+    expect(ooxmlMod).toContain('pub fn reject_legacy_wps');
+    expect(ooxmlMod).toContain('WPS_LEGACY_PACKAGE');
+    const viewSrc = read('src/compare-view/view.ts');
+    expect(viewSrc).toMatch(/legacyOfficeHint' : 'cmp\.binaryRouted/);
+    expect(dict('zh-CN')['cmp.legacyOfficeHint']).toContain('另存为');
+    expect(dict('en-US')['cmp.legacyOfficeHint']).toContain('save as');
+  });
 });

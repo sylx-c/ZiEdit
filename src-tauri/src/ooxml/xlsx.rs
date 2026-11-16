@@ -285,6 +285,7 @@ fn sheet_of(
 }
 
 pub fn open(path: &str) -> Result<Workbook> {
+    super::reject_legacy_wps(path)?;
     let p = Path::new(path);
     // 包大小预检（100MiB 红线，先于内核读取拒绝）
     let len = std::fs::metadata(p)

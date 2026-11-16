@@ -33,8 +33,10 @@ pub fn office_kind(path: &Path) -> Option<OfficeKind> {
         .map(str::to_ascii_lowercase)
         .as_deref()
     {
-        Some("docx" | "docm" | "dotx" | "dotm" | "odt") => Some(OfficeKind::Docx),
-        Some("xlsx" | "xlsm" | "xltx" | "xltm" | "xlam" | "xls" | "xlsb" | "ods") => {
+        Some("docx" | "docm" | "dotx" | "dotm" | "odt" | "pptx" | "wps" | "dps") => {
+            Some(OfficeKind::Docx)
+        }
+        Some("xlsx" | "xlsm" | "xltx" | "xltm" | "xlam" | "xls" | "xlsb" | "ods" | "et") => {
             Some(OfficeKind::Xlsx)
         }
         _ => None,

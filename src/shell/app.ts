@@ -675,7 +675,7 @@ export async function boot(): Promise<void> {
       if (t && !isVirtualTab(t.path)) {
         textOpenMemoInvalidate(t.path);
         void textClose(t.path).catch(err => console.warn('text_close', String(err)));
-        if (['Docx', 'Xlsx', 'Pdf'].includes(t.language ?? '')) void ooxmlClose(t.path).catch(err => console.warn('ooxml_close', String(err)));
+        if (['Docx', 'Pptx', 'Xlsx', 'Pdf'].includes(t.language ?? '')) void ooxmlClose(t.path).catch(err => console.warn('ooxml_close', String(err)));
       }
       syncTreeRootToActive();
     };
@@ -779,7 +779,7 @@ export async function boot(): Promise<void> {
     menuSplitEligible(tab.language, fileSizes.get(tab.path));
 
   const modeOf = (tab: TabState): ViewMode => {
-    if (tab.language === 'Docx' || tab.language === 'Pdf') return 'view';
+    if (tab.language === 'Docx' || tab.language === 'Pptx' || tab.language === 'Pdf') return 'view';
     if (tab.language === 'Xlsx') return 'csv';
     if (tab.route !== 'text') return 'view';
     // B-1 状态模型：modeMap 只记用户显式选择；缺省由 settings+元数据推（mode.ts 一个真相源）
@@ -3623,7 +3623,7 @@ export async function boot(): Promise<void> {
     const sizeCell = cell('mono', $t('st.tip.size'));
     // 图片没有文本语义；Office/PDF 的行列与编码也不是原文件属性。
     const imageOnly = tab?.route === 'image';
-    const documentOnly = ['Docx', 'Xlsx', 'Pdf'].includes(tab?.language ?? '');
+    const documentOnly = ['Docx', 'Pptx', 'Xlsx', 'Pdf'].includes(tab?.language ?? '');
     if (imageOnly) {
       for (const c of [modeCell, posCell, nlCell, encCell, langCell]) c.remove();
     } else if (documentOnly) {
@@ -3983,13 +3983,13 @@ export async function boot(): Promise<void> {
   reg.add = def => {
     if (def.id === 'file.saveAs' || def.id === 'tbcsv.delim') {
       const enabled = def.enabled;
-      def.enabled = () => enabled?.() !== false && !['Docx', 'Xlsx', 'Pdf'].includes(activeTab()?.language ?? '');
+      def.enabled = () => enabled?.() !== false && !['Docx', 'Pptx', 'Xlsx', 'Pdf'].includes(activeTab()?.language ?? '');
     }
     if (/^(?:edit\.(?:undo|redo|cut|paste|format|column|lineBatch|normalize|nlSave|encSave)|find\.(?:replace|batchReplace)|tbmd\.(?:headings|bold|italic|strike|inlineCode|codeBlock|link|table)|file\.save$)/.test(def.id)) {
       const enabled = def.enabled;
       def.enabled = () => enabled?.() !== false && !settings.readOnlyMode
         && (!activeTab() || !tabLock.has(activeTab()!.path))
-        && !['Docx', 'Xlsx', 'Pdf'].includes(activeTab()?.language ?? '')
+        && !['Docx', 'Pptx', 'Xlsx', 'Pdf'].includes(activeTab()?.language ?? '')
         && (def.id === 'file.save' || !activeTab() || modeOf(activeTab()!) !== 'md');
     }
     const availability = def.availability;

@@ -130,11 +130,18 @@ pub fn open_odf(path: &str) -> Result<Document> {
 /// 段落作为投影附加段（◇ 分节头行区分）；w:pStyle Heading1-9 作行前缀（H1…H9）。
 /// 关闭时与批 1/2 投影逐字节一致（缓存失效语义依赖）。
 pub fn open_with_scope(path: &str, extended: bool) -> Result<Document> {
-    let is_odf = std::path::Path::new(path)
+    super::reject_legacy_wps(path)?;
+    let ext = std::path::Path::new(path)
         .extension()
-        .is_some_and(|e| e.eq_ignore_ascii_case("odt"));
-    if is_odf {
+        .and_then(|e| e.to_str())
+        .map(str::to_ascii_lowercase)
+        .unwrap_or_default();
+    if ext == "odt" {
         return open_odf(path);
+    }
+    if ext == "pptx" {
+        // pptx（批 4）：演示文稿文本投影——每张幻灯片一行头 + 段落行
+        return open_pptx(path);
     }
     let mut zip = package(path)?;
     // 标题前缀随扩围开关（默认关=批 1 投影逐字节不变；开=H1…H9 前缀参与 diff）
@@ -143,6 +150,86 @@ pub fn open_with_scope(path: &str, extended: bool) -> Result<Document> {
         append_scoped(&mut zip, &mut doc)?;
     }
     Ok(doc)
+}
+
+/// pptx 文本投影：ppt/slides/slideN.xml 的 a:p 段落（a:t 文本连接），
+/// 每张幻灯片「◇ 幻灯片 N」头行 + 段落行；确定性（N 按数字序而非字典序）。
+fn open_pptx(path: &str) -> Result<Document> {
+    let mut zip = package(path)?;
+    let mut slides: Vec<(u32, String)> = Vec::new();
+    for name in zip.file_names() {
+        let name = name.map_err(|e| e.to_string())?.to_string();
+        if let Some(n) = name
+            .strip_prefix("ppt/slides/slide")
+            .and_then(|s| s.strip_suffix(".xml"))
+            && let Ok(no) = n.parse::<u32>()
+            && slides.len() < 512
+        {
+            slides.push((no, name));
+        }
+    }
+    if slides.len() >= 512 {
+        return Err("PPTX_SLIDE_LIMIT:512".into());
+    }
+    slides.sort_unstable_by_key(|(n, _)| *n);
+    let mut lines = Vec::new();
+    let mut bytes = 0usize;
+    for (no, name) in &slides {
+        push_line(
+            &mut lines,
+            &mut bytes,
+            format!("\u{25C7} \u{5E7B}\u{706F}\u{7247} {no}"),
+        )?;
+        let mut current = String::new();
+        let mut in_run = false; // a:t 内
+        let mut in_para = false; // a:p 内
+        let mut started = false;
+        xml(&mut zip, name, 16 * 1024 * 1024, |event| {
+            match event {
+                Event::Start(e) | Event::Empty(e) => match e.local_name().as_ref() {
+                    "p" => {
+                        if started {
+                            let line = std::mem::take(&mut current);
+                            push_line(&mut lines, &mut bytes, line)?;
+                        }
+                        in_para = true;
+                        started = true;
+                    }
+                    "t" if in_para => in_run = true,
+                    "br" | "cr" if in_para => current.push('\n'),
+                    _ => {}
+                },
+                Event::Text(e) if in_run => current
+                    .push_str(&quick_xml::escape::unescape(e.as_ref()).map_err(|e| e.to_string())?),
+                Event::GeneralRef(e) if in_run => {
+                    current.push_str(&crate::ooxml::resolve_ref(e.as_ref())?)
+                }
+                Event::CData(e) if in_run => current.push_str(e.as_ref()),
+                Event::End(e) => match e.local_name().as_ref() {
+                    "t" => in_run = false,
+                    "p" if in_para => {
+                        in_para = false;
+                        let line = std::mem::take(&mut current);
+                        push_line(&mut lines, &mut bytes, line)?;
+                        started = false;
+                    }
+                    _ => {}
+                },
+                _ => {}
+            }
+            if bytes > TEXT_LIMIT {
+                return Err("OOXML_TEXT_LIMIT:10MiB".into());
+            }
+            Ok(())
+        })?;
+    }
+    let total_chars = lines.iter().map(|s| s.chars().count()).sum();
+    Ok(Document {
+        lines,
+        total_chars,
+        revisions: false,
+        revision_records: Vec::new(),
+    })
 }
 
 fn parse_body(zip: &mut Package, with_headings: bool) -> Result<Document> {
@@ -492,6 +579,57 @@ mod tests {
         assert!(!doc.revisions);
         assert!(doc.revision_records.is_empty());
     }
+    #[test]
+    fn pptx_slide_text_projection() {
+        // 批 4：pptx → slides 的 a:p 段落（a:t 连接）；幻灯片头行按数字序
+        let mk = |tag: &str| {
+            crate::ooxml::fixture(
+                &[
+                    (
+                        "[Content_Types].xml",
+                        "<Types xmlns='http://schemas.openxmlformats.org/package/2006/content-types'><Default Extension='xml' ContentType='application/xml'/></Types>",
+                    ),
+                    (
+                        "ppt/slides/slide2.xml",
+                        &format!(
+                            "<p:sld xmlns:a='a' xmlns:p='p'><p:txBody><a:p><a:r><a:t>第二页 {tag}</a:t></a:r></a:p><a:p><a:r><a:t>附句</a:t></a:r></a:p></p:txBody></p:sld>"
+                        ),
+                    ),
+                    (
+                        "ppt/slides/slide10.xml",
+                        "<p:sld xmlns:a='a' xmlns:p='p'><p:txBody><a:p><a:r><a:t>第十页</a:t></a:r></a:p></p:txBody></p:sld>",
+                    ),
+                    (
+                        "ppt/slides/slide1.xml",
+                        "<p:sld xmlns:a='a' xmlns:p='p'><p:txBody><a:p><a:r><a:t>第一页</a:t></a:r></a:p></p:txBody></p:sld>",
+                    ),
+                ],
+                "deck.pptx",
+            )
+        };
+        let doc = open(&mk("v1")).unwrap();
+        assert_eq!(
+            doc.lines,
+            [
+                "\u{25C7} \u{5E7B}\u{706F}\u{7247} 1",
+                "第一页",
+                "\u{25C7} \u{5E7B}\u{706F}\u{7247} 2",
+                "第二页 v1",
+                "附句",
+                "\u{25C7} \u{5E7B}\u{706F}\u{7247} 10",
+                "第十页",
+            ],
+            "slide10 排在 slide2 之后（数字序非字典序）"
+        );
+        // 确定性：同内容重开逐字节一致
+        assert_eq!(open(&mk("v1")).unwrap().lines, doc.lines);
+        // 改一处：恰好一处差异（对比投影判据）
+        let mut other = open(&mk("v2")).unwrap();
+        assert_ne!(other.lines[3], doc.lines[3]);
+        other.lines[3] = doc.lines[3].clone();
+        assert_eq!(other.lines, doc.lines);
+    }
+
     #[test]
     fn revision_marks_set_flag_but_extraction_stays_final_state() {
         // w:ins 内文本计入正文（终态），w:delText 不计（local_name 非 t）；

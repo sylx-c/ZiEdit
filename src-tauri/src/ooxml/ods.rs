@@ -317,6 +317,7 @@ fn parse(zip: &mut Package, bytes: &mut usize) -> Result<OdsWorkbook> {
 }
 
 pub fn open(path: &str) -> Result<OdsWorkbook> {
+    super::reject_legacy_wps(path)?;
     let p = std::path::Path::new(path);
     let len = std::fs::metadata(p)
         .map_err(|e| format!("ODS_OPEN:{e}"))?

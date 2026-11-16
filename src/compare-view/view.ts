@@ -163,7 +163,9 @@ export class CompareView {
     cancel.remove();
     this.inputState = res.inputState;
     if (res.binary) {
-      this.opts.flash(t('cmp.binaryRouted'));
+      // 批 4：旧式/私有 Office 容器（OLE 二进制）给「另存为」指引，替换一刀切文案
+      const legacy = [this.pathA, this.pathB].some(p => /\.(doc|ppt|wps|et|dps)$/i.test(p));
+      this.opts.flash(t(legacy ? 'cmp.legacyOfficeHint' : 'cmp.binaryRouted'));
       const close = mk('button', 'cmp-btn', t('common.close'));
       close.addEventListener('click', () => this.opts.onClose());
       this.head.firstElementChild!.appendChild(close);
@@ -291,8 +293,9 @@ export class CompareView {
       const office = side === 'A' ? this.officeA : this.officeB;
       const dim = mk('span', 'cmp-meta-dim');
       if (office) {
+        const pptxSide = (side === 'A' ? this.pathA : this.pathB).toLowerCase().endsWith('.pptx');
         dim.textContent = `${t(office === 'docx' ? 'cmp.proj.docx' : 'cmp.proj.xlsx')} · ${tf('cmp.lines', m?.lines ?? 0)} · ${fmtSize(m?.len ?? 0)}`;
-        dim.title = t(office === 'docx' ? 'ooxml.docxScope' : 'ooxml.xlsxScope');
+        dim.title = t(pptxSide ? 'ooxml.pptxScope' : office === 'docx' ? 'ooxml.docxScope' : 'ooxml.xlsxScope');
       } else {
         dim.textContent = `${m?.encoding ?? ''}${m?.bom ? ' · BOM:' + m.bom : ''}${m?.eol && m.eol !== '-' ? ' · EOL:' + m.eol : ''} · ${tf('cmp.lines', m?.lines ?? 0)} · ${fmtSize(m?.len ?? 0)}`;
       }
