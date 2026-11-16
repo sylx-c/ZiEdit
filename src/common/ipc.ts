@@ -2,7 +2,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 
-export type ViewRoute = 'text' | 'image' | 'pdf'; // (2026-10-29 ac-011)
+export type ViewRoute = 'text' | 'image' | 'pdf' | 'rich'; // (2026-10-29 ac-011；2026-11-16 批 5 增 rich=docx 富预览)
 
 export interface DirEntry {
   name: string;

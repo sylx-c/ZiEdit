@@ -1969,3 +1969,11 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 
 /* 阶段 4：PDF 对比诚实提示（不出噪声 diff） */
 .cmp-pdf-note{padding:24px 20px;max-width:64ch;color:var(--fg);line-height:1.7}
+
+/* 批 5：docx 富预览（docx-preview 渲染容器） */
+.docx-rich{height:100%;display:flex;flex-direction:column;background:var(--bg)}
+.docx-rich-loading{padding:24px 20px;color:var(--muted)}
+.docx-rich-scroll{height:100%;overflow:auto;padding:16px 0}
+.docx-rich-pages{display:flex;flex-direction:column;align-items:center;gap:16px}
+.docx-rich-pages .docx-wrapper{background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.18);padding:24px 32px;max-width:920px;width:min(920px,calc(100vw - 96px))}
+.docx-rich-pages .docx-wrapper>section.docx{width:auto!important;padding-bottom:12px}

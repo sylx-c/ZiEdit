@@ -80,4 +80,28 @@ describe('ac-013 批 2：Excel 显示值查看与公式开关', () => {
     expect(dict('zh-CN')['cmp.legacyOfficeHint']).toContain('另存为');
     expect(dict('en-US')['cmp.legacyOfficeHint']).toContain('save as');
   });
+
+  it('批 5：Word 默认富预览（docx-preview）+ 失败回退文本投影 + 守护', () => {
+    const kindRs = read('src-tauri/src/kind_detect/mod.rs');
+    const richSrc = read('src/docx-rich/view.ts');
+    const stateSrc = read('src/common/state.ts');
+    const capsSrc = read('src/shell/view-capabilities.ts');
+    expect(kindRs).toContain('ViewRoute::Rich');
+    expect(kindRs).toContain('matches!(ext.as_str(), "docx" | "docm" | "dotx" | "dotm")');
+    expect(kindRs).toMatch(/ViewRoute::Image \| ViewRoute::Pdf \| ViewRoute::Rich => Ok\(fast\)/);
+    expect(richSrc).toContain('DOCX_RICH_MAX_BYTES = 100 * 1024 * 1024');
+    expect(richSrc).toContain('DOCX_RICH_RENDER_TIMEOUT_MS = 20_000');
+    expect(richSrc).toContain("await import('docx-preview')");
+    expect(richSrc).toContain('zassetUrl(this.path)');
+    expect(richSrc).toContain('onFallbackToText');
+    expect(appSrc).toContain("tab.route === 'rich'");
+    expect(appSrc).toMatch(/setRoute\(path, 'text'\)/);
+    expect(appSrc).toContain("isWordOoxmlPath(t.path)) store.setRoute(t.path, 'rich')");
+    expect(stateSrc).toContain("t.route === 'rich'");
+    expect(capsSrc).toContain('rich: { ...COMMON }');
+    for (const k of ['docxRich.loading', 'docxRich.fallback', 'docxRich.tooLarge', 'docxRich.timeout', 'docxRich.scope', 'act.richDocx']) {
+      expect(dict('zh-CN')[k], 'zh ' + k).toBeTruthy();
+      expect(dict('en-US')[k], 'en ' + k).toBeTruthy();
+    }
+  });
 });

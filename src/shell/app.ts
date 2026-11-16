@@ -97,6 +97,7 @@ import type { LivePreviewView as LivePreviewViewT } from '../markdown-view/livep
 import type { HeadingItem } from '../markdown-view/preview';
 import type { MdFormatCmd } from '../markdown-view/mdformat';
 import type { CsvView as CsvViewT } from '../csv-view/table';
+import type { RichDocxView as RichDocxViewT } from '../docx-rich/view';
 import type { CompareStatus, CompareView as CompareViewT } from '../compare-view/view';
 import { NAV_SHORTCUTS } from '../compare-view/layout';
 import { TailBoard, type TailStatus } from '../text-view/tailboard';
@@ -160,6 +161,7 @@ type ImagehostModule = typeof import('../markdown-view/imagehost');
 type MdFormatModule = typeof import('../markdown-view/mdformat');
 type LivePreviewModule = typeof import('../markdown-view/livepreview');
 type CsvModule = typeof import('../csv-view/table');
+type RichDocxModule = typeof import('../docx-rich/view');
 type CompareModule = typeof import('../compare-view/view');
 
 const notLoaded = (name: string): never => {
@@ -172,6 +174,7 @@ let EditView: EditModule['EditView'] = class {} as unknown as EditModule['EditVi
 let LivePreviewView: LivePreviewModule['LivePreviewView'] = class {} as unknown as LivePreviewModule['LivePreviewView'];
 let CsvView: CsvModule['CsvView'] = class {} as unknown as CsvModule['CsvView'];
 let CompareView: CompareModule['CompareView'] = class {} as unknown as CompareModule['CompareView'];
+let RichDocxView: RichDocxModule['RichDocxView'] = class {} as unknown as RichDocxModule['RichDocxView'];
 // 与 text-view/edit 同源常量（10MB）；编辑模块加载后以真实值覆写校准
 let EDIT_LIMIT = 10 * 1024 * 1024;
 // 高亮语言清单预置（与 text-view/highlight 的 HIGHLIGHT_LANGS 同源快照）：仅作模块就位前的
@@ -298,6 +301,12 @@ const loadCompare = (): Promise<CompareModule> =>
     CompareView = m.CompareView;
     return m;
   }));
+
+// 批 5：docx 富预览懒加载（docx-preview 仅预览模式进内存；分包由 vite 处理）
+let richDocxPromise: Promise<RichDocxModule> | null = null;
+const loadRichDocx = (): Promise<RichDocxModule> =>
+  (richDocxPromise ??= import('../docx-rich/view'));
+const isWordOoxmlPath = (p: string): boolean => /\.(docx|docm|dotx|dotm)$/i.test(p);
 
 // panels 懒加载（panels 静态引 text-view/highlight——Lezer 语言包+CM 属重依赖）：
 // 校验和/查找/规范化等面板函数首次使用时经 ensurePanels 取用
@@ -570,7 +579,7 @@ export async function boot(): Promise<void> {
   }
 
   // ---- 全局状态 ----
-  let currentView: TextViewT | EditViewT | CsvViewT | LivePreviewViewT | CompareViewT | ImageViewT | PdfView | null = null;
+  let currentView: TextViewT | EditViewT | CsvViewT | LivePreviewViewT | CompareViewT | ImageViewT | PdfView | RichDocxViewT | null = null;
   let viewCleanup: (() => void) | null = null;
   let currentViewKey = '\u0000'; // 哨兵：与任何真实 key（含无标签的 ''）都不相等，确保首帧渲染空态（P2-13）
   let viewStatus: TextViewStatus | null = null;
@@ -1691,6 +1700,7 @@ export async function boot(): Promise<void> {
     if (currentView instanceof TextView) currentView.destroy();
     if (currentView instanceof ImageView) currentView.destroy();
     if (currentView instanceof PdfView) currentView.destroy();
+    if (currentView instanceof RichDocxView) currentView.destroy();
     if (currentView instanceof EditView) currentView.destroy();
     if (currentView instanceof CsvView) currentView.destroy();
     if (currentView instanceof LivePreviewView) currentView.destroy();
@@ -1957,6 +1967,38 @@ export async function boot(): Promise<void> {
           await pv.mount();
           if (stale()) { pv.destroy(); pdfHost.remove(); }
         } catch (err) { if (!stale()) flash($tf('err.openFail', parseError(err).message)); }
+        return;
+      }
+      // Word 富预览（批 5）：route='rich'（docx/docm/dotx/dotm 默认）；渲染失败回退文本投影。
+      // 文件级授权早于任何字节 fetch（照 pdf 分支）。
+      if (tab.route === 'rich') {
+        try {
+          await zassetAllow(tab.path);
+          if (stale()) return;
+          const mod = await loadRichDocx();
+          if (stale()) return;
+          const richHost = document.createElement('div');
+          richHost.style.cssText = 'height:100%';
+          viewarea.appendChild(richHost);
+          const rv = new mod.RichDocxView(
+            richHost,
+            tab.path,
+            (path, reason) => {
+              // 回退 = 路由切文本投影（重建挂载）+ 如实提示原因
+              store.setRoute(path, 'text');
+              flash($tf('docxRich.fallback', reason));
+            },
+            msg => flash(msg),
+          );
+          currentView = rv;
+          await rv.mount();
+          if (stale()) { rv.destroy(); richHost.remove(); }
+        } catch (err) {
+          if (!stale()) {
+            flash($tf('docxRich.fallback', parseError(err).message));
+            store.setRoute(tab.path, 'text');
+          }
+        }
         return;
       }
       // 图片视图（批 D-1）：route='image'（png/jpg/gif/webp/svg/bmp）
@@ -2887,12 +2929,12 @@ export async function boot(): Promise<void> {
     const rail = document.getElementById('editorRail');
     if (rail) {
       // 文本/Markdown 各形态统一保留框架右轨；csv/pdf 无文本面照旧隐藏。
-      rail.style.display = t?.route === 'pdf' || (!!t && modeOf(t) === 'csv') ? 'none' : '';
+      rail.style.display = t?.route === 'pdf' || t?.route === 'rich' || (!!t && modeOf(t) === 'csv') ? 'none' : '';
     }
     if (!(ruler instanceof HTMLElement)) return;
     const m = t ? modeOf(t) : 'view';
     const mdLayout = !!t && t.route === 'text' && (m === 'md' || m === 'split' || m === 'wysiwyg');
-    ruler.style.display = settings.showRuler === false || mdLayout || t?.route === 'image' || t?.route === 'pdf' || m === 'csv' ? 'none' : '';
+    ruler.style.display = settings.showRuler === false || mdLayout || t?.route === 'image' || t?.route === 'pdf' || t?.route === 'rich' || m === 'csv' ? 'none' : '';
     // 轨顶 inset 随尺子可见性切换（29 = 尺 19 + 留白 10；隐藏时 10，轨顶不留空）
     document.getElementById('editorRail')?.classList.toggle('no-ruler', ruler.style.display === 'none');
   }
@@ -4013,7 +4055,8 @@ export async function boot(): Promise<void> {
   const currentViewKind = (): ViewKind => currentView instanceof TextView ? 'text'
     : currentView instanceof EditView ? 'edit' : currentView instanceof LivePreviewView ? 'ir'
       : currentView instanceof CsvView ? 'csv' : currentView instanceof CompareView ? 'compare'
-        : currentView instanceof ImageView ? 'image' : currentView instanceof PdfView ? 'pdf' : 'none';
+        : currentView instanceof ImageView ? 'image' : currentView instanceof PdfView ? 'pdf'
+      : currentView instanceof RichDocxView ? 'rich' : 'none';
   const currentViewSupports = (capability: ViewCapability): boolean => {
     const tab = activeTab();
     return hasViewCapability(currentViewKind(), capability, {
@@ -4666,6 +4709,19 @@ export async function boot(): Promise<void> {
         const panel = m.findInFilesPanel(root, (p, l) => void openPath(p, l));
         document.body.appendChild(overlayDialog($t('fif.title'), panel, () => panel.dispose()));
       });
+    },
+  });
+  reg.add({
+    // 批 5：Word OOXML 文本投影 ↔ 富预览互切（富预览为 docx 默认形态）
+    id: 'view.richDocx', label: 'act.richDocx', group: 'view', icon: 'text', tint: 'blue',
+    checked: () => activeTab()?.route === 'rich',
+    enabled: () => {
+      const t = activeTab();
+      return !!t && isRealFilePath(t.path) && isWordOoxmlPath(t.path);
+    },
+    run: () => {
+      const t = activeTab();
+      if (t && isWordOoxmlPath(t.path)) store.setRoute(t.path, 'rich');
     },
   });
   reg.add({

@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "currentDependencyStatus": {
     "inputSHA256": {
-      "package-lock.json": "6b4b0c75b044340831a838f0bc2d62d304ae30471f6ea91a7d2cb02654c8d77b",
+      "package-lock.json": "b6e50129a03f2f6e8e258ee5ea5507341a39125e8fc701ded4ae088779b5603c",
       "src-tauri/Cargo.lock": "57ac6bf0c0facb69c6a726c7571a34ccb7e83bc08a8f126604ce7a5670cb85c6"
     },
     "meaning": "Membership is exact ecosystem/name/version against current lockfiles, independent of historical evidence collection status. Historical entries and review findings remain preserved, but are not current dependency evidence or unresolved runtime items.",
-    "activePackages": 88,
+    "activePackages": 89,
     "historicalPackages": 2
   },
   "method": "Exact npm archive integrity checked against package-lock; exact crates.io archive SHA256 checked against Cargo.lock. Repository files pinned by npm registry gitHead, archive .cargo_vcs_info.json, or official npm SLSA provenance with subject digest matched to the verified archive. Official attestation signatures/transparency proofs are retained but not independently cryptographically verified. No guessed SPDX templates; ancestor LICENSE copies identified explicitly. Nonstandard AUTHORS grants and explicitly source-linked official standard license supplements are manually identified by evidenceRole and manualEvidence. Source responses and linkage metadata retained; full archives hashed but not retained.",
@@ -3071,6 +3071,58 @@
         "sourceArchiveSHA256": "c77e7a5d5ff31dd7acea7c44d4a0455e0528cdacbd24a8cb6c82b66d239b587e",
         "sourceIntegrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="
       },
+      "dependencyStatus": "CURRENT_LOCKED_DEPENDENCY"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "isarray",
+      "version": "1.0.0",
+      "declaredLicense": "MIT",
+      "documents": [],
+      "provenanceDocuments": [
+        {
+          "path": "provenance/packages/npm/isarray-1.0.0/registry-metadata.json",
+          "originalPath": "registry-metadata.json",
+          "sha256": "566bbad706db3711a1be1a2822bd37b200fd273fc118305430f019100e521a15",
+          "bytes": 1566,
+          "sourceURL": "https://registry.npmjs.org/isarray/1.0.0"
+        },
+        {
+          "path": "provenance/packages/npm/isarray-1.0.0/archive-package.json",
+          "originalPath": "archive-package.json",
+          "sha256": "93165ce56e458216c18240cd961a522af5b18e51da06f55d88ac552234455d95",
+          "bytes": 958,
+          "sourceURL": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz",
+          "sourceArchiveURL": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz",
+          "sourceArchiveSHA256": "e23c76f14f5222e07e39d89858b61e8e33f96956de9e0df3659cbdf8db950c87",
+          "sourceArchiveSHA512": "54b82121634ce842d0ce8ef3c26720d0d99357258a623bc878cf37ca3a74c110d39949eb33aefc7d06dc281a3a9f6089105d2cce81bfff2b60f932a56bcf402d",
+          "sourceIntegrity": "sha512-VLghIWNM6ELQzo7zwmcg0NmTVyWKYjvIeM83yjp0wRDTmUnrM678fQbcKBo6n2CJEF0szoG//ytg+TKla89ALQ=="
+        },
+        {
+          "path": "provenance/packages/npm/isarray-1.0.0/source-tree.json",
+          "originalPath": "source-tree.json",
+          "sha256": "535f1e445b5795357682dcc1b5654e50f226734d7a4b65a83bd5f0af15e049ee",
+          "bytes": 1951,
+          "sourceURL": "https://api.github.com/repos/juliangruber/isarray/git/trees/2a23a281f369e9ae06394c0fb4d2381355a6ba33?recursive=1",
+          "sourceRevision": "2a23a281f369e9ae06394c0fb4d2381355a6ba33"
+        }
+      ],
+      "review": [
+        {
+          "code": "NO_UPSTREAM_LICENSE_TEXT",
+          "detail": "Exact archive/repository evidence contains no standalone license file."
+        }
+      ],
+      "evidenceStatus": "REQUIRES_REVIEW",
+      "archive": {
+        "sourceArchiveURL": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz",
+        "sourceArchiveSHA256": "e23c76f14f5222e07e39d89858b61e8e33f96956de9e0df3659cbdf8db950c87",
+        "sourceArchiveSHA512": "54b82121634ce842d0ce8ef3c26720d0d99357258a623bc878cf37ca3a74c110d39949eb33aefc7d06dc281a3a9f6089105d2cce81bfff2b60f932a56bcf402d",
+        "sourceIntegrity": "sha512-VLghIWNM6ELQzo7zwmcg0NmTVyWKYjvIeM83yjp0wRDTmUnrM678fQbcKBo6n2CJEF0szoG//ytg+TKla89ALQ=="
+      },
+      "sourceRevision": "2a23a281f369e9ae06394c0fb4d2381355a6ba33",
+      "sourceRepositoryURL": "https://github.com/juliangruber/isarray",
+      "packagePathInRepository": "",
       "dependencyStatus": "CURRENT_LOCKED_DEPENDENCY"
     },
     {

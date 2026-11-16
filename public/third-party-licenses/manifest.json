@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "scripts/generate-third-party-licenses.mjs",
   "inputSHA256": {
-    "package-lock.json": "6b4b0c75b044340831a838f0bc2d62d304ae30471f6ea91a7d2cb02654c8d77b",
+    "package-lock.json": "b6e50129a03f2f6e8e258ee5ea5507341a39125e8fc701ded4ae088779b5603c",
     "src-tauri/Cargo.lock": "57ac6bf0c0facb69c6a726c7571a34ccb7e83bc08a8f126604ce7a5670cb85c6",
     "src-tauri/Cargo.toml": "4b53c68c219a83201dd52ac122ea17394671eb4d536582042aea8b0a027e7186"
   },
@@ -24,14 +24,14 @@
     "exclusions": "Local vendored renderers/fonts, OS/WebView runtimes, unlisted embedded third-party components, upstream bundled code without separately named notices, modified downstream source, patents, trademarks and commercial-service terms need separate review."
   },
   "counts": {
-    "npm": 295,
-    "npmInstalled": 246,
+    "npm": 309,
+    "npmInstalled": 260,
     "npmDevelopmentOnly": 233,
     "cargo": 568,
     "packagesWithReviewItems": 0,
     "reviewItems": 0,
-    "collectedDocuments": 1396,
-    "collectedTextBytes": 6298077
+    "collectedDocuments": 1411,
+    "collectedTextBytes": 6359820
   },
   "packages": [
     {
@@ -6153,6 +6153,37 @@
     },
     {
       "ecosystem": "npm",
+      "name": "core-util-is",
+      "version": "1.0.3",
+      "location": "node_modules/core-util-is",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "MIT",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/core-util-is/-/core-util-is-1.0.3.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/core-util-is/1.0.3",
+        "integrity": "sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==",
+        "repositoryURL": "git://github.com/isaacs/core-util-is"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE",
+          "path": "texts/npm/core-util-is-1.0.3-40d0aaef6d/LICENSE",
+          "bytes": 1077,
+          "sha256": "33b734d60042d0fe0c92dd1fc1e874193a1c899ec3e276a2eb935d2d0bf5b710"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
       "name": "cose-base",
       "version": "1.0.3",
       "location": "node_modules/cose-base",
@@ -7709,6 +7740,37 @@
     },
     {
       "ecosystem": "npm",
+      "name": "docx-preview",
+      "version": "0.4.1",
+      "location": "node_modules/docx-preview",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "Apache-2.0",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/docx-preview/-/docx-preview-0.4.1.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/docx-preview/0.4.1",
+        "integrity": "sha512-Dv4g+LeE0swHpPvNC0lAT0YsR5Zq5pAxw7d3vHQ8EChBLgIrqqe9VPL5nVt2HBJap8bEZbXUI0TJob7kBeNU9w==",
+        "repositoryURL": "https://github.com/VolodymyrBaydalka/docxjs"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE",
+          "path": "texts/npm/docx-preview-0.4.1-6ceca155f6/LICENSE",
+          "bytes": 11558,
+          "sha256": "8668bf4417d161e4eb4d47d6044526e4914d9eb3c748573d9bb7e87708c1253f"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
       "name": "dompurify",
       "version": "3.4.17",
       "location": "node_modules/dompurify",
@@ -8123,6 +8185,37 @@
     },
     {
       "ecosystem": "npm",
+      "name": "immediate",
+      "version": "3.0.6",
+      "location": "node_modules/immediate",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "MIT",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/immediate/-/immediate-3.0.6.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/immediate/3.0.6",
+        "integrity": "sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==",
+        "repositoryURL": "git://github.com/calvinmetcalf/immediate"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE.txt",
+          "path": "texts/npm/immediate-3.0.6-034a0c8b10/LICENSE.txt",
+          "bytes": 1115,
+          "sha256": "809e66de579fb7d92503848bbe6d1f348f4f6521a71e5d294fe7cc0c87a3b4ff"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
       "name": "import-meta-resolve",
       "version": "4.2.0",
       "location": "node_modules/import-meta-resolve",
@@ -8148,6 +8241,37 @@
           "path": "texts/npm/import-meta-resolve-4.2.0-1f66b45382/license",
           "bytes": 3493,
           "sha256": "8770a1a4b69ee722636643e81340ce4a8f0b8415b1c568487edc9062338bfcc7"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "inherits",
+      "version": "2.0.4",
+      "location": "node_modules/inherits",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "ISC",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/inherits/-/inherits-2.0.4.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/inherits/2.0.4",
+        "integrity": "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==",
+        "repositoryURL": "git://github.com/isaacs/inherits"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE",
+          "path": "texts/npm/inherits-2.0.4-c76937ee24/LICENSE",
+          "bytes": 749,
+          "sha256": "5ffe28e7ade7d8f10d85d5337a73fd793dac5c462fb9a28fbf8c5046c7fbca3b"
         }
       ],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
@@ -8216,6 +8340,38 @@
     },
     {
       "ecosystem": "npm",
+      "name": "isarray",
+      "version": "1.0.0",
+      "location": "node_modules/isarray",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "MIT",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/isarray/-/isarray-1.0.0.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/isarray/1.0.0",
+        "integrity": "sha512-VLghIWNM6ELQzo7zwmcg0NmTVyWKYjvIeM83yjp0wRDTmUnrM678fQbcKBo6n2CJEF0szoG//ytg+TKla89ALQ==",
+        "repositoryURL": "git://github.com/juliangruber/isarray"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "README.md",
+          "path": "texts/npm/isarray-1.0.0-4f959bdf89/audited-upstream/README.md",
+          "bytes": 1890,
+          "sha256": "ff138e683771b187f3629c383db72ee7d632009010a36d08e18e8d2a34222ec7"
+        }
+      ],
+      "supplementalEvidence": "node_modules/isarray/README.md carries the complete MIT license text (title, copyright line, full grant and disclaimer); audited in scripts/generate-third-party-licenses.mjs — not inferred from package.json metadata alone.",
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
       "name": "jsdom",
       "version": "30.1.3",
       "location": "node_modules/jsdom",
@@ -8243,6 +8399,44 @@
           "sha256": "242d37e7cab25cbafc36cc973ee88f9345fddf066afe4f72b7ac3d9ad4e24cce"
         }
       ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "jszip",
+      "version": "3.10.2",
+      "location": "node_modules/jszip",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "(MIT OR GPL-3.0-or-later)",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/jszip/-/jszip-3.10.2.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/jszip/3.10.2",
+        "integrity": "sha512-3l+rb15IOWtUhU0H5MFqES/T6Kh7abYwjosBey/vD6hDt8zoEffkSC5Ws5SGtgVw3gBx2NEbhTeSW1+kWkpyTQ==",
+        "repositoryURL": "https://github.com/Stuk/jszip"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE.markdown",
+          "path": "texts/npm/jszip-3.10.2-7041c1fbfa/LICENSE.markdown",
+          "bytes": 33753,
+          "sha256": "566c953c6090b1218ca6217dd7359d45dde46581968586dc607d59a78af6a9c4"
+        },
+        {
+          "originalPath": "lib/license_header.js",
+          "path": "texts/npm/jszip-3.10.2-7041c1fbfa/lib/license_header.js",
+          "bytes": 388,
+          "sha256": "27873abeec2df3693480a8d1b8fe17dd61bee843d1b39c1c9cfab57ffe93099e"
+        }
+      ],
+      "selectedLicense": "MIT",
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -8365,6 +8559,37 @@
           "path": "texts/npm/layout-base-1.0.2-6b2ab96b12/LICENSE",
           "bytes": 1069,
           "sha256": "eabb762d8a95109a39c9be3247325529a5239a7aca327d909c3ccdc41f3a06bf"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lie",
+      "version": "3.3.0",
+      "location": "node_modules/lie",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "MIT",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/lie/-/lie-3.3.0.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/lie/3.3.0",
+        "integrity": "sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ==",
+        "repositoryURL": "https://github.com/calvinmetcalf/lie"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "license.md",
+          "path": "texts/npm/lie-3.3.0-ce549a4983/license.md",
+          "bytes": 1084,
+          "sha256": "5c81b0caa98593408b03125efa25efe622341ed87ae55561968828cd887d64a4"
         }
       ],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
@@ -9304,6 +9529,37 @@
     },
     {
       "ecosystem": "npm",
+      "name": "pako",
+      "version": "1.0.11",
+      "location": "node_modules/pako",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "(MIT AND Zlib)",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/pako/-/pako-1.0.11.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/pako/1.0.11",
+        "integrity": "sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==",
+        "repositoryURL": "nodeca/pako"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE",
+          "path": "texts/npm/pako-1.0.11-e48e67e05f/LICENSE",
+          "bytes": 1104,
+          "sha256": "a04665b3b2de56c66730c1f720f528175739e4104f79073614aa611da1e85539"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
       "name": "parse5",
       "version": "8.0.1",
       "location": "node_modules/parse5",
@@ -9643,6 +9899,37 @@
     },
     {
       "ecosystem": "npm",
+      "name": "process-nextick-args",
+      "version": "2.0.1",
+      "location": "node_modules/process-nextick-args",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "MIT",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/process-nextick-args/2.0.1",
+        "integrity": "sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==",
+        "repositoryURL": "https://github.com/calvinmetcalf/process-nextick-args"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "license.md",
+          "path": "texts/npm/process-nextick-args-2.0.1-68c9e75cc9/license.md",
+          "bytes": 1064,
+          "sha256": "ecdccbcf39024f624ded480c01c0b25458e1eca8f26ecf040933865ce56d9a4f"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
       "name": "punycode",
       "version": "2.3.1",
       "location": "node_modules/punycode",
@@ -9699,6 +9986,37 @@
           "path": "texts/npm/punycode.js-2.3.1-69509aad4e/LICENSE-MIT.txt",
           "bytes": 1077,
           "sha256": "483acb265f182907d1caf6cff9c16c96f31325ed23792832cc5d8b12d5f88c8a"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "readable-stream",
+      "version": "2.3.8",
+      "location": "node_modules/readable-stream",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "MIT",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/readable-stream/-/readable-stream-2.3.8.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/readable-stream/2.3.8",
+        "integrity": "sha512-8p0AUk4XODgIewSi0l8Epjs+EVnWiK7NoDIEGU0HhE7+ZyY8D1IMY7odu5lRrFXGg71L15KG8QrPmum45RTtdA==",
+        "repositoryURL": "git://github.com/nodejs/readable-stream"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE",
+          "path": "texts/npm/readable-stream-2.3.8-6a0eabf712/LICENSE",
+          "bytes": 2337,
+          "sha256": "ec62dc96da0099b87f4511736c87309335527fb7031639493e06c95728dc8c54"
         }
       ],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
@@ -9860,6 +10178,37 @@
     },
     {
       "ecosystem": "npm",
+      "name": "safe-buffer",
+      "version": "5.1.2",
+      "location": "node_modules/safe-buffer",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "MIT",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/safe-buffer/-/safe-buffer-5.1.2.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/safe-buffer/5.1.2",
+        "integrity": "sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==",
+        "repositoryURL": "git://github.com/feross/safe-buffer"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE",
+          "path": "texts/npm/safe-buffer-5.1.2-bce944bea3/LICENSE",
+          "bytes": 1081,
+          "sha256": "c7cc929b57080f4b9d0c6cf57669f0463fc5b39906344dfc8d3bc43426b30eac"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
       "name": "safer-buffer",
       "version": "2.1.2",
       "location": "node_modules/safer-buffer",
@@ -9938,6 +10287,37 @@
         "sourceRevision": "211fa0ebec9b628affc09219199639887174bfc3",
         "sourceRepositoryURL": "https://github.com/lddubeau/saxes"
       },
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "setimmediate",
+      "version": "1.0.5",
+      "location": "node_modules/setimmediate",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "MIT",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/setimmediate/-/setimmediate-1.0.5.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/setimmediate/1.0.5",
+        "integrity": "sha512-MATJdZp8sLqDl/68LfQmbP8zKPLQNV6BIZoIgrscFDQ+RsvK/BxeDQOgyxKKoh0y/8h3BqVFnCqQ/gd+reiIXA==",
+        "repositoryURL": "YuzuJS/setImmediate"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE.txt",
+          "path": "texts/npm/setimmediate-1.0.5-e37b2c25da/LICENSE.txt",
+          "bytes": 1103,
+          "sha256": "c4b4ad3a5746f1f5249a6dd90396ec519264e1bb02e01e48a6522c48a3a97cb4"
+        }
+      ],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -10060,6 +10440,37 @@
           "path": "texts/npm/std-env-4.3.0-a29779af65/LICENCE",
           "bytes": 1079,
           "sha256": "a6f36438e46fb911859f3b9c4cad045ba64e1af3d8f4512c60258fa2d7552d28"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "string_decoder",
+      "version": "1.1.1",
+      "location": "node_modules/string_decoder",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "MIT",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/string_decoder/-/string_decoder-1.1.1.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/string_decoder/1.1.1",
+        "integrity": "sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==",
+        "repositoryURL": "git://github.com/nodejs/string_decoder"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE",
+          "path": "texts/npm/string_decoder-1.1.1-e7ae557c1b/LICENSE",
+          "bytes": 2338,
+          "sha256": "11f2aafb37d06b3ee5bdaf06e9811141d0da05263c316f3d627f45c20d43261b"
         }
       ],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
@@ -10506,6 +10917,37 @@
           "path": "texts/npm/undici-8.12.2-009540c311/lib/web/fetch/LICENSE",
           "bytes": 1071,
           "sha256": "a21d6c8d3fc631198b97e57584697f7f9c37805c71c6cf9a12e4442b40394b88"
+        }
+      ],
+      "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "ecosystem": "npm",
+      "name": "util-deprecate",
+      "version": "1.0.2",
+      "location": "node_modules/util-deprecate",
+      "dependencyClass": "production-or-optional",
+      "optional": false,
+      "dev": false,
+      "devOptional": false,
+      "os": [],
+      "cpu": [],
+      "license": "MIT",
+      "licenseEvidence": "package-lock.json",
+      "source": {
+        "archiveURL": "https://registry.npmmirror.com/util-deprecate/-/util-deprecate-1.0.2.tgz",
+        "registryMetadataURL": "https://registry.npmjs.org/util-deprecate/1.0.2",
+        "integrity": "sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==",
+        "repositoryURL": "git://github.com/TooTallNate/util-deprecate"
+      },
+      "review": [],
+      "installed": true,
+      "documents": [
+        {
+          "originalPath": "LICENSE",
+          "path": "texts/npm/util-deprecate-1.0.2-be19f75f90/LICENSE",
+          "bytes": 1102,
+          "sha256": "0154425673db15cdfa80ecba2c9b1f1a867f7197a006764712849bfc3a93cbb7"
         }
       ],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"

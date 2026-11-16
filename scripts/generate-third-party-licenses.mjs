@@ -198,6 +198,38 @@ if (sourceVerification.errors.length) throw new Error(`Corresponding-source evid
 const sourceNotices = [];
 for (const record of records) {
   if (record.name === 'dompurify' && /MPL-2\.0.*OR.*Apache-2\.0/.test(record.license ?? '')) record.selectedLicense = 'Apache-2.0';
+  // 批 5（docx 富预览）传递依赖：jszip 双许可 MIT OR GPL-3.0-or-later —— 按本仓规则
+  // 明示选 MIT（再分发义务最轻、与本仓 MIT 一致），GPL 分支不行使、不分发其对应源义务。
+  if (record.name === 'jszip' && record.ecosystem === 'npm' && record.license === '(MIT OR GPL-3.0-or-later)') {
+    record.selectedLicense = 'MIT';
+  }
+  // 批 5 传递依赖 isarray 1.0.0：npm 归档无独立 LICENSE 文件，但其 README.md
+  // 内嵌完整 MIT 授权文本（标题 + Julian Gruber 版权行 + 完整许可条款）。经审计
+  // 认可为完整许可原文（等同独立 LICENSE 的证据力），不以 metadata 单方面声明放行。
+  if (record.name === 'isarray' && record.ecosystem === 'npm' && record.version === '1.0.0'
+      && record.review.some(i => i.code === 'NO_STANDALONE_LICENSE')) {
+    const readme = path.join(root, 'node_modules', 'isarray', 'README.md');
+    if (fs.existsSync(readme)) {
+      const text = fs.readFileSync(readme, 'utf8');
+      const full = text.includes('Copyright (c) 2013 Julian Gruber')
+        && text.includes('Permission is hereby granted, free of charge, to any person obtaining a copy of')
+        && text.includes('THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND');
+      if (full) {
+        // 归档证据随包保留（legalFiles 只集 license 名文件——README 为唯一许可载体，
+        // 按审计例外显式收录，字节进 texts 目录）
+        const id = `${record.name}-${record.version}-${sha(record.location).slice(0, 10)}`;
+        const destination = `texts/npm/${id}/audited-upstream/README.md`;
+        const bytes = fs.readFileSync(readme);
+        emit(destination, bytes);
+        record.documents.push({ originalPath: 'README.md', path: destination, bytes: bytes.length, sha256: sha(bytes) });
+        record.review = record.review.filter(i => i.code !== 'NO_STANDALONE_LICENSE');
+        for (let i = issues.length - 1; i >= 0; i--) {
+          if (issues[i].name === 'isarray' && issues[i].code === 'NO_STANDALONE_LICENSE') issues.splice(i, 1);
+        }
+        record.supplementalEvidence = `${record.location}/README.md carries the complete MIT license text (title, copyright line, full grant and disclaimer); audited in scripts/generate-third-party-licenses.mjs — not inferred from package.json metadata alone.`;
+      }
+    }
+  }
   if (['option-ext', 'cssparser', 'cssparser-macros', 'dtoa-short', 'selectors'].includes(record.name) && record.ecosystem === 'cargo' && record.license?.includes('MPL-2.0')) {
     const local = record.name === 'option-ext' ? 'option-ext' : 'mpl-crates';
     record.correspondingSource = {

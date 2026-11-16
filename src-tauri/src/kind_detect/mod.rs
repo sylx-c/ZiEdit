@@ -5,13 +5,16 @@
 use std::io::Read;
 use std::path::Path;
 
-/// 视图路由：文本、图片或 PDF（2026-10-29 ac-011）
+/// 视图路由：文本、图片、PDF 或 docx 富预览（2026-10-29 ac-011；批 5 增 Rich）
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ViewRoute {
     Text,
     Image,
     Pdf,
+    /// Word OOXML 富预览（批 5）：docx/docm/dotx/dotm 默认路由；渲染失败由前端
+    /// 回退 text（文本投影）。odt/wps 不走（docx-preview 仅渲染 OOXML Word）。
+    Rich,
 }
 
 /// 识别结果：路由目标 + 语言类别（文本类才有）+ 二进制标记（对比/搜索等按此跳过）
@@ -138,6 +141,9 @@ pub fn detect_fast(path: &Path) -> FileKind {
         return FileKind {
             route: if lang == "Pdf" {
                 ViewRoute::Pdf
+            } else if lang == "Docx" && matches!(ext.as_str(), "docx" | "docm" | "dotx" | "dotm") {
+                // Word OOXML 默认富预览（批 5）；odt/wps 仍走文本投影
+                ViewRoute::Rich
             } else {
                 ViewRoute::Text
             },
@@ -174,7 +180,7 @@ fn detect_inner(path: &Path, key: Option<crate::encoding::ProbeKey>) -> std::io:
         return Ok(fast);
     }
     match fast.route {
-        ViewRoute::Image | ViewRoute::Pdf => Ok(fast),
+        ViewRoute::Image | ViewRoute::Pdf | ViewRoute::Rich => Ok(fast),
         ViewRoute::Text => {
             if fast.binary {
                 return Ok(fast);
@@ -268,6 +274,22 @@ mod tests {
     }
 
     #[test]
+    fn word_ooxml_routes_rich() {
+        // 批 5：Word OOXML 默认富预览；odt/wps（同 Docx 语言）仍走文本投影
+        for name in ["a.docx", "b.DOCM", "c.dotx", "d.dotm"] {
+            let k = detect_fast(std::path::Path::new(name));
+            assert_eq!(k.route, ViewRoute::Rich, "{name}");
+            assert_eq!(k.language, Some("Docx"), "{name}");
+            assert!(!k.binary, "{name}");
+        }
+        for name in ["e.odt", "f.wps"] {
+            let k = detect_fast(std::path::Path::new(name));
+            assert_eq!(k.route, ViewRoute::Text, "{name}");
+            assert_eq!(k.language, Some("Docx"), "{name}");
+        }
+    }
+
+    #[test]
     fn pdf_routes_pdf() {
         // (2026-10-29 ac-011) 快速与完整检测均保持 PDF 语言，并使用独立路由。
         let p = touch("route.pdf", b"%PDF-1.7");
@@ -283,10 +305,13 @@ mod tests {
     #[test]
     fn ext_text() {
         assert_eq!(detect_fast(Path::new("a.jsonc")).language, Some("JSON"));
-        for (name, language) in [("a.docx", "Docx"), ("a.xlsx", "Xlsx")] {
+        for (name, language, route) in [
+            ("a.docx", "Docx", ViewRoute::Rich),
+            ("a.xlsx", "Xlsx", ViewRoute::Text),
+        ] {
             let p = touch(name, &[0; 100]);
             assert_eq!(detect(&p).unwrap().language, Some(language));
-            assert_eq!(detect(&p).unwrap().route, ViewRoute::Text);
+            assert_eq!(detect(&p).unwrap().route, route);
         }
         let p = touch("a.json", b"{}");
         assert_eq!(detect_fast(&p).language, Some("JSON"));

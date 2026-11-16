@@ -161,7 +161,7 @@ export class TabStore {
       }
       return {
       path: normalizePath(t.path),
-      route: t.route === 'image' || t.route === 'pdf' ? t.route : 'text',
+      route: t.route === 'image' || t.route === 'pdf' || t.route === 'rich' ? t.route : 'text',
       language: t.language ?? null,
       scroll: typeof t.scroll === 'number' ? t.scroll : 0,
       ...(draft !== undefined ? { draftContent: draft } : {}),

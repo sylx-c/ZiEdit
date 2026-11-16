@@ -158,6 +158,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | npm | chevrotain | 13.2.0 | development-only | Apache-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | commander | 7.2.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | convert-source-map | 2.0.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | core-util-is | 1.0.3 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | cose-base | 1.0.3 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | crelt | 1.0.7 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | css-tree | 3.2.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
@@ -208,6 +209,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | npm | decimal.js | 10.6.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | delaunator | 5.1.0 | development-only | ISC | 1 | LOCAL_TEXT_COLLECTED |
 | npm | detect-libc | 2.1.2 | development-only | Apache-2.0 | 1 | LOCAL_TEXT_COLLECTED |
+| npm | docx-preview | 0.4.1 | production-or-optional | Apache-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | dompurify | 3.4.17 | development-only | (MPL-2.0 OR Apache-2.0) | 3 | LOCAL_TEXT_COLLECTED |
 | npm | elkjs | 0.9.3 | development-only | EPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | entities | 8.1.0 | production-or-optional | BSD-2-Clause | 1 | LOCAL_TEXT_COLLECTED |
@@ -220,14 +222,19 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | npm | hachure-fill | 0.5.2 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | html-encoding-sniffer | 7.0.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | iconv-lite | 0.6.3 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | immediate | 3.0.6 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | import-meta-resolve | 4.2.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | inherits | 2.0.4 | production-or-optional | ISC | 1 | LOCAL_TEXT_COLLECTED |
 | npm | internmap | 2.0.3 | development-only | ISC | 1 | LOCAL_TEXT_COLLECTED |
 | npm | is-potential-custom-element-name | 1.0.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | isarray | 1.0.0 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | jsdom | 30.1.3 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | jszip | 3.10.2 | production-or-optional | (MIT OR GPL-3.0-or-later) | 2 | LOCAL_TEXT_COLLECTED |
 | npm | katex | 0.18.11 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | commander | 15.0.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | khroma | 2.1.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | layout-base | 1.0.2 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | lie | 3.3.0 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | lightningcss | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | lightningcss-android-arm64 | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | lightningcss-darwin-arm64 | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
@@ -252,6 +259,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | npm | nanoid | 3.3.20 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | obug | 2.2.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | package-manager-detector | 1.9.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | pako | 1.0.11 | production-or-optional | (MIT AND Zlib) | 1 | LOCAL_TEXT_COLLECTED |
 | npm | parse5 | 8.0.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | path-data-parser | 0.1.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | pathe | 2.0.3 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
@@ -261,19 +269,24 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | npm | points-on-curve | 0.2.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | points-on-path | 0.2.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | postcss | 8.5.30 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | process-nextick-args | 2.0.1 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | punycode | 2.3.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | punycode.js | 2.3.1 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | readable-stream | 2.3.8 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | require-from-string | 2.0.2 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | robust-predicates | 3.0.3 | development-only | Unlicense | 1 | LOCAL_TEXT_COLLECTED |
 | npm | rolldown | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | roughjs | 4.6.6 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | rw | 1.3.3 | development-only | BSD-3-Clause | 1 | LOCAL_TEXT_COLLECTED |
+| npm | safe-buffer | 5.1.2 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | safer-buffer | 2.1.2 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | saxes | 6.0.0 | development-only | ISC | 1 | LOCAL_TEXT_COLLECTED |
+| npm | setimmediate | 1.0.5 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | siginfo | 2.0.0 | development-only | ISC | 1 | LOCAL_TEXT_COLLECTED |
 | npm | source-map-js | 1.2.2 | development-only | BSD-3-Clause | 1 | LOCAL_TEXT_COLLECTED |
 | npm | stackback | 0.0.2-ziedit.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | std-env | 4.3.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | string_decoder | 1.1.1 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | style-mod | 4.1.4 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | stylis | 4.4.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | tinybench | 2.9.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
@@ -288,6 +301,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | npm | typescript | 6.0.3 | development-only | Apache-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | uc.micro | 3.0.0 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | undici | 8.12.2 | development-only | MIT | 3 | LOCAL_TEXT_COLLECTED |
+| npm | util-deprecate | 1.0.2 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | uuid | 14.0.3 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | vite | 8.3.4 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | vitest | 4.1.12 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
