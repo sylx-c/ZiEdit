@@ -48,11 +48,11 @@ describe('统一 title 提示层', () => {
     const tip = document.querySelector('.app-tip') as HTMLElement;
     expect(tip).not.toBeNull();
     expect(tip.textContent).toBe('保存文件');
-    expect(tip.style.display).toBe('');
+    expect(tip.classList.contains('on')).toBe(true);
     fire(btn, 'pointerout');
     expect(btn.title).toBe('保存文件'); // 离开恢复（无障碍属性不变）
     delete btn.dataset.tipTitle;
-    expect(tip.style.display).toBe('none');
+    expect(tip.classList.contains('on')).toBe(false);
   });
 
   it('按下任意键鼠立即隐藏（不滞留）', () => {
@@ -63,9 +63,9 @@ describe('统一 title 提示层', () => {
     fire(btn, 'pointerover');
     vi.advanceTimersByTime(300);
     const tip = document.querySelector('.app-tip') as HTMLElement;
-    expect(tip.style.display).toBe('');
+    expect(tip.classList.contains('on')).toBe(true);
     fire(document.body, 'pointerdown');
-    expect(tip.style.display).toBe('none');
+    expect(tip.classList.contains('on')).toBe(false);
     expect(btn.title).toBe('提示');
   });
 });

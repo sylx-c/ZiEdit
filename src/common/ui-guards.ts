@@ -38,20 +38,20 @@ export function installPointerTips(): void {
       tipEl = document.createElement('div');
       tipEl.className = 'app-tip';
       tipEl.setAttribute('role', 'tooltip');
-      tipEl.style.display = 'none';
       document.body.appendChild(tipEl);
     }
     return tipEl;
   };
   const hide = (): void => {
     if (tipTimer) { clearTimeout(tipTimer); tipTimer = null; }
-    if (tipEl) tipEl.style.display = 'none';
+    if (tipEl) tipEl.classList.remove('on');
     if (tipOwner) { restoreTitle(tipOwner); tipOwner = null; }
   };
   const show = (el: HTMLElement): void => {
     const tip = ensure();
     tip.textContent = el.dataset.tipTitle ?? '';
-    tip.style.display = '';
+    tip.classList.add('on'); // 用类切换可见性：.app-tip 基类自带 display:none，
+    // 修前 style.display='' 会回落到该规则导致真机永远不可见（jsdom 未加载 CSS 漏检）。
     const r = el.getBoundingClientRect();
     const x = Math.min(Math.max(8, r.left + r.width / 2 - tip.offsetWidth / 2), window.innerWidth - 8 - tip.offsetWidth);
     const below = r.bottom + 6;

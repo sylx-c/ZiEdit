@@ -340,7 +340,12 @@ export function buildMenus(
       label: 'menu.fileF',
       entries: () => [
         { action: 'file.newDraft' }, { action: 'file.openFile' }, { action: 'file.openFolder' },
-        { label: 'menu.recent', children: () => recentFiles().slice(0, 10).map(r => ({ action: `file.recent:${r.path}` })) },
+        { label: 'menu.recent', children: () => {
+          const items = recentFiles().slice(0, 10).map(r => ({ action: `file.recent:${r.path}` }));
+          // 菜单项不支持右键（2026-11-16 用户反馈「右键没反应」）：清理入口直接放在子菜单尾部；
+          // 侧栏「最近」面板的行右键仍提供逐条移除。空列表不出现分隔线与清理项。
+          return items.length ? [...items, { sep: true }, { action: 'file.recentClear' }] : items;
+        } },
         { sep: true },
         { action: 'file.save' }, { action: 'file.saveAs' },
         // 转换类另存收拢为一个子菜单（2026-10 菜单梳理）：与「另存为」同族但不平铺
@@ -5091,6 +5096,15 @@ export async function boot(): Promise<void> {
         run: () => void openPath(r.path, undefined, r.isDir),
       });
     }
+    // 子菜单尾部的清理入口（2026-11-16 用户反馈）：与侧栏「清空」同确认口径。
+    reg.add({
+      id: 'file.recentClear', label: 'menu.recentClear', group: 'file',
+      run: () => {
+        void dlgConfirm($t('rec.clearConfirm')).then(ok => {
+          if (ok) void recentClear().then(() => void refreshRecents());
+        });
+      },
+    });
   }
 
   // ---- 菜单（六个，001 规则 19；结构定义见模块级 buildMenus） ----
@@ -5528,12 +5542,18 @@ export async function boot(): Promise<void> {
       el.addEventListener('click', () => openExternalUrl(url));
       return el;
     };
+    // 2026-11-16 用户反馈：整个「版本 1.0.2」都可点（不只点数字）；构建 SHA 附解释提示。
     ver.append(
-      document.createTextNode($t('about.versionLabel') + ' '),
-      inline(version, 'https://github.com/sylx-c/ZiEdit/releases', $t('about.versionDlTip')),
+      inline($t('about.versionLabel') + ' ' + version, 'https://github.com/sylx-c/ZiEdit/releases', $t('about.versionDlTip')),
       document.createTextNode(' · '),
       inline(channel, 'https://github.com/sylx-c/ZiEdit', $t('about.channelHomeTip')),
-      document.createTextNode(' · ' + __GIT_SHA__),
+      document.createTextNode(' · '),
+      (() => {
+        const sha = document.createElement('span');
+        sha.textContent = __GIT_SHA__;
+        sha.title = $t('about.buildShaTip');
+        return sha;
+      })(),
     );
     const tag = document.createElement('div');
     tag.className = 'about-tag';
