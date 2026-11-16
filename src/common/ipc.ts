@@ -75,6 +75,8 @@ export interface FindOptions {
 
 export const listDir = (path: string) => invoke<DirEntry[]>('read_dir', { path });
 export const openFile = (path: string) => invoke<OpenedInfo>('open_file', { path });
+/** 未知扩展名条目的按批内容嗅探（文件树展开用）：返回与 paths 等长的二进制标记数组。 */
+export const contentBinary = (paths: string[]) => invoke<boolean[]>('content_binary', { paths });
 
 /** 轻量文件状态（001 规则 29 外部修改检测轮询） */
 export interface FileStatResult {

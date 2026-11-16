@@ -245,6 +245,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::read_dir,
             commands::open_file,
+            commands::content_binary,
             commands::file_stat,
             commands::default_image_dir,
             commands::clipboard_read_image,

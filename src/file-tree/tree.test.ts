@@ -18,7 +18,16 @@ vi.mock('../common/ipc', () => ({
             { name: 'c.zip', isDir: false, len: 9, route: 'text' as const, language: null, binary: true },
             { name: 'sub', isDir: true, len: 0, route: 'text' as const, language: null, binary: false },
           ]
-        : [],
+        : path.endsWith('mix')
+          ? [
+              { name: 'readme.txt', isDir: false, len: 4, route: 'text' as const, language: 'Text', binary: false },
+              { name: 'notes.nfo', isDir: false, len: 8, route: 'text' as const, language: null, binary: false },
+              { name: 'data.lkn', isDir: false, len: 1024, route: 'text' as const, language: null, binary: false },
+            ]
+          : [],
+  // 未知扩展名嗅探桩：.lkn 内容二进制、.nfo 是文本（与真实 detect 语义一致）
+  contentBinary: async (paths: string[]) => paths.map(p => p.endsWith('.lkn')),
+  fileStat: async () => ({ len: 0, modifiedMs: 0, isDir: false, readonly: false }),
 }));
 
 // @vitest-environment jsdom
@@ -58,6 +67,32 @@ describe('FileTree 多选（Ctrl+点击，验收缺陷 D4 回归）', () => {
     c.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
     const sel = onContextFile.mock.calls[0]?.[3] as string[] | undefined;
     expect(sel).toEqual(['C:\\ws\\b.txt', 'C:\\ws\\c.txt']); // 末两个，非前两个
+    host.remove();
+  });
+});
+
+describe('FileTree 未知扩展名内容嗅探（.lkn 类：树里显示但打开是乱码，2026-11-16）', () => {
+  const roots: TreeRoot[] = [{ path: 'C:\\mix', label: 'mix' }];
+  const noop = () => {};
+  const rowNames = (host: HTMLElement) => [...host.querySelectorAll('.tr-name')].map(n => n.textContent);
+
+  it('默认隐藏嗅探为二进制的未知扩展名，保留文本未知扩展名与已知扩展名', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const tree = new FileTree(host, roots, { onOpenFile: noop }, { expandRoots: true });
+    await tree.render();
+    await new Promise(r => setTimeout(r, 0)); // 展开子目录的嗅探异步完成
+    expect(rowNames(host)).toEqual(['mix', 'readme.txt', 'notes.nfo']); // data.lkn 被隐藏
+    host.remove();
+  });
+
+  it('fileTreeShowAll 开启时不嗅探、全量展示', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const tree = new FileTree(host, roots, { onOpenFile: noop }, { expandRoots: true, showAllFiles: true });
+    await tree.render();
+    await new Promise(r => setTimeout(r, 0));
+    expect(rowNames(host)).toEqual(['mix', 'readme.txt', 'notes.nfo', 'data.lkn']);
     host.remove();
   });
 });

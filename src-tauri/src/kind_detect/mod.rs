@@ -368,6 +368,21 @@ mod tests {
     }
 
     #[test]
+    fn sniff_periodic_sparse_nul_binary() {
+        // .lkn 类周期性二进制（2026-11-16 用户反馈）：每 6 字节一个 NUL、控制字符占比 50%。
+        // 修前 utf16_without_bom 启发式把它误认无 BOM UTF-16，控制占比检查被短路、判为文本
+        // （树上显示、打开乱码）；收紧启发式（控制码元 >10% 拒绝）后正确判二进制。
+        let mut buf = Vec::new();
+        for _ in 0..300 {
+            buf.extend_from_slice(&[0x4C, 0x4B, 0x4E, 0x01, 0x00, 0x02]);
+        }
+        let p = touch("periodic.lkn", &buf);
+        let k = detect(&p).unwrap();
+        assert_eq!(k.route, ViewRoute::Text);
+        assert!(k.binary);
+    }
+
+    #[test]
     fn sniff_zip_and_control_ratio() {
         for name in ["container.unknown", "document.odt", "book.epub"] {
             assert!(

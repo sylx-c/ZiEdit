@@ -228,7 +228,18 @@ pub(crate) fn utf16_without_bom(bytes: &[u8]) -> Option<&'static Encoding> {
                 .iter()
                 .all(|range| !signal(range.clone(), 1 - side));
         if uniform && !enc.decode_without_bom_handling(bytes).1 {
-            return Some(enc);
+            // 文本判据（2026-11-16，.lkn 类二进制误判修复）：解出的码元几乎不含控制字符。
+            // 周期性二进制（如每 3 字节一个 NUL 的结构）能凑齐奇偶/半段一致性并整体可解码，
+            // 但“文本”里三分之一是控制码元——真实文本不存在这种形态；据此拒绝，控制字符
+            // 占比检查（kind_detect）得以对这类内容生效。控制集与 detect 同口径（不含 \t\n\r）。
+            let (text, _) = enc.decode_without_bom_handling(bytes);
+            let controls = text
+                .chars()
+                .filter(|c| matches!(*c as u32, 0x00..=0x08 | 0x0E..=0x1F))
+                .count();
+            if controls * 10 <= text.chars().count() {
+                return Some(enc);
+            }
         }
     }
     None
@@ -621,6 +632,13 @@ mod tests {
         assert!(utf16_without_bom(&[0; 32]).is_none());
         assert!(utf16_without_bom(b"hello\0world").is_none());
         assert_eq!(from_heuristic("纯中文测试".as_bytes(), None).name, "UTF-8");
+        // 控制码元占比 >10% 的周期性二进制不是文本：奇偶/半段一致且可解码也会被拒绝
+        // （2026-11-16 .lkn 误判修复——否则 kind_detect 的控制字符占比检查被短路）。
+        let mut periodic = Vec::new();
+        for _ in 0..300 {
+            periodic.extend_from_slice(&[0x4C, 0x4B, 0x4E, 0x01, 0x00, 0x02]);
+        }
+        assert!(utf16_without_bom(&periodic).is_none());
     }
 
     #[test]

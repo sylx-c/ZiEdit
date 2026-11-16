@@ -1,7 +1,7 @@
 // 文件树 —— 懒加载目录树（001 子 PRD：目录优先排序，点击文件回调打开）
 // 001 v0.9：目录跟随（规则 25）——reveal 逐级展开定位；无本地根时空态
 // 换肤批：行结构按定稿 demo（.tr / .tr-group / .tr-children 参考线，kind 色图标）
-import { listDir, fileStat, type DirEntry } from '../common/ipc';
+import { listDir, fileStat, contentBinary, type DirEntry } from '../common/ipc';
 import { t, tf } from '../common/i18n';
 
 export interface TreeActions {
@@ -435,6 +435,18 @@ export class FileTree {
     }
     if (gen !== this.renderGen) return; // 弃置迟到行：挂到游离锚点会以影子行污染 allRows，setActive/reveal 的 find 会命中不可见行
     if (entries === 'loading' || entries === 'error') return;
+    // 未知扩展名（text 路由且无语言标记且未判二进制）按批内容嗅探（2026-11-16 用户反馈
+    // .lkn：内容二进制但不在已知二进制扩展名表——树上显示、打开是乱码，没有展示意义）。
+    // 嗅探结果写回缓存条目，与已知二进制同口径由下方过滤统一隐藏；fileTreeShowAll 仍全量
+    // 展示。已知扩展名不嗅探，目录列表免 I/O 的性能约定不变；嗅探失败按保持显示回退。
+    const unknown = entries.filter(e => !e.isDir && !e.binary && e.language === null && e.route === 'text');
+    if (unknown.length && !this.showAllFiles) {
+      try {
+        const results = await contentBinary(unknown.map(e => this.nodePath(key, e.name)));
+        unknown.forEach((e, i) => { if (results[i]) e.binary = true; });
+      } catch { /* 嗅探失败（权限/设备路径等）：保持显示，不阻塞树 */ }
+      if (gen !== this.renderGen) return;
+    }
     const frag = document.createDocumentFragment();
     for (const e of entries) {
       // 默认隐藏已知二进制条目（exe/dll/压缩包/音视频等）：判定来自后端 detect_fast 免嗅探标记，

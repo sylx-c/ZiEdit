@@ -9,7 +9,7 @@ pub mod s3;
 pub mod text;
 
 use crate::error::ZiEditError;
-use crate::kind_detect::{ViewRoute, detect, detect_fast};
+use crate::kind_detect::{ViewRoute, detect, detect_cached, detect_fast};
 use crate::store;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -285,6 +285,29 @@ pub async fn open_file(path: String) -> Result<OpenedInfo, ZiEditError> {
             readonly: meta.permissions().readonly(),
             binary: kind.binary,
         })
+    })
+    .await
+    .map_err(|e| ZiEditError::Msg(e.to_string()))?
+}
+
+/// 未知扩展名条目的按批内容嗅探（文件树展开时用，2026-11-16）：完整识别（首 4KB——
+/// ZIP 头/连续 NUL/控制字符占比），返回与入参等长的二进制标记。detect_cached 进程内
+/// 缓存，同批重复嗅探零 I/O。已知扩展名不调用本命令——目录列表仍以 detect_fast 免嗅探
+/// 标记过滤（不增加目录扫描开销的性能约定不变）；本命令只补「未知扩展名默认当文本显示、
+/// 打开却是乱码」的缝（用户反馈 .lkn：内容二进制但不在已知二进制扩展名表）。
+/// 任一路径非法即整批失败（调用方按保持显示回退）。
+#[tauri::command]
+pub async fn content_binary(paths: Vec<String>) -> Result<Vec<bool>, ZiEditError> {
+    tauri::async_runtime::spawn_blocking(move || {
+        paths
+            .iter()
+            .map(|path| {
+                crate::paths::reject_device_path(path)?;
+                let kind = detect_cached(std::path::Path::new(path))
+                    .map_err(|e| ZiEditError::ctx("Detection failed", e))?;
+                Ok(kind.binary)
+            })
+            .collect::<Result<Vec<_>, ZiEditError>>()
     })
     .await
     .map_err(|e| ZiEditError::Msg(e.to_string()))?
