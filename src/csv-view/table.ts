@@ -36,12 +36,13 @@ export const csvRecordProvider: TableRecordProvider = {
   firstRowHeader: true,
   records: (path, from, to, delim, encoding) => ipc.csvRecords(path, from, to, delim, encoding),
 };
-export function xlsxRecordProvider(sheet = 0): TableRecordProvider {
+/** xlsx 家族记录源（批 2：formulas 开关——true 时有公式的格显示 "=公式"） */
+export function xlsxRecordProvider(sheet = 0, formulas = false): TableRecordProvider {
   return {
     supportsDelimiter: false,
     supportsSource: false,
     firstRowHeader: false,
-    records: async (path, from, to) => ({ ...await ipc.xlsxRecords(path, sheet, from, to), delimiter: '' }),
+    records: async (path, from, to) => ({ ...await ipc.xlsxRecords(path, sheet, from, to, formulas), delimiter: '' }),
   };
 }
 

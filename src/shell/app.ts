@@ -2560,18 +2560,32 @@ export async function boot(): Promise<void> {
         }, csvDelimiters.get(tab.path), workbook ? xlsxRecordProvider(0) : undefined);
         await csv.mount();
         if (workbook) {
+          // 批 2：sheet 切换 + 公式开关共用重挂路径（formulas 透传 xlsxRecordProvider）
+          let formulas = false;
+          const remount = (sheet: number): void => {
+            if (stale()) return;
+            csv.destroy();
+            csv = new CsvView(csvHost, tab.path, '', () => void 0, undefined, xlsxRecordProvider(sheet, formulas));
+            currentView = csv;
+            csv.setFontSize(settings.fontSize ?? 12);
+            void csv.mount().then(() => installSheets(sheet)).catch(err => flash(String(err)));
+          };
           const installSheets = (sheet: number): void => {
             if (stale()) return;
+            const bar = csvHost.querySelector('.csv-bar');
+            if (!bar) return;
             const button = document.createElement('button');
             button.textContent = workbook.sheets[sheet]?.name ?? '';
-            button.addEventListener('click', e => menu(workbook.sheets.map((s, index): CtxMenuItem => [s.name, () => {
-              csv.destroy();
-              csv = new CsvView(csvHost, tab.path, '', () => void 0, undefined, xlsxRecordProvider(index));
-              currentView = csv;
-              csv.setFontSize(settings.fontSize ?? 12);
-              void csv.mount().then(() => installSheets(index)).catch(err => flash(String(err)));
-            }]), e.clientX, e.clientY));
-            csvHost.querySelector('.csv-bar')?.appendChild(button);
+            button.addEventListener('click', e => menu(workbook.sheets.map((s, index): CtxMenuItem => [s.name, () => remount(index)]), e.clientX, e.clientY));
+            const fbtn = document.createElement('button');
+            fbtn.textContent = $t('csv.formulaToggle');
+            fbtn.classList.toggle('on', formulas);
+            fbtn.title = $t('csv.formulaToggleTitle');
+            fbtn.addEventListener('click', () => {
+              formulas = !formulas;
+              remount(sheet);
+            });
+            bar.append(button, fbtn);
           };
           installSheets(0);
         }

@@ -81,7 +81,7 @@ manifest 的 `licenseFiles` 路径相对于 `public/renderers/`；没有随包�
 
 生成方式：`node scripts/gen-rust-notices.mjs`（执行 `cargo metadata --format-version 1 --locked`，不修改锁文件）。
 
-直接依赖（含构建依赖）：`arboard`、`chardetng`、`crc32fast`、`encoding_rs`、`imagesize`、`log`、`md-5`、`quick-xml`、`regex`、`reqwest`、`serde`、`serde_json`、`sha1`、`sha2`、`similar`、`tauri`、`tauri-build`、`tauri-plugin-clipboard-manager`、`tauri-plugin-dialog`、`tauri-plugin-log`、`tauri-plugin-opener`、`tauri-plugin-single-instance`、`thiserror`、`trash`、`unicode-normalization`、`windows-sys`、`zip`。
+直接依赖（含构建依赖）：`arboard`、`calamine`、`chardetng`、`crc32fast`、`encoding_rs`、`imagesize`、`log`、`md-5`、`ooxml-numfmt`、`quick-xml`、`regex`、`reqwest`、`serde`、`serde_json`、`sha1`、`sha2`、`similar`、`tauri`、`tauri-build`、`tauri-plugin-clipboard-manager`、`tauri-plugin-dialog`、`tauri-plugin-log`、`tauri-plugin-opener`、`tauri-plugin-single-instance`、`thiserror`、`trash`、`unicode-normalization`、`windows-sys`、`zip`。
 
 EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendored 清单及随附许可。
 
@@ -103,6 +103,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - similar 2.7.0
 - sync_wrapper 1.0.2
 - tao 0.37.1
+- zopfli 0.8.4
 
 ### Apache-2.0 / MIT
 
@@ -141,6 +142,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - blocking 1.7.0
 - cargo_toml 1.0.1
 - chardetng 0.1.17
+- codepage 0.1.3
 - concurrent-queue 2.5.0
 - ctor 1.0.13
 - equivalent 1.0.2
@@ -257,6 +259,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - bytes 1.12.1
 - cairo-rs 0.18.5
 - cairo-sys-rs 0.18.2
+- calamine 0.38.0
 - cargo_metadata 0.19.2
 - cfb 0.14.0
 - cfg_aliases 0.2.2
@@ -304,6 +307,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - javascriptcore-rs 1.1.2
 - javascriptcore-rs-sys 1.1.1
 - libredox 0.1.25
+- lru 0.16.4
 - memoffset 0.9.1
 - mio 1.2.4
 - new_debug_unreachable 1.0.6
@@ -387,6 +391,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 
 ### MIT OR Apache-2.0
 
+- allocator-api2 0.2.21
 - android_log-sys 0.3.2
 - android_logger 0.15.1
 - android_system_properties 0.1.6
@@ -395,6 +400,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - async-broadcast 0.7.2
 - async-recursion 1.2.0
 - async-trait 0.1.92
+- atoi_simd 0.18.1
 - base64 0.21.7
 - base64 0.22.1
 - base64 0.23.1
@@ -420,6 +426,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - crossbeam-channel 0.5.17
 - crossbeam-utils 0.8.23
 - crypto-common 0.1.7
+- debug_unsafe 0.1.4
 - defmt 1.1.1
 - defmt-macros 1.1.1
 - defmt-parser 1.0.0
@@ -436,6 +443,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - env_filter 0.1.4
 - erased-serde 0.4.10
 - errno 0.3.14
+- fast-float2 0.2.4
 - fdeflate 0.3.7
 - field-offset 0.3.6
 - find-msvc-tools 0.1.14
@@ -457,6 +465,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - half 2.7.1
 - hashbrown 0.12.3
 - hashbrown 0.15.5
+- hashbrown 0.16.1
 - hashbrown 0.17.1
 - heck 0.4.1
 - heck 0.5.0
@@ -490,6 +499,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - num-conv 0.2.2
 - num-traits 0.2.19
 - once_cell 1.21.4
+- ooxml-numfmt 0.2.3
 - ordered-stream 0.2.0
 - parking_lot 0.12.5
 - parking_lot_core 0.9.12

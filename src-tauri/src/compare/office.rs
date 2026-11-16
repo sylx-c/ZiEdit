@@ -16,14 +16,16 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::ooxml::xlsx;
 
-/// 可投影对比的 Office 扩展名路由（批 1：docx/xlsx；后续批次扩 xls/ods/xlsm 等）
+/// 可投影对比的 Office 扩展名路由（批 1：docx/xlsx；批 2 扩全家族）
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OfficeKind {
     Docx,
     Xlsx,
 }
 
-/// 扩展名 → 投影类别；None = 走既有文本/二进制路径（行为零变化）
+/// 扩展名 → 投影类别；None = 走既有文本/二进制路径（行为零变化）。
+/// 批 2：Word 家族（docx/docm/dotx/dotm/odt）→ Docx；Excel 家族 + ODF 电子表格
+/// （xlsx/xlsm/xltx/xltm/xlam/xls/xlsb/ods）→ Xlsx（显示值口径）。
 pub fn office_kind(path: &Path) -> Option<OfficeKind> {
     match path
         .extension()
@@ -31,8 +33,10 @@ pub fn office_kind(path: &Path) -> Option<OfficeKind> {
         .map(str::to_ascii_lowercase)
         .as_deref()
     {
-        Some("docx") => Some(OfficeKind::Docx),
-        Some("xlsx") => Some(OfficeKind::Xlsx),
+        Some("docx" | "docm" | "dotx" | "dotm" | "odt") => Some(OfficeKind::Docx),
+        Some("xlsx" | "xlsm" | "xltx" | "xltm" | "xlam" | "xls" | "xlsb" | "ods") => {
+            Some(OfficeKind::Xlsx)
+        }
         _ => None,
     }
 }
@@ -62,53 +66,97 @@ const SHEET_PREFIX: &str = "\u{25C7} Sheet: ";
 /// xlsx 值投影：每 sheet 一行头 + 数据行（tab 连接，列位置即格位置）。
 /// - 空行投影为空字符串：稀疏行占位，插入/删除行由 Myers 对齐吸收；
 /// - 行尾空格串保留（`a\t` ≠ `a`）：单元格清空是真实差异；
-/// - sheet 名同样字面量化（防御理论上的控制字符）。
+/// - sheet 名同样字面量化（防御理论上的控制字符）；
+/// - 批 2：records 已是显示值口径（calamine + ooxml-numfmt），对比=所见。
 pub fn project_xlsx(book: &xlsx::Workbook) -> Vec<String> {
+    project_xlsx_mode(book, false)
+}
+
+/// 公式投影（批 2）：有公式的格投影公式原文（不带 = 前缀——投影要稳定可 diff，
+/// 前缀是查看层约定），其余格仍为显示值；行结构/sheet 头与值投影完全一致
+/// （同一文件两种投影行数相同，切换开关不改变对齐块坐标语义）。
+pub fn project_xlsx_formula(book: &xlsx::Workbook) -> Vec<String> {
+    project_xlsx_mode(book, true)
+}
+
+fn project_xlsx_mode(book: &xlsx::Workbook, formula: bool) -> Vec<String> {
     let mut lines = Vec::new();
     for sheet in &book.sheets {
         lines.push(format!("{SHEET_PREFIX}{}", sanitize_cell(&sheet.name)));
-        for row in &sheet.records {
+        // 公式查找：稀疏表按 (行,列) 有序 → 行游标单调推进 + 行内顺序查找
+        let mut fidx = 0usize;
+        for (ri, row) in sheet.records.iter().enumerate() {
             if row.is_empty() {
                 lines.push(String::new());
-            } else {
+                continue;
+            }
+            // 推进公式游标到当前行（跳过更早行）
+            while fidx < sheet.formulas.len() && (sheet.formulas[fidx].0 as usize) < ri {
+                fidx += 1;
+            }
+            if !formula {
                 lines.push(
                     row.iter()
                         .map(|c| sanitize_cell(c))
                         .collect::<Vec<_>>()
                         .join("\t"),
                 );
+                continue;
             }
+            let mut out = String::new();
+            for (ci, cell) in row.iter().enumerate() {
+                if ci > 0 {
+                    out.push('\t');
+                }
+                // 行内从游标起找 (ri, ci)（同行的公式连续存放）
+                let mut k = fidx;
+                let text = loop {
+                    if k >= sheet.formulas.len() || sheet.formulas[k].0 as usize > ri {
+                        break cell.as_str();
+                    }
+                    if sheet.formulas[k].1 as usize == ci {
+                        break sheet.formulas[k].2.as_str();
+                    }
+                    k += 1;
+                };
+                out.push_str(&sanitize_cell(text));
+            }
+            lines.push(out);
         }
     }
     lines
 }
 
-/// xlsx 投影缓存：`(path, len, mtime)` LRU（容量 4，照 compare::mod 的 nl_index_cache 模式）。
-/// office_window/office_side 每次窗口取行都要把注册表命中的 workbook 重新 join 成投影行
-/// （20 万行级每次全量 join 有感知），缓存后命中 O(1) 克隆 Arc；外部修改按键自动失效
-/// ——与 OoxmlRegistry（len/mtime 失效）同一语义，投影与 workbook 不会错版本。
-fn xlsx_projection_cache()
--> &'static Mutex<crate::encoding::ProbeLru<crate::encoding::ProbeKey, Arc<Vec<String>>>> {
-    static CACHE: OnceLock<
-        Mutex<crate::encoding::ProbeLru<crate::encoding::ProbeKey, Arc<Vec<String>>>>,
-    > = OnceLock::new();
-    CACHE.get_or_init(|| Mutex::new(crate::encoding::ProbeLru::new(4)))
+/// xlsx 投影缓存：`(path, len, mtime)` + 投影模式（值/公式）LRU（容量 4×2，照
+/// compare::mod 的 nl_index_cache 模式）。office_window/office_side 每次窗口取行都要把
+/// 注册表命中的 workbook 重新 join 成投影行（20 万行级每次全量 join 有感知），缓存后
+/// 命中 O(1) 克隆 Arc；外部修改按键自动失效——与 OoxmlRegistry（len/mtime 失效）
+/// 同一语义，投影与 workbook 不会错版本。
+type ProjectionCache =
+    crate::encoding::ProbeLru<(crate::encoding::ProbeKey, bool), Arc<Vec<String>>>;
+fn xlsx_projection_cache() -> &'static Mutex<ProjectionCache> {
+    static CACHE: OnceLock<Mutex<ProjectionCache>> = OnceLock::new();
+    CACHE.get_or_init(|| Mutex::new(crate::encoding::ProbeLru::new(8)))
 }
 
-/// 缓存版投影（批 1 收尾性能项）：stat 失败（文件被并发删除等理论情形）时不缓存、
-/// 直接投影返回，取行路径行为不回退。
-pub fn project_xlsx_cached(path: &Path, book: &xlsx::Workbook) -> Arc<Vec<String>> {
-    let key = match crate::encoding::probe_key(path) {
-        Ok(k) => k,
-        Err(_) => return Arc::new(project_xlsx(book)),
-    };
-    if let Ok(mut cache) = xlsx_projection_cache().lock()
-        && let Some(hit) = cache.get(&key)
+/// 缓存版投影（批 1 收尾性能项 / 批 2 加公式模式）：stat 失败（文件被并发删除等
+/// 理论情形）时不缓存、直接投影返回，取行路径行为不回退。
+pub fn project_xlsx_cached(path: &Path, book: &xlsx::Workbook, formula: bool) -> Arc<Vec<String>> {
+    let key = crate::encoding::probe_key(path).ok().map(|k| (k, formula));
+    if let Some(key) = &key
+        && let Ok(mut cache) = xlsx_projection_cache().lock()
+        && let Some(hit) = cache.get(key)
     {
         return hit.clone();
     }
-    let projection = Arc::new(project_xlsx(book));
-    if let Ok(mut cache) = xlsx_projection_cache().lock() {
+    let projection = Arc::new(if formula {
+        project_xlsx_formula(book)
+    } else {
+        project_xlsx(book)
+    });
+    if let Some(key) = key
+        && let Ok(mut cache) = xlsx_projection_cache().lock()
+    {
         cache.put(key, projection.clone());
     }
     projection
@@ -123,9 +171,27 @@ mod tests {
     fn kind_routing_by_extension() {
         assert_eq!(office_kind(Path::new("a.DOCX")), Some(OfficeKind::Docx));
         assert_eq!(office_kind(Path::new("b.Xlsx")), Some(OfficeKind::Xlsx));
-        assert_eq!(office_kind(Path::new("c.doc")), None);
-        assert_eq!(office_kind(Path::new("d.xls")), None);
-        assert_eq!(office_kind(Path::new("e.txt")), None);
+        // 批 2 全家族：Word 家族（含 odt 文本管线）与 Excel 家族（含 ods 电子表格）
+        for name in ["c.docm", "d.dotx", "e.dotm", "f.odt"] {
+            assert_eq!(
+                office_kind(Path::new(name)),
+                Some(OfficeKind::Docx),
+                "{name}"
+            );
+        }
+        for name in [
+            "g.xls", "h.xlsb", "i.xlsm", "j.xltm", "k.xltx", "l.xlam", "m.ods",
+        ] {
+            assert_eq!(
+                office_kind(Path::new(name)),
+                Some(OfficeKind::Xlsx),
+                "{name}"
+            );
+        }
+        // 旧格式与未知：仍走既有路径（.doc/.ppt spike 未决）
+        assert_eq!(office_kind(Path::new("n.doc")), None);
+        assert_eq!(office_kind(Path::new("o.ppt")), None);
+        assert_eq!(office_kind(Path::new("p.txt")), None);
         assert_eq!(office_kind(Path::new("noext")), None);
     }
 
@@ -143,6 +209,7 @@ mod tests {
     #[test]
     fn xlsx_projection_structure_and_alignment() {
         let book = xlsx::Workbook {
+            is_1904: false,
             sheets: vec![
                 Sheet {
                     name: "S1".into(),
@@ -152,10 +219,14 @@ mod tests {
                         Vec::new(),                  // 稀疏空行占位
                         vec!["x".into(), "".into()], // 尾格清空保留列位
                     ],
+                    formulas: Vec::new(),
+                    merges: Vec::new(),
                 },
                 Sheet {
                     name: "Empty".into(),
                     records: Vec::new(),
+                    formulas: Vec::new(),
+                    merges: Vec::new(),
                 },
             ],
         };
@@ -179,9 +250,12 @@ mod tests {
     fn cell_literals_keep_projection_single_line() {
         assert_eq!(sanitize_cell("a\tb\nc\rd"), "a\u{21E5}b\u{23CE}c\u{23CE}d");
         let lines = project_xlsx(&xlsx::Workbook {
+            is_1904: false,
             sheets: vec![Sheet {
                 name: "N".into(),
                 records: vec![vec!["multi\nline\tcell".into()]],
+                formulas: Vec::new(),
+                merges: Vec::new(),
             }],
         });
         assert_eq!(
@@ -199,22 +273,32 @@ mod tests {
         let p = dir.join("cache-v1.xlsx");
         std::fs::write(&p, []).unwrap();
         let mk_book = |tag: &str| xlsx::Workbook {
+            is_1904: false,
             sheets: vec![Sheet {
                 name: "S".into(),
                 records: vec![vec![tag.into()]],
+                formulas: vec![(0, 0, "F1".into())],
+                merges: Vec::new(),
             }],
         };
-        let v1 = project_xlsx_cached(&p, &mk_book("v1"));
+        let v1 = project_xlsx_cached(&p, &mk_book("v1"), false);
         // 命中：同键返回同一 Arc
-        let hit = project_xlsx_cached(&p, &mk_book("ignored"));
+        let hit = project_xlsx_cached(&p, &mk_book("ignored"), false);
         assert!(Arc::ptr_eq(&v1, &hit), "同键命中缓存，不重投影");
         assert_eq!(*hit, vec!["\u{25C7} Sheet: S", "v1"]);
-        // 外部修改：len/mtime 变 → 失效重投影
+        // 公式模式独立分键：不与值投影互相覆盖
+        let f1 = project_xlsx_cached(&p, &mk_book("ignored"), true);
+        assert_eq!(*f1, vec!["\u{25C7} Sheet: S", "F1"]);
+        let f1b = project_xlsx_cached(&p, &mk_book("ignored"), true);
+        assert!(Arc::ptr_eq(&f1, &f1b), "公式模式同样命中缓存");
+        // 外部修改：len/mtime 变 → 失效重投影（两种模式一并失效）
         std::thread::sleep(std::time::Duration::from_millis(10));
         std::fs::write(&p, [0u8; 8]).unwrap();
-        let v2 = project_xlsx_cached(&p, &mk_book("v2"));
+        let v2 = project_xlsx_cached(&p, &mk_book("v2"), false);
         assert_eq!(*v2, vec!["\u{25C7} Sheet: S", "v2"]);
         assert!(!Arc::ptr_eq(&v1, &v2));
+        let f2 = project_xlsx_cached(&p, &mk_book("v2"), true);
+        assert_eq!(*f2, vec!["\u{25C7} Sheet: S", "F1"], "公式文本来自新 book");
         let _ = std::fs::remove_file(&p);
     }
 }

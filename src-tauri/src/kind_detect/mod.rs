@@ -32,9 +32,11 @@ const NUL_RUN_LIMIT: usize = 64;
 fn language_of(ext: &str) -> Option<&'static str> {
     Some(match ext {
         "json" | "jsonc" => "JSON",
-        "docx" => "Docx",
+        // Office 家族扩展（批 2）：Word 家族走 Docx 文本管线（odt 读 content.xml），
+        // Excel 家族 + ODF 电子表格走 Xlsx 显示值管线（calamine/自有 ODS 解析）
+        "docx" | "docm" | "dotx" | "dotm" | "odt" => "Docx",
         "pdf" => "Pdf",
-        "xlsx" => "Xlsx",
+        "xlsx" | "xlsm" | "xltx" | "xltm" | "xlam" | "xls" | "xlsb" | "ods" => "Xlsx",
         "js" | "mjs" | "cjs" | "jsx" => "JavaScript",
         "ts" | "tsx" => "TypeScript",
         "md" | "markdown" => "Markdown",
@@ -102,7 +104,6 @@ fn is_binary_ext(ext: &str) -> bool {
             | "ogg"
             | "wav"
             | "doc"
-            | "xls"
             | "ppt"
             | "pptx"
             | "jar"
@@ -384,13 +385,17 @@ mod tests {
 
     #[test]
     fn sniff_zip_and_control_ratio() {
-        for name in ["container.unknown", "document.odt", "book.epub"] {
+        // 批 2：odt 已路由 Docx 文本管线（不再是未知 ZIP 二进制）
+        for name in ["container.unknown", "book.epub"] {
             assert!(
                 detect(&touch(name, b"PK\x03\x04zip payload"))
                     .unwrap()
                     .binary
             );
         }
+        let odt = detect(&touch("document.odt", b"PK\x03\x04zip payload")).unwrap();
+        assert_eq!(odt.language, Some("Docx"));
+        assert!(!odt.binary);
         assert_eq!(
             detect(&touch("control-boundary", b"abcdefghi\x01"))
                 .unwrap()

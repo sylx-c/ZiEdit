@@ -240,10 +240,14 @@ pub async fn xlsx_records(
     sheet: usize,
     from: u64,
     to: u64,
+    // 公式显示开关（批 2）：true = 有公式的格显示 "=公式"（Excel 编辑栏口径）。
+    // 可选参数向后兼容——既有调用不传即显示值。
+    formulas: Option<bool>,
 ) -> Result<xlsx::RecordsResult, ZiEditError> {
+    let formulas = formulas.unwrap_or(false);
     tauri::async_runtime::spawn_blocking(move || {
         let registry = app.state::<OoxmlRegistry>();
-        xlsx_records_impl(&registry, &path, sheet, from, to)
+        xlsx_records_impl(&registry, &path, sheet, from, to, formulas)
     })
     .await
     .map_err(|e| ZiEditError::Msg(e.to_string()))?
@@ -255,36 +259,36 @@ fn xlsx_records_impl(
     sheet: usize,
     from: u64,
     to: u64,
+    formulas: bool,
 ) -> Result<xlsx::RecordsResult, ZiEditError> {
-    let range = ooxml::window(from, to).map_err(ZiEditError::Msg)?;
     let book = load(registry, path, 1)?;
     let Content::Xlsx(book) = &*book else {
         unreachable!()
     };
-    let rows = &book
+    let target = book
         .sheets
         .get(sheet)
-        .ok_or_else(|| ZiEditError::Msg("XLSX_SHEET_NOT_FOUND:zero-based".into()))?
-        .records;
-    let mut records = Vec::new();
+        .ok_or_else(|| ZiEditError::Msg("XLSX_SHEET_NOT_FOUND:zero-based".into()))?;
+    let rows = &target.records;
+    let mut records = xlsx::window_records(target, from, to, formulas).map_err(ZiEditError::Msg)?;
+    // 窗口字节护栏（与 document_lines 同口径：4MiB/窗，超限截断窗口如实告知条数）
     let mut bytes = 0;
-    for i in range.take_while(|i| *i < rows.len()) {
-        let size: usize = rows[i].iter().map(String::len).sum();
+    let mut cut = records.len();
+    for (i, r) in records.iter().enumerate() {
+        let size: usize = r.cells.iter().map(String::len).sum();
         if size > ooxml::WINDOW_BYTES {
             return Err(ZiEditError::Msg("XLSX_RECORD_LIMIT:4MiB".into()));
         }
         if bytes + size > ooxml::WINDOW_BYTES {
+            cut = i;
             break;
         }
         bytes += size;
-        records.push(super::csv::CsvRecord {
-            no: (i + 1) as u64,
-            cells: rows[i].clone(),
-        });
     }
+    records.truncate(cut);
     Ok(xlsx::RecordsResult {
-        records,
         total: rows.len(),
+        records,
     })
 }
 #[tauri::command]

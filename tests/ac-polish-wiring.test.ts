@@ -25,7 +25,11 @@ describe('打磨接线', () => {
     expect(provider.supportsSource).toBe(false);
     expect(provider.supportsDelimiter).toBe(false);
     expect((await provider.records('a.xlsx', 1, 40, '', '')).records[0].cells).toEqual(['值']);
-    expect(invoke).toHaveBeenCalledWith('xlsx_records', { path: 'a.xlsx', sheet: 1, from: 1, to: 40 });
+    // 批 2：formulas 开关（provider 显式布尔 → 后端按显示值/公式取数）
+    expect(invoke).toHaveBeenCalledWith('xlsx_records', { path: 'a.xlsx', sheet: 1, from: 1, to: 40, formulas: false });
+    const fprovider = xlsxRecordProvider(1, true);
+    await fprovider.records('a.xlsx', 1, 40, '', '');
+    expect(invoke).toHaveBeenLastCalledWith('xlsx_records', { path: 'a.xlsx', sheet: 1, from: 1, to: 40, formulas: true });
     expect(text).toContain("pdfOpen : docxOpen)(this.path)");
     expect(text).toContain('docxLines(path, from, to)');
   });

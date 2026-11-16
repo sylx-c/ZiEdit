@@ -98,6 +98,8 @@ export class CompareView {
   private officeA: 'docx' | 'xlsx' | null = null;
   private officeB: 'docx' | 'xlsx' | null = null;
   private revisions = false;
+  /** xlsx 公式投影模式（批 2）：true 投影公式原文（对比口径切换，行结构不变） */
+  private formulaMode = false;
   private degraded = false;
   /** 当前差异序号（1-based；0=未定位/无差异） */
   private curDiff = 0;
@@ -121,10 +123,12 @@ export class CompareView {
     private host: HTMLElement,
     a: string,
     b: string,
-    private opts: { isReadOnly?: () => boolean; onClose: () => void; onStatus: (s: CompareStatus) => void; flash: (msg: string) => void; onJump?: (path: string, line: number) => void }
+    private opts: { isReadOnly?: () => boolean; onClose: () => void; onStatus: (s: CompareStatus) => void; flash: (msg: string) => void; onJump?: (path: string, line: number) => void },
+    formula = false
   ) {
     this.pathA = a;
     this.pathB = b;
+    this.formulaMode = formula;
     void this.init();
   }
 
@@ -136,7 +140,7 @@ export class CompareView {
     this.head.firstElementChild!.appendChild(cancel);
     let res: CmpOpenResult;
     try {
-      res = await compareOpen(this.pathA, this.pathB);
+      res = await compareOpen(this.pathA, this.pathB, this.formulaMode);
     } catch (err) {
       if (this.destroyed || generation !== this.generation) return;
       this.sizer.textContent = tf('cmp.openFail', String(err));
@@ -317,6 +321,18 @@ export class CompareView {
       const revBadge = mk('span', 'cmp-rev-badge', t('cmp.revisions'));
       revBadge.title = t('cmp.revisionsTitle');
       counts.appendChild(revBadge);
+    }
+    // 公式投影开关（批 2）：任一侧 xlsx 时可切换「显示值 / 公式」对比口径。
+    // 切换走整视图重建（投影行哈希/block 坐标全部随口径变化，增量更新无意义）。
+    if (this.officeA === 'xlsx' || this.officeB === 'xlsx') {
+      const fbtn = mk('button', 'cmp-btn' + (this.formulaMode ? ' on' : ''), t('cmp.formulaMode'));
+      fbtn.title = t('cmp.formulaModeTitle');
+      fbtn.addEventListener('click', () => {
+        this.destroy();
+        this.reloaded = new CompareView(this.host, this.pathA, this.pathB, this.opts, !this.formulaMode);
+        this.reloaded.setFontSize(this.fontSize);
+      });
+      counts.appendChild(fbtn);
     }
     headline.appendChild(counts);
     headline.appendChild(mk('span', 'tb-spacer'));
@@ -595,9 +611,10 @@ export class CompareView {
         return;
       }
       try {
-        // 投影对（批 1）：A 侧为 docx/xlsx 时相等块取行走 office_lines（同一分流口径）
+        // 投影对（批 1）：A 侧为 docx/xlsx 时相等块取行走 office_lines（同一分流口径；
+        // 批 2：公式模式同口径透传）
         const fetched = this.officeA
-          ? (await officeLines(this.pathA, blk.aStart, blk.aEnd)).lines
+          ? (await officeLines(this.pathA, blk.aStart, blk.aEnd, this.formulaMode)).lines
           : await textLines(this.pathA, blk.aStart, blk.aEnd);
         if (this.destroyed) return;
         const texts = fetched.map(l => l.text);
@@ -616,7 +633,7 @@ export class CompareView {
     }
     try {
       const [la, lb] = await compareDetail(
-        this.pathA, this.pathB, blk.aStart, blk.aEnd, blk.bStart, blk.bEnd
+        this.pathA, this.pathB, blk.aStart, blk.aEnd, blk.bStart, blk.bEnd, this.formulaMode
       );
       if (this.destroyed) return;
       this.detailCache.set(d.idx, [la, lb]);

@@ -283,16 +283,17 @@ export const csvRecords = (
 
 export interface DocxOpenResult { paraCount: number; totalChars: number; truncated: boolean }
 export interface DocxLinesResult { lines: TextLine[]; total: number }
-export interface XlsxOpenResult { sheets: { name: string; rows: number }[]; truncated: boolean }
+export interface XlsxOpenResult { sheets: { name: string; rows: number }[]; truncated: boolean; /** 1904 日期系统标志（批 2，旧后端可能缺省） */ is1904?: boolean }
 export interface XlsxRecordsResult { records: CsvRecord[]; total: number }
 export const docxOpen = (path: string) => invoke<DocxOpenResult>('docx_open', { path });
 export const pdfOpen = (path: string) => invoke<DocxOpenResult>('pdf_open', { path });
 export const pdfLines = (path: string, from: number, to: number) => invoke<DocxLinesResult>('pdf_lines', { path, from, to });
 export const docxLines = (path: string, from: number, to: number) => invoke<DocxLinesResult>('docx_lines', { path, from, to });
 export const xlsxOpen = (path: string) => invoke<XlsxOpenResult>('xlsx_open', { path });
-/** sheet is zero-based; record windows are one-based, inclusive. */
-export const xlsxRecords = (path: string, sheet: number, from: number, to: number) =>
-  invoke<XlsxRecordsResult>('xlsx_records', { path, sheet, from, to });
+/** sheet is zero-based; record windows are one-based, inclusive.
+ *  formulas（批 2）：true = 有公式的格显示 "=公式"（Excel 编辑栏口径）。 */
+export const xlsxRecords = (path: string, sheet: number, from: number, to: number, formulas?: boolean) =>
+  invoke<XlsxRecordsResult>('xlsx_records', { path, sheet, from, to, formulas: formulas ?? null });
 export const ooxmlClose = (path: string) => invoke<void>('ooxml_close', { path });
 
 // ---- 深度对比（008，ADR 010）----
@@ -349,15 +350,17 @@ export interface NormalizeOpts {
   fullToHalf: boolean;
 }
 
-export const compareOpen = (a: string, b: string) => invoke<CmpOpenResult>('compare_open', { a, b });
+/** formula（批 2）：xlsx 对投影公式原文而非显示值（对比口径切换，行结构不变） */
+export const compareOpen = (a: string, b: string, formula?: boolean) =>
+  invoke<CmpOpenResult>('compare_open', { a, b, formula: formula ?? null });
 export const compareDetail = (
-  a: string, b: string, aFrom: number, aTo: number, bFrom: number, bTo: number
-) => invoke<CmpDetailLine[][]>('compare_detail', { a, b, aFrom, aTo, bFrom, bTo });
+  a: string, b: string, aFrom: number, aTo: number, bFrom: number, bTo: number, formula?: boolean
+) => invoke<CmpDetailLine[][]>('compare_detail', { a, b, aFrom, aTo, bFrom, bTo, formula: formula ?? null });
 /** 对比视图相等块取行（批 1）：按 compare_open 同一分流取 Office 投影行窗口 */
 export interface OfficeLine { no: number; text: string }
 export interface OfficeLinesResult { lines: OfficeLine[]; total: number }
-export const officeLines = (path: string, from: number, to: number) =>
-  invoke<OfficeLinesResult>('office_lines', { path, from, to });
+export const officeLines = (path: string, from: number, to: number, formula?: boolean) =>
+  invoke<OfficeLinesResult>('office_lines', { path, from, to, formula: formula ?? null });
 export const normalizeSave = (src: string, dst: string, opts: NormalizeOpts, encodingName?: string) =>
   invoke<number>('normalize_save', { src, dst, opts, encodingName: encodingName ?? null });
 

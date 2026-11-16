@@ -303,6 +303,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | aho-corasick | 1.1.5 | all-targets-conservative-superset | Unlicense OR MIT | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | alloc-no-stdlib | 3.0.0 | all-targets-conservative-superset | BSD-3-Clause | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | alloc-stdlib | 0.3.0 | all-targets-conservative-superset | BSD-3-Clause | 1 | LOCAL_TEXT_COLLECTED |
+| cargo | allocator-api2 | 0.2.21 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | android_log-sys | 0.3.2 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | android_logger | 0.15.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | android_system_properties | 0.1.6 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
@@ -320,6 +321,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | async-trait | 0.1.92 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | atk-sys | 0.18.2 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | atk | 0.18.2 | all-targets-conservative-superset | MIT | 2 | LOCAL_TEXT_COLLECTED |
+| cargo | atoi_simd | 0.18.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | atomic-waker | 1.1.2 | all-targets-conservative-superset | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | autocfg | 1.5.1 | all-targets-conservative-superset | Apache-2.0 OR MIT | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | base64 | 0.21.7 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
@@ -343,6 +345,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | bytes | 1.12.1 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | cairo-rs | 0.18.5 | all-targets-conservative-superset | MIT | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | cairo-sys-rs | 0.18.2 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| cargo | calamine | 0.38.0 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | camino | 1.2.6 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | cargo-platform | 0.1.9 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | cargo_metadata | 0.19.2 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
@@ -357,6 +360,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | chardetng | 0.1.17 | all-targets-conservative-superset | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | chrono | 0.4.45 | all-targets-conservative-superset | MIT OR Apache-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | clipboard-win | 5.4.1 | all-targets-conservative-superset | BSL-1.0 | 1 | LOCAL_TEXT_COLLECTED |
+| cargo | codepage | 0.1.3 | all-targets-conservative-superset | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | combine | 4.6.8 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | concurrent-queue | 2.5.0 | all-targets-conservative-superset | Apache-2.0 OR MIT | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | constant_time_eq | 0.6.1 | all-targets-conservative-superset | CC0-1.0 OR MIT-0 OR Apache-2.0 | 3 | LOCAL_TEXT_COLLECTED |
@@ -380,6 +384,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | darling_core | 0.24.1 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | darling_macro | 0.24.1 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | dbus | 0.9.12 | all-targets-conservative-superset | Apache-2.0/MIT | 2 | LOCAL_TEXT_COLLECTED |
+| cargo | debug_unsafe | 0.1.4 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | defmt-macros | 1.1.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | defmt-parser | 1.0.0 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | defmt | 1.1.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
@@ -413,6 +418,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | error-code | 3.4.0 | all-targets-conservative-superset | BSL-1.0 | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | event-listener-strategy | 0.5.4 | all-targets-conservative-superset | Apache-2.0 OR MIT | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | event-listener | 5.4.2 | all-targets-conservative-superset | Apache-2.0 OR MIT | 2 | LOCAL_TEXT_COLLECTED |
+| cargo | fast-float2 | 0.2.4 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | fastrand | 2.5.0 | all-targets-conservative-superset | Apache-2.0 OR MIT | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | fax | 0.2.7 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | fdeflate | 0.3.7 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
@@ -462,6 +468,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | half | 2.7.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | hashbrown | 0.12.3 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | hashbrown | 0.15.5 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
+| cargo | hashbrown | 0.16.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | hashbrown | 0.17.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | heck | 0.4.1 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | heck | 0.5.0 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
@@ -524,6 +531,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | lock_api | 0.4.14 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | log | 0.4.34 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | lru-slab | 0.1.3 | all-targets-conservative-superset | MIT OR Apache-2.0 OR Zlib | 3 | LOCAL_TEXT_COLLECTED |
+| cargo | lru | 0.16.4 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | markup5ever | 0.39.0 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | md-5 | 0.10.6 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | memchr | 2.8.3 | all-targets-conservative-superset | Unlicense OR MIT | 3 | LOCAL_TEXT_COLLECTED |
@@ -564,6 +572,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | objc2-web-kit | 0.3.2 | all-targets-conservative-superset | Zlib OR Apache-2.0 OR MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | objc2 | 0.6.5 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | once_cell | 1.21.4 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
+| cargo | ooxml-numfmt | 0.2.3 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | open | 5.4.4 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | option-ext | 0.2.0 | all-targets-conservative-superset | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | ordered-stream | 0.2.0 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
@@ -852,6 +861,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | zip | 9.5.1 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | zlib-rs | 0.6.8 | all-targets-conservative-superset | Zlib | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | zmij | 1.0.23 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| cargo | zopfli | 0.8.4 | all-targets-conservative-superset | Apache-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | zune-core | 0.5.3 | all-targets-conservative-superset | MIT OR Apache-2.0 OR Zlib | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | zune-jpeg | 0.5.15 | all-targets-conservative-superset | MIT OR Apache-2.0 OR Zlib | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | zvariant | 5.15.0 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |

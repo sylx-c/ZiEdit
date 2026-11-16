@@ -55,6 +55,8 @@ arboard = "3"
 # default-features 关闭（不带默认 TLS/压缩/gzip），rustls-tls 供 https；客户端禁重定向、
 # 禁代理（例外边界：只访问用户配置地址，见 src/commands/s3.rs）
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+calamine = "0.38.0"
+ooxml-numfmt = "0.2.3"
 
 
 [target.'cfg(windows)'.dependencies]

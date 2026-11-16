@@ -43,9 +43,12 @@ describe('001-AC-14 菜单结构', () => {
     const es = entriesOf('menu.fileF');
     const recent = es.find(e => e.label === 'menu.recent');
     expect(recent?.children).toBeTruthy();
+    // 右键清理条目（2026-11-16 桌面化批次）：分隔后随附「清空最近列表」
     expect(recent!.children!().map(c => c.action)).toEqual([
       'file.recent:C:\\a\\b.md',
       'file.recent:C:\\a\\c.txt',
+      undefined, // 分隔条
+      'file.recentClear',
     ]);
     expect(allActions(es)).toContain('file.reload');
     // 命名会话收进「会话 ▸」：不再随数量平铺文件菜单

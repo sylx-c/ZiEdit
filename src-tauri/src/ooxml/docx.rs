@@ -28,6 +28,14 @@ impl Document {
     }
 }
 pub fn open(path: &str) -> Result<Document> {
+    // odt（ODF 文本文档）：读 content.xml 的 text:p/text:h 段落（批 2，quick-xml
+    // 管线复用）；无修订语义（ODF 变更跟踪不解析），revisions 恒 false。
+    let is_odf = std::path::Path::new(path)
+        .extension()
+        .is_some_and(|e| e.eq_ignore_ascii_case("odt"));
+    if is_odf {
+        return open_odf(path);
+    }
     let mut zip = package(path)?;
     let mut lines = Vec::new();
     let mut current = String::new();
@@ -99,6 +107,66 @@ pub fn open(path: &str) -> Result<Document> {
     })
 }
 
+/// ODF 文本文档（.odt）：content.xml 的 text:p / text:h 段落 → 行投影。
+/// text:tab → 制表符、text:line-break / text:s（空格串）按显示语义展开；
+/// 上限与 docx 同口径（10MiB 提取文本红线，显式哨兵）。
+fn open_odf(path: &str) -> Result<Document> {
+    let mut zip = package(path)?;
+    let mut lines = Vec::new();
+    let mut current = String::new();
+    let mut in_paragraph = false; // 段落文本模式（text:p/text:h 内）
+    let mut bytes = 0usize;
+    xml(&mut zip, "content.xml", 32 * 1024 * 1024, |event| {
+        match event {
+            Event::Start(e) | Event::Empty(e) => match e.local_name().as_ref() {
+                "p" | "h" => {
+                    in_paragraph = true;
+                    current.clear();
+                }
+                "tab" if in_paragraph => current.push('\t'),
+                "line-break" if in_paragraph => current.push('\n'),
+                "s" if in_paragraph => {
+                    // text:c 个空格（默认 1）
+                    let n: usize = attr(&e, "text:c")?
+                        .and_then(|v| v.parse().ok())
+                        .unwrap_or(1)
+                        .min(1000);
+                    for _ in 0..n {
+                        current.push(' ');
+                    }
+                }
+                // 命名空间内文本元素（office:text 等）不产出行
+                _ => {}
+            },
+            Event::Text(t) if in_paragraph => current
+                .push_str(&quick_xml::escape::unescape(t.as_ref()).map_err(|e| e.to_string())?),
+            Event::GeneralRef(t) if in_paragraph => {
+                current.push_str(&crate::ooxml::resolve_ref(t.as_ref())?)
+            }
+            Event::CData(t) if in_paragraph => current.push_str(t.as_ref()),
+            Event::End(e) => match e.local_name().as_ref() {
+                "p" | "h" => {
+                    in_paragraph = false;
+                    bytes += current.len() + std::mem::size_of::<String>();
+                    if bytes > TEXT_LIMIT {
+                        return Err("OOXML_TEXT_LIMIT:10MiB".into());
+                    }
+                    lines.push(std::mem::take(&mut current));
+                }
+                _ => {}
+            },
+            _ => {}
+        }
+        Ok(())
+    })?;
+    let total_chars = lines.iter().map(|s| s.chars().count()).sum();
+    Ok(Document {
+        lines,
+        total_chars,
+        revisions: false,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -112,6 +180,27 @@ mod tests {
             "paragraphs.docx",
         );
         assert_eq!(open(&p).unwrap().lines, ["A&B\tC\nD", "X\tY"]);
+    }
+    #[test]
+    fn odt_text_projection() {
+        // 批 2：odt → content.xml 段落行投影（tab/换行/空格串展开；revisions 恒 false）
+        let p = fixture(
+            &[
+                ("mimetype", "application/vnd.oasis.opendocument.text"),
+                (
+                    "META-INF/manifest.xml",
+                    "<manifest:manifest xmlns:manifest='urn:oasis:names:tc:opendocument:xmlns:manifest:1.0' manifest:version='1.2'><manifest:file-entry manifest:full-path='/' manifest:media-type='application/vnd.oasis.opendocument.text'/><manifest:file-entry manifest:full-path='content.xml' manifest:media-type='text/xml'/></manifest:manifest>",
+                ),
+                (
+                    "content.xml",
+                    "<office:document-content xmlns:office='urn:oasis:names:tc:opendocument:xmlns:office:1.0' xmlns:text='urn:oasis:names:tc:opendocument:xmlns:text:1.0'><office:body><office:text><text:h>标题</text:h><text:p>第一段<text:tab/>后</text:p><text:p>换行<text:line-break/>第二行</text:p><text:p>空<text:s text:c='3'/>格</text:p></office:text></office:body></office:document-content>",
+                ),
+            ],
+            "doc.odt",
+        );
+        let doc = open(&p).unwrap();
+        assert_eq!(doc.lines, ["标题", "第一段\t后", "换行\n第二行", "空   格"]);
+        assert!(!doc.revisions);
     }
     #[test]
     fn revision_marks_set_flag_but_extraction_stays_final_state() {

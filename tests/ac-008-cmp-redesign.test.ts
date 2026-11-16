@@ -402,13 +402,68 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
     expect(rsSrc).toContain('pub async fn office_lines');
     expect(libRs).toContain('commands::compare::office_lines');
     expect(ipcSrc).toContain("invoke<OfficeLinesResult>('office_lines'");
-    expect(viewSrc).toContain('await officeLines(this.pathA, blk.aStart, blk.aEnd)');
+    expect(viewSrc).toMatch(/officeLines\(this\.pathA, blk\.aStart, blk\.aEnd[,)]/);
     expect(ipcSrc).toContain("officeA: 'docx' | 'xlsx' | null");
   });
 
   it('投影对不判 BOM（批 1 收尾）：任一侧 Office 投影时不显示 BOM 徽标', () => {
     // 投影侧 bom 恒为空串占位——混合对（office vs 带 BOM 文本）不得误报「BOM 差异」
     expect(viewSrc).toMatch(/!this\.officeA && !this\.officeB && \(this\.metaA\?\.bom/);
+  });
+
+  describe('008 扩展·批 2：Excel 家族投影对比（显示值口径 + 公式模式）', () => {
+    const kindRs = read('src-tauri/src/kind_detect/mod.rs');
+    const xlsxRs = read('src-tauri/src/ooxml/xlsx.rs');
+    const odsRs = read('src-tauri/src/ooxml/ods.rs');
+
+    it('office_kind 扩面：Excel 家族（含 xls/xlsb/ods）→ Xlsx，Word 家族（含 odt）→ Docx', () => {
+      expect(officeRs).toContain('Some("docx" | "docm" | "dotx" | "dotm" | "odt") => Some(OfficeKind::Docx)');
+      expect(officeRs).toContain(
+        'Some("xlsx" | "xlsm" | "xltx" | "xltm" | "xlam" | "xls" | "xlsb" | "ods")'
+      );
+      // .xls 移出二进制黑名单（可打开可对比），.doc/.ppt 维持拒绝（spike 未决）
+      const binaryFn = kindRs.slice(kindRs.indexOf('fn is_binary_ext'), kindRs.indexOf('/// 快速识别'));
+      expect(binaryFn).not.toContain('"xls"');
+      expect(binaryFn).toContain('"doc"');
+      expect(binaryFn).toContain('"ppt"');
+      // 语言路由扩面：odt → Docx 文本管线，xls/xlsb/ods → Xlsx 表格管线
+      expect(kindRs).toContain('"docx" | "docm" | "dotx" | "dotm" | "odt" => "Docx"');
+      expect(kindRs).toMatch(/"xlsx" \| "xlsm"[\s\S]*?"xls"[\s\S]*?"ods" =>/);
+    });
+
+    it('公式对比口径切换：compare_open/office_lines/compare_detail 透传 formula，头部开关重建视图', () => {
+      expect(rsSrc).toContain('formula: Option<bool>');
+      expect(ipcSrc).toContain("invoke<CmpOpenResult>('compare_open', { a, b, formula");
+      expect(ipcSrc).toContain("invoke<OfficeLinesResult>('office_lines', { path, from, to, formula");
+      expect(viewSrc).toContain('compareOpen(this.pathA, this.pathB, this.formulaMode)');
+      expect(viewSrc).toContain('officeLines(this.pathA, blk.aStart, blk.aEnd, this.formulaMode)');
+      expect(viewSrc).toContain('compareDetail(');
+      expect(viewSrc).toContain("this.formulaMode\n      );");
+      // 开关只在 xlsx 侧出现；切换走整视图重建（口径变化 → 块坐标全部失效）
+      expect(viewSrc).toMatch(/this\.officeA === 'xlsx' \|\| this\.officeB === 'xlsx'/);
+      expect(viewSrc).toContain('new CompareView(this.host, this.pathA, this.pathB, this.opts, !this.formulaMode)');
+      for (const k of ['cmp.formulaMode', 'cmp.formulaModeTitle']) {
+        expect(dict('zh-CN')[k], `zh ${k}`).toBeTruthy();
+        expect(dict('en-US')[k], `en ${k}`).toBeTruthy();
+      }
+    });
+
+    it('显示值口径：calamine 内核 + ooxml-numfmt 渲染（哨兵与上限沿用）', () => {
+      expect(xlsxRs).toContain('use ooxml_numfmt::{DateSystem, FormatOptions}');
+      expect(xlsxRs).toContain('calamine');
+      // xlsx/xlsb 流式逐格先检（有界红线保持）；xls/ods 整表后检（如实注释）
+      expect(xlsxRs).toContain('next_cell_with_style_id');
+      expect(xlsxRs).toContain('next_formula');
+      for (const sentinel of ['XLSX_OPEN', 'OOXML_PACKAGE_LIMIT:100MiB', 'XLSX_SHEET_LIMIT:64', 'XLSX_ROW_LIMIT_OR_ORDER:200000', 'XLSX_COLUMN_LIMIT:1024', 'XLSX_CELL_LIMIT:32KiB', 'OOXML_TEXT_LIMIT:10MiB']) {
+        expect(`${xlsxRs}${odsRs}`).toContain(sentinel);
+      }
+    });
+
+    it('ods 自有有界管线：截断 content.xml 显式报错不挂起（calamine Ods 挂起缺陷的选型证据）', () => {
+      expect(odsRs).toContain('ODS_TRUNCATED_CONTENT');
+      expect(odsRs).toContain('truncated_content_errors_instead_of_hanging');
+      expect(xlsxRs).toContain('super::ods::to_workbook(super::ods::open(path)?)');
+    });
   });
 
   it('投影头部：office 侧隐藏编码/BOM/EOL 改示投影说明；修订徽标；xlsx 侧不挂行跳转', () => {

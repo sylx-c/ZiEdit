@@ -1,5 +1,6 @@
 //! Bounded, offline OOXML extraction. ZIP reads use the file engine's chunk cache.
 pub mod docx;
+pub mod ods;
 pub mod pdf;
 pub mod xlsx;
 

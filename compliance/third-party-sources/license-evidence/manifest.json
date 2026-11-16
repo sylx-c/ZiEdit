@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "currentDependencyStatus": {
     "inputSHA256": {
-      "package-lock.json": "fec4b770bb1e9d1c7428b537459dac7e7712ebb56d2e1c411c2bc0ebc93bff1e",
-      "src-tauri/Cargo.lock": "56c5b9a449fb20854545745b348202a5b7a5fc7d7aee82e17eb4cff3fab3f5e9"
+      "package-lock.json": "6b4b0c75b044340831a838f0bc2d62d304ae30471f6ea91a7d2cb02654c8d77b",
+      "src-tauri/Cargo.lock": "57ac6bf0c0facb69c6a726c7571a34ccb7e83bc08a8f126604ce7a5670cb85c6"
     },
     "meaning": "Membership is exact ecosystem/name/version against current lockfiles, independent of historical evidence collection status. Historical entries and review findings remain preserved, but are not current dependency evidence or unresolved runtime items.",
     "activePackages": 88,

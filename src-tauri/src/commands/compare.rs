@@ -73,9 +73,13 @@ pub async fn compare_open(
     app: tauri::AppHandle,
     a: String,
     b: String,
+    // xlsx 投影公式模式（批 2）：Some(true) 投影公式原文；缺省=显示值。
+    // 可选参数向后兼容——既有调用不传即维持值投影。
+    formula: Option<bool>,
 ) -> Result<CompareResult, ZiEditError> {
     crate::paths::reject_device_path(&a)?;
     crate::paths::reject_device_path(&b)?;
+    let formula = formula.unwrap_or(false);
     // 行哈希 diff / 编码探测 / 元信息读取均为阻塞 IO+CPU，移阻塞线程不冻结异步运行时（照 misc.rs 范例）。
     tauri::async_runtime::spawn_blocking(move || {
         let pa = PathBuf::from(&a);
@@ -85,7 +89,7 @@ pub async fn compare_open(
         let kind_b = compare::office::office_kind(&pb);
         if kind_a.is_some() || kind_b.is_some() {
             let registry = app.state::<OoxmlRegistry>();
-            return compare_open_office(&registry, &a, &b, kind_a, kind_b, input_state);
+            return compare_open_office(&registry, &a, &b, kind_a, kind_b, input_state, formula);
         }
         let binary = compare::inputs_binary(&pa, &pb)?;
         if binary {
@@ -194,6 +198,7 @@ fn office_side(
     registry: &OoxmlRegistry,
     path: &str,
     kind: OfficeKind,
+    formula: bool,
 ) -> Result<OfficeSide, ZiEditError> {
     match kind {
         OfficeKind::Docx => {
@@ -212,7 +217,8 @@ fn office_side(
             let Content::Xlsx(book) = &*content else {
                 unreachable!()
             };
-            let projection = compare::office::project_xlsx_cached(std::path::Path::new(path), book);
+            let projection =
+                compare::office::project_xlsx_cached(std::path::Path::new(path), book, formula);
             let lines = projection.len() as u64;
             Ok(OfficeSide {
                 hashes: compare::office::hash_doc_lines(&projection),
@@ -232,6 +238,7 @@ fn compare_open_office(
     kind_a: Option<OfficeKind>,
     kind_b: Option<OfficeKind>,
     input_state: compare::InputState,
+    formula: bool,
 ) -> Result<CompareResult, ZiEditError> {
     // 非投影侧仍按既有二进制判决拒绝；投影侧跳过（容器是 ZIP，binary 判据不适用）
     if (kind_a.is_none() && compare::input_binary(std::path::Path::new(a))?)
@@ -251,14 +258,15 @@ fn compare_open_office(
             revisions: false,
         });
     }
-    // 统一侧快照：Office 走投影（enc "-"，docx 带修订标志），文本走既有探测+行哈希
+    // 统一侧快照：Office 走投影（enc "-"，docx 带修订标志），文本走既有探测+行哈希。
+    // 公式模式（批 2）：xlsx 侧投影公式原文而非显示值（对比口径切换，行结构不变）。
     let side_of = |registry: &OoxmlRegistry,
                    path: &str,
                    kind: Option<OfficeKind>|
      -> Result<(Vec<compare::LineHash>, u64, String, bool), ZiEditError> {
         match kind {
             Some(k) => {
-                let side = office_side(registry, path, k)?;
+                let side = office_side(registry, path, k, formula)?;
                 Ok((side.hashes, side.lines, "-".into(), side.revisions))
             }
             None => {
@@ -354,6 +362,7 @@ fn office_window(
     kind: OfficeKind,
     from: u64,
     to: u64,
+    formula: bool,
 ) -> Result<(Vec<String>, u64), ZiEditError> {
     let range = crate::ooxml::window(from, to).map_err(ZiEditError::Msg)?;
     // Arc 与 owned 都要活到切片用完（borrow checker：不能在 match 臂内释放）
@@ -365,9 +374,9 @@ fn office_window(
     let slice: &[String] = match (&*content, kind) {
         (Content::Docx(doc), OfficeKind::Docx) => &doc.lines,
         (Content::Xlsx(book), OfficeKind::Xlsx) => {
-            // 缓存投影（批 1 收尾）：窗口取行不再每次全量 join；键含 len/mtime，
+            // 缓存投影（批 1 收尾）：窗口取行不再每次全量 join；键含 len/mtime+模式，
             // 与注册表 workbook 同一失效语义（file 变化 → 两侧同时 miss 重解析）。
-            owned = compare::office::project_xlsx_cached(std::path::Path::new(path), book);
+            owned = compare::office::project_xlsx_cached(std::path::Path::new(path), book, formula);
             &owned
         }
         _ => unreachable!(),
@@ -400,13 +409,16 @@ pub async fn office_lines(
     path: String,
     from: u64,
     to: u64,
+    // xlsx 公式模式（与 compare_open 同口径；缺省=显示值）
+    formula: Option<bool>,
 ) -> Result<OfficeLinesResult, ZiEditError> {
     crate::paths::reject_device_path(&path)?;
+    let formula = formula.unwrap_or(false);
     tauri::async_runtime::spawn_blocking(move || {
         let registry = app.state::<OoxmlRegistry>();
         let kind = compare::office::office_kind(&PathBuf::from(&path))
             .ok_or_else(|| ZiEditError::Msg("OFFICE_LINES:unsupported-kind".into()))?;
-        let (texts, total) = office_window(&registry, &path, kind, from, to)?;
+        let (texts, total) = office_window(&registry, &path, kind, from, to, formula)?;
         let mut lines = Vec::with_capacity(texts.len());
         let mut bytes = 0usize;
         for (i, text) in texts.into_iter().enumerate() {
@@ -432,6 +444,8 @@ pub async fn office_lines(
 /// Office 投影侧（批 1）：行文本取自投影切片，行级类别（编码/EOL）不判定——
 /// 投影无字节层；六类码点级分类对投影行照常成立。
 #[tauri::command]
+// IPC 参数即函数签名（窗口坐标 + 口径开关，无合理聚组对象）；7 参数上限豁免
+#[allow(clippy::too_many_arguments)]
 pub async fn compare_detail(
     app: tauri::AppHandle,
     a: String,
@@ -440,7 +454,10 @@ pub async fn compare_detail(
     a_to: u64,
     b_from: u64,
     b_to: u64,
+    // xlsx 公式模式（与 compare_open 同口径；缺省=显示值）
+    formula: Option<bool>,
 ) -> Result<Vec<Vec<DetailLine>>, ZiEditError> {
+    let formula = formula.unwrap_or(false);
     tauri::async_runtime::spawn_blocking(move || {
         let registry = app.state::<OoxmlRegistry>();
         let kind_a = compare::office::office_kind(&PathBuf::from(&a));
@@ -459,7 +476,9 @@ pub async fn compare_detail(
                    to: u64|
          -> Result<Src, ZiEditError> {
             match kind {
-                Some(k) => Ok(Src::Office(office_window(registry, path, k, from, to)?.0)),
+                Some(k) => Ok(Src::Office(
+                    office_window(registry, path, k, from, to, formula)?.0,
+                )),
                 None => {
                     let enc = enc_name_of(path)?;
                     let raw = compare::read_lines_raw(&PathBuf::from(path), from, to)
@@ -845,12 +864,20 @@ mod tests {
         crate::ooxml::fixture(
             &[
                 (
+                    "[Content_Types].xml",
+                    "<Types xmlns='http://schemas.openxmlformats.org/package/2006/content-types'><Default Extension='rels' ContentType='application/vnd.openxmlformats-package.relationships+xml'/><Default Extension='xml' ContentType='application/xml'/><Override PartName='/xl/workbook.xml' ContentType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml'/><Override PartName='/xl/worksheets/sheet1.xml' ContentType='application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml'/></Types>",
+                ),
+                (
+                    "_rels/.rels",
+                    "<Relationships xmlns='http://schemas.openxmlformats.org/package/2006/relationships'><Relationship Id='rId1' Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument' Target='xl/workbook.xml'/></Relationships>",
+                ),
+                (
                     "xl/workbook.xml",
-                    "<workbook xmlns:r='r'><sheets><sheet name='Data' r:id='r1'/></sheets></workbook>",
+                    "<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Data' r:id='r1'/></sheets></workbook>",
                 ),
                 (
                     "xl/_rels/workbook.xml.rels",
-                    "<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/></Relationships>",
+                    "<Relationships><Relationship Id='r1' Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet' Target='worksheets/sheet1.xml'/></Relationships>",
                 ),
                 (
                     "xl/sharedStrings.xml",
@@ -896,6 +923,7 @@ mod tests {
             Some(OfficeKind::Docx),
             Some(OfficeKind::Docx),
             state,
+            false,
         )
         .unwrap();
         assert!(!same.binary);
@@ -922,6 +950,7 @@ mod tests {
             Some(OfficeKind::Docx),
             Some(OfficeKind::Docx),
             state2,
+            false,
         )
         .unwrap();
         let replaces: Vec<_> = diff.blocks.iter().filter(|b| b.kind == "replace").collect();
@@ -947,6 +976,7 @@ mod tests {
             Some(OfficeKind::Docx),
             Some(OfficeKind::Docx),
             state,
+            false,
         )
         .unwrap();
         assert!(res.revisions, "B 侧含修订 → 标志置位");
@@ -968,6 +998,7 @@ mod tests {
             Some(OfficeKind::Xlsx),
             Some(OfficeKind::Xlsx),
             state,
+            false,
         )
         .unwrap();
         assert_eq!(res.office_a, Some("xlsx"));
@@ -988,6 +1019,7 @@ mod tests {
             Some(OfficeKind::Xlsx),
             Some(OfficeKind::Xlsx),
             state2,
+            false,
         )
         .unwrap();
         assert!(same.blocks.iter().all(|b| b.kind == "equal"));
@@ -1002,8 +1034,16 @@ mod tests {
         let registry = OoxmlRegistry::default();
         let state =
             compare::input_state(std::path::Path::new(&a), std::path::Path::new(&txt)).unwrap();
-        let res =
-            compare_open_office(&registry, &a, &txt, Some(OfficeKind::Docx), None, state).unwrap();
+        let res = compare_open_office(
+            &registry,
+            &a,
+            &txt,
+            Some(OfficeKind::Docx),
+            None,
+            state,
+            false,
+        )
+        .unwrap();
         assert_eq!(res.office_a, Some("docx"));
         assert_eq!(res.office_b, None);
         assert!(!res.meta_b.encoding.is_empty(), "文本侧编码语义保留");
@@ -1023,6 +1063,7 @@ mod tests {
             Some(OfficeKind::Docx),
             None,
             state2,
+            false,
         )
         .unwrap();
         assert!(refused.binary);
@@ -1030,21 +1071,103 @@ mod tests {
         assert_eq!(refused.office_a, Some("docx"));
     }
 
+    /// 批 2 判据：值同公式不同可检出——值投影 0 差异，公式投影恰好报一处
+    #[test]
+    fn office_compare_formula_mode_detects_formula_change() {
+        let sheet = |f: &str| {
+            format!(
+                "<worksheet><sheetData><row r='1'><c r='A1'><f>{f}</f><v>2</v></c></row></sheetData></worksheet>"
+            )
+        };
+        let mk = |f: &str, name: &str| {
+            crate::ooxml::fixture(
+                &[
+                    (
+                        "[Content_Types].xml",
+                        "<Types xmlns='http://schemas.openxmlformats.org/package/2006/content-types'><Default Extension='rels' ContentType='application/vnd.openxmlformats-package.relationships+xml'/><Default Extension='xml' ContentType='application/xml'/><Override PartName='/xl/workbook.xml' ContentType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml'/><Override PartName='/xl/worksheets/sheet1.xml' ContentType='application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml'/></Types>",
+                    ),
+                    (
+                        "_rels/.rels",
+                        "<Relationships xmlns='http://schemas.openxmlformats.org/package/2006/relationships'><Relationship Id='rId1' Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument' Target='xl/workbook.xml'/></Relationships>",
+                    ),
+                    (
+                        "xl/workbook.xml",
+                        "<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='S' r:id='r1'/></sheets></workbook>",
+                    ),
+                    (
+                        "xl/_rels/workbook.xml.rels",
+                        "<Relationships><Relationship Id='r1' Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet' Target='worksheets/sheet1.xml'/></Relationships>",
+                    ),
+                    ("xl/worksheets/sheet1.xml", &sheet(f)),
+                ],
+                name,
+            )
+        };
+        let a = mk("A1*2", "fml-a.xlsx");
+        let b = mk("A1+A1", "fml-b.xlsx"); // 缓存值同为 2
+        let registry = OoxmlRegistry::default();
+        let state =
+            compare::input_state(std::path::Path::new(&a), std::path::Path::new(&b)).unwrap();
+        let values = compare_open_office(
+            &registry,
+            &a,
+            &b,
+            Some(OfficeKind::Xlsx),
+            Some(OfficeKind::Xlsx),
+            state,
+            false,
+        )
+        .unwrap();
+        assert!(
+            values.blocks.iter().all(|x| x.kind == "equal"),
+            "值投影：缓存值相同 → 0 差异，got {:?}",
+            values.blocks
+        );
+        let state2 =
+            compare::input_state(std::path::Path::new(&a), std::path::Path::new(&b)).unwrap();
+        let formulas = compare_open_office(
+            &registry,
+            &a,
+            &b,
+            Some(OfficeKind::Xlsx),
+            Some(OfficeKind::Xlsx),
+            state2,
+            true,
+        )
+        .unwrap();
+        let replaces: Vec<_> = formulas
+            .blocks
+            .iter()
+            .filter(|x| x.kind == "replace")
+            .collect();
+        assert_eq!(
+            replaces.len(),
+            1,
+            "公式投影：公式不同 → 恰好一处，got {:?}",
+            formulas.blocks
+        );
+        assert_eq!((replaces[0].a_start, replaces[0].a_end), (2, 2));
+        // 窗口取行同口径：公式模式行文本
+        let (lines, total) = office_window(&registry, &a, OfficeKind::Xlsx, 2, 2, true).unwrap();
+        assert_eq!(total, 2);
+        assert_eq!(lines, ["A1*2"]);
+    }
+
     /// office_window：1 基窗口切片、越界空、xlsx 投影行取窗（含 sheet 头行）
     #[test]
     fn office_window_slicing() {
         let a = xlsx_fixture("win-a.xlsx", "v");
         let registry = OoxmlRegistry::default();
-        let (lines, total) = office_window(&registry, &a, OfficeKind::Xlsx, 2, 3).unwrap();
+        let (lines, total) = office_window(&registry, &a, OfficeKind::Xlsx, 2, 3, false).unwrap();
         assert_eq!(total, 3);
         assert_eq!(lines, ["h1", "\tv"]);
         // 越界：from 超投影总行数 → 空（total 仍如实）
-        let (none, t2) = office_window(&registry, &a, OfficeKind::Xlsx, 9, 12).unwrap();
+        let (none, t2) = office_window(&registry, &a, OfficeKind::Xlsx, 9, 12, false).unwrap();
         assert!(none.is_empty());
         assert_eq!(t2, 3);
         // docx：段落行窗口
         let d = docx_fixture("win-d.docx", "beta");
-        let (dl, dt) = office_window(&registry, &d, OfficeKind::Docx, 2, 2).unwrap();
+        let (dl, dt) = office_window(&registry, &d, OfficeKind::Docx, 2, 2, false).unwrap();
         assert_eq!(dt, 3);
         assert_eq!(dl, ["beta"]);
     }
@@ -1065,7 +1188,7 @@ mod tests {
             let state =
                 compare::input_state(std::path::Path::new(a), std::path::Path::new(b)).unwrap();
             let t = Instant::now();
-            let res = compare_open_office(&registry, a, b, kind_a, kind_b, state).unwrap();
+            let res = compare_open_office(&registry, a, b, kind_a, kind_b, state, false).unwrap();
             (t.elapsed().as_millis(), res)
         };
 
