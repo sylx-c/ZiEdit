@@ -5864,7 +5864,7 @@ dependencies = [
 
 [[package]]
 name = "ziedit"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "arboard",
  "chardetng",

@@ -3,8 +3,8 @@
   "generator": "scripts/generate-third-party-licenses.mjs",
   "inputSHA256": {
     "package-lock.json": "6b4b0c75b044340831a838f0bc2d62d304ae30471f6ea91a7d2cb02654c8d77b",
-    "src-tauri/Cargo.lock": "6879603193a31107cb3cd9122bf80a1845944acfed6e6ae437ac13a93dce76af",
-    "src-tauri/Cargo.toml": "0f47abc65e6422b7032e955ffa567520464e2cce69e4e28e1cdf523731416045"
+    "src-tauri/Cargo.lock": "39cf03c84d200189d06ca27e752542bc0adb995b1f6d80c4e8a5d09e4210922e",
+    "src-tauri/Cargo.toml": "2b2f7838450f81616574185c5f32d8c123668c9c3a6927b0bc7bc4e699c713da"
   },
   "cargoCommand": [
     "cargo",
