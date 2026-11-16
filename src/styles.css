@@ -420,6 +420,11 @@ button{font:inherit}
   background:var(--surface);color:var(--accent);
   box-shadow:var(--shadow-sm);
 }
+/* 「只读」点亮=琥珀（2026-11-16 用户定稿方案 A）：与「编辑」蓝形成一眼可分的色彩语义；
+   状态栏模式格的只读空心点同色（.mode-cell.preview）。 */
+.seg .tb[data-action="view.tabLock"].active{
+  color:var(--c-amber);
+}
 
 /* ── Main layout ── */
 .main{flex:1;display:flex;overflow:hidden;min-height:0}
@@ -1164,12 +1169,12 @@ button{font:inherit}
   content:'';width:6px;height:6px;flex-shrink:0;
   background:var(--accent);border-radius:50%;
 }
-/* 只读形态（渲染预览/标签锁，2026-11-16）：同色空心圆点——与 editing 同为「当前模式」
-   的亮展示，实心=可编辑、空心=只读；此前预览态恒灰被读作“颜色没了”。 */
-.statusbar .st-cell.mode-cell.preview{color:var(--accent);font-weight:600}
+/* 只读形态（渲染预览/标签锁，2026-11-16 方案 A）：琥珀色空心圆点——与可编辑的蓝色实心点
+   一眼可分；此前预览态恒灰被读作“颜色没了”，同色空心方案在 6px 圆点上区分偏弱（用户裁决换色）。 */
+.statusbar .st-cell.mode-cell.preview{color:var(--c-amber);font-weight:600}
 .statusbar .st-cell.mode-cell.preview::before{
   content:'';width:6px;height:6px;flex-shrink:0;box-sizing:border-box;
-  border:1.5px solid var(--accent);border-radius:50%;
+  border:1.5px solid var(--c-amber);border-radius:50%;
 }
 .st-led{width:6px;height:6px;flex-shrink:0}
 .st-led.ok{background:var(--c-green)}
