@@ -323,6 +323,14 @@ export function markdownIndent(view: EditorView, direction: 1 | -1): boolean {
   return (direction > 0 ? indentMore : indentLess)(view);
 }
 
+/** 围栏代码内的 Tab 缩进当前行。修前围栏代码内 Tab 无任何处理器，浏览器默认焦点导航
+ *  会把焦点移出编辑器——实测落到表格工具条按钮上，随后的 Enter 即点击，误触发行/列
+ *  操作改写旧表格（AC-36 密集键入表格位移级联的入口，2026-11-16 小语料诊断复现）。 */
+export function codeIndent(view: EditorView, direction: 1 | -1): boolean {
+  if (view.state.readOnly || isComposing(view) || !inNode(view, ['FencedCode'])) return false;
+  return (direction > 0 ? indentMore : indentLess)(view);
+}
+
 function exitCode(view: EditorView): boolean {
   if (view.state.readOnly || isComposing(view) || !view.state.selection.main.empty) return false;
   let node = syntaxTree(view.state).resolveInner(view.state.selection.main.head, -1);

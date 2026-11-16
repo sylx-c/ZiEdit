@@ -97,13 +97,20 @@ describe('MD-05 输入撤离邻域（分屏滚动同步不得饿死水合）', (
       expect(near.dataset.renderPending).toBeUndefined();
       expect(far.dataset.renderPending).toBe('1');
       // 分屏左右同步以编程滚动持续派发 md-user-input：视口内挂载不得被作废重挂。
+      // 邻域清扫在宏任务执行（滚动应用后的几何）；同步阶段不作废任何在途挂载。
       root.dispatchEvent(new Event('md-user-input'));
+      await tick();
       expect(near.dataset.renderState).toBe('loading');
       expect(near.dataset.renderPending).toBeUndefined();
       expect(far.dataset.renderPending).toBe('1');
       // 目标真正离屏后仍按原语义撤离：取消在途、回待派发队列。
+      // 清扫必须延后一拍（2026-11-16 修复：scrollTo 派发点同步读几何拿到跳转前视口，
+      // 会把离屏目标误判为邻域内保留，其迟到交付写进离屏子树触发渲染器 CHECK 崩溃）：
+      // 同步阶段不得有任何撤离动作，宏任务后离屏目标才回到待派发队列。
       Object.defineProperty(near, 'offsetTop', { value: 100_000, configurable: true });
       root.dispatchEvent(new Event('md-user-input'));
+      expect(near.dataset.renderPending).toBeUndefined();
+      await tick();
       expect(near.dataset.renderPending).toBe('1');
     } finally { destroyHydratedRenders(root); }
   });

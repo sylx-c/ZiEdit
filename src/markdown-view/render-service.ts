@@ -494,6 +494,8 @@ interface HydrateLane {
   timer?: ReturnType<typeof setTimeout>;
   checking?: boolean;
   recheck?: boolean;
+  /** 邻域清扫已排队（宏任务去重）：输入脉冲密集时只排一次。 */
+  sweepQueued?: boolean;
 }
 const hydrateLanes = new WeakMap<HTMLElement, HydrateLane>();
 const hydrateScrollListeners = new WeakMap<HTMLElement, () => void>();
@@ -601,6 +603,20 @@ function scheduleLaneCheck(scroller: HTMLElement): void {
   })(); }, 200);
 }
 
+/** 离屏在途挂载撤离：取消在途、回待派发队列。必须在滚动几何已应用的时机调用——
+ *  用跳转前的视口判定会把离屏目标误判为邻域内，其迟到交付会写进已离屏子树
+ *  （2026-11-16 early-input 复测实测触发 WebView2 渲染器确定性 CHECK 崩溃，msedge.dll 同一偏移 3/3）。 */
+function sweepOffscreen(lane: HydrateLane): void {
+  for (const [target, active] of [...lane.active]) {
+    if (withinNeighborhood(target, lane.scroller)) continue;
+    active.cancel();
+    hydrateCleanups.get(lane.root)?.delete(target);
+    target.dataset.renderPending = '1';
+    lane.pending.push([target, active.block]);
+    lane.active.delete(target);
+  }
+}
+
 function attachLane(scroller: HTMLElement): void {
   if (hydrateScrollListeners.has(scroller)) return;
   const onScroll = (): void => scheduleLaneCheck(scroller);
@@ -613,13 +629,16 @@ function attachLane(scroller: HTMLElement): void {
     // 派发 md-user-input（reading-surface.scrollTo → userInput），修前每个同步脉冲都把
     // 在途挂载全数作废，重挂-取消每 ~200ms 循环，渲染请求与交付帧反复被清，永不完成
     // （MD-05 无效 Mermaid 分屏停留 loading/pending）。交付侧仍有世代/忙碌检查，保留挂载无碍。
-    for (const [target, active] of [...lane.active]) {
-      if (withinNeighborhood(target, scroller)) continue;
-      active.cancel();
-      hydrateCleanups.get(lane.root)?.delete(target);
-      target.dataset.renderPending = '1';
-      lane.pending.push([target, active.block]);
-      lane.active.delete(target);
+    // 邻域清扫延后到宏任务：md-user-input 在 scrollTo 派发点同步到达，此刻立即读几何
+    // 拿到的是跳转前视口，会把离屏目标误判为邻域内而保留，其迟到交付即触发上述崩溃。
+    // setTimeout(0) 先于下一帧执行，取消仍赶在任何交付帧之前生效。
+    if (!lane.sweepQueued) {
+      lane.sweepQueued = true;
+      setTimeout(() => {
+        if (hydrateLanes.get(scroller) !== lane) return;
+        lane.sweepQueued = false;
+        sweepOffscreen(lane);
+      }, 0);
     }
     scheduleLaneCheck(scroller);
   };

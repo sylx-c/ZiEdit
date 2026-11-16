@@ -24,6 +24,7 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
   private visual: { element: Element; range?: Range; top: number } | null = null;
   private visualScrollTop = 0;
   private frame = 0;
+  private contentFrame = 0;
   private dead = false;
   private observer?: ResizeObserver;
   private assetObserver?: MutationObserver;
@@ -180,8 +181,18 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
     this.element.dispatchEvent(new Event('md-layout'));
     this.scrolled();
   }
-  /** 派生内容交付后立即由同一负责人锚定，不能等到下一轮尺寸观察才修正。 */
-  contentChanged(): void { this.layoutChanged(); }
+  /** 派生内容交付后由同一负责人锚定，不能等到下一轮尺寸观察才修正。
+   *  同帧合并：dense 文档公式水合风暴里每笔交付都同步触发锚点几何读（强制布局）+
+   *  滚动补偿 + md-layout（地图/大纲同步），放大为停手阶段 ≥100ms 长任务
+   *  （2026-11-16 dense-2m 60Hz 矩阵 101ms）。合并到每帧至多一次：锚定仍先于
+   *  下一轮尺寸观察，且视口内多笔交付的累计偏移一次修正。 */
+  contentChanged(): void {
+    if (this.contentFrame) return;
+    this.contentFrame = requestAnimationFrame(() => {
+      this.contentFrame = 0;
+      if (!this.dead) this.layoutChanged();
+    });
+  }
   private watchAsset(image: HTMLImageElement): void {
     if (!this.root.contains(image)) return;
     this.assets.set(image, 2);
@@ -202,7 +213,13 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
   private assetLoaded = (event: Event): void => {
     // 原生图片尺寸可能先于下一轮 RO 交付；只通知当前锚管理器，
     // 不保存或写回加载开始时的位置。新输入和销毁仍取消旧锚。
-    if (event.target instanceof HTMLImageElement && this.root.contains(event.target)) { this.watchAsset(event.target); this.contentChanged(); }
+    // 图片 load 是一次性事件（区别于公式水合风暴），同步补偿：
+    // 必须在load事件任务内、布局首次绘制前完成，否则判据采样会捕获
+    // 一个整帧的可见位移（navigation 门 224px 漂移的迟到主环）。
+    if (event.target instanceof HTMLImageElement && this.root.contains(event.target)) {
+      this.watchAsset(event.target);
+      this.layoutChanged();
+    }
   };
   update(blocks: ReadingBlock[], lines: number, append = false): void {
     const visible = blocks.filter(entry => !entry.element.hidden);
@@ -489,7 +506,7 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
     });
   }
   destroy(): void {
-    this.dead = true; cancelAnimationFrame(this.frame); cancelAnimationFrame(this.assetFrame); this.observer?.disconnect(); this.assetObserver?.disconnect(); this.assets.clear();
+    this.dead = true; cancelAnimationFrame(this.frame); cancelAnimationFrame(this.assetFrame); cancelAnimationFrame(this.contentFrame); this.contentFrame = 0; this.observer?.disconnect(); this.assetObserver?.disconnect(); this.assets.clear();
     this.geometry.clear(); this.heights.clear(); this.pages.clear(); this.observed.clear();
     for (const page of this.pinnedPages) page.style.removeProperty('content-visibility');
     this.pinnedPages.clear(); this.entries = new WeakMap(); this.indices = new WeakMap();

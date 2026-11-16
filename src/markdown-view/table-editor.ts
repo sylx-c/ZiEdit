@@ -118,6 +118,10 @@ export function createTableTools(main: EditorView): HTMLElement {
     const box = tools.closest<HTMLElement>('.mdir-tablebox');
     if (box && !box.contains(document.activeElement)) destroyCellEditor(box);
   }));
+  // 工具条是鼠标操作面：不参与键盘 Tab 导航。修前在围栏代码等 Tab 未被主编辑器处理的
+  // 上下文里，浏览器默认焦点导航会把焦点交给工具条按钮，随后的 Enter 即点击（误触发表格
+  // 行列/对齐操作改写文档——AC-36 表格位移级联的第二环，2026-11-16 小语料诊断复现）。
+  for (const control of tools.querySelectorAll<HTMLButtonElement | HTMLInputElement | HTMLSelectElement>('button,input,select')) control.tabIndex = -1;
   return tools;
 }
 

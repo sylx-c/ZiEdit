@@ -25,8 +25,9 @@ describe('统一阅读正文', () => {
     expect(surface.overview(1, { version: 1, height: 200, top: 0, viewport: 100 })[0]).toMatchObject({ text: '[image]', kind: 'Image' });
     surface.destroy();
   });
-  it('派生内容交付时立即补偿文字位置，不等待下一帧尺寸观察', () => {
-    vi.stubGlobal('requestAnimationFrame', () => 1);
+  it('派生内容交付按帧合并补偿文字位置（先于下一轮尺寸观察）', () => {
+    let frame!: FrameRequestCallback;
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { frame = callback; return 1; });
     vi.stubGlobal('cancelAnimationFrame', () => {});
     const host = document.createElement('div'), root = document.createElement('div'), element = document.createElement('div');
     element.textContent = 'stable reading text'; root.append(element); host.append(root); document.body.append(host);
@@ -40,6 +41,10 @@ describe('统一阅读正文', () => {
     host.scrollTop = 100;
     const surface = new ReadingSurface(host, root); surface.update([{ block: doc.blocks[0]!, element }], doc.lines);
     top += 40; surface.contentChanged();
+    // 同帧合并（2026-11-16 dense-2m 停手长任务修复）：公式水合风暴里逐笔同步补偿
+    // 每次都强制布局，放大为 ≥100ms 长任务；同步阶段不再立即补偿，帧回调统一执行。
+    expect(host.scrollTop).toBe(100);
+    frame(16);
     expect(host.scrollTop).toBe(140);
     expect(element.getBoundingClientRect().top).toBe(20);
     surface.destroy();
@@ -237,6 +242,11 @@ describe('统一阅读正文', () => {
   });
   it('图片 load 在尺寸观察交付前通知唯一锚管理器，用户输入与销毁取消旧锚', () => {
     vi.stubGlobal('ResizeObserver', undefined);
+    // 补偿按帧合并（2026-11-16 dense-2m 停手长任务修复）：捕获 rAF 回调后手动冲刷。
+    const frames=new Map<number,FrameRequestCallback>();let serial=0;
+    vi.stubGlobal('requestAnimationFrame',(callback:FrameRequestCallback)=>{frames.set(++serial,callback);return serial;});
+    vi.stubGlobal('cancelAnimationFrame',(id:number)=>frames.delete(id));
+    const frame=()=>{const batch=[...frames];frames.clear();for(const [,callback] of batch)callback(0);};
     const host=document.createElement('div'),root=document.createElement('div'),block=document.createElement('div');
     const image=document.createElement('img'),paragraph=document.createElement('p');
     root.append(block);block.append(image,paragraph);host.append(root);document.body.append(host);
@@ -245,14 +255,14 @@ describe('统一阅读正文', () => {
     Object.defineProperty(document,'elementFromPoint',{configurable:true,value:()=>paragraph});
     const surface=new ReadingSurface(host,root),doc=new MarkdownDocumentSession().update('paragraph');
     try {
-      surface.update([{element:block,block:doc.blocks[0]!}],doc.lines);surface.scrollTo(0);
-      growth=240;image.dispatchEvent(new Event('load'));
+      surface.update([{element:block,block:doc.blocks[0]!}],doc.lines);surface.scrollTo(0);frame();
+      growth=240;image.dispatchEvent(new Event('load'));frame();
       expect(host.scrollTop).toBe(240);expect(paragraph.getBoundingClientRect().top).toBe(40);
-      host.dispatchEvent(new WheelEvent('wheel'));growth=300;image.dispatchEvent(new Event('load'));
+      host.dispatchEvent(new WheelEvent('wheel'));growth=300;image.dispatchEvent(new Event('load'));frame();
       expect(host.scrollTop).toBe(240);
-      surface.destroy();growth=360;image.dispatchEvent(new Event('load'));
+      surface.destroy();growth=360;image.dispatchEvent(new Event('load'));frame();
       expect(host.scrollTop).toBe(240);
-    } finally { surface.destroy();Reflect.deleteProperty(document,'elementFromPoint'); }
+    } finally { surface.destroy();Reflect.deleteProperty(document,'elementFromPoint');vi.unstubAllGlobals(); }
   });
   it('图片固有尺寸先于 load 和尺寸观察交付时，在绘制前保持最新阅读锚', async () => {
     vi.stubGlobal('ResizeObserver', undefined);

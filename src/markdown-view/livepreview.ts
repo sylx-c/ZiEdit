@@ -47,7 +47,7 @@ import { FindBar } from '../text-view/findbar';
 import { runMdFormat, editMarkdownLink, MD_INLINE_COMMANDS, MD_BLOCK_COMMANDS, type MdFormatCmd } from './mdformat';
 import { destroyCellEditor } from './table-editor';
 import { tableRowNumber } from './table-viewport';
-import { markdownWriting, markdownIndent, inlineFormatChanged, inlineFormatField, inlineFormatMarks, inlineFormatOpen, inlineFormatClose, type InlineFormat } from './writing';
+import { markdownWriting, markdownIndent, codeIndent, inlineFormatChanged, inlineFormatField, inlineFormatMarks, inlineFormatOpen, inlineFormatClose, type InlineFormat } from './writing';
 import { trackImageTarget } from './imagehost';
 import { snapshotDocument } from '../common/snapshot';
 import { startParseWarmup } from '../common/parse-warmup';
@@ -480,8 +480,8 @@ export class LivePreviewView {
             ...defaultKeymap,
             ...historyKeymap,
             // 活动表格内单元格导航/加行加列（规则 23 M2）；不在表格内返回 false 交回默认缩进
-            { key: 'Tab', run: () => this.tableTab(1) || markdownIndent(this.view, 1) },
-            { key: 'Shift-Tab', run: () => this.tableTab(-1) || markdownIndent(this.view, -1) },
+            { key: 'Tab', run: () => this.tableTab(1) || markdownIndent(this.view, 1) || codeIndent(this.view, 1) },
+            { key: 'Shift-Tab', run: () => this.tableTab(-1) || markdownIndent(this.view, -1) || codeIndent(this.view, -1) },
             { key: 'Mod-s', preventDefault: true, run: () => { void this.save(); return true; } },
             { key: 'Mod-f', preventDefault: true, run: () => { this.openFindBar(); return true; } },
             { key: 'Mod-h', preventDefault: true, run: () => { this.openFindBar(undefined, true); return true; } },
@@ -504,10 +504,20 @@ export class LivePreviewView {
             }
             if (!u.docChanged) return;
             this.opts.onDocChange?.();
-            // 冻结块 DOM 时仍映射表格位置，否则表格前的改动会让格内提交写错范围。
-            if (u.state.field(compositionActive)) for (const box of this.host.querySelectorAll<HTMLElement>('.mdir-tablebox')) {
-              box.dataset.mdTableFrom = String(u.changes.mapPos(Number(box.dataset.mdTableFrom), 1));
-              box.dataset.mdTableTo = String(u.changes.mapPos(Number(box.dataset.mdTableTo), -1));
+            // 任何文档变更都映射表格框坐标：块装饰重建是异步解析，重建前的窗口里
+            // 格内写回/表格操作仍按 box 上存的旧坐标执行——表格前的改动会让提交写错范围
+            // （2026-11-16 AC-36 冷轮键序乱序根因：解析慢的冷启动窗口最长）。重建后
+            // 装饰层自会写入新坐标，映射只负责填補延迟窗口；输入法冻结块情形同被覆盖。
+            // 坐标超出本事务变更集域（框经历多轮未映射/表已删除）时跳过——硬映射会抛错，
+            // 留给装饰重建刷新，cellRange 对陈旧值按解析失败返回 null 跳过写回。
+            if (u.docChanged) {
+              const limit = u.startState.doc.length;
+              for (const box of this.host.querySelectorAll<HTMLElement>('.mdir-tablebox')) {
+                const from = Number(box.dataset.mdTableFrom), to = Number(box.dataset.mdTableTo);
+                if (!Number.isInteger(from) || from < 0 || from > limit || !Number.isInteger(to) || to < 0 || to > limit) continue;
+                box.dataset.mdTableFrom = String(u.changes.mapPos(from, 1));
+                box.dataset.mdTableTo = String(u.changes.mapPos(to, -1));
+              }
             }
             this.tracker.patchStats(u);
             const wasDirty = this.dirty;
