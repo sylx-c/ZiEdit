@@ -302,8 +302,11 @@ export class CompareView {
     );
     // BOM 文件级徽标（008 规则 8 v0.6）：A/B BOM 有无或类型不同 → 计数行红色「BOM」徽标。
     // 徽标是六类图例 BOM 项的「可过滤载体」——chip 空心（hiddenCats 含 bom）时随之隐藏（G-014 根修）。
+    // 投影对不判 BOM（批 1 收尾）：任一侧为 Office 投影（officeA/officeB 非空）时，投影侧
+    // bom 恒为空串占位——混合对（office vs 带 BOM 文本）会误报「BOM 差异」，如实语义是
+    // 「投影无字节层，BOM 不适用」，与编码/EOL 徽标同一处理（不产出）。
     this.bomBadgeEl = null;
-    if ((this.metaA?.bom ?? '') !== (this.metaB?.bom ?? '')) {
+    if (!this.officeA && !this.officeB && (this.metaA?.bom ?? '') !== (this.metaB?.bom ?? '')) {
       const bomBadge = mk('span', 'cmp-bom-badge', 'BOM');
       bomBadge.title = `A: ${this.metaA?.bom || '-'} / B: ${this.metaB?.bom || '-'}`;
       this.bomBadgeEl = bomBadge;

@@ -12,6 +12,7 @@
 //! 「插入一行」放大成「其后所有行替换」；行定位交给块坐标（线号）承担。
 
 use std::path::Path;
+use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::ooxml::xlsx;
 
@@ -80,6 +81,37 @@ pub fn project_xlsx(book: &xlsx::Workbook) -> Vec<String> {
         }
     }
     lines
+}
+
+/// xlsx 投影缓存：`(path, len, mtime)` LRU（容量 4，照 compare::mod 的 nl_index_cache 模式）。
+/// office_window/office_side 每次窗口取行都要把注册表命中的 workbook 重新 join 成投影行
+/// （20 万行级每次全量 join 有感知），缓存后命中 O(1) 克隆 Arc；外部修改按键自动失效
+/// ——与 OoxmlRegistry（len/mtime 失效）同一语义，投影与 workbook 不会错版本。
+fn xlsx_projection_cache()
+-> &'static Mutex<crate::encoding::ProbeLru<crate::encoding::ProbeKey, Arc<Vec<String>>>> {
+    static CACHE: OnceLock<
+        Mutex<crate::encoding::ProbeLru<crate::encoding::ProbeKey, Arc<Vec<String>>>>,
+    > = OnceLock::new();
+    CACHE.get_or_init(|| Mutex::new(crate::encoding::ProbeLru::new(4)))
+}
+
+/// 缓存版投影（批 1 收尾性能项）：stat 失败（文件被并发删除等理论情形）时不缓存、
+/// 直接投影返回，取行路径行为不回退。
+pub fn project_xlsx_cached(path: &Path, book: &xlsx::Workbook) -> Arc<Vec<String>> {
+    let key = match crate::encoding::probe_key(path) {
+        Ok(k) => k,
+        Err(_) => return Arc::new(project_xlsx(book)),
+    };
+    if let Ok(mut cache) = xlsx_projection_cache().lock()
+        && let Some(hit) = cache.get(&key)
+    {
+        return hit.clone();
+    }
+    let projection = Arc::new(project_xlsx(book));
+    if let Ok(mut cache) = xlsx_projection_cache().lock() {
+        cache.put(key, projection.clone());
+    }
+    projection
 }
 
 #[cfg(test)]
@@ -156,5 +188,33 @@ mod tests {
             lines,
             ["\u{25C7} Sheet: N", "multi\u{23CE}line\u{21E5}cell"]
         );
+    }
+
+    #[test]
+    fn projection_cache_hits_and_invalidates_on_change() {
+        // 批 1 收尾：窗口取行的重复 join 走 (path,len,mtime) LRU——同键命中同一投影（指针相等），
+        // 文件变化（len/mtime 变）后失效重投影，绝不回退旧版本。
+        let dir = std::env::temp_dir().join("ZiEdit-office-cache");
+        std::fs::create_dir_all(&dir).unwrap();
+        let p = dir.join("cache-v1.xlsx");
+        std::fs::write(&p, []).unwrap();
+        let mk_book = |tag: &str| xlsx::Workbook {
+            sheets: vec![Sheet {
+                name: "S".into(),
+                records: vec![vec![tag.into()]],
+            }],
+        };
+        let v1 = project_xlsx_cached(&p, &mk_book("v1"));
+        // 命中：同键返回同一 Arc
+        let hit = project_xlsx_cached(&p, &mk_book("ignored"));
+        assert!(Arc::ptr_eq(&v1, &hit), "同键命中缓存，不重投影");
+        assert_eq!(*hit, vec!["\u{25C7} Sheet: S", "v1"]);
+        // 外部修改：len/mtime 变 → 失效重投影
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        std::fs::write(&p, [0u8; 8]).unwrap();
+        let v2 = project_xlsx_cached(&p, &mk_book("v2"));
+        assert_eq!(*v2, vec!["\u{25C7} Sheet: S", "v2"]);
+        assert!(!Arc::ptr_eq(&v1, &v2));
+        let _ = std::fs::remove_file(&p);
     }
 }

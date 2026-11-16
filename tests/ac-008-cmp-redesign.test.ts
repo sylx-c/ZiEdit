@@ -406,6 +406,11 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
     expect(ipcSrc).toContain("officeA: 'docx' | 'xlsx' | null");
   });
 
+  it('投影对不判 BOM（批 1 收尾）：任一侧 Office 投影时不显示 BOM 徽标', () => {
+    // 投影侧 bom 恒为空串占位——混合对（office vs 带 BOM 文本）不得误报「BOM 差异」
+    expect(viewSrc).toMatch(/!this\.officeA && !this\.officeB && \(this\.metaA\?\.bom/);
+  });
+
   it('投影头部：office 侧隐藏编码/BOM/EOL 改示投影说明；修订徽标；xlsx 侧不挂行跳转', () => {
     expect(viewSrc).toContain("t(office === 'docx' ? 'cmp.proj.docx' : 'cmp.proj.xlsx')");
     expect(viewSrc).toContain('cmp-rev-badge');

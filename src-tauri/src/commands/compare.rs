@@ -7,6 +7,7 @@ use crate::compare::{self, detect, office::OfficeKind};
 use crate::encoding;
 use crate::error::ZiEditError;
 use std::path::PathBuf;
+use std::sync::Arc;
 use tauri::Manager;
 
 /// 文件对比元信息
@@ -211,7 +212,7 @@ fn office_side(
             let Content::Xlsx(book) = &*content else {
                 unreachable!()
             };
-            let projection = compare::office::project_xlsx(book);
+            let projection = compare::office::project_xlsx_cached(std::path::Path::new(path), book);
             let lines = projection.len() as u64;
             Ok(OfficeSide {
                 hashes: compare::office::hash_doc_lines(&projection),
@@ -360,11 +361,13 @@ fn office_window(
         OfficeKind::Docx => ooxml::load(registry, path, 0)?,
         OfficeKind::Xlsx => ooxml::load(registry, path, 1)?,
     };
-    let owned: Vec<String>;
+    let owned: Arc<Vec<String>>;
     let slice: &[String] = match (&*content, kind) {
         (Content::Docx(doc), OfficeKind::Docx) => &doc.lines,
         (Content::Xlsx(book), OfficeKind::Xlsx) => {
-            owned = compare::office::project_xlsx(book);
+            // 缓存投影（批 1 收尾）：窗口取行不再每次全量 join；键含 len/mtime，
+            // 与注册表 workbook 同一失效语义（file 变化 → 两侧同时 miss 重解析）。
+            owned = compare::office::project_xlsx_cached(std::path::Path::new(path), book);
             &owned
         }
         _ => unreachable!(),
@@ -1044,6 +1047,138 @@ mod tests {
         let (dl, dt) = office_window(&registry, &d, OfficeKind::Docx, 2, 2).unwrap();
         assert_eq!(dt, 3);
         assert_eq!(dl, ["beta"]);
+    }
+
+    /// 批 1 收尾·性能实测（阶段 0.2）：20 万行级 xlsx 与大 docx 的 Office 投影对比打开耗时，
+    /// 与同规模文本对比（hash_lines + diff_hashes）同量级。默认 #[ignore]（语料生成 +
+    /// 全量解析为秒级，日常门禁不跑）：
+    /// `cargo test --release --manifest-path src-tauri/Cargo.toml office_compare_perf -- --ignored --nocapture`
+    /// （release 才是发行口径；数据记入 docs/changes/office-compare-batch1.md 收口卡）。
+    #[test]
+    #[ignore]
+    fn office_compare_perf_200k_scale_matches_text() {
+        use std::time::Instant;
+        let dir = std::env::temp_dir().join("ZiEdit-cmp-perf");
+        std::fs::create_dir_all(&dir).unwrap();
+        let registry = OoxmlRegistry::default();
+        let run = |a: &str, b: &str, kind_a, kind_b| {
+            let state =
+                compare::input_state(std::path::Path::new(a), std::path::Path::new(b)).unwrap();
+            let t = Instant::now();
+            let res = compare_open_office(&registry, a, b, kind_a, kind_b, state).unwrap();
+            (t.elapsed().as_millis(), res)
+        };
+
+        // —— 20 万行级 xlsx（1 列，提取文本 ≈9.8MiB，贴 10MiB 红线的最大可行规模；
+        // 2 列即超 OOXML_TEXT_LIMIT 显式哨兵——红线行为，非缺陷）——
+        let xlsx_sheet = |mutate: bool| {
+            let mut s = String::with_capacity(16 << 20);
+            s.push_str("<worksheet><sheetData>");
+            // 单位数取值：逐格 String 记账（24B/格 + 24B/行）× 20 万行 ≈9.8MiB，
+            // 贴 10MiB 红线内——六位数取值即超限（哨兵是红线行为，见收口卡备忘）。
+            for r in 1..=200_000u32 {
+                let v = if mutate && r == 100_000 { 9u32 } else { r % 10 };
+                s.push_str(&format!(
+                    "<row r='{r}'><c r='A{r}' t='n'><v>{v}</v></c></row>"
+                ));
+            }
+            s.push_str("</sheetData></worksheet>");
+            s
+        };
+        let xlsx_meta: &[(&str, &str)] = &[
+            (
+                "xl/workbook.xml",
+                "<workbook xmlns:r='r'><sheets><sheet name='Data' r:id='r1'/></sheets></workbook>",
+            ),
+            (
+                "xl/_rels/workbook.xml.rels",
+                "<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/></Relationships>",
+            ),
+        ];
+        let plain = xlsx_sheet(false);
+        let big = crate::ooxml::fixture(
+            &[
+                xlsx_meta[0],
+                xlsx_meta[1],
+                ("xl/worksheets/sheet1.xml", &plain),
+            ],
+            "perf-200k.xlsx",
+        );
+        // 同内容重存场景：字节拷贝成独立文件——投影按提取内容对比，与真实「不同 deflate
+        // 流的同内容重存」等价；两侧独立解析（路径不同，注册表不命中）。
+        let twin = dir.join("perf-200k-twin.xlsx");
+        std::fs::copy(&big, &twin).unwrap();
+        let twin = twin.to_string_lossy().into_owned();
+        let (ms, same) = run(&big, &twin, Some(OfficeKind::Xlsx), Some(OfficeKind::Xlsx));
+        println!("perf: xlsx 200k rows same-content compare_open = {ms}ms");
+        assert!(same.blocks.iter().all(|b| b.kind == "equal"));
+        assert_eq!(same.meta_a.lines, 200_001); // sheet 头 + 20 万数据行
+        let mutated = xlsx_sheet(true);
+        let big2 = crate::ooxml::fixture(
+            &[
+                xlsx_meta[0],
+                xlsx_meta[1],
+                ("xl/worksheets/sheet1.xml", &mutated),
+            ],
+            "perf-200k-mut.xlsx",
+        );
+        let (ms2, diff) = run(&big, &big2, Some(OfficeKind::Xlsx), Some(OfficeKind::Xlsx));
+        println!("perf: xlsx 200k rows one-cell-change compare_open = {ms2}ms");
+        let replaces: Vec<_> = diff.blocks.iter().filter(|b| b.kind == "replace").collect();
+        assert_eq!(replaces.len(), 1, "改一格恰好一处，got {:?}", diff.blocks);
+        assert_eq!((replaces[0].a_start, replaces[0].a_end), (100_001, 100_001));
+
+        // —— 大 docx（12 万段 × ~40 字符 ≈7.7MiB 提取文本）——
+        let docx_xml = |mutate: bool| {
+            let mut s = String::with_capacity(8 << 20);
+            s.push_str("<w:document xmlns:w='w'>");
+            for i in 0..120_000u32 {
+                let tag = if mutate && i == 60_000 {
+                    "CHANGED-para"
+                } else {
+                    "para"
+                };
+                s.push_str(&format!(
+                    "<w:p><w:r><w:t>{tag} {i:06} ——— padding text to body size</w:t></w:r></w:p>"
+                ));
+            }
+            s.push_str("</w:document>");
+            s
+        };
+        let dxml = docx_xml(false);
+        let dmut = docx_xml(true);
+        let d1 = crate::ooxml::fixture(&[("word/document.xml", &dxml)], "perf-docx.docx");
+        let d2 = crate::ooxml::fixture(&[("word/document.xml", &dmut)], "perf-docx-mut.docx");
+        let dtwin = dir.join("perf-docx-twin.docx");
+        std::fs::copy(&d1, &dtwin).unwrap();
+        let dtwin = dtwin.to_string_lossy().into_owned();
+        let (dms, dsame) = run(&d1, &dtwin, Some(OfficeKind::Docx), Some(OfficeKind::Docx));
+        println!("perf: docx 120k paragraphs same-content compare_open = {dms}ms");
+        assert!(dsame.blocks.iter().all(|b| b.kind == "equal"));
+        let (dms2, ddiff) = run(&d1, &d2, Some(OfficeKind::Docx), Some(OfficeKind::Docx));
+        println!("perf: docx 120k paragraphs one-para-change compare_open = {dms2}ms");
+        assert_eq!(
+            ddiff.blocks.iter().filter(|b| b.kind == "replace").count(),
+            1
+        );
+
+        // —— 同规模文本基线（对比量级参照）——
+        let txt = dir.join("perf-200k.txt");
+        let mut body = String::with_capacity(4 << 20);
+        for r in 1..=200_000u32 {
+            body.push_str(&format!("{r}\n"));
+        }
+        std::fs::write(&txt, body.as_bytes()).unwrap();
+        let t = Instant::now();
+        let (ha, _) = compare::hash_lines(&txt, "UTF-8", compare::LINE_LIMIT).unwrap();
+        let (hb, _) = compare::hash_lines(&txt, "UTF-8", compare::LINE_LIMIT).unwrap();
+        let blocks = compare::diff_hashes(&ha, &hb);
+        println!(
+            "perf: text 200k lines hash_lines x2 + diff = {}ms ({} blocks)",
+            t.elapsed().as_millis(),
+            blocks.len()
+        );
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// 008 规则 12 v0.6：预览概要纯函数——改/增/删计数与样本（≤20 行、120 字符截断）
