@@ -353,6 +353,14 @@ button{font:inherit}
   box-shadow:var(--shadow-lg);padding:4px;z-index:100;
   margin-top:4px;
 }
+/* 统一 title 提示层（2026-11-16）：原生悬停提示在 WebView2 下延迟约 500ms 且同位悬停常
+   不再触发；自定义层 260ms 稳定出现、贴合主题，installPointerTips 悬停期间摘下原生 title。 */
+.app-tip{
+  position:fixed;z-index:1000;display:none;max-width:320px;
+  padding:3px 8px;border-radius:5px;background:var(--surface);color:var(--fg);
+  border:1px solid var(--border);box-shadow:var(--shadow-lg);
+  font-size:12px;line-height:1.5;pointer-events:none;
+}
 .menu-item.open > .menu-dropdown{display:block}
 .menu-action{
   display:flex;align-items:center;
@@ -1156,6 +1164,13 @@ button{font:inherit}
   content:'';width:6px;height:6px;flex-shrink:0;
   background:var(--accent);border-radius:50%;
 }
+/* 只读形态（渲染预览/标签锁，2026-11-16）：同色空心圆点——与 editing 同为「当前模式」
+   的亮展示，实心=可编辑、空心=只读；此前预览态恒灰被读作“颜色没了”。 */
+.statusbar .st-cell.mode-cell.preview{color:var(--accent);font-weight:600}
+.statusbar .st-cell.mode-cell.preview::before{
+  content:'';width:6px;height:6px;flex-shrink:0;box-sizing:border-box;
+  border:1.5px solid var(--accent);border-radius:50%;
+}
 .st-led{width:6px;height:6px;flex-shrink:0}
 .st-led.ok{background:var(--c-green)}
 .st-led.info{background:var(--c-blue)}
@@ -1402,6 +1417,9 @@ button{font:inherit}
 .welcome-box ul{margin:0 0 14px;padding-inline-start:18px;color:var(--fg);font-size:12.5px;line-height:1.9}
 .about-name{font-size:19px;font-weight:650;letter-spacing:.5px}
 .about-ver{color:var(--accent);font-size:12.5px;font-family:var(--mono)}
+/* 版本行内链接（2026-11-16）：版本号→下载页、渠道标记→仓库首页；构建 SHA 保持纯文本 */
+.about-inline-link{background:none;border:none;padding:0;color:inherit;font:inherit;cursor:pointer}
+.about-inline-link:hover{text-decoration:underline}
 .about-copy{display:flex;align-items:center;justify-content:center}
 .about-link{
   border:0;padding:0;background:transparent;color:inherit;cursor:pointer;
@@ -1658,6 +1676,8 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .cmp-stat-num .del b{color:var(--c-red)}
 /* BOM 文件级徽标（008 规则 8 v0.6）：A/B BOM 有无或类型不同时计数行红标 */
 .cmp-bom-badge{display:inline-block;margin-left:8px;padding:1px 6px;border-radius:3px;background:var(--diff-del);color:var(--c-red);font-size:10px;font-weight:600;letter-spacing:0.04em;vertical-align:1px}
+/* 修订徽标（批 1）：docx 侧含修订标记 → 对比口径=终态的如实告知（琥珀色，非差异） */
+.cmp-rev-badge{display:inline-block;margin-left:8px;padding:1px 6px;border-radius:3px;background:var(--hover);color:var(--c-amber);font-size:10px;font-weight:600;letter-spacing:0.04em;vertical-align:1px;cursor:help}
 /* 规范化另存预览（008 规则 12 v0.6） */
 .norm-preview{margin-top:10px;max-height:220px;overflow:auto;font-family:var(--mono);font-size:11.5px;border:1px solid var(--border);border-radius:4px;padding:6px 8px}
 .norm-preview-head{color:var(--faint);margin-bottom:4px}

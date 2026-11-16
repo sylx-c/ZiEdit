@@ -130,6 +130,7 @@ import {
 import { SidebarCtl, type RecentItem, type SidebarOpts } from './sidebar';
 import { startAutosaveTimers, closeActionFor } from './autosave';
 import { t as $t, tf as $tf, getLang, setLang, syncLangFromSettings, type Lang } from '../common/i18n';
+import { installDefaultContextMenuGuard, installPointerTips } from '../common/ui-guards';
 import { fmtSize } from '../common/format';
 import { clampFontSize } from '../common/fontSize';
 import { normLocal, dirOf, isRealFilePath, isVirtualTab, deriveTreeRoot } from '../common/paths';
@@ -469,6 +470,10 @@ export function normalizeEditorDom(): void {
 
 export async function boot(): Promise<void> {
   normalizeEditorDom();
+  // 桌面化兜底（2026-11-16 用户反馈）：未提供自定义右键菜单的面拦截 WebView2 默认菜单；
+  // title 提示统一走自定义层（原生在 WebView2 下延迟长且常不再触发）。
+  installDefaultContextMenuGuard();
+  installPointerTips();
   const sidebarEl = el('sidebar');
   const tabbar = el('tabbar');
   const viewarea = el('viewarea');
@@ -3764,12 +3769,16 @@ export async function boot(): Promise<void> {
           }
       }
       setTxt(modeCell, modeName);
-      // 编辑缓冲/即时渲染在场：模式格着强调色 + 圆点（P3 反馈 13 语义沿用；工具栏 editToggle 已随 v2.6 删除）
-      // 锁态与工具栏「编辑|只读」段同一事实源（2026-10 反馈）：标签锁/全局只读时不亮「编辑」并显示「只读」。
+      // 模式格两态强标记（2026-11-16 用户反馈定稿）：可编辑形态=强调色实心圆点（editing），
+      // 只读形态（渲染预览/标签锁）=强调色空心圆点（preview）——同为「当前模式」的亮展示，
+      // 实心/空心对应可编辑/只读；可编辑与否的完整裁决仍由工具栏「编辑|只读」段承担（两侧对称点亮）。
+      // 锁态与工具栏「编辑|只读」段同一事实源（2026-10 反馈）：标签锁/全局只读时显示「只读」。
       const editingNow =
         !!t && (currentView instanceof EditView || currentView instanceof LivePreviewView);
       const locked = editingNow && (settings.readOnlyMode || (t ? tabLock.has(t.path) : false));
-      modeCell.classList.toggle('editing', editingNow && !locked && m !== 'md');
+      const readonlyForm = m === 'md' || locked;
+      modeCell.classList.toggle('editing', editingNow && !readonlyForm);
+      modeCell.classList.toggle('preview', readonlyForm);
       if (locked && m !== 'md') setTxt(modeCell, $t('status.readonly'));
       setTxt(
         posCell,
@@ -5491,13 +5500,10 @@ export async function boot(): Promise<void> {
     return __APP_VERSION__;
   }
 
-  /** 版本口径（001 规则 30 v2.0 修订）：「版本 · 渠道 · 构建 SHA」——构建日期不再展示（2026-10 用户定稿） */
-  function buildLabel(version: string): string {
-    const channel = $t(__BUILD_CHANNEL__ === 'release' ? 'about.channelRelease' : 'about.channelDev');
-    return [version, channel, __GIT_SHA__].join(' · ');
-  }
-
-  /** 关于对话框 `AboutDialog`（001 规则 30）：图标/名称/版本/简介/标识符/版权/日志入口 */
+  /** 关于对话框 `AboutDialog`（001 规则 30）：图标/名称/版本/简介/标识符/版权/日志入口。
+   *  版本口径（001 规则 30 v2.0 修订）：「版本 · 渠道 · 构建 SHA」——构建日期不再展示（2026-10 用户定稿）；
+   *  2026-11-16 用户需求：版本号点击→下载安装包页（GitHub Releases），渠道标记点击→GitHub 仓库首页，
+   *  构建 SHA 保持纯文本（溯源标识，非链接）。 */
   async function openAboutDialog(): Promise<void> {
     const body = document.createElement('div');
     body.className = 'about-box';
@@ -5510,7 +5516,25 @@ export async function boot(): Promise<void> {
     name.textContent = 'ZiEdit';
     const ver = document.createElement('div');
     ver.className = 'about-ver';
-    ver.textContent = $tf('about.version', buildLabel(await appVersion()));
+    const version = await appVersion();
+    const channel = $t(__BUILD_CHANNEL__ === 'release' ? 'about.channelRelease' : 'about.channelDev');
+    const inline = (text: string, url: string, tip: string): HTMLButtonElement => {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'about-inline-link';
+      el.textContent = text;
+      el.title = tip;
+      el.setAttribute('aria-label', tip);
+      el.addEventListener('click', () => openExternalUrl(url));
+      return el;
+    };
+    ver.append(
+      document.createTextNode($t('about.versionLabel') + ' '),
+      inline(version, 'https://github.com/sylx-c/ZiEdit/releases', $t('about.versionDlTip')),
+      document.createTextNode(' · '),
+      inline(channel, 'https://github.com/sylx-c/ZiEdit', $t('about.channelHomeTip')),
+      document.createTextNode(' · ' + __GIT_SHA__),
+    );
     const tag = document.createElement('div');
     tag.className = 'about-tag';
     tag.textContent = $t('about.tagline');

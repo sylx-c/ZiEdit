@@ -283,6 +283,15 @@ export class SidebarCtl {
     });
     r.append(star, del);
     r.addEventListener('click', () => this.opts.onOpenPath(item.path, item.isDir));
+    // 右键菜单（2026-11-16 用户需求）：与收藏行同口径——移除该记录/清空全部。
+    r.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.opts.showMenu([
+        [t('sb.removeRec'), () => this.opts.onRemoveRecents([item.path])],
+        [t('sb.clear'), () => this.opts.onClearRecents()],
+      ], e.clientX, e.clientY);
+    });
     return r;
   }
 
