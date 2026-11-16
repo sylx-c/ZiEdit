@@ -373,3 +373,48 @@ describe('i18n 两语齐全（中文界面下导航/统计/折叠行不得回退
     expect(tf('cmp.sameLines', 9)).toMatch(/9/);
   });
 });
+
+describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', () => {
+  const viewSrc = read('src/compare-view/view.ts');
+  const ipcSrc = read('src/common/ipc.ts');
+  const rsSrc = read('src-tauri/src/commands/compare.rs');
+  const officeRs = read('src-tauri/src/compare/office.rs');
+  const libRs = read('src-tauri/src/lib.rs');
+  const css = read('src/styles.css');
+
+  it('后端分流：office 扩展名走投影管线，不对 ZIP 原始字节做行哈希', () => {
+    expect(officeRs).toContain('pub fn office_kind');
+    expect(officeRs).toContain('pub fn project_xlsx');
+    expect(officeRs).toContain('pub fn hash_doc_lines');
+    expect(rsSrc).toContain('fn compare_open_office');
+    expect(rsSrc).toContain('OFFICE_PROJECTION_LIMIT');
+    // 混合对对齐口径：投影无字节层，byte := text（否则等内容行被判全替换）
+    expect(rsSrc).toContain('h.byte = h.text');
+    // 采样降级不适用于投影（降级路径读原始容器字节 = 噪声）：office 主流程不得调用
+    // （按调用语法判，注释里的说明文字不算）
+    const from = rsSrc.indexOf('fn compare_open_office');
+    const to = rsSrc.indexOf('fn office_window');
+    const officeFn = rsSrc.slice(from, to > from ? to : from + 4000);
+    expect(officeFn).not.toContain('hash_windows(');
+  });
+
+  it('office_lines 命令注册 + 前端封装 + 相等块取行分流', () => {
+    expect(rsSrc).toContain('pub async fn office_lines');
+    expect(libRs).toContain('commands::compare::office_lines');
+    expect(ipcSrc).toContain("invoke<OfficeLinesResult>('office_lines'");
+    expect(viewSrc).toContain('await officeLines(this.pathA, blk.aStart, blk.aEnd)');
+    expect(ipcSrc).toContain("officeA: 'docx' | 'xlsx' | null");
+  });
+
+  it('投影头部：office 侧隐藏编码/BOM/EOL 改示投影说明；修订徽标；xlsx 侧不挂行跳转', () => {
+    expect(viewSrc).toContain("t(office === 'docx' ? 'cmp.proj.docx' : 'cmp.proj.xlsx')");
+    expect(viewSrc).toContain('cmp-rev-badge');
+    expect(css).toContain('.cmp-rev-badge');
+    // xlsx 投影行号≠Excel 行号，CsvView 无行锚——不挂 cmp-jump
+    expect(viewSrc).toContain("=== 'xlsx') continue");
+    for (const k of ['cmp.proj.docx', 'cmp.proj.xlsx', 'cmp.revisions', 'cmp.revisionsTitle']) {
+      expect(dict('zh-CN')[k], `zh ${k}`).toBeTruthy();
+      expect(dict('en-US')[k], `en ${k}`).toBeTruthy();
+    }
+  });
+});

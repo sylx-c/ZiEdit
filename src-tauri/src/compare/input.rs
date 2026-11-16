@@ -28,16 +28,17 @@ pub fn input_state(a: &Path, b: &Path) -> std::io::Result<InputState> {
     })
 }
 
-pub fn inputs_binary(a: &Path, b: &Path) -> std::io::Result<bool> {
+/// 单侧二进制判决（compare 唯一类型判据；与 inputs_binary 同一口径）：
+/// FileKind.binary 或 无语言的图片路由。Office 投影侧（docx/xlsx）不走本判决。
+pub fn input_binary(path: &Path) -> std::io::Result<bool> {
     use crate::kind_detect::detect;
-    // 复用唯一类型判据（首 4KB 连续 NUL >64）；SVG 仍为文本。
-    // Hex 视图移除后判据改为 FileKind.binary（呈现分流见 compare_open 的 binary 字段）。
-    let binary = |path: &Path| -> std::io::Result<bool> {
-        let kind = detect(path)?;
-        Ok(kind.binary
-            || (kind.route == crate::kind_detect::ViewRoute::Image && kind.language.is_none()))
-    };
-    Ok(binary(a)? || binary(b)?)
+    let kind = detect(path)?;
+    Ok(kind.binary
+        || (kind.route == crate::kind_detect::ViewRoute::Image && kind.language.is_none()))
+}
+
+pub fn inputs_binary(a: &Path, b: &Path) -> std::io::Result<bool> {
+    Ok(input_binary(a)? || input_binary(b)?)
 }
 
 #[cfg(test)]

@@ -5,7 +5,8 @@
 
 pub mod detect;
 mod input;
-pub use input::{InputState, input_state, inputs_binary};
+pub mod office;
+pub use input::{InputState, input_binary, input_state, inputs_binary};
 
 use std::collections::hash_map::DefaultHasher;
 use std::fs::File;

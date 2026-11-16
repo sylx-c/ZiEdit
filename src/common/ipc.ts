@@ -321,6 +321,12 @@ export interface CmpOpenResult {
   encMarksA: Array<[number, number]>;
   encMarksB: Array<[number, number]>;
   degraded: boolean;
+  /** Office 投影侧标记（批 1）：'docx' | 'xlsx' | null（null=原始文本路径）。
+   *  投影侧 encoding/bom/eol 无意义，头部改示投影说明。 */
+  officeA: 'docx' | 'xlsx' | null;
+  officeB: 'docx' | 'xlsx' | null;
+  /** 任一 docx 侧含修订标记（对比口径=接受修订后终态，头部如实告知） */
+  revisions: boolean;
 }
 export type CmpSpanCat = 'homoglyph' | 'normalize' | 'invisible' | 'whitespace' | 'content';
 export interface CmpSpan {
@@ -347,6 +353,11 @@ export const compareOpen = (a: string, b: string) => invoke<CmpOpenResult>('comp
 export const compareDetail = (
   a: string, b: string, aFrom: number, aTo: number, bFrom: number, bTo: number
 ) => invoke<CmpDetailLine[][]>('compare_detail', { a, b, aFrom, aTo, bFrom, bTo });
+/** 对比视图相等块取行（批 1）：按 compare_open 同一分流取 Office 投影行窗口 */
+export interface OfficeLine { no: number; text: string }
+export interface OfficeLinesResult { lines: OfficeLine[]; total: number }
+export const officeLines = (path: string, from: number, to: number) =>
+  invoke<OfficeLinesResult>('office_lines', { path, from, to });
 export const normalizeSave = (src: string, dst: string, opts: NormalizeOpts, encodingName?: string) =>
   invoke<number>('normalize_save', { src, dst, opts, encodingName: encodingName ?? null });
 

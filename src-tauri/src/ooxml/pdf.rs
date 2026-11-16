@@ -267,7 +267,12 @@ fn extract(mut r: impl BufRead) -> Result<Document> {
         return Err("PDF_LINE_LIMIT:4MiB".into());
     }
     let total_chars = lines.iter().map(|s| s.chars().count()).sum();
-    Ok(Document { lines, total_chars })
+    // PDF 无 Word 修订语义：revisions 恒 false（docx::Document 复用结构）
+    Ok(Document {
+        lines,
+        total_chars,
+        revisions: false,
+    })
 }
 pub fn open(path: &str) -> Result<Document> {
     extract(BufReader::with_capacity(

@@ -302,6 +302,7 @@ pub fn run() {
             tray_set_language,
             commands::compare::compare_open,
             commands::compare::compare_detail,
+            commands::compare::office_lines,
             commands::compare::normalize_save,
             commands::compare::normalize_preview,
             commands::compare::encode_convert_save,

@@ -6,6 +6,7 @@ import {
   compareDetail,
   compareOpen,
   fileStat,
+  officeLines,
   textLines,
   type CmpDetailLine,
   type CmpOpenResult,
@@ -93,6 +94,10 @@ export class CompareView {
   private pathB = '';
   private metaA: CmpOpenResult['metaA'] | null = null;
   private metaB: CmpOpenResult['metaB'] | null = null;
+  /** Office 投影侧（批 1）：头部徽标分流 + 相等块取行走 office_lines */
+  private officeA: 'docx' | 'xlsx' | null = null;
+  private officeB: 'docx' | 'xlsx' | null = null;
+  private revisions = false;
   private degraded = false;
   /** 当前差异序号（1-based；0=未定位/无差异） */
   private curDiff = 0;
@@ -151,6 +156,9 @@ export class CompareView {
     this.blocks = toViewBlocks(res.blocks);
     this.metaA = res.metaA;
     this.metaB = res.metaB;
+    this.officeA = res.officeA ?? null;
+    this.officeB = res.officeB ?? null;
+    this.revisions = res.revisions === true;
     this.degraded = res.degraded;
     this.encA = new Set(res.encMarksA.map(m => m[0]));
     this.encB = new Set(res.encMarksB.map(m => m[0]));
@@ -252,11 +260,15 @@ export class CompareView {
       s.title = m?.path ?? '';
       const badge = mk('span', 'cmp-side', side);
       const file = mk('span', 'cmp-file', (m?.path ?? '').split(/[\\/]/).pop() ?? '');
-      const dim = mk(
-        'span',
-        'cmp-meta-dim',
-        `${m?.encoding ?? ''}${m?.bom ? ' · BOM:' + m.bom : ''}${m?.eol && m.eol !== '-' ? ' · EOL:' + m.eol : ''} · ${tf('cmp.lines', m?.lines ?? 0)} · ${fmtSize(m?.len ?? 0)}`
-      );
+      // 投影侧（批 1）：encoding/BOM/EOL 对投影无意义 → 改示投影说明（悬停给提取范围）
+      const office = side === 'A' ? this.officeA : this.officeB;
+      const dim = mk('span', 'cmp-meta-dim');
+      if (office) {
+        dim.textContent = `${t(office === 'docx' ? 'cmp.proj.docx' : 'cmp.proj.xlsx')} · ${tf('cmp.lines', m?.lines ?? 0)} · ${fmtSize(m?.len ?? 0)}`;
+        dim.title = t(office === 'docx' ? 'ooxml.docxScope' : 'ooxml.xlsxScope');
+      } else {
+        dim.textContent = `${m?.encoding ?? ''}${m?.bom ? ' · BOM:' + m.bom : ''}${m?.eol && m.eol !== '-' ? ' · EOL:' + m.eol : ''} · ${tf('cmp.lines', m?.lines ?? 0)} · ${fmtSize(m?.len ?? 0)}`;
+      }
       s.append(badge, file, dim);
       return s;
     };
@@ -296,6 +308,12 @@ export class CompareView {
       bomBadge.title = `A: ${this.metaA?.bom || '-'} / B: ${this.metaB?.bom || '-'}`;
       this.bomBadgeEl = bomBadge;
       counts.appendChild(bomBadge);
+    }
+    // 修订徽标（批 1）：docx 侧含修订标记 → 如实告知对比口径=接受修订后终态
+    if (this.revisions) {
+      const revBadge = mk('span', 'cmp-rev-badge', t('cmp.revisions'));
+      revBadge.title = t('cmp.revisionsTitle');
+      counts.appendChild(revBadge);
     }
     headline.appendChild(counts);
     headline.appendChild(mk('span', 'tb-spacer'));
@@ -554,6 +572,8 @@ export class CompareView {
       ];
       for (const [cell, side, no] of cells) {
         if (no == null) continue;
+        // xlsx 投影侧（批 1）：投影行号≠Excel 行号，CsvView 无行锚——跳转不可达，不挂跳转样式
+        if ((side === 'a' ? this.officeA : this.officeB) === 'xlsx') continue;
         cell.classList.add('cmp-jump');
         cell.addEventListener('click', () => this.opts.onJump!(side === 'a' ? this.pathA : this.pathB, no));
       }
@@ -572,9 +592,12 @@ export class CompareView {
         return;
       }
       try {
-        const lines = await textLines(this.pathA, blk.aStart, blk.aEnd);
+        // 投影对（批 1）：A 侧为 docx/xlsx 时相等块取行走 office_lines（同一分流口径）
+        const fetched = this.officeA
+          ? (await officeLines(this.pathA, blk.aStart, blk.aEnd)).lines
+          : await textLines(this.pathA, blk.aStart, blk.aEnd);
         if (this.destroyed) return;
-        const texts = lines.map(l => l.text);
+        const texts = fetched.map(l => l.text);
         this.equalCache.set(d.idx, texts);
         const cur = [...this.sizer.children].find(c => (c as HTMLElement).style.top === `${d.top}px`) as HTMLElement | undefined;
         if (cur) this.fillText(cur, texts);

@@ -4,6 +4,9 @@ use serde::Serialize;
 pub struct Document {
     pub lines: Vec<String>,
     pub total_chars: usize,
+    /// 正文存在修订标记（w:ins/w:del）：查看提示与对比投影口径说明用。
+    /// 提取语义不变（插入文本计入正文、w:delText 丢弃）＝「接受全部修订后的终态」。
+    pub revisions: bool,
 }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -11,6 +14,8 @@ pub struct OpenResult {
     pub para_count: usize,
     pub total_chars: usize,
     pub truncated: bool,
+    #[serde(default)]
+    pub revisions: bool,
 }
 impl Document {
     pub fn info(&self) -> OpenResult {
@@ -18,6 +23,7 @@ impl Document {
             para_count: self.lines.len(),
             total_chars: self.total_chars,
             truncated: false,
+            revisions: self.revisions,
         }
     }
 }
@@ -30,6 +36,7 @@ pub fn open(path: &str) -> Result<Document> {
     let mut first_cell = true;
     let mut cell_paragraphs = 0;
     let mut bytes = 0;
+    let mut revisions = false;
     xml(&mut zip, "word/document.xml", 32 * 1024 * 1024, |event| {
         match event {
             Event::Start(e) | Event::Empty(e) => match e.local_name().as_ref() {
@@ -51,6 +58,9 @@ pub fn open(path: &str) -> Result<Document> {
                     cell_paragraphs += 1;
                 }
                 "t" => in_text = true,
+                // 修订标记（批 1 对比投影）：w:ins/w:del 元素出现即置位；
+                // 提取口径不变（终态），标志仅供查看/对比头部如实告知。
+                "ins" | "del" => revisions = true,
                 "tab" => current.push('\t'),
                 "br" | "cr" => current.push('\n'),
                 _ => {}
@@ -82,7 +92,11 @@ pub fn open(path: &str) -> Result<Document> {
         Ok(())
     })?;
     let total_chars = lines.iter().map(|s| s.chars().count()).sum();
-    Ok(Document { lines, total_chars })
+    Ok(Document {
+        lines,
+        total_chars,
+        revisions,
+    })
 }
 
 #[cfg(test)]
@@ -98,6 +112,31 @@ mod tests {
             "paragraphs.docx",
         );
         assert_eq!(open(&p).unwrap().lines, ["A&B\tC\nD", "X\tY"]);
+    }
+    #[test]
+    fn revision_marks_set_flag_but_extraction_stays_final_state() {
+        // w:ins 内文本计入正文（终态），w:delText 不计（local_name 非 t）；
+        // 出现 ins/del 即置 revisions 标志。
+        let p = fixture(
+            &[(
+                "word/document.xml",
+                "<w:document xmlns:w='w'><w:p><w:ins><w:r><w:t>kept</w:t></w:r></w:ins><w:del><w:r><w:delText>gone</w:delText></w:r></w:del></w:p></w:document>",
+            )],
+            "revisions.docx",
+        );
+        let doc = open(&p).unwrap();
+        assert_eq!(doc.lines, ["kept"]);
+        assert!(doc.revisions);
+        assert!(doc.info().revisions);
+        // 无修订文档：标志为 false
+        let clean = fixture(
+            &[(
+                "word/document.xml",
+                "<w:document xmlns:w='w'><w:p><w:r><w:t>plain</w:t></w:r></w:p></w:document>",
+            )],
+            "clean.docx",
+        );
+        assert!(!open(&clean).unwrap().revisions);
     }
     #[test]
     fn extraction_limit_is_explicit() {

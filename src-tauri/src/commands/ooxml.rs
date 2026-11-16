@@ -10,7 +10,7 @@ use std::{
 };
 use tauri::Manager;
 
-enum Content {
+pub(crate) enum Content {
     Docx(docx::Document),
     Xlsx(xlsx::Workbook),
     Pdf(docx::Document),
@@ -60,7 +60,12 @@ fn publish_entry(
 /// （docx/xlsx/pdf::open 可达数百 ms，持锁会把并发 lines 查询挡在锁外），
 /// 再二次加锁经 [`publish_entry`] 做失效校验 + 淘汰 + 插入；
 /// len/mtime 失效语义与 4 份淘汰上限不变。
-fn load(registry: &OoxmlRegistry, path: &str, kind: u8) -> Result<Arc<Content>, ZiEditError> {
+/// pub(crate)：commands::compare 的 Office 投影对比复用同一缓存与失效语义（批 1）。
+pub(crate) fn load(
+    registry: &OoxmlRegistry,
+    path: &str,
+    kind: u8,
+) -> Result<Arc<Content>, ZiEditError> {
     crate::paths::reject_device_path(path)?;
     let meta = std::fs::metadata(path)?;
     let modified = meta.modified().ok();
@@ -303,6 +308,7 @@ mod tests {
         Arc::new(Content::Docx(docx::Document {
             lines: vec![tag.into()],
             total_chars: tag.len(),
+            revisions: false,
         }))
     }
 
