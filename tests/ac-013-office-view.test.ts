@@ -96,7 +96,7 @@ describe('ac-013 批 2：Excel 显示值查看与公式开关', () => {
     expect(richSrc).toContain('onFallbackToText');
     expect(appSrc).toContain("tab.route === 'rich'");
     expect(appSrc).toMatch(/setRoute\(path, 'text'\)/);
-    expect(appSrc).toContain("isWordOoxmlPath(t.path)) store.setRoute(t.path, 'rich')");
+    expect(appSrc).toContain("isWordOoxmlPath(t.path)) store.setRoute(t.path, 'rich', { lock: true })");
     expect(stateSrc).toContain("t.route === 'rich'");
     expect(capsSrc).toContain('rich: { ...COMMON }');
     for (const k of ['docxRich.loading', 'docxRich.fallback', 'docxRich.tooLarge', 'docxRich.timeout', 'docxRich.scope', 'act.richDocx']) {

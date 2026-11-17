@@ -381,7 +381,7 @@ export interface XlsxDiffResult {
   diffs: XlsxDiffEntry[];
   groups: Array<[string, number]>;
 }
-export const xlsxXiff = (a: string, b: string, keyColumn?: number) =>
+export const xlsxDiff = (a: string, b: string, keyColumn?: number) =>
   invoke<XlsxDiffResult>('xlsx_diff', { a, b, opts: { keyColumn: keyColumn ?? null } });
 export interface DocxRevisionRecord { kind: string; author: string; date: string; text: string }
 export interface DocxRevisionReport { records: DocxRevisionRecord[]; total: number; truncated: boolean }

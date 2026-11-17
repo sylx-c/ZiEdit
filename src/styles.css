@@ -1656,6 +1656,7 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .cmp-headline{
   display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;
   border-bottom:1px solid var(--border);overflow:hidden;
+  container-type:inline-size;
 }
 .cmp-legend{
   display:flex;align-items:center;gap:6px;height:28px;padding:0 10px;
@@ -1666,8 +1667,13 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
   font-family:var(--mono);font-size:10px;font-weight:600;line-height:14px;padding:0 4px;
   border:1px solid var(--accent);border-radius:3px;color:var(--accent);flex-shrink:0;
 }
-.cmp-file{font-family:var(--mono);color:var(--fg);max-width:190px;overflow:hidden;text-overflow:ellipsis}
-.cmp-meta-dim{font-family:var(--mono);color:var(--faint);font-size:10.5px;overflow:hidden;text-overflow:ellipsis}
+/* 文件名是用户内容不是代码：沿用界面字体（等宽栈缺 CJK/带圈数字，① 会被符号字回退成小号）。*/
+/* 文件名优先于右侧次要信息：不参与收缩（收缩时左侧文件名会被压成「①预算…」）。*/
+.cmp-file{font-family:inherit;color:var(--fg);max-width:240px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.cmp-meta-dim{font-family:var(--mono);color:var(--faint);font-size:10.5px;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* 头部空间不足时先撤次要的投影说明，保证 A/B 文件名完整（文件名截断比丢说明更难辨认）。
+   完整口径仍可悬停文件名查看。 */
+@container (max-width:1180px){.cmp-headline .cmp-meta-dim{display:none}}
 .cmp-arrow{color:var(--faint);font-family:var(--mono);flex-shrink:0}
 /* diffstat：三色配比条 + ~改 / +增 / −删 计数 */
 .cmp-stat{display:flex;align-items:center;gap:8px;flex-shrink:0}
@@ -1698,6 +1704,8 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .cmp-row .cmp-jump{cursor:pointer}
 .cmp-row .cmp-jump:hover{text-decoration:underline dotted;text-underline-offset:3px}
 .cmp-counts{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 动作按钮不参与截断：摘要文本先让位（窄窗口下差异清单/公式口径/扩围入口必须可达）。 */
+.cmp-acts{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .cmp-counts em{font-style:normal;color:var(--c-amber);font-weight:550}
 /* 差异导航 ◀ n/m ▶ */
 .cmp-nav{

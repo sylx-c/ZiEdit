@@ -135,6 +135,7 @@ import { installDefaultContextMenuGuard, installPointerTips } from '../common/ui
 import { fmtSize } from '../common/format';
 import { clampFontSize } from '../common/fontSize';
 import { normLocal, dirOf, isRealFilePath, isVirtualTab, deriveTreeRoot } from '../common/paths';
+import { comparePair, tabDisplayName } from '../common/tab-title';
 import { snapshotHint, INITIAL_SNAP_HINTS } from './recovery-hints';
 import { placePopup } from '../common/popup';
 import { openContextMenu } from './context-menu';
@@ -821,10 +822,15 @@ export async function boot(): Promise<void> {
   const activeTab = () => store.active();
   const activeName = (): string | null => {
     const t = activeTab();
-    if (!t) return null;
-    return t.path.startsWith('draft://')
-      ? $tf('tab.draft', t.path.slice(8))
-      : t.path.replace(/\\/g, '/').split('/').pop() ?? t.path;
+    // 与标签栏同源（修前自造 basename：对比伪标签退化为 URL 编码串，标题栏看不出在比哪两个文件）
+    return t ? tabDisplayName(t) : null;
+  };
+
+/** 状态栏提示区默认文案：真实文件给完整路径，伪标签给可读显示名（不暴露 compare:// 伪路径）。 */
+  const hintOf = (tab: TabState): string => {
+    if (tab.path.startsWith('draft://')) return $t('status.draft');
+    if (isVirtualTab(tab.path)) return tabDisplayName(tab);
+    return tab.path;
   };
 
   const render = () => {
@@ -2948,19 +2954,6 @@ export async function boot(): Promise<void> {
     renderTabs();
   }
 
-  function tabDisplayName(tab: { path: string }): string {
-    if (tab.path.startsWith('draft://')) return $tf('tab.draft', tab.path.slice(8));
-    if (tab.path === 'tail://') return $t('tab.tailboard');
-    if (tab.path.startsWith('compare://')) {
-      return tab.path
-        .slice('compare://'.length)
-        .split('|')
-        .map(s => decodeURIComponent(s).replace(/\\/g, '/').split('/').pop())
-        .join(' ↔ ');
-    }
-    return tab.path.replace(/\\/g, '/').split('/').pop() ?? tab.path;
-  }
-
   // 溢出下拉按钮可见性 + 活动标签滚入视口（#25）
   function refreshTabbarChrome(): void {
     const btn = tabbar.querySelector('.tab-overflow') as HTMLElement | null;
@@ -3024,11 +3017,18 @@ export async function boot(): Promise<void> {
       // 规则 7 状态标记（F001-03）：文件已不在——标签名划线弱化（.tab-del 见 styles.css）
       if (deletedPaths.has(tab.path)) t.classList.add('tab-del');
       // H-2：修改时间/大小从状态栏移到标签悬停（状态栏按视图裁剪降密度）
+      // 伪标签悬停同样不得打印 compare:// 编码串：对比标签给「A ↔ B」+ 两侧完整路径，
+      // 草稿/尾随台给显示名；真实文件维持完整路径（含修改时间/大小/只读）。
       {
         const mt = fileMtimes.get(tab.path);
         const size = fileSizes.get(tab.path);
+        const pair = comparePair(tab.path);
+        let base: string;
+        if (pair) base = `${tabDisplayName(tab)}\nA: ${pair[0]}\nB: ${pair[1]}`;
+        else if (isVirtualTab(tab.path) || tab.path.startsWith('draft://')) base = tabDisplayName(tab);
+        else base = tab.path;
         t.title =
-          tab.path +
+          base +
           (mt ? `\n${$tf('st.mtime', fmtDate(mt))}` : '') +
           (size ? `\n${$tf('st.size', fmtSize(size))}` : '') +
           (fileReadonly.has(tab.path) ? `\n${$t('status.readonly')}` : '');
@@ -3564,7 +3564,9 @@ export async function boot(): Promise<void> {
       statusHintEl.className = 'st-hint';
       bindStatusHint(statusHintEl);
     }
-    setHintDefault(tab ? (tab.path.startsWith('draft://') ? $t('status.draft') : tab.path) : $t('status.ready'));
+    // 提示区默认文案：真实文件=完整路径；草稿/对比/尾随台等伪标签=可读显示名。
+    // 修前对比标签把整条 URL 编码的 compare:// 串铺在状态栏左侧（与标题栏同源的乱码问题）。
+    setHintDefault(tab ? hintOf(tab) : $t('status.ready'));
     const mode: ViewMode = tab ? modeOf(tab) : 'view';
     const isMd = !!tab && tab.route === 'text' && tab.language === 'Markdown';
     const realText =
@@ -4721,7 +4723,7 @@ export async function boot(): Promise<void> {
     },
     run: () => {
       const t = activeTab();
-      if (t && isWordOoxmlPath(t.path)) store.setRoute(t.path, 'rich');
+      if (t && isWordOoxmlPath(t.path)) store.setRoute(t.path, 'rich', { lock: true });
     },
   });
   reg.add({
@@ -4732,7 +4734,7 @@ export async function boot(): Promise<void> {
     },
     run: () => {
       const t = activeTab();
-      if (t && isRealFilePath(t.path)) store.setRoute(t.path, 'text');
+      if (t && isRealFilePath(t.path)) store.setRoute(t.path, 'text', { lock: true });
     },
   });
   /** 「可编辑面」的视图类型判定（供 enabled 与非 Markdown 的选中态使用）：

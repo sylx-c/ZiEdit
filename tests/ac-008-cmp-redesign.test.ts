@@ -480,7 +480,7 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
       expect(rsSrc).toContain('pub async fn xlsx_diff');
       expect(libRs).toContain('commands::compare::xlsx_diff');
       expect(ipcSrc).toContain("invoke<XlsxDiffResult>('xlsx_diff'");
-      expect(viewSrc).toContain('xlsxXiff(this.pathA, this.pathB');
+      expect(viewSrc).toContain('xlsxDiff(this.pathA, this.pathB');
     });
 
     it('差异清单 UI：分组折叠 + 键列输入 + 点击定位投影行（替换批 1 的 xlsx 不挂跳转）', () => {
@@ -513,6 +513,13 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
       expect(docxRs).toMatch(/"页眉" => 0/);
       expect(ipcSrc).toContain('extended: extended ?? null');
       expect(viewSrc).toContain("new CompareView(this.host, this.pathA, this.pathB, this.opts, this.formulaMode, !this.extendedMode)");
+      // M1 修复锁：三条通道（open/lines/detail）后端同口径接收 extended——
+      // 修前 office_lines/compare_detail 不收该参数，扩围块取行恒读基础投影
+      expect((rsSrc.match(/extended: Option<bool>/g) ?? []).length).toBeGreaterThanOrEqual(3);
+      expect(rsSrc).toContain('office_window(&registry, &path, kind, from, to, formula, extended)');
+      expect(rsSrc).toContain('office_window(registry, path, k, from, to, formula, extended)');
+      expect(rsSrc).toContain('if extended {');
+      expect(rsSrc).toContain('KIND_DOCX_EXTENDED');
       // 注册表分槽：同路径 docx 基础/扩围变体不得互相命中
       const ooxmlRs = read('src-tauri/src/commands/ooxml.rs');
       expect(ooxmlRs).toContain('entry.kind == kind');
@@ -558,8 +565,15 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
     it('点击定位：双表打开时清单条目走 duoLocate（sheet 切换 + 滚动 + 闪烁格）；关闭时投影行定位保留', () => {
       expect(viewSrc).toContain('duoLocate(d.sheet, d.row');
       expect(viewSrc).toMatch(/if \(this\.duoPanel\) \{[\s\S]{0,120}duoLocate/);
-      expect(viewSrc).toMatch(/duoPrefetch\(this\.pathA, idxA, 'A', gen\)/);
-      expect(viewSrc).toContain('xlsxRecords(path, sheetIndex, 1, 200)');
+      // M2 窗口补取：滚动/定位按可视窗口取数（修前固定前 200 行不补取）
+      expect(viewSrc).toMatch(/duoEnsure\('A', 1, 60, gen\)/);
+      expect(viewSrc).toContain('xlsxRecords(path, sheetIndex, from, to)');
+      // M3+M2 滚动联动：用户意图驱动侧判定（去掉事件计数——赋值被钳制为同值时
+      // 不发 scroll 事件，计数会泄漏并吞掉用户下一次真实滚动）
+      expect(viewSrc).toContain('if (driver && driver !== from) return;');
+      expect(viewSrc).toContain(
+        "for (const type of ['wheel', 'pointerdown', 'touchstart', 'keydown'] as const)"
+      );
       // 差异索引供高亮：fillDiffList 顺带产出 sheet→row→cols
       expect(viewSrc).toMatch(/diffIndex\.set\(d\.sheet/);
       // destroy 作废迟到渲染

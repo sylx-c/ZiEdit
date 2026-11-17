@@ -11,7 +11,7 @@ import {
   textLines,
   xlsxOpen,
   xlsxRecords,
-  xlsxXiff,
+  xlsxDiff,
   type CmpDetailLine,
   type CmpOpenResult,
   type CmpSpanCat,
@@ -119,6 +119,12 @@ export class CompareView {
   private duoTotalA = 0;
   private duoTotalB = 0;
   private duoCols = 0;
+  /** 各侧当前 sheet 索引与在途取数标记（M2 窗口补取用） */
+  private duoIdxA = 0;
+  private duoIdxB = 0;
+  /** 在途取数标记按代登记：旧代请求的 finally 不得清掉新代标记（审查 M2） */
+  private duoFetchGenA: number | null = null;
+  private duoFetchGenB: number | null = null;
   /** 差异索引（fillDiffList 顺带产出）：sheet → row → 变更列集合（cell 级） */
   private diffIndex = new Map<string, Map<number, Set<number>>>();
   private duoRowH = 24;
@@ -299,7 +305,17 @@ export class CompareView {
     legend.textContent = '';
     const mkMeta = (m: CmpOpenResult['metaA'] | null, side: 'A' | 'B'): HTMLSpanElement => {
       const s = mk('span', 'cmp-meta');
+      // 投影说明可能因头部宽度不足被容器查询隐藏——悬停仍可看到完整口径。
+      const scopeTitle = side === 'A' ? this.officeA : this.officeB;
       s.title = m?.path ?? '';
+      if (scopeTitle) {
+        const ext = (side === 'A' ? this.pathA : this.pathB).toLowerCase();
+        let scopeKey: 'ooxml.pptxScope' | 'ooxml.docxScope' | 'ooxml.xlsxScope';
+        if (ext.endsWith('.pptx')) scopeKey = 'ooxml.pptxScope';
+        else if (scopeTitle === 'docx') scopeKey = 'ooxml.docxScope';
+        else scopeKey = 'ooxml.xlsxScope';
+        s.title += `\n${t(scopeKey)}`;
+      }
       const badge = mk('span', 'cmp-side', side);
       const file = mk('span', 'cmp-file', (m?.path ?? '').split(/[\\/]/).pop() ?? '');
       // 投影侧（批 1）：encoding/BOM/EOL 对投影无意义 → 改示投影说明（悬停给提取范围）
@@ -307,8 +323,12 @@ export class CompareView {
       const dim = mk('span', 'cmp-meta-dim');
       if (office) {
         const pptxSide = (side === 'A' ? this.pathA : this.pathB).toLowerCase().endsWith('.pptx');
-        dim.textContent = `${t(office === 'docx' ? 'cmp.proj.docx' : 'cmp.proj.xlsx')} · ${tf('cmp.lines', m?.lines ?? 0)} · ${fmtSize(m?.len ?? 0)}`;
-        dim.title = t(pptxSide ? 'ooxml.pptxScope' : office === 'docx' ? 'ooxml.docxScope' : 'ooxml.xlsxScope');
+        // 行数已在下方 A/B 列头行显示（"11 行"）；首行只留投影口径 + 大小——
+        // 投影说明较长会把两侧文件名挤成「①预算…」，文件名优先（修前实测）。
+        dim.textContent = `${t(office === 'docx' ? 'cmp.proj.docx' : 'cmp.proj.xlsx')} · ${fmtSize(m?.len ?? 0)}`;
+        if (pptxSide) dim.title = t('ooxml.pptxScope');
+        else if (office === 'docx') dim.title = t('ooxml.docxScope');
+        else dim.title = t('ooxml.xlsxScope');
       } else {
         dim.textContent = `${m?.encoding ?? ''}${m?.bom ? ' · BOM:' + m.bom : ''}${m?.eol && m.eol !== '-' ? ' · EOL:' + m.eol : ''} · ${tf('cmp.lines', m?.lines ?? 0)} · ${fmtSize(m?.len ?? 0)}`;
       }
@@ -361,6 +381,9 @@ export class CompareView {
       revBadge.title = t('cmp.revisionsTitle');
       counts.appendChild(revBadge);
     }
+    // 动作按钮独立容器：头部空间不足时先截断左侧摘要文本，按钮保持可用——
+    // 修前按钮挂在 .cmp-counts（overflow:hidden）里，窄窗口下「差异清单」被裁成「…」。
+    const acts = mk('span', 'cmp-acts');
     // 公式投影开关（批 2）：任一侧 xlsx 时可切换「显示值 / 公式」对比口径。
     // 切换走整视图重建（投影行哈希/block 坐标全部随口径变化，增量更新无意义）。
     if (this.officeA === 'xlsx' || this.officeB === 'xlsx') {
@@ -371,13 +394,13 @@ export class CompareView {
         this.reloaded = new CompareView(this.host, this.pathA, this.pathB, this.opts, !this.formulaMode, this.extendedMode);
         this.reloaded.setFontSize(this.fontSize);
       });
-      counts.appendChild(fbtn);
+      acts.appendChild(fbtn);
       // 结构差异清单（批 3）：xlsx 对的单元格级清单（Sheet2!C5: 100→200），
       // 点击定位到投影行；键列输入按列号对齐行（插入行不错位）
       const listBtn = mk('button', 'cmp-btn' + (this.listPanel ? ' on' : ''), t('cmp.diffList'));
       listBtn.title = t('cmp.diffListTitle');
       listBtn.addEventListener('click', () => this.toggleDiffList());
-      counts.appendChild(listBtn);
+      acts.appendChild(listBtn);
     }
     // 扩围开关（批 3）：任一侧 docx 时投影附加页眉脚/脚注/批注段与标题前缀
     if (this.officeA === 'docx' || this.officeB === 'docx') {
@@ -388,16 +411,17 @@ export class CompareView {
         this.reloaded = new CompareView(this.host, this.pathA, this.pathB, this.opts, this.formulaMode, !this.extendedMode);
         this.reloaded.setFontSize(this.fontSize);
       });
-      counts.appendChild(ebtn);
+      acts.appendChild(ebtn);
       // 按修订对比（批 3）：docx 侧含修订标记时，修订记录直接读成差异清单
       if (this.revisions) {
         const rbtn = mk('button', 'cmp-btn', t('cmp.revisionMode'));
         rbtn.title = t('cmp.revisionModeTitle');
         rbtn.addEventListener('click', () => void this.showRevisionReport());
-        counts.appendChild(rbtn);
+        acts.appendChild(rbtn);
       }
     }
     headline.appendChild(counts);
+    if (acts.childElementCount > 0) headline.appendChild(acts);
     headline.appendChild(mk('span', 'tb-spacer'));
 
     // 差异导航 ◀ n/m ▶（键位 = ActionRegistry 同源，001 规则 34 v2.4）
@@ -819,7 +843,7 @@ export class CompareView {
     panel.appendChild(mk('div', 'cmp-list-loading', t('common.loading')));
     try {
       await this.ensureSheetOffsets();
-      const res = await xlsxXiff(this.pathA, this.pathB, this.keyColumn || undefined);
+      const res = await xlsxDiff(this.pathA, this.pathB, this.keyColumn || undefined);
       if (this.destroyed || panel !== this.listPanel) return;
       // 差异索引（双表对照高亮用）：sheet → row → 变更列集合
       this.diffIndex.clear();
@@ -918,10 +942,7 @@ export class CompareView {
         const base = this.sheetLineOffsets.get(d.sheet);
         if (base == null) return;
         const line = base + (d.kind === 'cell' || d.kind === 'rowAdd' || d.kind === 'rowDel' ? d.row : 0);
-        const target = this.display.find(x => line >= x.blk.aStart && line <= x.blk.aEnd)
-          ?? this.display.find(x => x.top >= (line - 1) * this.rowH);
-        if (target) this.scroller.scrollTop = Math.max(0, (line - 1) * this.rowH - 40);
-        else this.scroller.scrollTop = Math.max(0, (line - 1) * this.rowH - 40);
+        this.scroller.scrollTop = Math.max(0, (line - 1) * this.rowH - 40);
       });
     }
     return row;
@@ -951,14 +972,27 @@ export class CompareView {
     panel.append(head, body);
     this.host.appendChild(panel);
     this.duoPanel = panel;
-    // 同步滚动：A/B 行高一致，scrollTop 互推（guard 防环）
-    let syncing = false;
-    const link = (from: HTMLDivElement, to: HTMLDivElement) => from.addEventListener('scroll', () => {
-      if (syncing) return;
-      syncing = true;
-      to.scrollTop = from.scrollTop;
-      syncing = false;
-    });
+    // 同步滚动：A/B 行高一致，scrollTop 互推。回写回声与「短侧钳制回推」分开处理：
+    // ① 程序化赋值产生的回声：值相同直接短路；
+    // ② 短侧滚到上限后把长侧拉回（批 3 M3：长表尾部不可达）——用「用户意图驱动侧」
+    //    判定，只有用户直接操作的一侧有资格驱动另一侧（wheel/pointerdown/touchstart/
+    //    keydown 标记）。审查 M2：修前用事件次数计数抑制，程序化赋值被钳制为同值时
+    //    浏览器不发 scroll 事件，计数泄漏会吞掉用户下一次真实滚动；改为意图标记后
+    //    无计数可泄漏（程序化滚动的回声永远不是驱动侧）。
+    let driver: HTMLDivElement | null = null;
+    const markDriver = (scroller: HTMLDivElement): void => {
+      for (const type of ['wheel', 'pointerdown', 'touchstart', 'keydown'] as const) {
+        scroller.addEventListener(type, () => { driver = scroller; }, { passive: true });
+      }
+    };
+    const link = (from: HTMLDivElement, to: HTMLDivElement): void => {
+      markDriver(from);
+      from.addEventListener('scroll', () => {
+        if (driver && driver !== from) return; // 非驱动侧事件（程序化回声/钳制回推）不反推
+        if (Math.abs(to.scrollTop - from.scrollTop) < 1) return;
+        to.scrollTop = from.scrollTop;
+      });
+    };
     link(left.scroller, right.scroller);
     link(right.scroller, left.scroller);
     // 打开时定位到首个有差异的 sheet（无差异用 A 侧第一个 sheet）
@@ -977,7 +1011,7 @@ export class CompareView {
     return { wrap, scroller, body, head };
   }
 
-  /** 展示指定 sheet（空串 = 各自第一个）；重置缓存与窗口渲染 */
+  /** 展示指定 sheet（空串 = 各自第一个）；重置缓存，首屏窗口取数后渲染 */
   private async duoShow(sheet: string): Promise<void> {
     const panel = this.duoPanel;
     if (!panel || this.destroyed) return;
@@ -985,6 +1019,10 @@ export class CompareView {
     this.duoCacheA.clear();
     this.duoCacheB.clear();
     this.duoCols = 0;
+    this.duoTotalA = 0;
+    this.duoTotalB = 0;
+    this.duoFetchGenA = null;
+    this.duoFetchGenB = null;
     const [wa, wb] = await Promise.all([
       xlsxOpen(this.pathA).catch(() => null),
       xlsxOpen(this.pathB).catch(() => null),
@@ -992,6 +1030,8 @@ export class CompareView {
     if (gen !== this.duoGen || this.destroyed) return;
     const idxA = sheet ? Math.max(0, (wa?.sheets ?? []).findIndex(s => s.name === sheet)) : 0;
     const idxB = sheet ? Math.max(0, (wb?.sheets ?? []).findIndex(s => s.name === sheet)) : 0;
+    this.duoIdxA = idxA;
+    this.duoIdxB = idxB;
     this.duoSheet = sheet || wa?.sheets?.[0]?.name || wb?.sheets?.[0]?.name || '';
     // 标题栏刷新 sheet 名
     const headEl = panel.querySelector('.cmp-duo-head span');
@@ -1000,27 +1040,52 @@ export class CompareView {
     if (sides.length !== 2) return;
     const left = sides[0]!, right = sides[1]!;
     const scrollers = [left.querySelector('.cmp-duo-scroll') as HTMLDivElement, right.querySelector('.cmp-duo-scroll') as HTMLDivElement];
+    scrollers.forEach(s => { s.scrollTop = 0; });
     const onScroll = (): void => this.duoRender(gen);
     scrollers.forEach(s => { s.onscroll = onScroll; });
+    // 首屏窗口取数（批 6 复验 M2：修前固定预取前 200 行且永不补取——第 201 行起
+    // 恒空白、清单定位到 200 行外两侧全空；改按可视窗口滚动补取）
     await Promise.all([
-      this.duoPrefetch(this.pathA, idxA, 'A', gen),
-      this.duoPrefetch(this.pathB, idxB, 'B', gen),
+      this.duoEnsure('A', 1, 60, gen),
+      this.duoEnsure('B', 1, 60, gen),
     ]);
     if (gen !== this.duoGen || this.destroyed) return;
     this.duoRender(gen);
   }
 
-  private async duoPrefetch(path: string, sheetIndex: number, side: 'A' | 'B', gen: number): Promise<void> {
+  /** 窗口补取：可视范围内有未缓存行则整窗取数。每侧一个在途标记防滚动风暴
+   * 重复请求；到达后 gen 校验再重绘。缓存 2 万行封顶防长会话无界增长。 */
+  private async duoEnsure(side: 'A' | 'B', from: number, to: number, gen: number): Promise<void> {
+    if (gen !== this.duoGen || this.destroyed) return;
+    const cache = side === 'A' ? this.duoCacheA : this.duoCacheB;
+    const total = side === 'A' ? this.duoTotalA : this.duoTotalB;
+    const path = side === 'A' ? this.pathA : this.pathB;
+    const sheetIndex = side === 'A' ? this.duoIdxA : this.duoIdxB;
+    const hi = total > 0 ? Math.min(to, total) : to;
+    let missing = false;
+    for (let n = Math.max(1, from); n <= hi; n++) {
+      if (!cache.has(n)) { missing = true; break; }
+    }
+    if (!missing) return;
+    const inFlight = side === 'A' ? this.duoFetchGenA : this.duoFetchGenB;
+    if (inFlight === gen) return;
+    if (side === 'A') this.duoFetchGenA = gen; else this.duoFetchGenB = gen;
     try {
-      const res = await xlsxRecords(path, sheetIndex, 1, 200);
+      const res = await xlsxRecords(path, sheetIndex, from, to);
       if (gen !== this.duoGen || this.destroyed) return;
-      const cache = side === 'A' ? this.duoCacheA : this.duoCacheB;
+      if (cache.size > 20_000) cache.clear();
       for (const r of res.records) {
         cache.set(r.no, r.cells);
         if (r.cells.length > this.duoCols) this.duoCols = r.cells.length;
       }
       if (side === 'A') this.duoTotalA = res.total; else this.duoTotalB = res.total;
+      this.duoRender(gen);
     } catch { /* 打开失败侧保持空（如实呈现为空表） */ }
+    finally {
+      // 只清自己这一代：迟到的旧代响应不得解除新代在途状态（审查 M2 竞态）
+      if (side === 'A') { if (this.duoFetchGenA === gen) this.duoFetchGenA = null; }
+      else { if (this.duoFetchGenB === gen) this.duoFetchGenB = null; }
+    }
   }
 
   /** 窗口渲染（虚拟滚动：可视区 ±缓冲，行 DOM 整窗重建——每侧 ≤ ~70 行，重建成本可忽略） */
@@ -1045,6 +1110,8 @@ export class CompareView {
       const from = Math.max(1, Math.floor(scroller.scrollTop / rowH) + 1);
       const visible = Math.ceil(scroller.clientHeight / rowH) + 6;
       const to = Math.min(total, from + visible);
+      // 滚动到未缓存窗口则补取（M2）：先按缓存渲染（未到行暂空），数据到达后重绘
+      void this.duoEnsure(i === 0 ? 'A' : 'B', from, to, gen);
       body.style.transform = `translateY(${(from - 1) * rowH}px)`;
       // 列头：行号角 + 列字母
       head.replaceChildren(mk('span', 'cmp-duo-corner', ''));
@@ -1077,6 +1144,13 @@ export class CompareView {
     const gen = this.duoGen;
     const y = Math.max(0, (row - 1) * this.duoRowH - 40);
     panel.querySelectorAll<HTMLDivElement>('.cmp-duo-scroll').forEach(s => { s.scrollTop = y; });
+    // 目标行数据就位后再渲染+闪烁（远行首访的窗口取数是异步的，直接渲染会
+    // 因 duoCols=0 没有格 DOM 可闪——批 6 复验 M2 定位链路）
+    await Promise.all([
+      this.duoEnsure('A', row, row + 60, gen),
+      this.duoEnsure('B', row, row + 60, gen),
+    ]);
+    if (gen !== this.duoGen || this.destroyed) return;
     this.duoRender(gen);
     // 闪烁定位格（两侧同坐标）
     panel.querySelectorAll('.cmp-duo-row').forEach(r => {
@@ -1102,8 +1176,16 @@ export class CompareView {
     this.host.appendChild(panel);
     this.listPanel = panel;
     const target = this.officeA === 'docx' ? this.pathA : this.pathB;
+    const other = target === this.pathA ? this.pathB : this.pathA;
     try {
-      const report = await docxRevisionReport(target);
+      let report = await docxRevisionReport(target);
+      // 双侧均 docx 且仅另一侧含修订：首取为空回取另一侧（批 6 复验 L7——修前
+      // 恒读 A 侧，「无修订记录」与「任一侧含修订」点亮的徽标/按钮自相矛盾）
+      if (!report.records.length && this.officeA === 'docx' && this.officeB === 'docx' && other !== target) {
+        const alt = await docxRevisionReport(other);
+        if (this.destroyed || panel !== this.listPanel) return;
+        if (alt.records.length) report = alt;
+      }
       if (this.destroyed || panel !== this.listPanel) return;
       panel.textContent = '';
       panel.appendChild(mk('div', 'cmp-list-head', t('cmp.revisionMode')));
