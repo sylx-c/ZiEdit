@@ -33,7 +33,7 @@ pub fn office_kind(path: &Path) -> Option<OfficeKind> {
         .map(str::to_ascii_lowercase)
         .as_deref()
     {
-        Some("docx" | "docm" | "dotx" | "dotm" | "odt" | "pptx" | "wps" | "dps") => {
+        Some("docx" | "docm" | "dotx" | "dotm" | "odt" | "pptx" | "wps" | "dps" | "doc") => {
             Some(OfficeKind::Docx)
         }
         Some("xlsx" | "xlsm" | "xltx" | "xltm" | "xlam" | "xls" | "xlsb" | "ods" | "et") => {
@@ -190,8 +190,8 @@ mod tests {
                 "{name}"
             );
         }
-        // 旧格式与未知：仍走既有路径（.doc/.ppt spike 未决）
-        assert_eq!(office_kind(Path::new("n.doc")), None);
+        // 旧格式：.doc 已支持（批 6 rwml）；.ppt 维持拒绝（无宽松许可候选）
+        assert_eq!(office_kind(Path::new("n.doc")), Some(OfficeKind::Docx));
         assert_eq!(office_kind(Path::new("o.ppt")), None);
         assert_eq!(office_kind(Path::new("p.txt")), None);
         assert_eq!(office_kind(Path::new("noext")), None);

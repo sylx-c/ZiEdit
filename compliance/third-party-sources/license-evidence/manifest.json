@@ -3,7 +3,7 @@
   "currentDependencyStatus": {
     "inputSHA256": {
       "package-lock.json": "b6e50129a03f2f6e8e258ee5ea5507341a39125e8fc701ded4ae088779b5603c",
-      "src-tauri/Cargo.lock": "57ac6bf0c0facb69c6a726c7571a34ccb7e83bc08a8f126604ce7a5670cb85c6"
+      "src-tauri/Cargo.lock": "5df931d5ba6f39e2d7c6abf6fe17d9383e56090419b17ea3f80ceed9b450d5eb"
     },
     "meaning": "Membership is exact ecosystem/name/version against current lockfiles, independent of historical evidence collection status. Historical entries and review findings remain preserved, but are not current dependency evidence or unresolved runtime items.",
     "activePackages": 89,

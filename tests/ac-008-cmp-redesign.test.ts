@@ -417,17 +417,17 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
     const odsRs = read('src-tauri/src/ooxml/ods.rs');
 
     it('office_kind 扩面：Excel 家族（含 xls/xlsb/ods）→ Xlsx，Word 家族（含 odt）→ Docx', () => {
-      expect(officeRs).toContain('Some("docx" | "docm" | "dotx" | "dotm" | "odt" | "pptx" | "wps" | "dps")');
+      expect(officeRs).toContain('Some("docx" | "docm" | "dotx" | "dotm" | "odt" | "pptx" | "wps" | "dps" | "doc")');
       expect(officeRs).toContain(
         'Some("xlsx" | "xlsm" | "xltx" | "xltm" | "xlam" | "xls" | "xlsb" | "ods" | "et")'
       );
       // .xls 移出二进制黑名单（可打开可对比），.doc/.ppt 维持拒绝（spike 未决）
       const binaryFn = kindRs.slice(kindRs.indexOf('fn is_binary_ext'), kindRs.indexOf('/// 快速识别'));
       expect(binaryFn).not.toContain('"xls"');
-      expect(binaryFn).toContain('"doc"');
+      expect(binaryFn).not.toContain('"doc"'); // 批 6：rwml 支持，移出黑名单
       expect(binaryFn).toContain('"ppt"');
       // 语言路由扩面：odt → Docx 文本管线，xls/xlsb/ods → Xlsx 表格管线
-      expect(kindRs).toContain('"docx" | "docm" | "dotx" | "dotm" | "odt" | "wps" => "Docx"');
+      expect(kindRs).toContain('"docx" | "docm" | "dotx" | "dotm" | "odt" | "wps" | "doc" => "Docx"');
       expect(kindRs).toMatch(/"xlsx" \| "xlsm"[\s\S]*?"xls"[\s\S]*?"ods" =>/);
     });
 
@@ -540,6 +540,36 @@ describe('008 扩展·批 1：Office 投影对比（docx/xlsx 分流契约）', 
     it('i18n 两语齐全：PDF 暂不支持提示', () => {
       expect(dict('zh-CN')['cmp.pdfUnsupported']).toContain('PDF');
       expect(dict('en-US')['cmp.pdfUnsupported']).toContain('PDF');
+    });
+  });
+
+  describe('批 6：双表对照（A/B 同名 sheet 并排联动 + 点击定位单元格）', () => {
+    it('面板结构：差异清单头部入口 + 双表同步滚动 + 差异行/格高亮', () => {
+      expect(viewSrc).toContain('toggleDuo()');
+      expect(viewSrc).toContain("mk('button', 'cmp-btn' + (this.duoPanel ? ' on' : ''), t('cmp.duo'))");
+      expect(viewSrc).toMatch(/to\.scrollTop = from\.scrollTop/);
+      expect(viewSrc).toMatch(/link\(left\.scroller, right\.scroller\)/);
+      expect(viewSrc).toContain('cmp-duo-diff');
+      expect(viewSrc).toContain('cmp-duo-cell-diff');
+      expect(viewSrc).toContain('cmp-duo-cell-hit');
+      expect(css).toContain('.cmp-duo{');
+      expect(css).toContain('.cmp-duo-body{flex:1;display:grid;grid-template-columns:1fr 1fr');
+    });
+    it('点击定位：双表打开时清单条目走 duoLocate（sheet 切换 + 滚动 + 闪烁格）；关闭时投影行定位保留', () => {
+      expect(viewSrc).toContain('duoLocate(d.sheet, d.row');
+      expect(viewSrc).toMatch(/if \(this\.duoPanel\) \{[\s\S]{0,120}duoLocate/);
+      expect(viewSrc).toMatch(/duoPrefetch\(this\.pathA, idxA, 'A', gen\)/);
+      expect(viewSrc).toContain('xlsxRecords(path, sheetIndex, 1, 200)');
+      // 差异索引供高亮：fillDiffList 顺带产出 sheet→row→cols
+      expect(viewSrc).toMatch(/diffIndex\.set\(d\.sheet/);
+      // destroy 作废迟到渲染
+      expect(viewSrc).toContain('++this.duoGen');
+    });
+    it('i18n 两语齐全：双表对照', () => {
+      for (const k of ['cmp.duo', 'cmp.duoTitle']) {
+        expect(dict('zh-CN')[k], 'zh ' + k).toBeTruthy();
+        expect(dict('en-US')[k], 'en ' + k).toBeTruthy();
+      }
     });
   });
 

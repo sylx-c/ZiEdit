@@ -67,6 +67,37 @@ pub fn open(path: &str) -> Result<Document> {
     open_with_scope(path, false)
 }
 
+/// 旧式 .doc（Word 97-2003，批 6 spike 结论引入）：rwml extract_text（段落/
+/// 单元格以 \n 连接）。守护沿用全局红线：包 100MiB 预检 + 提取文本 10MiB 哨兵；
+/// rwml 错误映射 DOC_OPEN:<原因>（类型化、不 panic——spike 敌意样本实测）。
+/// 无修订通道（如实：revisions 恒 false，修订报告对 .doc 不适用）。
+fn open_legacy_doc(path: &str) -> Result<Document> {
+    let p = std::path::Path::new(path);
+    let len = std::fs::metadata(p)
+        .map_err(|e| format!("DOC_OPEN:{e}"))?
+        .len();
+    if len > 100 * 1024 * 1024 {
+        return Err("OOXML_PACKAGE_LIMIT:100MiB".into());
+    }
+    let bytes = std::fs::read(p).map_err(|e| format!("DOC_OPEN:{e}"))?;
+    let text = rwml::extract_text(&bytes).map_err(|e| format!("DOC_OPEN:{e}"))?;
+    let mut acc = 0usize;
+    let mut lines = Vec::new();
+    for line in text.split('\n') {
+        acc += line.len() + std::mem::size_of::<String>();
+        if acc > TEXT_LIMIT {
+            return Err("OOXML_TEXT_LIMIT:10MiB".into());
+        }
+        lines.push(line.to_string());
+    }
+    let total_chars = lines.iter().map(|s| s.chars().count()).sum();
+    Ok(Document {
+        lines,
+        total_chars,
+        revisions: false,
+        revision_records: Vec::new(),
+    })
+}
 /// odt（ODF 文本文档）：读 content.xml 的 text:p/text:h 段落（批 2，quick-xml
 /// 管线复用）；无修订语义（ODF 变更跟踪不解析），revisions 恒 false。
 pub fn open_odf(path: &str) -> Result<Document> {
@@ -142,6 +173,15 @@ pub fn open_with_scope(path: &str, extended: bool) -> Result<Document> {
     if ext == "pptx" {
         // pptx（批 4）：演示文稿文本投影——每张幻灯片一行头 + 段落行
         return open_pptx(path);
+    }
+    if ext == "doc" {
+        return open_legacy_doc(path);
+    }
+    if ext == "doc" {
+        // 旧式 Word 97-2003（批 6 spike 结论引入）：rwml（MIT）legacy 通道——
+        // 敌意样本实测全部类型化报错 0ms（截断/垃圾/头残缺），自带 1600+ 测试含
+        // LibreOffice/POI 交叉语料。无修订通道（如实：revisions 恒 false）。
+        return open_legacy_doc(path);
     }
     let mut zip = package(path)?;
     // 标题前缀随扩围开关（默认关=批 1 投影逐字节不变；开=H1…H9 前缀参与 diff）
@@ -628,6 +668,35 @@ mod tests {
         assert_ne!(other.lines[3], doc.lines[3]);
         other.lines[3] = doc.lines[3].clone();
         assert_eq!(other.lines, doc.lines);
+    }
+
+    #[test]
+    fn legacy_doc_extraction_via_rwml() {
+        // rwml 0.1.5 语料夹具（MIT，fixtures/README.md 记录来源）：嵌套表格 →
+        // 段落/单元格行投影；同文件二次提取逐字节一致（确定性）
+        let bytes = include_bytes!("fixtures/nested_tables.doc");
+        let dir = std::env::temp_dir().join("ZiEdit-legacy-doc");
+        std::fs::create_dir_all(&dir).unwrap();
+        let p = dir.join("nested.doc");
+        std::fs::write(&p, bytes).unwrap();
+        let path = p.to_string_lossy().into_owned();
+        let doc = open(&path).unwrap();
+        assert!(
+            doc.lines.contains(&"Outer cell text".to_string()),
+            "got {:?}",
+            doc.lines
+        );
+        assert!(doc.lines.contains(&"Inner cell text".to_string()));
+        assert!(!doc.revisions);
+        assert!(doc.revision_records.is_empty());
+        let again = open(&path).unwrap();
+        assert_eq!(doc.lines, again.lines, "确定性");
+        // 敌意：非 OLE 内容 → 类型化 DOC_OPEN 错误（spike 实测复验）
+        let bad = dir.join("bad.doc");
+        std::fs::write(&bad, b"garbage not ole").unwrap();
+        let err = open(bad.to_str().unwrap()).err().unwrap();
+        assert!(err.starts_with("DOC_OPEN:"), "{err}");
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

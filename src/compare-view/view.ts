@@ -10,6 +10,7 @@ import {
   officeLines,
   textLines,
   xlsxOpen,
+  xlsxRecords,
   xlsxXiff,
   type CmpDetailLine,
   type CmpOpenResult,
@@ -109,6 +110,18 @@ export class CompareView {
   private extendedMode = false;
   /** 结构差异清单（批 3）：xlsx 对的单元格级清单面板 */
   private listPanel: HTMLDivElement | null = null;
+  /** 双表对照面板（批 6）：A/B 同名 sheet 并排，同步滚动 + 差异高亮 + 点击定位 */
+  private duoPanel: HTMLDivElement | null = null;
+  private duoSheet: string | null = null;
+  private duoGen = 0;
+  private duoCacheA = new Map<number, string[]>();
+  private duoCacheB = new Map<number, string[]>();
+  private duoTotalA = 0;
+  private duoTotalB = 0;
+  private duoCols = 0;
+  /** 差异索引（fillDiffList 顺带产出）：sheet → row → 变更列集合（cell 级） */
+  private diffIndex = new Map<string, Map<number, Set<number>>>();
+  private duoRowH = 24;
   private sheetLineOffsets: Map<string, number> = new Map();
   private keyColumn = 0;
   private degraded = false;
@@ -164,7 +177,7 @@ export class CompareView {
     this.inputState = res.inputState;
     if (res.binary) {
       // 批 4：旧式/私有 Office 容器（OLE 二进制）给「另存为」指引，替换一刀切文案
-      const legacy = [this.pathA, this.pathB].some(p => /\.(doc|ppt|wps|et|dps)$/i.test(p));
+      const legacy = [this.pathA, this.pathB].some(p => /\.(ppt|wps|et|dps)$/i.test(p));
       this.opts.flash(t(legacy ? 'cmp.legacyOfficeHint' : 'cmp.binaryRouted'));
       const close = mk('button', 'cmp-btn', t('common.close'));
       close.addEventListener('click', () => this.opts.onClose());
@@ -808,6 +821,16 @@ export class CompareView {
       await this.ensureSheetOffsets();
       const res = await xlsxXiff(this.pathA, this.pathB, this.keyColumn || undefined);
       if (this.destroyed || panel !== this.listPanel) return;
+      // 差异索引（双表对照高亮用）：sheet → row → 变更列集合
+      this.diffIndex.clear();
+      for (const d of res.diffs) {
+        if (d.kind !== 'cell') continue;
+        let rows = this.diffIndex.get(d.sheet);
+        if (!rows) this.diffIndex.set(d.sheet, (rows = new Map()));
+        let cols = rows.get(d.row);
+        if (!cols) rows.set(d.row, (cols = new Set()));
+        cols.add(d.col);
+      }
       panel.textContent = '';
       const head = mk('div', 'cmp-list-head');
       head.appendChild(mk('span', '', t('cmp.diffList')));
@@ -827,6 +850,11 @@ export class CompareView {
       });
       keyWrap.appendChild(keyInput);
       head.appendChild(keyWrap);
+      // 双表对照（批 6）：A/B 同名 sheet 并排联动，点击清单条目定位到单元格
+      const duoBtn = mk('button', 'cmp-btn' + (this.duoPanel ? ' on' : ''), t('cmp.duo'));
+      duoBtn.title = t('cmp.duoTitle');
+      duoBtn.addEventListener('click', () => this.toggleDuo());
+      head.appendChild(duoBtn);
       panel.appendChild(head);
       if (!res.diffs.length) {
         panel.appendChild(mk('div', 'cmp-list-empty', t('cmp.diffListEmpty')));
@@ -882,6 +910,11 @@ export class CompareView {
     if (d.kind !== 'sheetAdd' && d.kind !== 'sheetDel') {
       row.classList.add('cmp-jump');
       row.addEventListener('click', () => {
+        // 双表对照打开时优先定位双表（sheet/行/格）；关闭时定位对比视图投影行
+        if (this.duoPanel) {
+          void this.duoLocate(d.sheet, d.row, d.kind === 'cell' ? d.col : -1);
+          return;
+        }
         const base = this.sheetLineOffsets.get(d.sheet);
         if (base == null) return;
         const line = base + (d.kind === 'cell' || d.kind === 'rowAdd' || d.kind === 'rowDel' ? d.row : 0);
@@ -892,6 +925,169 @@ export class CompareView {
       });
     }
     return row;
+  }
+
+  // ---- 批 6：双表对照（A/B 同名 sheet 并排联动）----
+
+  private toggleDuo(): void {
+    if (this.duoPanel) {
+      this.duoPanel.remove();
+      this.duoPanel = null;
+      this.duoSheet = null;
+      ++this.duoGen;
+      return;
+    }
+    const panel = mk('div', 'cmp-duo');
+    const head = mk('div', 'cmp-duo-head');
+    const title = mk('span', '', t('cmp.duo'));
+    head.appendChild(title);
+    const closeBtn = mk('button', 'cmp-btn', t('common.close'));
+    closeBtn.addEventListener('click', () => this.toggleDuo());
+    head.appendChild(closeBtn);
+    const body = mk('div', 'cmp-duo-body');
+    const left = this.duoSide('A');
+    const right = this.duoSide('B');
+    body.append(left.wrap, right.wrap);
+    panel.append(head, body);
+    this.host.appendChild(panel);
+    this.duoPanel = panel;
+    // 同步滚动：A/B 行高一致，scrollTop 互推（guard 防环）
+    let syncing = false;
+    const link = (from: HTMLDivElement, to: HTMLDivElement) => from.addEventListener('scroll', () => {
+      if (syncing) return;
+      syncing = true;
+      to.scrollTop = from.scrollTop;
+      syncing = false;
+    });
+    link(left.scroller, right.scroller);
+    link(right.scroller, left.scroller);
+    // 打开时定位到首个有差异的 sheet（无差异用 A 侧第一个 sheet）
+    const firstDiffSheet = this.diffIndex.keys().next().value ?? null;
+    void this.duoShow(firstDiffSheet ?? '');
+  }
+
+  private duoSide(side: 'A' | 'B'): { wrap: HTMLDivElement; scroller: HTMLDivElement; body: HTMLDivElement; head: HTMLDivElement } {
+    const wrap = mk('div', 'cmp-duo-side');
+    const head = mk('div', 'cmp-duo-colhead');
+    const scroller = mk('div', 'cmp-duo-scroll');
+    const body = mk('div', 'cmp-duo-rows');
+    scroller.appendChild(body);
+    wrap.append(head, scroller);
+    void side;
+    return { wrap, scroller, body, head };
+  }
+
+  /** 展示指定 sheet（空串 = 各自第一个）；重置缓存与窗口渲染 */
+  private async duoShow(sheet: string): Promise<void> {
+    const panel = this.duoPanel;
+    if (!panel || this.destroyed) return;
+    const gen = ++this.duoGen;
+    this.duoCacheA.clear();
+    this.duoCacheB.clear();
+    this.duoCols = 0;
+    const [wa, wb] = await Promise.all([
+      xlsxOpen(this.pathA).catch(() => null),
+      xlsxOpen(this.pathB).catch(() => null),
+    ]);
+    if (gen !== this.duoGen || this.destroyed) return;
+    const idxA = sheet ? Math.max(0, (wa?.sheets ?? []).findIndex(s => s.name === sheet)) : 0;
+    const idxB = sheet ? Math.max(0, (wb?.sheets ?? []).findIndex(s => s.name === sheet)) : 0;
+    this.duoSheet = sheet || wa?.sheets?.[0]?.name || wb?.sheets?.[0]?.name || '';
+    // 标题栏刷新 sheet 名
+    const headEl = panel.querySelector('.cmp-duo-head span');
+    if (headEl) headEl.textContent = `${t('cmp.duo')} · ${this.duoSheet}`;
+    const sides = panel.querySelectorAll<HTMLDivElement>('.cmp-duo-side');
+    if (sides.length !== 2) return;
+    const left = sides[0]!, right = sides[1]!;
+    const scrollers = [left.querySelector('.cmp-duo-scroll') as HTMLDivElement, right.querySelector('.cmp-duo-scroll') as HTMLDivElement];
+    const onScroll = (): void => this.duoRender(gen);
+    scrollers.forEach(s => { s.onscroll = onScroll; });
+    await Promise.all([
+      this.duoPrefetch(this.pathA, idxA, 'A', gen),
+      this.duoPrefetch(this.pathB, idxB, 'B', gen),
+    ]);
+    if (gen !== this.duoGen || this.destroyed) return;
+    this.duoRender(gen);
+  }
+
+  private async duoPrefetch(path: string, sheetIndex: number, side: 'A' | 'B', gen: number): Promise<void> {
+    try {
+      const res = await xlsxRecords(path, sheetIndex, 1, 200);
+      if (gen !== this.duoGen || this.destroyed) return;
+      const cache = side === 'A' ? this.duoCacheA : this.duoCacheB;
+      for (const r of res.records) {
+        cache.set(r.no, r.cells);
+        if (r.cells.length > this.duoCols) this.duoCols = r.cells.length;
+      }
+      if (side === 'A') this.duoTotalA = res.total; else this.duoTotalB = res.total;
+    } catch { /* 打开失败侧保持空（如实呈现为空表） */ }
+  }
+
+  /** 窗口渲染（虚拟滚动：可视区 ±缓冲，行 DOM 整窗重建——每侧 ≤ ~70 行，重建成本可忽略） */
+  private duoRender(gen: number): void {
+    const panel = this.duoPanel;
+    if (!panel || gen !== this.duoGen || this.destroyed) return;
+    const sides = panel.querySelectorAll<HTMLDivElement>('.cmp-duo-side');
+    if (sides.length !== 2) return;
+    const sheetDiffs = this.diffIndex.get(this.duoSheet ?? '');
+    const colName = (c: number): string => {
+      let n = c + 1, s = '';
+      while (n > 0) { n--; s = String.fromCharCode(65 + n % 26) + s; n = Math.floor(n / 26); }
+      return s;
+    };
+    for (const [i, sideEl] of [sides[0]!, sides[1]!].entries()) {
+      const cache = i === 0 ? this.duoCacheA : this.duoCacheB;
+      const total = i === 0 ? this.duoTotalA : this.duoTotalB;
+      const scroller = sideEl.querySelector('.cmp-duo-scroll') as HTMLDivElement;
+      const body = sideEl.querySelector('.cmp-duo-rows') as HTMLDivElement;
+      const head = sideEl.querySelector('.cmp-duo-colhead') as HTMLDivElement;
+      const rowH = this.duoRowH;
+      const from = Math.max(1, Math.floor(scroller.scrollTop / rowH) + 1);
+      const visible = Math.ceil(scroller.clientHeight / rowH) + 6;
+      const to = Math.min(total, from + visible);
+      body.style.transform = `translateY(${(from - 1) * rowH}px)`;
+      // 列头：行号角 + 列字母
+      head.replaceChildren(mk('span', 'cmp-duo-corner', ''));
+      for (let c = 0; c < this.duoCols; c++) head.appendChild(mk('span', 'cmp-duo-col', colName(c)));
+      const frag = document.createDocumentFragment();
+      for (let n = from; n <= to; n++) {
+        const cells = cache.get(n);
+        const row = mk('div', 'cmp-duo-row');
+        row.style.top = `${(n - from) * rowH}px`;
+        row.style.height = `${rowH}px`;
+        row.appendChild(mk('span', 'cmp-duo-no', String(n)));
+        const cols = sheetDiffs?.get(n);
+        if (cols) row.classList.add('cmp-duo-diff');
+        for (let c = 0; c < this.duoCols; c++) {
+          const cell = mk('span', 'cmp-duo-cell', cells?.[c] ?? '');
+          if (cols?.has(c)) cell.classList.add('cmp-duo-cell-diff');
+          row.appendChild(cell);
+        }
+        frag.appendChild(row);
+      }
+      body.replaceChildren(frag);
+    }
+  }
+
+  /** 清单条目点击 → 双表定位（sheet 切换 + 滚动到行 + 闪烁该格） */
+  private async duoLocate(sheet: string, row: number, col: number): Promise<void> {
+    if (sheet !== this.duoSheet) await this.duoShow(sheet);
+    const panel = this.duoPanel;
+    if (!panel) return;
+    const gen = this.duoGen;
+    const y = Math.max(0, (row - 1) * this.duoRowH - 40);
+    panel.querySelectorAll<HTMLDivElement>('.cmp-duo-scroll').forEach(s => { s.scrollTop = y; });
+    this.duoRender(gen);
+    // 闪烁定位格（两侧同坐标）
+    panel.querySelectorAll('.cmp-duo-row').forEach(r => {
+      if ((r.querySelector('.cmp-duo-no')?.textContent ?? '') === String(row)) {
+        const cell = r.children[1 + col];
+        if (cell) {
+          cell.classList.add('cmp-duo-cell-hit');
+          setTimeout(() => cell.classList.remove('cmp-duo-cell-hit'), 1200);
+        }
+      }
+    });
   }
 
   /** 按修订对比（批 3）：修订记录直接读成差异清单（审阅语义） */
@@ -936,6 +1132,7 @@ export class CompareView {
     this.reloaded?.destroy();
     this.reloaded = undefined;
     ++this.generation;
+    ++this.duoGen; // 双表迟到渲染一并作废
     clearInterval(this.poll);
     this.destroyed = true;
     if (this.onWinMove) window.removeEventListener('mousemove', this.onWinMove);

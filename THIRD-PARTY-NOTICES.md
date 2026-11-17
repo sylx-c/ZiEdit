@@ -81,7 +81,7 @@ manifest 的 `licenseFiles` 路径相对于 `public/renderers/`；没有随包�
 
 生成方式：`node scripts/gen-rust-notices.mjs`（执行 `cargo metadata --format-version 1 --locked`，不修改锁文件）。
 
-直接依赖（含构建依赖）：`arboard`、`calamine`、`chardetng`、`crc32fast`、`encoding_rs`、`imagesize`、`log`、`md-5`、`ooxml-numfmt`、`quick-xml`、`regex`、`reqwest`、`serde`、`serde_json`、`sha1`、`sha2`、`similar`、`tauri`、`tauri-build`、`tauri-plugin-clipboard-manager`、`tauri-plugin-dialog`、`tauri-plugin-log`、`tauri-plugin-opener`、`tauri-plugin-single-instance`、`thiserror`、`trash`、`unicode-normalization`、`windows-sys`、`zip`。
+直接依赖（含构建依赖）：`arboard`、`calamine`、`chardetng`、`crc32fast`、`encoding_rs`、`imagesize`、`log`、`md-5`、`ooxml-numfmt`、`quick-xml`、`regex`、`reqwest`、`rwml`、`serde`、`serde_json`、`sha1`、`sha2`、`similar`、`tauri`、`tauri-build`、`tauri-plugin-clipboard-manager`、`tauri-plugin-dialog`、`tauri-plugin-log`、`tauri-plugin-opener`、`tauri-plugin-single-instance`、`thiserror`、`trash`、`unicode-normalization`、`windows-sys`、`zip`。
 
 EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendored 清单及随附许可。
 
@@ -261,6 +261,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - cairo-sys-rs 0.18.2
 - calamine 0.38.0
 - cargo_metadata 0.19.2
+- cfb 0.10.0
 - cfb 0.14.0
 - cfg_aliases 0.2.2
 - combine 4.6.8
@@ -332,6 +333,7 @@ EPL-2.0 组件 elkjs 属于前端 Mermaid，不在 Rust 依赖树中；见 vendo
 - redox_syscall 0.5.18
 - redox_users 0.5.3
 - rfd 0.16.0
+- rwml 0.1.5
 - schemars 0.8.22
 - schemars 0.9.0
 - schemars 1.2.3

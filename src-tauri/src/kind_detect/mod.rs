@@ -37,7 +37,7 @@ fn language_of(ext: &str) -> Option<&'static str> {
         "json" | "jsonc" => "JSON",
         // Office 家族扩展（批 2）：Word 家族走 Docx 文本管线（odt 读 content.xml），
         // Excel 家族 + ODF 电子表格走 Xlsx 显示值管线（calamine/自有 ODS 解析）
-        "docx" | "docm" | "dotx" | "dotm" | "odt" | "wps" => "Docx",
+        "docx" | "docm" | "dotx" | "dotm" | "odt" | "wps" | "doc" => "Docx",
         "pdf" => "Pdf",
         "pptx" | "dps" => "Pptx",
         "et" => "Xlsx",
@@ -108,7 +108,6 @@ fn is_binary_ext(ext: &str) -> bool {
             | "flac"
             | "ogg"
             | "wav"
-            | "doc"
             | "ppt"
             | "jar"
             | "class"

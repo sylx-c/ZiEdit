@@ -366,6 +366,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | cargo_toml | 1.0.1 | all-targets-conservative-superset | Apache-2.0 OR MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | cc | 1.8.0 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | cesu8 | 1.1.0 | all-targets-conservative-superset | Apache-2.0/MIT | 6 | LOCAL_TEXT_COLLECTED |
+| cargo | cfb | 0.10.0 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | cfb | 0.14.0 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | cfg-expr | 0.15.8 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | cfg-if | 1.0.5 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
@@ -653,6 +654,7 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | cargo | rustls-webpki | 0.103.16 | all-targets-conservative-superset | ISC | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | rustls | 0.23.46 | all-targets-conservative-superset | Apache-2.0 OR ISC OR MIT | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | rustversion | 1.0.23 | all-targets-conservative-superset | MIT OR Apache-2.0 | 2 | LOCAL_TEXT_COLLECTED |
+| cargo | rwml | 0.1.5 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | cargo | ryu | 1.0.23 | all-targets-conservative-superset | Apache-2.0 OR BSL-1.0 | 2 | LOCAL_TEXT_COLLECTED |
 | cargo | same-file | 1.0.6 | all-targets-conservative-superset | Unlicense/MIT | 3 | LOCAL_TEXT_COLLECTED |
 | cargo | schemars | 0.8.22 | all-targets-conservative-superset | MIT | 1 | LOCAL_TEXT_COLLECTED |

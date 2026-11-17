@@ -1170,8 +1170,8 @@ mod tests {
             "投影与等价文本 → 0 差异，got {:?}",
             res.blocks
         );
-        // 二进制文本侧：.doc 扩展名 + 二进制内容 → 拒绝对比（既有语义）
-        let doc_bin = temp_bin("legacy.doc", &[0u8; 100]);
+        // 二进制文本侧：.ppt 扩展名（无宽松许可候选，维持拒绝）；.doc 已支持
+        let doc_bin = temp_bin("legacy.ppt", &[0u8; 100]);
         let state2 =
             compare::input_state(std::path::Path::new(&a), std::path::Path::new(&doc_bin)).unwrap();
         let refused = compare_open_office(

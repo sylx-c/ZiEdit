@@ -1977,3 +1977,21 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .docx-rich-pages{display:flex;flex-direction:column;align-items:center;gap:16px}
 .docx-rich-pages .docx-wrapper{background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.18);padding:24px 32px;max-width:920px;width:min(920px,calc(100vw - 96px))}
 .docx-rich-pages .docx-wrapper>section.docx{width:auto!important;padding-bottom:12px}
+
+/* 批 6：双表对照（A/B 同名 sheet 并排联动 + 差异高亮） */
+.cmp-duo{position:absolute;inset:var(--cmp-top,89px) 0 0 0;z-index:6;display:flex;flex-direction:column;background:var(--bg)}
+.cmp-duo-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 12px;border-bottom:1px solid var(--border);font-weight:600;font-size:12px}
+.cmp-duo-body{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:0}
+.cmp-duo-side{display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1px solid var(--border)}
+.cmp-duo-side:last-child{border-right:0}
+.cmp-duo-colhead{display:flex;border-bottom:1px solid var(--border);overflow:hidden;font-family:var(--mono,monospace);font-size:11px;color:var(--muted)}
+.cmp-duo-corner{flex:0 0 44px;border-right:1px solid var(--border)}
+.cmp-duo-col{flex:1 0 84px;padding:2px 6px;border-right:1px solid var(--border);white-space:nowrap}
+.cmp-duo-scroll{flex:1;overflow:auto;position:relative}
+.cmp-duo-rows{position:relative}
+.cmp-duo-row{display:flex;position:absolute;left:0;right:0;font-size:12px}
+.cmp-duo-no{flex:0 0 44px;border-right:1px solid var(--border);padding:0 6px;color:var(--muted);font-family:var(--mono,monospace);font-size:11px;white-space:nowrap;overflow:hidden}
+.cmp-duo-cell{flex:1 0 84px;padding:0 6px;border-right:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmp-duo-row.cmp-duo-diff{background:color-mix(in oklch,var(--diff-chg) 14%,transparent)}
+.cmp-duo-cell-diff{background:color-mix(in oklch,var(--diff-chg) 30%,transparent);font-weight:600}
+.cmp-duo-cell-hit{outline:2px solid var(--accent,#4a8);outline-offset:-2px;transition:outline .2s}

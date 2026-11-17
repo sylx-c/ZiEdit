@@ -57,6 +57,7 @@ arboard = "3"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
 calamine = "0.38.0"
 ooxml-numfmt = "0.2.3"
+rwml = { version = "0.1.5", default-features = false }
 
 
 [target.'cfg(windows)'.dependencies]
