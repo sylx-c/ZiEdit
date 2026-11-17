@@ -40,6 +40,32 @@ describe('TabStore.open（001-AC-2 重复打开激活）', () => {
     s.open({ ...tab('a.docx'), route: 'rich' });
     expect(s.tabs[0]!.scroll).toBe(88);
   });
+
+  it('批 6 复验 L9：用户显式锁定的路由不被重开探测/自动写入覆盖', () => {
+    const s = new TabStore();
+    s.open({ ...tab('a.docx'), route: 'rich' });
+    // 用户经视图菜单显式切 text（锁定）并滚动
+    s.setRoute('a.docx', 'text', { lock: true });
+    s.setScroll('a.docx', 77);
+    // 重新打开（探测 rich）：锁定路由保持、滚动保留
+    expect(s.open({ ...tab('a.docx'), route: 'rich' })).toBe('activated');
+    expect(s.tabs[0]!.route).toBe('text');
+    expect(s.tabs[0]!.routeLocked).toBe(true);
+    expect(s.tabs[0]!.scroll).toBe(77);
+    // 自动写入（富预览回退形态）同样让位
+    s.setRoute('a.docx', 'rich');
+    expect(s.tabs[0]!.route).toBe('text');
+    // 用户显式切回 rich：可写且锁定跟随
+    s.setRoute('a.docx', 'rich', { lock: true });
+    expect(s.tabs[0]!.route).toBe('rich');
+    // 会话往返（JSON 序列化）保留锁定：恢复后重开仍不被 rich 覆盖
+    s.setRoute('a.docx', 'text', { lock: true });
+    const restored = new TabStore();
+    restored.restore(JSON.parse(JSON.stringify(s.session())));
+    restored.open({ ...tab('a.docx'), route: 'rich' });
+    expect(restored.tabs[0]!.route).toBe('text');
+    expect(restored.tabs[0]!.routeLocked).toBe(true);
+  });
 });
 
 describe('TabStore.close', () => {

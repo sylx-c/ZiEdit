@@ -59,6 +59,11 @@ pub struct TabState {
     /// 草稿标签正文（走查 N 车道：重启不丢草稿；非草稿标签为 None）
     #[serde(default)]
     pub draft_content: Option<String>,
+    /// 用户经视图菜单显式锁定的路由（批 6 复验 L9）：随会话持久化，重开/自动写入
+    /// 不得覆盖。审查 H1：TS 侧早已加字段，Rust 侧缺字段导致保存时被 serde 丢弃、
+    /// 重启即丢锁——必须与本结构体同步（旧会话缺字段按 false 兼容）。
+    #[serde(default)]
+    pub route_locked: bool,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
@@ -732,5 +737,38 @@ mod tests {
             store::load_or_default(&store::config_file(&dir, "favorites.json"));
         assert_eq!(fav.items.len(), n, "并发 favorites_toggle 不得丢更新");
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// 批 6 审查 H1：用户显式锁定的路由（routeLocked）必须随会话落盘。
+    /// 修前 TS 新增该字段而 Rust TabState 无对应字段：session_save 反序列化后
+    /// 写回结构体，未知字段被 serde 丢弃——重启即丢锁，视图菜单所选路由失效。
+    #[test]
+    fn session_route_locked_roundtrips_through_json() {
+        use crate::kind_detect::ViewRoute;
+        let session = SessionState {
+            tabs: vec![TabState {
+                path: r"E:\x\a.docx".into(),
+                route: ViewRoute::Text,
+                language: None,
+                scroll: 88.0,
+                bookmarks: vec![],
+                draft_content: None,
+                route_locked: true,
+            }],
+            active_index: 0,
+        };
+        let json = serde_json::to_string(&session).unwrap();
+        assert!(
+            json.contains("\"routeLocked\":true"),
+            "会话序列化必须带 routeLocked:真（Rust 字段与 TS 对齐）: {json}"
+        );
+        let back: SessionState = serde_json::from_str(&json).unwrap();
+        assert!(back.tabs[0].route_locked, "反序列化必须保留锁定");
+        // 旧会话缺字段：默认 false，不得凭空上锁
+        let legacy: SessionState = serde_json::from_str(
+            r#"{"tabs":[{"path":"E:\\x\\a.docx","route":"rich","language":null,"scroll":0,"bookmarks":[]}],"activeIndex":0}"#,
+        )
+        .unwrap();
+        assert!(!legacy.tabs[0].route_locked);
     }
 }

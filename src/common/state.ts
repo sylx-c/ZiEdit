@@ -6,6 +6,9 @@ declare module './ipc' {
   interface TabState {
     /** 草稿正文随会话保存；真实文件不保存正文。 */
     draftContent?: string;
+    /** 用户经视图菜单显式选择的路由（批 6 复验 L9）：重开/自动写入（回退、
+     *  探测刷新）不得覆盖；随会话持久化。 */
+    routeLocked?: boolean;
   }
 }
 
@@ -39,7 +42,9 @@ export class TabStore {
       // 批 5 缺陷修复：激活已存在标签时以**本次打开的探测路由**刷新——否则富预览
       // 一次回退（或旧会话污染）写入的 route 永久压过「Word 默认富预览」。
       // 路由变化才重置滚动（同路由激活保持位置）；语言不动（草稿格式切换走 setTabLanguage）。
-      if (t.route !== tab.route) {
+      // 批 6 复验 L9：用户显式锁定（routeLocked）的路由不被探测刷新——修前无条件
+      // 覆盖，用户选定的 text 投影重开即回 rich 且滚动清零。
+      if (t.route !== tab.route && !t.routeLocked) {
         t.route = tab.route;
         t.scroll = 0;
       }
@@ -107,13 +112,23 @@ export class TabStore {
     }
   }
 
-  /** 视图路由强制切换（菜单/工具栏"文本/图片"，001 规则 19）：路由变更触发重渲染 */
-  setRoute(path: string, route: TabState['route']): void {
+  /** 视图路由强制切换（菜单/工具栏"文本/图片"，001 规则 19）：路由变更触发重渲染。
+   *  opts.lock = 用户显式选择（视图菜单）：写入并标记 routeLocked，且不受既有
+   *  锁限制；无 opts = 自动写入（富预览回退等）——已锁定的路由让位不写。 */
+  setRoute(path: string, route: TabState['route'], opts?: { lock?: boolean }): void {
     const t = this.tabs.find(t => t.path === normalizePath(path));
-    if (t && t.route !== route) {
+    if (!t) return;
+    if (t.routeLocked && !opts?.lock) return;
+    // 锁先落状态再持久化：修前 emit() 发生在写锁之前，会话快照里没有 routeLocked；
+    // 路由未变时也不触发任何持久化（审查 H1 的 TS 侧）
+    const newlyLocked = opts?.lock === true && t.routeLocked !== true;
+    if (newlyLocked) t.routeLocked = true;
+    if (t.route !== route) {
       t.route = route;
       t.scroll = 0;
       this.emit();
+    } else if (newlyLocked) {
+      this.saveHandler?.(this.session()); // 仅锁状态变化：免重渲染，直接存盘
     }
   }
 
@@ -170,6 +185,7 @@ export class TabStore {
       return {
       path: normalizePath(t.path),
       route: t.route === 'image' || t.route === 'pdf' || t.route === 'rich' ? t.route : 'text',
+      routeLocked: t.routeLocked === true ? true : undefined,
       language: t.language ?? null,
       scroll: typeof t.scroll === 'number' ? t.scroll : 0,
       ...(draft !== undefined ? { draftContent: draft } : {}),
