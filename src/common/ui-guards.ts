@@ -4,7 +4,11 @@
 //   （复制/粘贴），编辑器与阅读面等已 preventDefault 的自定义菜单不受影响。
 // ② 统一 title 提示层：原生 title 悬停提示在 WebView2 下延迟长（约 500ms）且不稳定
 //   （同位悬停常不再触发）——自定义层接管：260ms 稳定出现、跟随元素、离開/按下即隐。
-//   原生提示的抑制采用「悬停期间摘下 title、离开时恢复」的经典手法，无障碍属性不变。
+//   原生提示的抑制采用「自定义层可见期间摘下 title、hide 时恢复」的经典手法，无障碍属性不变。
+//   摘下时机在 show()（260ms 后）而非 pointerover：标签栏等面每次渲染全量重建元素，
+//   点击后指针停在原位时 Chromium 会对新元素补发 pointerover——若在 pointerover 即摘下，
+//   新元素的 title 会被清空且再无 pointerdown/pointerout 恢复（真机 position 门禁首抓，
+//   2026-11-18）；快速点击（<260ms）全程不摘，依赖 title 的读取方（门禁/自动化/读屏）不受扰。
 
 let guardInstalled = false;
 export function installDefaultContextMenuGuard(): void {
@@ -48,8 +52,10 @@ export function installPointerTips(): void {
     if (tipOwner) { restoreTitle(tipOwner); tipOwner = null; }
   };
   const show = (el: HTMLElement): void => {
+    if (!el.isConnected) return; // 悬停期间元素被重建移除（如标签栏全量渲染）则不出提示
     const tip = ensure();
     tip.textContent = el.dataset.tipTitle ?? '';
+    el.title = ''; // 仅在自定义层实际可见期间摘下原生提示（避免双层）；hide() 恢复。
     tip.classList.add('on'); // 用类切换可见性：.app-tip 基类自带 display:none，
     // 修前 style.display='' 会回落到该规则导致真机永远不可见（jsdom 未加载 CSS 漏检）。
     const r = el.getBoundingClientRect();
@@ -67,7 +73,7 @@ export function installPointerTips(): void {
     if (tipOwner !== el) hide();
     tipOwner = el;
     if (el.dataset.tipTitle === undefined) el.dataset.tipTitle = el.title;
-    el.title = ''; // 悬停期间摘下原生提示；离开时恢复
+    // 注意：此处不摘原生 title——摘下动作移到 show()（260ms 后），见文件头注释。
     if (tipTimer) clearTimeout(tipTimer);
     tipTimer = setTimeout(() => { tipTimer = null; show(el); }, 260);
   });
