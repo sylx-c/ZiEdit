@@ -6,7 +6,12 @@ import { spawn } from 'node:child_process';
 import { EXE, RUN_DIR, waitTargets, connectCDP, waitFor, switchMdMode, dismissOverlay,
   clickXY, pressKey, killTree, sleep, setNativeWindowSize } from './gate-lib.mjs';
 
-const output=path.resolve(process.argv[2]??path.join(RUN_DIR,'results/md-editing.json'));
+// 参数约定与 run-all 统一为 `(corpus?, out)`（批 6 复验 H4）：本门禁语料自建，
+// corpus 参数可忽略；run-md-matrix 的直调形态是单参 `(out)`。按扩展名区分——
+// 修前 argv[2] 恒当 output，run-all 传参下结果 JSON 会覆写语料文件（自毁式失败：
+// 首轮把 single-table-400k.md 写成报告 JSON，次轮打开「巨表」即 40 行 JSON 超时）
+const outArg = process.argv[2]?.toLowerCase().endsWith('.md') ? process.argv[3] : process.argv[2];
+const output=path.resolve(outArg??path.join(RUN_DIR,'results/md-editing.json'));
 const file=path.join(RUN_DIR,'corpus/native-md-editing.md');
 fs.mkdirSync(path.dirname(file),{recursive:true});fs.mkdirSync(path.dirname(output),{recursive:true});
 fs.writeFileSync(file,'# Editable\n\n| Name | Value |\n| --- | --- |\n| Cell | Original |\n\n'+

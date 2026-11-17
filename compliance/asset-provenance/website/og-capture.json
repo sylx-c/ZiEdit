@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "capturedAt": "2026-11-10T15:46:20.733Z",
+  "capturedAt": "2026-11-17T13:20:13.986Z",
   "origin": "New real website first-viewport capture in this remediation session. No DOM/CSS injection, composition or image resampling.",
   "script": {
     "path": "scripts/capture-website-assets.mjs",
@@ -9,15 +9,15 @@
   },
   "browser": {
     "path": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-    "bytes": 5073736,
-    "sha256": "d258e512aa24947cfbef0c0033d8c3cd56ecb40f7b2ad59802fa75c4e4f3324d"
+    "bytes": 5072712,
+    "sha256": "2497874639116d8edc3de34b3fd83f72fa099112a5d2a426e1f08fcf39a99612"
   },
   "browserVersion": {
     "protocolVersion": "1.3",
-    "product": "Edg/157.0.4341.42",
-    "revision": "@7b1486be4607d53d9f93841b7c776bc525ca74b7",
+    "product": "Edg/157.0.4341.60",
+    "revision": "@fbcb2989a6c61b72a4919fe1028e58e70131cd46",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
-    "jsVersion": "15.7.11.4"
+    "jsVersion": "15.7.11.7"
   },
   "viewport": {
     "width": 1262,
@@ -39,7 +39,7 @@
     {
       "path": "website/index.html",
       "bytes": 15467,
-      "sha256": "dabdb0cefee4a4c0f5e07a2dd437eb1026b4da71830a79958eedc6b872871884"
+      "sha256": "c5226e5f073e8e042f43ef6ccdd33925cc78dcacc7aa8a81e0fb27f300261302"
     },
     {
       "path": "website/shots/en/code.png",
@@ -74,7 +74,7 @@
     {
       "path": "website/site.js",
       "bytes": 1917,
-      "sha256": "6f9e9df0f7842f13c74c9d9d143118267e0726f6dbe6cec512c5287028576f8c"
+      "sha256": "45d0babab66b0eaca67ba82fc1b7a20d2fa6decd7f6ebf8d6c1e718e0b237261"
     },
     {
       "path": "website/styles.css",

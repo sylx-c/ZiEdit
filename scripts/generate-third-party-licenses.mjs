@@ -208,7 +208,9 @@ for (const record of records) {
   // 认可为完整许可原文（等同独立 LICENSE 的证据力），不以 metadata 单方面声明放行。
   if (record.name === 'isarray' && record.ecosystem === 'npm' && record.version === '1.0.0'
       && record.review.some(i => i.code === 'NO_STANDALONE_LICENSE')) {
-    const readme = path.join(root, 'node_modules', 'isarray', 'README.md');
+    // 批 6 复验 L13：README 从 record.location 取证（修前硬编码顶层 node_modules
+    // 路径——嵌套安装时证据与被记录包不对应）
+    const readme = path.join(root, record.location, 'README.md');
     if (fs.existsSync(readme)) {
       const text = fs.readFileSync(readme, 'utf8');
       const full = text.includes('Copyright (c) 2013 Julian Gruber')
@@ -223,8 +225,10 @@ for (const record of records) {
         emit(destination, bytes);
         record.documents.push({ originalPath: 'README.md', path: destination, bytes: bytes.length, sha256: sha(bytes) });
         record.review = record.review.filter(i => i.code !== 'NO_STANDALONE_LICENSE');
+        // 批 6 复验 L13：回滚条件与 record 侧守卫对称（限 npm 生态）——避免
+        // 同名 cargo 包的同类 issue 被误删导致 counts 低报
         for (let i = issues.length - 1; i >= 0; i--) {
-          if (issues[i].name === 'isarray' && issues[i].code === 'NO_STANDALONE_LICENSE') issues.splice(i, 1);
+          if (issues[i].ecosystem === 'npm' && issues[i].name === 'isarray' && issues[i].code === 'NO_STANDALONE_LICENSE') issues.splice(i, 1);
         }
         record.supplementalEvidence = `${record.location}/README.md carries the complete MIT license text (title, copyright line, full grant and disclaimer); audited in scripts/generate-third-party-licenses.mjs — not inferred from package.json metadata alone.`;
       }

@@ -19,6 +19,10 @@ const GATE_DEFS = {
   'release-resources': { script: 'gate-release-behavior.mjs', out: 'release-resources.json', corpus: false, args: ['--resources'] },
   'recovery': { script: 'gate-recovery.mjs', out: 'recovery.json', corpus: false },
   'office-smoke': { script: 'gate-office-smoke.mjs', out: 'office-smoke.json', corpus: false },
+  // md-editing 恢复（批 6 复验 H4）：run-release-native 的 data-safety 集合仍点名
+  // 本门禁，移除定义会使发布验收以「未知门禁」exit 1 中断。主语料自建；巨表语料
+  // 依赖 gen-md-surfaces-corpus.mjs（corpus:true 让缺失走 fail-fast 提示）
+  'md-editing': { script: 'gate-md-editing.mjs', out: 'md-editing.json', corpus: true, defaultCorpus: 'single-table-400k.md' },
   'md-navigation': { script: 'gate-md-navigation.mjs', out: 'md-navigation.json', corpus: true, defaultCorpus: 'repeated-6001.md' },
   'md-surfaces': { script: 'gate-md-surfaces.mjs', out: 'md-surfaces.json', corpus: true },
   'md-structure': { script: 'gate-md-structure.mjs', out: 'md-structure.json', corpus: false },

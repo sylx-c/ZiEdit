@@ -36,7 +36,9 @@ export function releaseFixtures(dir) {
   const xlsxTypes = '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
   const rootRels = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
   const types = { txt: 'ZiEdit 中文 text\nline two\n', md: '# ZiEdit\r\n\r\n中文 **Markdown**\r\n\r\n| A | B |\r\n|---|---|\r\n|1|2|\r\n', csv: 'Name,Value\n中文,42\n', pdf: pdf(),
-    png: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42jP8/x8AAwMCAO+jR1sAAAAASUVORK5CYII=', 'base64'),
+    // 1×1 透明 PNG（批 6 复验 L11：修前手改单字符 base64 致 IDAT zlib 流损坏——
+    // adler32/CRC 均不符，Chromium 宽容解码掩盖了损坏；本常量经 CRC+inflate 程序验证）
+    png: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64'),
     // docx 为完整 OPC 包（docx-preview 渲染层比 Rust 提取器严格：需 [Content_Types] + rels）
     docx: zip({
       '[Content_Types].xml': '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>',
