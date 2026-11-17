@@ -2,7 +2,9 @@
 
 use serde::Serialize;
 
-use crate::commands::ooxml::{self, Content, OoxmlRegistry};
+use crate::commands::ooxml::{
+    self, Content, KIND_DOCX_BASE, KIND_DOCX_EXTENDED, KIND_XLSX, OoxmlRegistry,
+};
 use crate::compare::{self, detect, office::OfficeKind};
 use crate::encoding;
 use crate::error::ZiEditError;
@@ -242,7 +244,16 @@ fn office_side(
     match kind {
         OfficeKind::Docx => {
             // 扩围变体走注册表 kind 3（独立缓存槽）：页眉脚/脚注/批注/标题前缀
-            let content = ooxml::load(registry, path, if extended { 3 } else { 0 })?;
+            // 扩围变体走注册表扩围槽（常量口径与 office_window 一致——裸数字已收口 KIND_*）
+            let content = ooxml::load(
+                registry,
+                path,
+                if extended {
+                    KIND_DOCX_EXTENDED
+                } else {
+                    KIND_DOCX_BASE
+                },
+            )?;
             let Content::Docx(doc) = &*content else {
                 unreachable!()
             };
@@ -408,12 +419,30 @@ fn office_window(
     from: u64,
     to: u64,
     formula: bool,
+    extended: bool,
 ) -> Result<(Vec<String>, u64), ZiEditError> {
-    let range = crate::ooxml::window(from, to).map_err(ZiEditError::Msg)?;
+    // 空侧合法：对齐块的 insert/delete 一侧坐标为 0（该侧无行），必须当空窗口而不是
+    // 非法窗口——修前直接 OOXML_WINDOW 报错，Office 对的变更块详情显示「详情加载失败」。
+    // 与文本侧 read_lines_raw（from 钳到 1、want=0 → 空）同口径；总行数照常回报。
+    let range = if from == 0 || to < from {
+        0..0
+    } else {
+        crate::ooxml::window(from, to).map_err(ZiEditError::Msg)?
+    };
     // Arc 与 owned 都要活到切片用完（borrow checker：不能在 match 臂内释放）
     let content = match kind {
-        OfficeKind::Docx => ooxml::load(registry, path, 0)?,
-        OfficeKind::Xlsx => ooxml::load(registry, path, 1)?,
+        // 扩围变体走注册表 kind 3（与 compare_open 同口径）：修前取行恒走基础
+        // 投影，扩围块坐标与取行内容错位（批 6 复验 M1）
+        OfficeKind::Docx => ooxml::load(
+            registry,
+            path,
+            if extended {
+                KIND_DOCX_EXTENDED
+            } else {
+                KIND_DOCX_BASE
+            },
+        )?,
+        OfficeKind::Xlsx => ooxml::load(registry, path, KIND_XLSX)?,
     };
     let owned: Arc<Vec<String>>;
     let slice: &[String] = match (&*content, kind) {
@@ -456,14 +485,17 @@ pub async fn office_lines(
     to: u64,
     // xlsx 公式模式（与 compare_open 同口径；缺省=显示值）
     formula: Option<bool>,
+    // docx 扩围（与 compare_open 同口径；缺省=基础投影）
+    extended: Option<bool>,
 ) -> Result<OfficeLinesResult, ZiEditError> {
     crate::paths::reject_device_path(&path)?;
     let formula = formula.unwrap_or(false);
+    let extended = extended.unwrap_or(false);
     tauri::async_runtime::spawn_blocking(move || {
         let registry = app.state::<OoxmlRegistry>();
         let kind = compare::office::office_kind(&PathBuf::from(&path))
             .ok_or_else(|| ZiEditError::Msg("OFFICE_LINES:unsupported-kind".into()))?;
-        let (texts, total) = office_window(&registry, &path, kind, from, to, formula)?;
+        let (texts, total) = office_window(&registry, &path, kind, from, to, formula, extended)?;
         let mut lines = Vec::with_capacity(texts.len());
         let mut bytes = 0usize;
         for (i, text) in texts.into_iter().enumerate() {
@@ -501,8 +533,12 @@ pub async fn compare_detail(
     b_to: u64,
     // xlsx 公式模式（与 compare_open 同口径；缺省=显示值）
     formula: Option<bool>,
+    // docx 扩围（与 compare_open 同口径；缺省=基础投影）——修前缺失导致扩围
+    // 块的详情恒读基础投影、行内容与块坐标错位（批 6 复验 M1）
+    extended: Option<bool>,
 ) -> Result<Vec<Vec<DetailLine>>, ZiEditError> {
     let formula = formula.unwrap_or(false);
+    let extended = extended.unwrap_or(false);
     tauri::async_runtime::spawn_blocking(move || {
         let registry = app.state::<OoxmlRegistry>();
         let kind_a = compare::office::office_kind(&PathBuf::from(&a));
@@ -522,7 +558,7 @@ pub async fn compare_detail(
          -> Result<Src, ZiEditError> {
             match kind {
                 Some(k) => Ok(Src::Office(
-                    office_window(registry, path, k, from, to, formula)?.0,
+                    office_window(registry, path, k, from, to, formula, extended)?.0,
                 )),
                 None => {
                     let enc = enc_name_of(path)?;
@@ -1142,6 +1178,33 @@ mod tests {
         assert!(same.blocks.iter().all(|b| b.kind == "equal"));
     }
 
+    /// 批 6 追修：变更块详情对「空侧」不得报错。
+    /// insert/delete 块的一侧坐标为 (0,0)——office 投影窗口修前走 ooxml::window 校验
+    /// 直接返回 OOXML_WINDOW，前端变更块显示「详情加载失败」（xlsx/docx 对实测复现）。
+    /// 现口径：0 基或倒序窗口 = 合法空窗口，投影总行数照常回报（与文本侧 read_lines_raw 同口径）。
+    #[test]
+    fn office_window_empty_side_is_valid() {
+        let docx = docx_fixture("emp-a.docx", "beta");
+        let xlsx = xlsx_fixture("emp-x.xlsx", "old");
+        let registry = OoxmlRegistry::default();
+
+        let (lines, total) =
+            office_window(&registry, &docx, OfficeKind::Docx, 0, 0, false, false).unwrap();
+        assert!(lines.is_empty(), "空侧不得产出投影行");
+        assert_eq!(total, 3, "空侧仍回报投影总行数（alpha/beta/gamma）");
+
+        // 倒序窗口（to < from）同样按空侧处理，不得再抛 OOXML_WINDOW
+        let (lines2, total2) =
+            office_window(&registry, &xlsx, OfficeKind::Xlsx, 5, 4, false, false).unwrap();
+        assert!(lines2.is_empty());
+        assert_eq!(total2, 3, "xlsx 投影 = sheet 头 + 2 行");
+
+        // 回归护栏：正常窗口仍然取到行（修空侧不得把正常窗口也变空）
+        let (lines3, _) =
+            office_window(&registry, &docx, OfficeKind::Docx, 1, 2, false, false).unwrap();
+        assert_eq!(lines3, vec!["alpha".to_string(), "beta".to_string()]);
+    }
+
     /// 混合对：docx 投影 vs 原始文本行（提取文本对源文本的对比成立）；
     /// 二进制文本侧仍按既有语义拒绝（binary=true，但 office 标记保留）
     #[test]
@@ -1345,7 +1408,8 @@ mod tests {
         );
         assert_eq!((replaces[0].a_start, replaces[0].a_end), (2, 2));
         // 窗口取行同口径：公式模式行文本
-        let (lines, total) = office_window(&registry, &a, OfficeKind::Xlsx, 2, 2, true).unwrap();
+        let (lines, total) =
+            office_window(&registry, &a, OfficeKind::Xlsx, 2, 2, true, false).unwrap();
         assert_eq!(total, 2);
         assert_eq!(lines, ["A1*2"]);
     }
@@ -1355,16 +1419,18 @@ mod tests {
     fn office_window_slicing() {
         let a = xlsx_fixture("win-a.xlsx", "v");
         let registry = OoxmlRegistry::default();
-        let (lines, total) = office_window(&registry, &a, OfficeKind::Xlsx, 2, 3, false).unwrap();
+        let (lines, total) =
+            office_window(&registry, &a, OfficeKind::Xlsx, 2, 3, false, false).unwrap();
         assert_eq!(total, 3);
         assert_eq!(lines, ["h1", "\tv"]);
         // 越界：from 超投影总行数 → 空（total 仍如实）
-        let (none, t2) = office_window(&registry, &a, OfficeKind::Xlsx, 9, 12, false).unwrap();
+        let (none, t2) =
+            office_window(&registry, &a, OfficeKind::Xlsx, 9, 12, false, false).unwrap();
         assert!(none.is_empty());
         assert_eq!(t2, 3);
         // docx：段落行窗口
         let d = docx_fixture("win-d.docx", "beta");
-        let (dl, dt) = office_window(&registry, &d, OfficeKind::Docx, 2, 2, false).unwrap();
+        let (dl, dt) = office_window(&registry, &d, OfficeKind::Docx, 2, 2, false, false).unwrap();
         assert_eq!(dt, 3);
         assert_eq!(dl, ["beta"]);
     }

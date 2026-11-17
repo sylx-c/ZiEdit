@@ -3,7 +3,12 @@ use crate::commands::csv::CsvRecord;
 use calamine::{Data, Range, Reader, Sheets};
 use ooxml_numfmt::{DateSystem, FormatOptions};
 use serde::Serialize;
-use std::path::Path;
+use std::{
+    collections::HashMap,
+    path::Path,
+    sync::{Mutex, OnceLock},
+    time::SystemTime,
+};
 
 /// Excel 家族有界提取（批 2：calamine 内核替换自研 XML 遍历）。
 /// 覆盖 xlsx/xlsm/xltx/xltm/xlam/xls/xlsb/ods；显示值渲染走 ooxml-numfmt——
@@ -167,6 +172,13 @@ impl<'a> RecordsBuilder<'a> {
         }
         let row = &mut self.records[ru];
         if c as usize >= row.len() {
+            // 列稠密化记账（批 6 复验）：填充格的 String 头也是实打实的堆内存——
+            // 修前只记单格，远列稀疏攻击（每行 1 字节格放第 1024 列）可在 text
+            // 记账 ~10MB 通过哨兵的同时物化数十万行 × 1024 列稠密矩阵（GB 级）
+            *self.bytes += (c as usize + 1 - row.len()) * std::mem::size_of::<String>();
+            if *self.bytes > super::TEXT_LIMIT {
+                return Err("OOXML_TEXT_LIMIT:10MiB".into());
+            }
             row.resize(c as usize + 1, String::new());
         }
         *self.bytes += text.len() + std::mem::size_of::<String>();
@@ -284,6 +296,44 @@ fn sheet_of(
     })
 }
 
+/// 嗅探结果缓存：(path, len, mtime) → 是否 ODF。同一文件在 open/lines/detail
+/// 通道会多次进入本函数，缓存避免每轮重复解析 ZIP 中央目录（审查 L1）。
+type ProbeCache = Mutex<HashMap<String, (u64, Option<SystemTime>, bool)>>;
+fn probe_cache() -> &'static ProbeCache {
+    static CACHE: OnceLock<ProbeCache> = OnceLock::new();
+    CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+/// 包内容嗅探：根级 `mimetype`/`content.xml` 是 ODF 包判据（OOXML 在 xl/、doc/、
+/// ppt/ 子目录，不会误命中）。打不开（非 zip）返回 false——照旧走 calamine 出
+/// 类型化 XLSX_OPEN 错误，不吞错。结果按 (路径, 大小, 修改时间) 记忆化；容量
+/// 上限 8 条，超出整体清空（对比/查看同时只涉及少数文件，避免无界增长）。
+fn odf_content(path: &str) -> bool {
+    let meta = std::fs::metadata(path).ok();
+    let len = meta.as_ref().map(std::fs::Metadata::len).unwrap_or(0);
+    let mtime = meta.as_ref().and_then(|m| m.modified().ok());
+    if let Ok(cache) = probe_cache().lock()
+        && let Some((cached_len, cached_mtime, value)) = cache.get(path)
+        && *cached_len == len
+        && *cached_mtime == mtime
+    {
+        return *value;
+    }
+    let value = match super::package(path) {
+        Ok(zip) => zip.file_names().any(|n| {
+            n.map(|s| s == "mimetype" || s == "content.xml")
+                .unwrap_or(false)
+        }),
+        Err(_) => false,
+    };
+    if let Ok(mut cache) = probe_cache().lock() {
+        if cache.len() >= 8 {
+            cache.clear();
+        }
+        cache.insert(path.to_owned(), (len, mtime, value));
+    }
+    value
+}
+
 pub fn open(path: &str) -> Result<Workbook> {
     super::reject_legacy_wps(path)?;
     let p = Path::new(path);
@@ -294,12 +344,15 @@ pub fn open(path: &str) -> Result<Workbook> {
     if len > PACKAGE_LIMIT {
         return Err("OOXML_PACKAGE_LIMIT:100MiB".into());
     }
-    // ods 走自有有界管线（calamine Ods 对截断 content.xml 无限循环——见 ods.rs 注释）
-    if p.extension()
+    // ODF 内容走自有有界管线（calamine Ods 对截断 content.xml 无限循环——见 ods.rs
+    // 注释）。.ods 按扩展名直达；其余扩展名（.et 及恶意改名的 ODF zip）按包内容
+    // 嗅探分流，杜绝落入 calamine 的 Ods 通道（批 6 复验的 .et 挂起绕过）
+    let is_ods_ext = p
+        .extension()
         .and_then(|e| e.to_str())
-        .is_some_and(|e| e.eq_ignore_ascii_case("ods"))
-    {
-        return Ok(super::ods::to_workbook(super::ods::open(path)?));
+        .is_some_and(|e| e.eq_ignore_ascii_case("ods"));
+    if is_ods_ext || odf_content(path) {
+        return super::ods::to_workbook(super::ods::open(path)?);
     }
     let mut book: Sheets<std::io::BufReader<std::fs::File>> =
         calamine::open_workbook_auto(p).map_err(map_open_err)?;
@@ -595,5 +648,61 @@ mod tests {
         let got = window_records(sheet, 4, 4, false).unwrap();
         assert_eq!(got[0].no, 4);
         assert_eq!(got[0].cells, ["", "7"]);
+    }
+
+    #[test]
+    fn far_column_sparse_attack_hits_text_limit() {
+        // 批 6 复验（列稠密化记账）：每行 1 字节格放第 1024 列（AMJ）——修前
+        // text 记账 ~10MB 可通过哨兵的同时物化稠密矩阵（放大 ~500×）
+        let mut sheet_data = String::from("<worksheet><sheetData>");
+        for r in 1..=500u32 {
+            sheet_data.push_str(&format!("<row r='{r}'><c r='AMJ{r}'><v>1</v></c></row>"));
+        }
+        sheet_data.push_str("</sheetData></worksheet>");
+        let p = wb_fixture(&sheet_data, None, "far-col.xlsx");
+        assert_eq!(open(&p).err().unwrap(), "OOXML_TEXT_LIMIT:10MiB");
+    }
+
+    #[test]
+    fn et_with_odf_content_routes_to_bounded_pipeline() {
+        // 批 6 复验（.et 绕过）：ODF zip 内容挂 .et 扩展名——包内容嗅探分流到
+        // 自有管线（修前落入 calamine auto 的 Ods 通道，截断 content.xml 即挂起）
+        let p = crate::ooxml::fixture(
+            &[
+                ("mimetype", "application/vnd.oasis.opendocument.spreadsheet"),
+                (
+                    "META-INF/manifest.xml",
+                    "<manifest:manifest xmlns:manifest='urn:oasis:names:tc:opendocument:xmlns:manifest:1.0' manifest:version='1.2'><manifest:file-entry manifest:full-path='/' manifest:media-type='application/vnd.oasis.opendocument.spreadsheet'/><manifest:file-entry manifest:full-path='content.xml' manifest:media-type='text/xml'/></manifest:manifest>",
+                ),
+                (
+                    "content.xml",
+                    "<office:document-content xmlns:office='urn:oasis:names:tc:opendocument:xmlns:office:1.0' xmlns:table='urn:oasis:names:tc:opendocument:xmlns:table:1.0'><office:body><office:spreadsheet><table:table table:name='ET表'><table:table-row><table:table-cell office:value-type='float' office:value='7'/></table:table-row></table:table></office:spreadsheet></office:body></office:document-content>",
+                ),
+            ],
+            "data.et",
+        );
+        let book = open(&p).unwrap();
+        assert_eq!(book.sheets[0].name, "ET表");
+        assert_eq!(book.sheets[0].records[0], ["7"]);
+        // 截断 content.xml 的 .et：秒级哨兵报错（与 .ods 同一守护，不挂起）
+        let p2 = crate::ooxml::fixture(
+            &[
+                ("mimetype", "application/vnd.oasis.opendocument.spreadsheet"),
+                (
+                    "META-INF/manifest.xml",
+                    "<manifest:manifest xmlns:manifest='urn:oasis:names:tc:opendocument:xmlns:manifest:1.0' manifest:version='1.2'><manifest:file-entry manifest:full-path='/' manifest:media-type='application/vnd.oasis.opendocument.spreadsheet'/><manifest:file-entry manifest:full-path='content.xml' manifest:media-type='text/xml'/></manifest:manifest>",
+                ),
+                (
+                    "content.xml",
+                    "<office:document-content xmlns:office='urn:oasis:names:tc:opendocument:xmlns:office:1.0' xmlns:table='urn:oasis:names:tc:opendocument:xmlns:table:1.0'><office:body><office:spreadsheet><table:table table:name='T'><table:table-row><table:table-cell office:value-type='float' office:value='1'/></table:table-row>",
+                ),
+            ],
+            "truncated.et",
+        );
+        let err = open(&p2).err().expect("截断 content.xml 必须报错");
+        assert!(
+            err.starts_with("OOXML_XML:") || err == "ODS_TRUNCATED_CONTENT",
+            "got {err}"
+        );
     }
 }

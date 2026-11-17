@@ -90,7 +90,13 @@ fn pair_sheets(a: &Workbook, b: &Workbook) -> Vec<(Option<usize>, Option<usize>)
 /// 单 sheet 差异：行对齐（键列模式）→ 逐坐标比单元格。
 /// 默认模式行号配对（i↔i）；键列模式对键列哈希做 Myers，等值块内配对、
 /// delete→rowDel / insert→rowAdd。
-fn diff_sheet(out: &mut Vec<CellDiff>, sheet: &str, a: &Sheet, b: &Sheet, opts: &XlsxDiffOpts) {
+fn diff_sheet(
+    out: &mut Vec<CellDiff>,
+    sheet: &str,
+    a: &Sheet,
+    b: &Sheet,
+    opts: &XlsxDiffOpts,
+) -> Result<(), String> {
     enum Align {
         Pair(usize, usize),
         Del(usize),
@@ -154,6 +160,13 @@ fn diff_sheet(out: &mut Vec<CellDiff>, sheet: &str, a: &Sheet, b: &Sheet, opts: 
         }
     };
     for item in align {
+        // 总量哨兵下沉到推送循环（批 6 复验）：修前只在每个 sheet 配对后检查，
+        // 单 sheet 可在报错前累积数十万条（约 20× 哨兵意图的峰值内存）。
+        // 语义：恰好 2 万条可接受，出现第 20001 条即报错（审查 L4：循环内用 >=
+        // 保证峰值恰为上限；收尾检查保留 > 以放行恰好上限的清单）。
+        if out.len() >= XLSX_DIFF_LIMIT {
+            return Err(format!("XLSX_DIFF_LIMIT:{}", XLSX_DIFF_LIMIT));
+        }
         match item {
             Align::Pair(ia, ib) => {
                 let ra = &a.records[ia];
@@ -201,10 +214,17 @@ fn diff_sheet(out: &mut Vec<CellDiff>, sheet: &str, a: &Sheet, b: &Sheet, opts: 
             }
         }
     }
+    Ok(())
 }
 
 /// 结构化差异主入口（纯函数）。sheet 增删先报，再按配对逐 sheet 出清单。
 pub fn xlsx_diff(a: &Workbook, b: &Workbook, opts: &XlsxDiffOpts) -> Result<Vec<CellDiff>, String> {
+    if opts.key_column == Some(0) {
+        // 1 基键列入口哨兵（批 6 复验）：0 在 key_hashes 会 u32 下溢——debug 构建
+        // panic（经 JoinError 变 task panicked），release 回绕后 row.get 恒 None、
+        // 全部键哈希退化为空串并静默变成行号配对。显式报错，绝不静默。
+        return Err("XLSX_KEY_COLUMN:>=1".into());
+    }
     let mut out = Vec::new();
     for (ai, bi) in pair_sheets(a, b) {
         match (ai, bi) {
@@ -214,7 +234,7 @@ pub fn xlsx_diff(a: &Workbook, b: &Workbook, opts: &XlsxDiffOpts) -> Result<Vec<
                 &a.sheets[ai],
                 &b.sheets[bi],
                 opts,
-            ),
+            )?,
             (Some(ai), None) => out.push(CellDiff {
                 sheet: a.sheets[ai].name.clone(),
                 kind: "sheetDel",
@@ -415,6 +435,26 @@ mod tests {
                 .err()
                 .unwrap(),
             "XLSX_DIFF_LIMIT:20000"
+        );
+    }
+
+    #[test]
+    fn key_column_zero_is_rejected() {
+        // 批 6 复验：1 基键列 0 修前在 key_hashes u32 下溢——debug panic /
+        // release 静默退化为行号配对；入口显式哨兵
+        let a = book(vec![sheet("S", vec![vec!["k"], vec!["x"]])]);
+        let b = book(vec![sheet("S", vec![vec!["k"], vec!["y"]])]);
+        assert_eq!(
+            xlsx_diff(
+                &a,
+                &b,
+                &XlsxDiffOpts {
+                    key_column: Some(0)
+                }
+            )
+            .err()
+            .unwrap(),
+            "XLSX_KEY_COLUMN:>=1"
         );
     }
 }

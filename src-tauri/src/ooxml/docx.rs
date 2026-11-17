@@ -174,13 +174,10 @@ pub fn open_with_scope(path: &str, extended: bool) -> Result<Document> {
         // pptx（批 4）：演示文稿文本投影——每张幻灯片一行头 + 段落行
         return open_pptx(path);
     }
+    // 旧式 Word 97-2003（批 6 spike 结论引入）：rwml（MIT）legacy 通道——
+    // 敌意样本实测全部类型化报错 0ms（截断/垃圾/头残缺），自带 1600+ 测试含
+    // LibreOffice/POI 交叉语料。无修订通道（如实：revisions 恒 false）。
     if ext == "doc" {
-        return open_legacy_doc(path);
-    }
-    if ext == "doc" {
-        // 旧式 Word 97-2003（批 6 spike 结论引入）：rwml（MIT）legacy 通道——
-        // 敌意样本实测全部类型化报错 0ms（截断/垃圾/头残缺），自带 1600+ 测试含
-        // LibreOffice/POI 交叉语料。无修订通道（如实：revisions 恒 false）。
         return open_legacy_doc(path);
     }
     let mut zip = package(path)?;
@@ -203,13 +200,14 @@ fn open_pptx(path: &str) -> Result<Document> {
             .strip_prefix("ppt/slides/slide")
             .and_then(|s| s.strip_suffix(".xml"))
             && let Ok(no) = n.parse::<u32>()
-            && slides.len() < 512
         {
+            // 上限哨兵在物化前检查（批 6 复验）：允许恰好 512 页、第 513 页报错；
+            // 修前「收集 <512 + 循环后 >=512 报错」把 512 页 deck 也拒了（差一）
+            if slides.len() >= 512 {
+                return Err("PPTX_SLIDE_LIMIT:512".into());
+            }
             slides.push((no, name));
         }
-    }
-    if slides.len() >= 512 {
-        return Err("PPTX_SLIDE_LIMIT:512".into());
     }
     slides.sort_unstable_by_key(|(n, _)| *n);
     let mut lines = Vec::new();
@@ -282,7 +280,8 @@ fn parse_body(zip: &mut Package, with_headings: bool) -> Result<Document> {
     let mut bytes = 0;
     let mut revisions = false;
     let mut revision_records: Vec<RevisionRecord> = Vec::new();
-    // 修订采集：当前修订元素（ins/del）深度与文本累计（嵌套修订按最外层归类）
+    // 修订采集：当前修订元素（ins/del）深度与文本累计。归类口径：每个 ins/del
+    // 元素各产出一条记录；文本累计到最内层（最后 push 的记录，last_mut 归属）
     let mut rev_depth: usize = 0;
     let mut in_del_text = false;
     let mut heading = String::new();
@@ -462,7 +461,13 @@ fn append_scoped(zip: &mut Package, doc: &mut Document) -> Result<()> {
         _ => 3,
     };
     names.sort_by(|a, b| (rank(a.1), &a.0).cmp(&(rank(b.1), &b.0)));
-    let mut bytes: usize = doc.lines.iter().map(|l| l.len()).sum();
+    // 初始记账与 push_line 同口径（行内容 + String 头）：修前只记内容长度，
+    // 扩围预算比正文路径松 lines.len()×24B（批 6 复验收紧）
+    let mut bytes: usize = doc
+        .lines
+        .iter()
+        .map(|l| l.len() + std::mem::size_of::<String>())
+        .sum();
     for (name, label) in names {
         let head = format!("\u{25C7} {label}: {name}");
         push_line(&mut doc.lines, &mut bytes, head)?;
@@ -671,6 +676,36 @@ mod tests {
         assert_ne!(other.lines[3], doc.lines[3]);
         other.lines[3] = doc.lines[3].clone();
         assert_eq!(other.lines, doc.lines);
+    }
+
+    #[test]
+    fn pptx_slide_limit_boundary() {
+        // 批 6 复验（差一修复）：恰好 512 页可开，第 513 页 PPTX_SLIDE_LIMIT 哨兵；
+        // 修前「收集 <512 + 循环后 >=512 报错」把 512 页 deck 也拒了
+        let deck = |n: u32| {
+            let entries: Vec<(String, String)> = (1..=n)
+                .map(|i| {
+                    (
+                        format!("ppt/slides/slide{i}.xml"),
+                        format!(
+                            "<p:sld xmlns:a='a' xmlns:p='p'><p:txBody><a:p><a:r><a:t>s{i}</a:t></a:r></a:p></p:txBody></p:sld>"
+                        ),
+                    )
+                })
+                .collect();
+            let refs: Vec<(&str, &str)> = entries
+                .iter()
+                .map(|(a, b)| (a.as_str(), b.as_str()))
+                .collect();
+            crate::ooxml::fixture(&refs, "limit.pptx")
+        };
+        let ok = open(&deck(512)).unwrap();
+        assert_eq!(ok.lines.len(), 1024, "512 页 = 512 头行 + 512 段落行");
+        assert!(
+            ok.lines
+                .contains(&"\u{25C7} \u{5E7B}\u{706F}\u{7247} 512".to_string())
+        );
+        assert_eq!(open(&deck(513)).err().unwrap(), "PPTX_SLIDE_LIMIT:512");
     }
 
     #[test]

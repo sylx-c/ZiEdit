@@ -15,11 +15,18 @@ pub(crate) enum Content {
     Xlsx(xlsx::Workbook),
     Pdf(docx::Document),
 }
+
+// 注册表内容变体（kind）：缓存分槽键与解析分流共用一份定义——
+// 调用侧（commands/compare.rs 扩围取行走扩围变体）不得再写裸数字（审查 L2）。
+pub(crate) const KIND_DOCX_BASE: u8 = 0;
+pub(crate) const KIND_XLSX: u8 = 1;
+pub(crate) const KIND_PDF: u8 = 2;
+pub(crate) const KIND_DOCX_EXTENDED: u8 = 3;
 struct Entry {
     len: u64,
     modified: Option<std::time::SystemTime>,
-    /// 内容变体（0=docx 基础 / 1=xlsx / 2=pdf / 3=docx 扩围）：同路径不同
-    /// 变体不得互相命中（批 3），否则扩围投影会读到基础缓存的正文。
+    /// 内容变体（见 [`KIND_DOCX_BASE`]/[`KIND_XLSX`]/[`KIND_PDF`]/[`KIND_DOCX_EXTENDED`]）：同路径
+    /// 不同变体不得互相命中（批 3），否则扩围投影会读到基础缓存的正文。
     kind: u8,
     content: Arc<Content>,
 }
@@ -87,15 +94,16 @@ pub(crate) fn load(
             return Ok(entry.content.clone());
         }
     }
-    let content = Arc::new(if kind == 2 {
-        Content::Pdf(pdf::open(path).map_err(ZiEditError::Msg)?)
-    } else if kind == 1 {
-        Content::Xlsx(xlsx::open(path).map_err(ZiEditError::Msg)?)
-    } else if kind == 3 {
+    let content = Arc::new(match kind {
+        KIND_PDF => Content::Pdf(pdf::open(path).map_err(ZiEditError::Msg)?),
+        KIND_XLSX => Content::Xlsx(xlsx::open(path).map_err(ZiEditError::Msg)?),
         // 批 3 扩围变体（页眉脚/脚注/批注/标题前缀）：与基础 docx 分槽缓存
-        Content::Docx(docx::open_with_scope(path, true).map_err(ZiEditError::Msg)?)
-    } else {
-        Content::Docx(docx::open(path).map_err(ZiEditError::Msg)?)
+        KIND_DOCX_EXTENDED => {
+            Content::Docx(docx::open_with_scope(path, true).map_err(ZiEditError::Msg)?)
+        }
+        KIND_DOCX_BASE => Content::Docx(docx::open(path).map_err(ZiEditError::Msg)?),
+        // 未定义变体按基础 docx（与既有 else 语义一致；新增变体须在此显式登记）
+        _ => Content::Docx(docx::open(path).map_err(ZiEditError::Msg)?),
     });
     let mut entries = registry
         .0

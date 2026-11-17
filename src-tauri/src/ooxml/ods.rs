@@ -133,6 +133,11 @@ fn parse(zip: &mut Package, bytes: &mut usize) -> Result<OdsWorkbook> {
                             .and_then(|v| v.parse().ok())
                             .unwrap_or(1);
                         let formula = super::attr(&e, "table:formula")?;
+                        // 公式属性同受单格上限（批 6 复验）：修前只查格值，长公式
+                        // 可携带至行落地再无界克隆
+                        if formula.as_deref().is_some_and(|f| f.len() > CELL_LIMIT) {
+                            return Err("XLSX_CELL_LIMIT:32KiB".into());
+                        }
                         let start_col = row_col;
                         if row_col.saturating_add(repeats) > COLUMN_LIMIT {
                             return Err("XLSX_COLUMN_LIMIT:1024".into());
@@ -203,6 +208,9 @@ fn parse(zip: &mut Package, bytes: &mut usize) -> Result<OdsWorkbook> {
                             .and_then(|v| v.parse().ok())
                             .unwrap_or(1);
                         let formula = super::attr(&e, "table:formula")?;
+                        if formula.as_deref().is_some_and(|f| f.len() > CELL_LIMIT) {
+                            return Err("XLSX_CELL_LIMIT:32KiB".into());
+                        }
                         let start_col = row_col;
                         if row_col.saturating_add(repeats) > COLUMN_LIMIT {
                             return Err("XLSX_COLUMN_LIMIT:1024".into());
@@ -282,6 +290,12 @@ fn parse(zip: &mut Package, bytes: &mut usize) -> Result<OdsWorkbook> {
                         for k in 0..n {
                             let r = (base + k) as u32;
                             for (c, f) in &row_formulas {
+                                // 公式展开与值路径同口径记账（批 6 复验）：修前克隆
+                                // 完全脱离 bytes——长公式 × 行重复可绕过 10MiB 哨兵
+                                *bytes += f.len() + std::mem::size_of::<String>();
+                                if *bytes > TEXT_LIMIT {
+                                    return Err("OOXML_TEXT_LIMIT:10MiB".into());
+                                }
                                 cur_formulas.push((r, *c, f.clone()));
                             }
                         }
@@ -330,19 +344,37 @@ pub fn open(path: &str) -> Result<OdsWorkbook> {
     parse(&mut zip, &mut bytes)
 }
 
-/// 转为 xlsx 通道的 Workbook 形态（稀疏格 → 稠密行矩阵，同一稀疏占位语义）
-pub fn to_workbook(book: OdsWorkbook) -> super::xlsx::Workbook {
+/// 转为 xlsx 通道的 Workbook 形态（稀疏格 → 稠密行矩阵，同一稀疏占位语义）。
+/// 稠密化受同一 10MiB 记账约束——错误口径与解析阶段一致（OOXML_TEXT_LIMIT），
+/// 且记账**跨 sheet 累计**（审查 M1：修前每个 sheet 各自重置预算，N 个 sheet
+/// 可放大到 N×10MiB 稠密矩阵，与解析阶段全局累计口径不一致）。
+pub fn to_workbook(book: OdsWorkbook) -> Result<super::xlsx::Workbook> {
     let mut sheets = Vec::with_capacity(book.sheets.len());
+    let mut bytes = 0usize;
     for s in book.sheets {
         let mut records: Vec<Vec<String>> = Vec::new();
         for (r, c, v) in s.cells {
             let ru = r as usize;
             if ru >= records.len() {
+                // 稠密化记账（批 6 复验）：修前 resize 填充完全不记账，远列稀疏
+                // 可在解析记账达标后于本步物化数十万行 × 1024 列稠密矩阵（GB 级）
+                bytes += (ru + 1 - records.len()) * std::mem::size_of::<Vec<String>>();
+                if bytes > TEXT_LIMIT {
+                    return Err("OOXML_TEXT_LIMIT:10MiB".into());
+                }
                 records.resize_with(ru + 1, Vec::new);
             }
             let row = &mut records[ru];
             if c as usize >= row.len() {
+                bytes += (c as usize + 1 - row.len()) * std::mem::size_of::<String>();
+                if bytes > TEXT_LIMIT {
+                    return Err("OOXML_TEXT_LIMIT:10MiB".into());
+                }
                 row.resize(c as usize + 1, String::new());
+            }
+            bytes += v.len() + std::mem::size_of::<String>();
+            if bytes > TEXT_LIMIT {
+                return Err("OOXML_TEXT_LIMIT:10MiB".into());
             }
             row[c as usize] = v;
         }
@@ -355,10 +387,10 @@ pub fn to_workbook(book: OdsWorkbook) -> super::xlsx::Workbook {
             merges: Vec::new(), // covered-cell 合并语义不还原（如实：无合并区间）
         });
     }
-    super::xlsx::Workbook {
+    Ok(super::xlsx::Workbook {
         sheets,
         is_1904: false,
-    }
+    })
 }
 
 #[cfg(test)]
@@ -387,7 +419,7 @@ mod tests {
             "{HEAD}<table:table table:name='Data'>             <table:table-row>             <table:table-cell office:value-type='float' office:value='42'/>             <table:table-cell office:value-type='string'><text:p>hello &amp; bye</text:p></table:table-cell>             <table:table-cell office:value-type='date' office:date-value='2024-01-01'/>             <table:table-cell office:value-type='boolean' office:boolean-value='true'/>             <table:table-cell table:number-columns-repeated='2' office:value-type='float' office:value='7'/>             </table:table-row>             <table:table-row><table:table-cell table:number-columns-repeated='3'/>             <table:table-cell office:value-type='float' office:value='9'/>             </table:table-row>             </table:table>{TAIL}"
         );
         let p = ods_fixture(&content, "vals.ods");
-        let book = to_workbook(open(&p).unwrap());
+        let book = to_workbook(open(&p).unwrap()).unwrap();
         assert_eq!(book.sheets.len(), 1);
         assert_eq!(book.sheets[0].name, "Data");
         // 行 1：42 | hello & bye | 2024-01-01 | TRUE | 7 | 7（重复列占位）
@@ -406,7 +438,7 @@ mod tests {
             "{HEAD}<table:table table:name='S'>             <table:table-row table:number-rows-repeated='99'/>             <table:table-row><table:table-cell office:value-type='float' office:value='5'/></table:table-row>             </table:table>{TAIL}"
         );
         let p = ods_fixture(&content, "sparse-rows.ods");
-        let book = to_workbook(open(&p).unwrap());
+        let book = to_workbook(open(&p).unwrap()).unwrap();
         assert_eq!(book.sheets[0].records.len(), 100);
         assert_eq!(book.sheets[0].records[99], ["5"]);
     }
@@ -417,7 +449,7 @@ mod tests {
             "{HEAD}<table:table table:name='S'>             <table:table-row>             <table:table-cell office:value-type='float' office:value='3' table:formula='of:=1+2'/>             </table:table-row></table:table>{TAIL}"
         );
         let p = ods_fixture(&content, "formula.ods");
-        let book = to_workbook(open(&p).unwrap());
+        let book = to_workbook(open(&p).unwrap()).unwrap();
         assert_eq!(book.sheets[0].formulas, vec![(0, 0, "of:=1+2".to_string())]);
         assert_eq!(book.sheets[0].records[0], ["3"]);
     }
@@ -469,7 +501,7 @@ mod tests {
             "{HEAD}<table:table table:name='S'>             <table:table-row>             <table:table-cell office:value-type='string'><text:p>l1</text:p><text:p>l2</text:p></table:table-cell>             </table:table-row></table:table>{TAIL}"
         );
         let p = ods_fixture(&content, "paras.ods");
-        let book = to_workbook(open(&p).unwrap());
+        let book = to_workbook(open(&p).unwrap()).unwrap();
         assert_eq!(book.sheets[0].records[0], ["l1\nl2"]);
     }
 
@@ -479,10 +511,65 @@ mod tests {
             "{HEAD}<table:table table:name='E'/><table:table table:name='F'>             <table:table-row><table:table-cell office:value-type='float' office:value='2.5'/>             <table:table-cell office:value-type='float' office:value='-3'/>             </table:table-row></table:table>{TAIL}"
         );
         let p = ods_fixture(&content, "empty-table.ods");
-        let book = to_workbook(open(&p).unwrap());
+        let book = to_workbook(open(&p).unwrap()).unwrap();
         assert_eq!(book.sheets.len(), 2);
         assert_eq!(book.sheets[0].name, "E");
         assert!(book.sheets[0].records.is_empty());
         assert_eq!(book.sheets[1].records[0], ["2.5", "-3"]);
+    }
+
+    #[test]
+    fn formula_expansion_and_attr_limits() {
+        // 批 6 复验（公式记账）：长公式 × 行重复展开受 10MiB 哨兵约束——修前
+        // 克隆完全脱离 bytes，~120B 公式 × 20 万行可无界物化
+        let f = format!("of:={}", "1+".repeat(60));
+        let content = format!(
+            "{HEAD}<table:table table:name='S'><table:table-row table:number-rows-repeated='200000'><table:table-cell office:value-type='float' office:value='1' table:formula='{f}'/></table:table-row></table:table>{TAIL}"
+        );
+        let p = ods_fixture(&content, "formula-expand.ods");
+        assert_eq!(open(&p).err().unwrap(), "OOXML_TEXT_LIMIT:10MiB");
+        // 公式属性本身受单格上限（修前只查格值）
+        let huge = format!("of:={}", "1+".repeat(17 * 1024));
+        let content2 = format!(
+            "{HEAD}<table:table table:name='S'><table:table-row><table:table-cell office:value-type='float' office:value='1' table:formula='{huge}'/></table:table-row></table:table>{TAIL}"
+        );
+        let p2 = ods_fixture(&content2, "formula-huge.ods");
+        assert_eq!(open(&p2).err().unwrap(), "XLSX_CELL_LIMIT:32KiB");
+    }
+
+    /// 批 6 审查 M1：稠密化记账必须跨 sheet 累计。修前每 sheet 各自重置
+    /// 10MiB 预算——两份各约 5.4MiB 的 sheet 合计超限却都放行（N 倍放大）。
+    #[test]
+    fn to_workbook_budget_is_global_across_sheets() {
+        let dense_rows = |n: usize| {
+            let mut s = String::new();
+            for _ in 0..n {
+                s.push_str("<table:table-row><table:covered-table-cell table:number-columns-repeated='1023'/><table:table-cell office:value-type='float' office:value='1'/></table:table-row>");
+            }
+            s
+        };
+        let content = format!(
+            "{HEAD}<table:table table:name='A'>{}</table:table><table:table table:name='B'>{}</table:table>{TAIL}",
+            dense_rows(220),
+            dense_rows(220)
+        );
+        let p = ods_fixture(&content, "multi-sheet-budget.ods");
+        let wb = open(&p).expect("解析阶段记账达标（每行仅一个 1 字节值）");
+        assert_eq!(to_workbook(wb).err().unwrap(), "OOXML_TEXT_LIMIT:10MiB");
+    }
+
+    #[test]
+    fn to_workbook_dense_fill_is_bounded() {
+        // 批 6 复验（稠密化记账）：covered-cell 推列游标 + 单值格 × 500 行——
+        // 解析记账 ~12KB 通过，to_workbook 稠密化 500×1024×24B 超限报错
+        // （修前完全不记账，放大到数十万行即 GB 级矩阵）
+        let mut rows = String::new();
+        for _ in 0..500 {
+            rows.push_str("<table:table-row><table:covered-table-cell table:number-columns-repeated='1023'/><table:table-cell office:value-type='float' office:value='1'/></table:table-row>");
+        }
+        let content = format!("{HEAD}<table:table table:name='S'>{rows}</table:table>{TAIL}");
+        let p = ods_fixture(&content, "dense-fill.ods");
+        let wb = open(&p).expect("解析阶段记账达标（每行仅一个 1 字节值）");
+        assert_eq!(to_workbook(wb).err().unwrap(), "OOXML_TEXT_LIMIT:10MiB");
     }
 }
