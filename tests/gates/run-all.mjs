@@ -18,7 +18,7 @@ const GATE_DEFS = {
   'release-formats': { script: 'gate-release-behavior.mjs', out: 'release-formats.json', corpus: false },
   'release-resources': { script: 'gate-release-behavior.mjs', out: 'release-resources.json', corpus: false, args: ['--resources'] },
   'recovery': { script: 'gate-recovery.mjs', out: 'recovery.json', corpus: false },
-  'md-editing': { script: 'gate-md-editing.mjs', out: 'md-editing.json', corpus: false },
+  'office-smoke': { script: 'gate-office-smoke.mjs', out: 'office-smoke.json', corpus: false },
   'md-navigation': { script: 'gate-md-navigation.mjs', out: 'md-navigation.json', corpus: true, defaultCorpus: 'repeated-6001.md' },
   'md-surfaces': { script: 'gate-md-surfaces.mjs', out: 'md-surfaces.json', corpus: true },
   'md-structure': { script: 'gate-md-structure.mjs', out: 'md-structure.json', corpus: false },

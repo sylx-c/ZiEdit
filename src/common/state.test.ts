@@ -24,6 +24,22 @@ describe('TabStore.open（001-AC-2 重复打开激活）', () => {
     expect(s.tabs).toHaveLength(2);
     expect(s.activeIndex).toBe(0);
   });
+
+  it('批 5 缺陷修复：激活已存在标签时以本次探测路由刷新（富预览回退不再永久粘连）', () => {
+    const s = new TabStore();
+    s.open(tab('a.docx'));
+    // 模拟：旧会话恢复/富预览回退把标签写成 text，滚动停在 120
+    s.setRoute('a.docx', 'text');
+    s.setScroll('a.docx', 120);
+    // 重新打开：open_file 探测返回 rich → 激活时刷新路由并重置滚动
+    expect(s.open({ ...tab('a.docx'), route: 'rich' })).toBe('activated');
+    expect(s.tabs[0]!.route).toBe('rich');
+    expect(s.tabs[0]!.scroll).toBe(0);
+    // 同路由再次激活：滚动位置保持（不重置）
+    s.setScroll('a.docx', 88);
+    s.open({ ...tab('a.docx'), route: 'rich' });
+    expect(s.tabs[0]!.scroll).toBe(88);
+  });
 });
 
 describe('TabStore.close', () => {

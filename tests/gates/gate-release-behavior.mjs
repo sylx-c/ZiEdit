@@ -15,7 +15,7 @@ let cdp;
 const save = () => { fs.mkdirSync(path.dirname(output), { recursive: true }); fs.writeFileSync(output, JSON.stringify(report, null, 2)); };
 const check = (name, pass, detail) => { report.checks.push({ name, pass, detail }); save(); console.log(`${pass ? 'PASS' : 'FAIL'} ${name}`); if (!pass) throw new Error(name + ': ' + JSON.stringify(detail)); };
 const active = file => `document.querySelector('.tab.active')?.title.split('\\n')[0].toLowerCase()===${JSON.stringify(file.toLowerCase())}`;
-const selectors = { txt: '.cm-content', md: '.md-col,.md-ir:not(.md-ir-loading) .cm-content,.cm-content', csv: '.csv-cell', png: '.img-canvas', pdf: '.pdf-view canvas', docx: '.tv-tx', xlsx: '.csv-cell' };
+const selectors = { txt: '.cm-content', md: '.md-col,.md-ir:not(.md-ir-loading) .cm-content,.cm-content', csv: '.csv-cell', png: '.img-canvas', pdf: '.pdf-view canvas', docx: '.docx-rich-pages .docx-wrapper,.tv-tx', xlsx: '.csv-cell', pptx: '.tv-tx', doc: '.tv-tx', ods: '.csv-cell' };
 async function open(file, type) {
   const opener = spawn(EXE, [file], { stdio: 'ignore', windowsHide: true }); opener.unref();
   await waitFor(cdp, active(file), 30000);
@@ -63,7 +63,8 @@ try {
     for (const [type, file] of Object.entries(files)) {
       await open(file, type);
       const detail = await cdp.evaluate(`({text:document.querySelector('#viewarea')?.textContent,image:document.querySelector('.img-canvas')?.naturalWidth,canvas:document.querySelector('canvas')?.width})`);
-      check(`${type} 中文空格路径真实渲染`, type === 'png' ? detail.image > 0 : type === 'pdf' ? detail.canvas > 0 : type === 'md' || detail.text.includes('中文'), detail);
+      const expectText = { txt: '中文', md: '中文', csv: '中文', docx: '中文', xlsx: '2024-01-01', pptx: '幻灯片中文', ods: 'ODS中文', doc: 'Inner cell text' }[type];
+      check(`${type} 中文空格路径真实渲染`, type === 'png' ? detail.image > 0 : type === 'pdf' ? detail.canvas > 0 : type === 'md' || !!expectText && detail.text.includes(expectText), detail);
       // md 夹具为 CRLF：表格必须真实渲染，渲染面不得出现竖线原文（2026-11-11 CRLF 展示缺陷的发布侧防线）。
       if (type === 'md') check('md CRLF 表格真实渲染', await cdp.evaluate(`(() => { const root = [...document.querySelectorAll('.md-preview')].find(e => e.offsetParent !== null && !e.closest('.md-split')); return !!root && !!root.querySelector('table') && !(root.textContent || '').includes('| A |'); })()`));
     }

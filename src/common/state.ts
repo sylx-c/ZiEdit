@@ -35,6 +35,14 @@ export class TabStore {
     tab = { ...tab, path };
     const existing = this.tabs.findIndex(t => t.path === path);
     if (existing >= 0) {
+      const t = this.tabs[existing]!;
+      // 批 5 缺陷修复：激活已存在标签时以**本次打开的探测路由**刷新——否则富预览
+      // 一次回退（或旧会话污染）写入的 route 永久压过「Word 默认富预览」。
+      // 路由变化才重置滚动（同路由激活保持位置）；语言不动（草稿格式切换走 setTabLanguage）。
+      if (t.route !== tab.route) {
+        t.route = tab.route;
+        t.scroll = 0;
+      }
       this.activeIndex = existing;
       this.emit();
       return 'activated';

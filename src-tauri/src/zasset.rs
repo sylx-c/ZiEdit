@@ -106,6 +106,13 @@ fn content_type(path: &Path) -> Option<&'static str> {
             "avif" => "image/avif",
             "tif" | "tiff" => "image/tiff",
             "otf" => "font/otf",
+            // Word OOXML（批 5 富预览字节通道）：仅 Rich 路由四扩展——渲染层按需
+            // 取文档字节；授权/大小上限（256MiB）与其余类型同口径，不放宽其它格式。
+            "docx" | "dotx" => {
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            }
+            "docm" => "application/vnd.ms-word.document.macroEnabled.12",
+            "dotm" => "application/vnd.ms-word.template.macroEnabled.12",
             _ => return None,
         },
     )
@@ -187,6 +194,21 @@ mod tests {
         }
         assert_eq!(decode("%E4%B8%AD%20%23%25"), Some("中 #%".into()));
         assert_eq!(content_type(Path::new("a.PDF")), Some("application/pdf"));
+        // 批 5：Word OOXML 富预览字节通道（其余 Office 格式不放宽——仅 Rich 路由四扩展）
+        assert_eq!(
+            content_type(Path::new("a.docx")),
+            Some("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        );
+        assert_eq!(
+            content_type(Path::new("a.dotm")),
+            Some("application/vnd.ms-word.template.macroEnabled.12")
+        );
+        assert_eq!(
+            content_type(Path::new("a.pptx")),
+            None,
+            "非富预览家族不放宽"
+        );
+        assert_eq!(content_type(Path::new("a.xlsx")), None);
         assert_eq!(content_type(Path::new("secret.txt")), None);
         let secret = dir.join("secret.txt");
         std::fs::write(&secret, b"secret").unwrap();
