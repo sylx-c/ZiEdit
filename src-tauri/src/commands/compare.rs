@@ -1406,14 +1406,23 @@ mod tests {
             s.push_str("</sheetData></worksheet>");
             s
         };
+        // 完整 OPC 包（calamine 需 _rels/.rels 与 rel Type——批 2 内核后的夹具形态）
         let xlsx_meta: &[(&str, &str)] = &[
             (
+                "[Content_Types].xml",
+                "<Types xmlns='http://schemas.openxmlformats.org/package/2006/content-types'><Default Extension='rels' ContentType='application/vnd.openxmlformats-package.relationships+xml'/><Default Extension='xml' ContentType='application/xml'/><Override PartName='/xl/workbook.xml' ContentType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml'/><Override PartName='/xl/worksheets/sheet1.xml' ContentType='application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml'/></Types>",
+            ),
+            (
+                "_rels/.rels",
+                "<Relationships xmlns='http://schemas.openxmlformats.org/package/2006/relationships'><Relationship Id='rId1' Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument' Target='xl/workbook.xml'/></Relationships>",
+            ),
+            (
                 "xl/workbook.xml",
-                "<workbook xmlns:r='r'><sheets><sheet name='Data' r:id='r1'/></sheets></workbook>",
+                "<workbook xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'><sheets><sheet name='Data' r:id='r1'/></sheets></workbook>",
             ),
             (
                 "xl/_rels/workbook.xml.rels",
-                "<Relationships><Relationship Id='r1' Target='worksheets/sheet1.xml'/></Relationships>",
+                "<Relationships><Relationship Id='r1' Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet' Target='worksheets/sheet1.xml'/></Relationships>",
             ),
         ];
         let plain = xlsx_sheet(false);
@@ -1421,6 +1430,8 @@ mod tests {
             &[
                 xlsx_meta[0],
                 xlsx_meta[1],
+                xlsx_meta[2],
+                xlsx_meta[3],
                 ("xl/worksheets/sheet1.xml", &plain),
             ],
             "perf-200k.xlsx",
@@ -1439,6 +1450,8 @@ mod tests {
             &[
                 xlsx_meta[0],
                 xlsx_meta[1],
+                xlsx_meta[2],
+                xlsx_meta[3],
                 ("xl/worksheets/sheet1.xml", &mutated),
             ],
             "perf-200k-mut.xlsx",

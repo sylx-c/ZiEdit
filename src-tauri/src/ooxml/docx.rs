@@ -407,7 +407,10 @@ fn parse_body(zip: &mut Package, with_headings: bool) -> Result<Document> {
         if revision_records.len() > REVISION_LIMIT {
             return Err("DOCX_REVISION_LIMIT:10000".into());
         }
-        if bytes + current.len() + lines.len() * std::mem::size_of::<String>() > TEXT_LIMIT {
+        // 记账口径：push_line 已把每行 24B String 头计入 bytes——此处只补当前段缓冲，
+        // 不得再加 lines.len()*24（批 6 复验发现的双重记账会使有效上限随行数收紧，
+        // 12 万段×50B 语料实际 8.9MiB 被误判超限）。
+        if bytes + current.len() > TEXT_LIMIT {
             return Err("OOXML_TEXT_LIMIT:10MiB".into());
         }
         Ok(())
@@ -724,6 +727,23 @@ mod tests {
         );
         assert!(!open(&clean).unwrap().revisions);
     }
+    #[test]
+    fn near_limit_corpus_not_double_counted() {
+        // 批 6 复验回归锁：12 万段 × 50B（实际记账 ≈8.9MiB，含每行 24B String 头）
+        // 必须通过——修前循环级守卫重复加 lines.len()*24，有效上限随行数收紧而误判超限。
+        let mut xml = String::with_capacity(8 << 20);
+        xml.push_str("<w:document xmlns:w='w'>");
+        for i in 0..120_000u32 {
+            xml.push_str(&format!(
+                "<w:p><w:r><w:t>para {i:06} \u{2014}\u{2014}\u{2014} padding text to body size</w:t></w:r></w:p>"
+            ));
+        }
+        xml.push_str("</w:document>");
+        let p = fixture(&[("word/document.xml", &xml)], "near-limit.docx");
+        let doc = open(&p).unwrap();
+        assert_eq!(doc.lines.len(), 120_000);
+    }
+
     #[test]
     fn extraction_limit_is_explicit() {
         let text = format!(
