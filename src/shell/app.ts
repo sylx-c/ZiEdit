@@ -5604,17 +5604,19 @@ export async function boot(): Promise<void> {
     ver.className = 'about-ver';
     const version = await appVersion();
     const channel = $t(__BUILD_CHANNEL__ === 'release' ? 'about.channelRelease' : 'about.channelDev');
-    const inline = (text: string, url: string, tip: string): HTMLButtonElement => {
+    const inline = (text: string, url: string, ariaLabel: string): HTMLButtonElement => {
       const el = document.createElement('button');
       el.type = 'button';
       el.className = 'about-inline-link';
       el.textContent = text;
-      el.title = tip;
-      el.setAttribute('aria-label', tip);
+      // 只保留无障碍标签（读屏用，不可见）：2026-11-17 用户反馈——版本/渠道点开即跳转，
+      // 不再显示任何悬停文字提示（修前 title 会经自定义提示层弹出说明）。
+      el.setAttribute('aria-label', ariaLabel);
       el.addEventListener('click', () => openExternalUrl(url));
       return el;
     };
-    // 2026-11-16 用户反馈：整个「版本 1.0.2」都可点（不只点数字）；构建 SHA 附解释提示。
+    // 2026-11-16 用户反馈：整个「版本 1.0.2」都可点（不只点数字）。
+    // 2026-11-17 用户反馈：构建 SHA 只作纯文本溯源标识；版本/渠道行也不再附悬停提示。
     ver.append(
       inline($t('about.versionLabel') + ' ' + version, 'https://github.com/sylx-c/ZiEdit/releases', $t('about.versionDlTip')),
       document.createTextNode(' · '),
@@ -5623,7 +5625,6 @@ export async function boot(): Promise<void> {
       (() => {
         const sha = document.createElement('span');
         sha.textContent = __GIT_SHA__;
-        sha.title = $t('about.buildShaTip');
         return sha;
       })(),
     );
