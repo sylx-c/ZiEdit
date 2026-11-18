@@ -46,10 +46,11 @@ export function releaseAcceptance(root, manifest, records = {}) {
         if (id === 'windows-ci') detail = report.platform === 'win32' && /^https:\/\/github\.com\/[^/]+\/[^/]+\/actions\/runs\/\d+$/.test(report.runUrl ?? '');
         if (id === 'installed-package') detail = report.platform === 'win32' && report.independentEnvironment === true;
         if (id === 'trial-two-days') {
-          // 2026-11-14 项目所有者决定：试用口径从「连续两自然日×各60分钟」放宽为「单日≥60分钟」。
+          // 2026-11-18 项目所有者决定：删除时长要求——试用登记只需真实使用记录
+          // （日期/试用者/备注/无阻塞）；minutes 字段保留为备注性信息，不参与判定。
           const days = report.days ?? [];
           detail = days.length >= 1 && days.every(day => /^\d{4}-\d{2}-\d{2}$/.test(day.date))
-            && days.every(day => day.minutes >= 60 && day.tester && day.notes && day.blockers === 0)
+            && days.every(day => day.tester && day.notes && day.blockers === 0)
             && days.every(day => day.date <= new Date().toISOString().slice(0, 10));
         }
         status = bound && linkedFilesValid && matchingPackage && detail && report.verdict === true ? 'passed' : 'failed';
