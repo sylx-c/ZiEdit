@@ -1,5 +1,9 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import agentsDoc from '../../AGENTS.md?raw';
+// 语料原取 AGENTS.md（2026-11-18 随仓库瘦身撤出跟踪）；此处内嵌等价语料：
+// 首屏（0–1483）内含真实表格，其后仍有大量未构建块，驱动「预算切片 + TableWidget 保留」路径。
+const agentsDoc = Array.from({ length: 40 }, (_, i) =>
+  `## 章节 ${i}\n\n说明段落 ${i}：跨平台离线文件查看与编辑工具，大文本与代码查看编辑、Markdown 写作预览。\n\n` +
+  `| 命令 ${i} | 用途 |\n|---|---|\n| npm ci | 安装依赖 |\n| npm test | 前端测试 |\n| npm run tauri build | 打安装包 |\n\n`).join('');
 import { EditorState } from '@codemirror/state';
 import { ensureSyntaxTree } from '@codemirror/language';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
