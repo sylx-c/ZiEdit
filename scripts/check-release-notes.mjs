@@ -21,5 +21,7 @@ const banned = [/发布草案/, /lead 拟/, /待补/, /发布须等/, /留档/, 
 for (const re of banned) { const m = text.match(re); if (m) errors.push(`正文含内部工作标记「${m[0]}」`); }
 // 5) 下载表哈希不得留占位
 if (/（以上传资产|（同上）|（发布时回填/.test(text)) errors.push('下载表仍含哈希占位符——必须回填实际上传资产 digest');
+// 6) 必须给 CHANGELOG 挂可点击链接（v1.0.2 曾漏挂）
+if (!/\[CHANGELOG\]\(https:\/\/[^\s)]+\)/.test(text)) errors.push('缺少指向 CHANGELOG 的可点击链接');
 if (errors.length) { console.error('发布说明未通过格式守卫：'); for (const e of errors) console.error('  - ' + e); process.exit(1); }
 console.log('发布说明格式守卫通过：无 H1、简介开头、章节齐全、无内部标记、无占位符。');
