@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EditorView } from '@codemirror/view';
+import { ensureSyntaxTree } from '@codemirror/language';
 import { LivePreviewView } from '../src/markdown-view/livepreview';
 import { compositionChanged } from '../src/common/composition';
 
@@ -15,6 +16,9 @@ async function mount(source: string) {
   const host = document.createElement('div'); document.body.append(host);
   const view = new LivePreviewView(host, { path: 'E:/boundary.md', encoding: 'UTF-8', initialDoc: source, onStatus: () => {}, onSaved: () => {} });
   mounted.push(view); await until(() => !!view.view);
+  // 表格边界输入依赖 syntaxTree 里的 Table 节点；慢环境下渲染先行、编辑器解析树滞后，
+  // 显式等解析完成再输入（与套件其他 ac-007 测试同口径）。
+  await until(() => ensureSyntaxTree(view.view!.state, view.view!.state.doc.length, 1000) !== null);
   return { view, host, main: view.view };
 }
 function type(view: EditorView, text: string) {
