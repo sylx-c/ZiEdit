@@ -62,47 +62,47 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | npm | @mathjax/mathjax-stix2-font | 4.1.3 | development-only | Apache-2.0 | 3 | LOCAL_TEXT_COLLECTED |
 | npm | @mermaid-js/parser | 2.0.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | @napi-rs/canvas | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @napi-rs/canvas-android-arm64 | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | @napi-rs/canvas-android-arm64 | 1.0.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | @napi-rs/canvas-darwin-arm64 | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @napi-rs/canvas-darwin-x64 | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @napi-rs/canvas-linux-arm-gnueabihf | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @napi-rs/canvas-linux-arm64-gnu | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @napi-rs/canvas-linux-arm64-musl | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @napi-rs/canvas-linux-riscv64-gnu | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | @napi-rs/canvas-darwin-x64 | 1.0.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @napi-rs/canvas-linux-arm-gnueabihf | 1.0.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @napi-rs/canvas-linux-arm64-gnu | 1.0.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @napi-rs/canvas-linux-arm64-musl | 1.0.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @napi-rs/canvas-linux-riscv64-gnu | 1.0.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | @napi-rs/canvas-linux-x64-gnu | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @napi-rs/canvas-linux-x64-musl | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @napi-rs/canvas-win32-arm64-msvc | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | @napi-rs/canvas-linux-x64-musl | 1.0.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @napi-rs/canvas-win32-arm64-msvc | 1.0.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | @napi-rs/canvas-win32-x64-msvc | 1.0.13 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | @oxc-project/types | 0.153.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-android-arm-eabi | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-android-arm64 | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | @rolldown/binding-android-arm-eabi | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @rolldown/binding-android-arm64 | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | @rolldown/binding-darwin-arm64 | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-darwin-x64 | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-freebsd-x64 | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-linux-arm-gnueabihf | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-linux-arm64-gnu | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-linux-arm64-musl | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-linux-ppc64-gnu | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-linux-s390x-gnu | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | @rolldown/binding-darwin-x64 | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @rolldown/binding-freebsd-x64 | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @rolldown/binding-linux-arm-gnueabihf | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @rolldown/binding-linux-arm64-gnu | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @rolldown/binding-linux-arm64-musl | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @rolldown/binding-linux-ppc64-gnu | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @rolldown/binding-linux-s390x-gnu | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | @rolldown/binding-linux-x64-gnu | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-linux-x64-musl | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-openharmony-arm64 | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
-| npm | @rolldown/binding-win32-arm64-msvc | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
+| npm | @rolldown/binding-linux-x64-musl | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @rolldown/binding-openharmony-arm64 | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @rolldown/binding-win32-arm64-msvc | 1.2.13 | development-only | MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | @rolldown/binding-win32-x64-msvc | 1.2.13 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | @rolldown/pluginutils | 1.0.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | @standard-schema/spec | 1.1.0 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | @tauri-apps/api | 2.12.3 | production-or-optional | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
 | npm | @tauri-apps/cli | 2.12.2 | development-only | Apache-2.0 OR MIT | 2 | LOCAL_TEXT_COLLECTED |
 | npm | @tauri-apps/cli-darwin-arm64 | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
-| npm | @tauri-apps/cli-darwin-x64 | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
-| npm | @tauri-apps/cli-linux-arm-gnueabihf | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
-| npm | @tauri-apps/cli-linux-arm64-gnu | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
-| npm | @tauri-apps/cli-linux-arm64-musl | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
-| npm | @tauri-apps/cli-linux-riscv64-gnu | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
+| npm | @tauri-apps/cli-darwin-x64 | 2.12.2 | development-only | Apache-2.0 OR MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @tauri-apps/cli-linux-arm-gnueabihf | 2.12.2 | development-only | Apache-2.0 OR MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @tauri-apps/cli-linux-arm64-gnu | 2.12.2 | development-only | Apache-2.0 OR MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @tauri-apps/cli-linux-arm64-musl | 2.12.2 | development-only | Apache-2.0 OR MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @tauri-apps/cli-linux-riscv64-gnu | 2.12.2 | development-only | Apache-2.0 OR MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | @tauri-apps/cli-linux-x64-gnu | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
-| npm | @tauri-apps/cli-linux-x64-musl | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
-| npm | @tauri-apps/cli-win32-arm64-msvc | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
-| npm | @tauri-apps/cli-win32-ia32-msvc | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
+| npm | @tauri-apps/cli-linux-x64-musl | 2.12.2 | development-only | Apache-2.0 OR MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @tauri-apps/cli-win32-arm64-msvc | 2.12.2 | development-only | Apache-2.0 OR MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | @tauri-apps/cli-win32-ia32-msvc | 2.12.2 | development-only | Apache-2.0 OR MIT | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | @tauri-apps/cli-win32-x64-msvc | 2.12.2 | development-only | Apache-2.0 OR MIT | 3 | LOCAL_TEXT_COLLECTED |
 | npm | @tauri-apps/plugin-clipboard-manager | 2.4.2 | production-or-optional | MIT OR Apache-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | @tauri-apps/plugin-dialog | 2.8.2 | production-or-optional | MIT OR Apache-2.0 | 1 | LOCAL_TEXT_COLLECTED |
@@ -236,16 +236,16 @@ Development flags identify lockfile classification, not proof of bundling. Revie
 | npm | layout-base | 1.0.2 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | lie | 3.3.0 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | lightningcss | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
-| npm | lightningcss-android-arm64 | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
+| npm | lightningcss-android-arm64 | 1.33.0 | development-only | MPL-2.0 | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | lightningcss-darwin-arm64 | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
-| npm | lightningcss-darwin-x64 | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
-| npm | lightningcss-freebsd-x64 | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
-| npm | lightningcss-linux-arm-gnueabihf | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
-| npm | lightningcss-linux-arm64-gnu | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
-| npm | lightningcss-linux-arm64-musl | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
+| npm | lightningcss-darwin-x64 | 1.33.0 | development-only | MPL-2.0 | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | lightningcss-freebsd-x64 | 1.33.0 | development-only | MPL-2.0 | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | lightningcss-linux-arm-gnueabihf | 1.33.0 | development-only | MPL-2.0 | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | lightningcss-linux-arm64-gnu | 1.33.0 | development-only | MPL-2.0 | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | lightningcss-linux-arm64-musl | 1.33.0 | development-only | MPL-2.0 | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | lightningcss-linux-x64-gnu | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
-| npm | lightningcss-linux-x64-musl | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
-| npm | lightningcss-win32-arm64-msvc | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
+| npm | lightningcss-linux-x64-musl | 1.33.0 | development-only | MPL-2.0 | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
+| npm | lightningcss-win32-arm64-msvc | 1.33.0 | development-only | MPL-2.0 | 0 | OUT_OF_BUILD_PLATFORM_SCOPE |
 | npm | lightningcss-win32-x64-msvc | 1.33.0 | development-only | MPL-2.0 | 1 | LOCAL_TEXT_COLLECTED |
 | npm | linkify-it | 6.1.0 | production-or-optional | MIT | 1 | LOCAL_TEXT_COLLECTED |
 | npm | lodash-es | 4.18.1 | development-only | MIT | 1 | LOCAL_TEXT_COLLECTED |

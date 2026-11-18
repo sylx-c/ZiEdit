@@ -47,3 +47,5 @@ tests/gates/__pycache__/
 .slim/deepwork/
 
 .dsh-vision-router/
+
+AGENTS.md

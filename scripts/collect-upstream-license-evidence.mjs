@@ -11,6 +11,7 @@ import crypto from 'node:crypto';
 import { gunzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { inBuildPlatformScope, BUILD_PLATFORM_SCOPE_NOTE } from './build-platform-scope.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const base = path.join(root, 'compliance/third-party-sources/license-evidence');
 const manifestPath = path.join(base, 'manifest.json');
@@ -85,7 +86,15 @@ const targetKeys = new Set((previous?.packages || []).map(p=>`${p.ecosystem}:${p
 for (const p of sourceManifest.packages) if (p.review.some(i=>['NO_STANDALONE_LICENSE','PACKAGE_NOT_INSTALLED'].includes(i.code))) targetKeys.add(`${p.ecosystem}:${p.name}@${p.version}`);
 // 平台限定包必须全部持有固定归档证据：生成器对它们不读本机安装（跨 OS 确定性），
 // 因此宿主机恰好装上的那些平台变体（如 Windows 上的 win32-x64）也必须有补充证据。
-for (const [location,item] of Object.entries(lock.packages||{})) if (location.startsWith('node_modules/') && (((item.os?.length ?? 0) + (item.cpu?.length ?? 0)) > 0)) targetKeys.add(`npm:${item.name||location.split('node_modules/').at(-1)}@${item.version}`);
+  // 2026-11-18 作用域决定（scripts/build-platform-scope.mjs）：仅 CI 构建平台的变体采集；
+  // 其余平台变体为开发工具链可选目标，不采集（历史过量采集的条目已按同口径移除）。
+  for (const [location,item] of Object.entries(lock.packages||{})) {
+    if (!location.startsWith('node_modules/')) continue;
+    if ((((item.os?.length ?? 0) + (item.cpu?.length ?? 0)) > 0) !== true) continue;
+    const pkgName = item.name || location.split('node_modules/').at(-1);
+    if (!inBuildPlatformScope(pkgName)) continue;
+    targetKeys.add(`npm:${pkgName}@${item.version}`);
+  }
 const targets = sourceManifest.packages.filter(p=>targetKeys.has(`${p.ecosystem}:${p.name}@${p.version}`));
 const cargoLockEntries = fs.readFileSync(path.join(root,'src-tauri/Cargo.lock'),'utf8').split('[[package]]').slice(1);
 function cargoChecksum(name,version) {
