@@ -1,4 +1,4 @@
-// i18n 一致性单测（001 规则 26 界面多语言 / AGENTS 红线：不自造术语、文案全覆盖）
+// i18n 一致性单测（001 规则 26 界面多语言 / 工程红线：不自造术语、文案全覆盖）
 // 双向守护：① 中英字典 key 对齐且占位符一致 ② 代码引用的 key 必在字典、字典 key 必被引用（无缺失、无冗余）
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest';
