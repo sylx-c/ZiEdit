@@ -26,12 +26,12 @@
   "counts": {
     "npm": 309,
     "npmInstalled": 260,
-    "npmDevelopmentOnly": 233,
+    "npmDevelopmentOnly": 241,
     "cargo": 570,
     "packagesWithReviewItems": 0,
     "reviewItems": 0,
-    "collectedDocuments": 1413,
-    "collectedTextBytes": 6361962
+    "collectedDocuments": 1361,
+    "collectedTextBytes": 6102290
   },
   "packages": [
     {
@@ -1863,7 +1863,7 @@
       "name": "@napi-rs/canvas-android-arm64",
       "version": "1.0.13",
       "location": "node_modules/@napi-rs/canvas-android-arm64",
-      "dependencyClass": "production-or-optional",
+      "dependencyClass": "development-only",
       "optional": true,
       "dev": false,
       "devOptional": false,
@@ -1882,36 +1882,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_napi-rs_canvas-android-arm64-1.0.13-16d541e6f7/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "0b8e3b4f0042f33677406344854c1dcce3a2878eb3a3f6baee58c6f5752655ce",
-          "bytes": 2705,
-          "sourceURL": "https://raw.githubusercontent.com/Brooooooklyn/canvas/00a115d9903647f116daf86eccd2c6ba36128371/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-android-arm64/-/canvas-android-arm64-1.0.13.tgz",
-          "sourceArchiveSHA256": "6cd32b264e798a3b8be3370d21df3f14039e9dd25833b4230f2776901d5e49bc",
-          "sourceArchiveSHA512": "b6b9fb01a0f343ec9e780d1ece1902edc0756433eda7851893412f07917caad60bf631155ad56b537d163a9239d83b33a13c5a4ec0a07f93cfe1955a3a53881d",
-          "sourceIntegrity": "sha512-trn7AaDzQ+yeeA0ezhkC7cB1ZDPtp4UYk0EvB5F8qtYL9jEVWtVrU30WOpI52DszoTxaTsCgf5PP4ZVaOlOIHQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@napi-rs%2fcanvas-android-arm64@1.0.13",
-          "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-          "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_napi-rs_canvas-android-arm64-1.0.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-android-arm64/-/canvas-android-arm64-1.0.13.tgz",
-          "sourceArchiveSHA256": "6cd32b264e798a3b8be3370d21df3f14039e9dd25833b4230f2776901d5e49bc",
-          "sourceArchiveSHA512": "b6b9fb01a0f343ec9e780d1ece1902edc0756433eda7851893412f07917caad60bf631155ad56b537d163a9239d83b33a13c5a4ec0a07f93cfe1955a3a53881d",
-          "sourceIntegrity": "sha512-trn7AaDzQ+yeeA0ezhkC7cB1ZDPtp4UYk0EvB5F8qtYL9jEVWtVrU30WOpI52DszoTxaTsCgf5PP4ZVaOlOIHQ=="
-        },
-        "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-        "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -1975,7 +1948,7 @@
       "name": "@napi-rs/canvas-darwin-x64",
       "version": "1.0.13",
       "location": "node_modules/@napi-rs/canvas-darwin-x64",
-      "dependencyClass": "production-or-optional",
+      "dependencyClass": "development-only",
       "optional": true,
       "dev": false,
       "devOptional": false,
@@ -1994,36 +1967,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_napi-rs_canvas-darwin-x64-1.0.13-c8a3263c5f/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "0b8e3b4f0042f33677406344854c1dcce3a2878eb3a3f6baee58c6f5752655ce",
-          "bytes": 2705,
-          "sourceURL": "https://raw.githubusercontent.com/Brooooooklyn/canvas/00a115d9903647f116daf86eccd2c6ba36128371/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-darwin-x64/-/canvas-darwin-x64-1.0.13.tgz",
-          "sourceArchiveSHA256": "5822ad0b372245308396b30b88f92cff94bc5c8e2e5c00d41a73593169be77bb",
-          "sourceArchiveSHA512": "399a0fc30bb84cc320f064c2141ae0f14144c7041353fe798b7b930bf8b30dab7a3c713eae8f5d8a6c90a0e6e815ff75f8d63b3e79fbd12711f1ff08f3e7995f",
-          "sourceIntegrity": "sha512-OZoPwwu4TMMg8GTCFBrg8UFExwQTU/55i3uTC/izDat6PHE+ro9dimyQoOboFf91+NY7Pnn70ScR8f8I8+eZXw==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@napi-rs%2fcanvas-darwin-x64@1.0.13",
-          "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-          "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_napi-rs_canvas-darwin-x64-1.0.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-darwin-x64/-/canvas-darwin-x64-1.0.13.tgz",
-          "sourceArchiveSHA256": "5822ad0b372245308396b30b88f92cff94bc5c8e2e5c00d41a73593169be77bb",
-          "sourceArchiveSHA512": "399a0fc30bb84cc320f064c2141ae0f14144c7041353fe798b7b930bf8b30dab7a3c713eae8f5d8a6c90a0e6e815ff75f8d63b3e79fbd12711f1ff08f3e7995f",
-          "sourceIntegrity": "sha512-OZoPwwu4TMMg8GTCFBrg8UFExwQTU/55i3uTC/izDat6PHE+ro9dimyQoOboFf91+NY7Pnn70ScR8f8I8+eZXw=="
-        },
-        "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-        "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2031,7 +1977,7 @@
       "name": "@napi-rs/canvas-linux-arm-gnueabihf",
       "version": "1.0.13",
       "location": "node_modules/@napi-rs/canvas-linux-arm-gnueabihf",
-      "dependencyClass": "production-or-optional",
+      "dependencyClass": "development-only",
       "optional": true,
       "dev": false,
       "devOptional": false,
@@ -2050,36 +1996,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_napi-rs_canvas-linux-arm-gnueabihf-1.0.13-7de4c52f81/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "0b8e3b4f0042f33677406344854c1dcce3a2878eb3a3f6baee58c6f5752655ce",
-          "bytes": 2705,
-          "sourceURL": "https://raw.githubusercontent.com/Brooooooklyn/canvas/00a115d9903647f116daf86eccd2c6ba36128371/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm-gnueabihf/-/canvas-linux-arm-gnueabihf-1.0.13.tgz",
-          "sourceArchiveSHA256": "eca0adc4567bb83556befd87bcd3db78e267bc90809c2cb1e4fd2e433c5cfe7c",
-          "sourceArchiveSHA512": "75949868a44ebacc14d9e5161b96812a774d55eebc7a5a35617f77c6d45ac7babae7cb63f2b604f87c1dba8bd6260b3aab0bf5af5fc22d1eb49c37816f28efca",
-          "sourceIntegrity": "sha512-dZSYaKROuswU2eUWG5aBKndNVe68elo1YX93xtRax7q658tj8rYE+HwduovWJgs6qwv1r1/CLR60nDeBbyjvyg==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@napi-rs%2fcanvas-linux-arm-gnueabihf@1.0.13",
-          "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-          "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_napi-rs_canvas-linux-arm-gnueabihf-1.0.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm-gnueabihf/-/canvas-linux-arm-gnueabihf-1.0.13.tgz",
-          "sourceArchiveSHA256": "eca0adc4567bb83556befd87bcd3db78e267bc90809c2cb1e4fd2e433c5cfe7c",
-          "sourceArchiveSHA512": "75949868a44ebacc14d9e5161b96812a774d55eebc7a5a35617f77c6d45ac7babae7cb63f2b604f87c1dba8bd6260b3aab0bf5af5fc22d1eb49c37816f28efca",
-          "sourceIntegrity": "sha512-dZSYaKROuswU2eUWG5aBKndNVe68elo1YX93xtRax7q658tj8rYE+HwduovWJgs6qwv1r1/CLR60nDeBbyjvyg=="
-        },
-        "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-        "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2087,7 +2006,7 @@
       "name": "@napi-rs/canvas-linux-arm64-gnu",
       "version": "1.0.13",
       "location": "node_modules/@napi-rs/canvas-linux-arm64-gnu",
-      "dependencyClass": "production-or-optional",
+      "dependencyClass": "development-only",
       "optional": true,
       "dev": false,
       "devOptional": false,
@@ -2106,36 +2025,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_napi-rs_canvas-linux-arm64-gnu-1.0.13-9155cd3c63/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "0b8e3b4f0042f33677406344854c1dcce3a2878eb3a3f6baee58c6f5752655ce",
-          "bytes": 2705,
-          "sourceURL": "https://raw.githubusercontent.com/Brooooooklyn/canvas/00a115d9903647f116daf86eccd2c6ba36128371/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm64-gnu/-/canvas-linux-arm64-gnu-1.0.13.tgz",
-          "sourceArchiveSHA256": "d5ddc1b293ced8ec850d258408a22c57f8d284ac4d15b5bb9dd65371855e16d9",
-          "sourceArchiveSHA512": "5ba173604f000c723ddc89f5be2f342812fa6ed0ed00cba3e740a1e69b64592f31ba7b72cdb4788792435265e86a4c599f6c8c22792cb9d4c4a95496a05a851a",
-          "sourceIntegrity": "sha512-W6FzYE8ADHI93In1vi80KBL6btDtAMuj50Ch5ptkWS8xuntyzbR4h5JDUmXoakxZn2yMInksudTEqVSWoFqFGg==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@napi-rs%2fcanvas-linux-arm64-gnu@1.0.13",
-          "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-          "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_napi-rs_canvas-linux-arm64-gnu-1.0.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm64-gnu/-/canvas-linux-arm64-gnu-1.0.13.tgz",
-          "sourceArchiveSHA256": "d5ddc1b293ced8ec850d258408a22c57f8d284ac4d15b5bb9dd65371855e16d9",
-          "sourceArchiveSHA512": "5ba173604f000c723ddc89f5be2f342812fa6ed0ed00cba3e740a1e69b64592f31ba7b72cdb4788792435265e86a4c599f6c8c22792cb9d4c4a95496a05a851a",
-          "sourceIntegrity": "sha512-W6FzYE8ADHI93In1vi80KBL6btDtAMuj50Ch5ptkWS8xuntyzbR4h5JDUmXoakxZn2yMInksudTEqVSWoFqFGg=="
-        },
-        "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-        "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2143,7 +2035,7 @@
       "name": "@napi-rs/canvas-linux-arm64-musl",
       "version": "1.0.13",
       "location": "node_modules/@napi-rs/canvas-linux-arm64-musl",
-      "dependencyClass": "production-or-optional",
+      "dependencyClass": "development-only",
       "optional": true,
       "dev": false,
       "devOptional": false,
@@ -2162,36 +2054,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_napi-rs_canvas-linux-arm64-musl-1.0.13-6412d64a72/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "0b8e3b4f0042f33677406344854c1dcce3a2878eb3a3f6baee58c6f5752655ce",
-          "bytes": 2705,
-          "sourceURL": "https://raw.githubusercontent.com/Brooooooklyn/canvas/00a115d9903647f116daf86eccd2c6ba36128371/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm64-musl/-/canvas-linux-arm64-musl-1.0.13.tgz",
-          "sourceArchiveSHA256": "80b674714ba1f8ee37ab78e1665df8f243cdffd8e48060153e03e35ce9ee4e6c",
-          "sourceArchiveSHA512": "fba7d0fab478f619006b8be8876b2d2c8c10fb8b7e826a2c78cf01739dff0e53176fbdc82b29833d62bd03f36d59ea935b88a35a9a58bb2bb14b684f23cb7334",
-          "sourceIntegrity": "sha512-+6fQ+rR49hkAa4voh2stLIwQ+4t+gmoseM8Bc53/DlMXb73IKymDPWK9A/NtWeqTW4ijWppYuyuxS2hPI8tzNA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@napi-rs%2fcanvas-linux-arm64-musl@1.0.13",
-          "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-          "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_napi-rs_canvas-linux-arm64-musl-1.0.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm64-musl/-/canvas-linux-arm64-musl-1.0.13.tgz",
-          "sourceArchiveSHA256": "80b674714ba1f8ee37ab78e1665df8f243cdffd8e48060153e03e35ce9ee4e6c",
-          "sourceArchiveSHA512": "fba7d0fab478f619006b8be8876b2d2c8c10fb8b7e826a2c78cf01739dff0e53176fbdc82b29833d62bd03f36d59ea935b88a35a9a58bb2bb14b684f23cb7334",
-          "sourceIntegrity": "sha512-+6fQ+rR49hkAa4voh2stLIwQ+4t+gmoseM8Bc53/DlMXb73IKymDPWK9A/NtWeqTW4ijWppYuyuxS2hPI8tzNA=="
-        },
-        "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-        "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2199,7 +2064,7 @@
       "name": "@napi-rs/canvas-linux-riscv64-gnu",
       "version": "1.0.13",
       "location": "node_modules/@napi-rs/canvas-linux-riscv64-gnu",
-      "dependencyClass": "production-or-optional",
+      "dependencyClass": "development-only",
       "optional": true,
       "dev": false,
       "devOptional": false,
@@ -2218,36 +2083,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_napi-rs_canvas-linux-riscv64-gnu-1.0.13-3019929538/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "0b8e3b4f0042f33677406344854c1dcce3a2878eb3a3f6baee58c6f5752655ce",
-          "bytes": 2705,
-          "sourceURL": "https://raw.githubusercontent.com/Brooooooklyn/canvas/00a115d9903647f116daf86eccd2c6ba36128371/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-riscv64-gnu/-/canvas-linux-riscv64-gnu-1.0.13.tgz",
-          "sourceArchiveSHA256": "bcd33398688722de958cc0756ac57bb909148f71b2e11e5569932536b901f098",
-          "sourceArchiveSHA512": "d7b5c430ededf515bf4ed1ed4857f60246925ae0967736cf7a2773ef3ace15ac07c682d22429e94c8d61379694beb64d9e434d9adfef655242874af251a8a4dc",
-          "sourceIntegrity": "sha512-17XEMO3t9RW/TtHtSFf2AkaSWuCWdzbPeidz7zrOFawHxoLSJCnpTI1hN5aUvrZNnkNNmt/vZVJCh0ryUaik3A==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@napi-rs%2fcanvas-linux-riscv64-gnu@1.0.13",
-          "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-          "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_napi-rs_canvas-linux-riscv64-gnu-1.0.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-riscv64-gnu/-/canvas-linux-riscv64-gnu-1.0.13.tgz",
-          "sourceArchiveSHA256": "bcd33398688722de958cc0756ac57bb909148f71b2e11e5569932536b901f098",
-          "sourceArchiveSHA512": "d7b5c430ededf515bf4ed1ed4857f60246925ae0967736cf7a2773ef3ace15ac07c682d22429e94c8d61379694beb64d9e434d9adfef655242874af251a8a4dc",
-          "sourceIntegrity": "sha512-17XEMO3t9RW/TtHtSFf2AkaSWuCWdzbPeidz7zrOFawHxoLSJCnpTI1hN5aUvrZNnkNNmt/vZVJCh0ryUaik3A=="
-        },
-        "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-        "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2311,7 +2149,7 @@
       "name": "@napi-rs/canvas-linux-x64-musl",
       "version": "1.0.13",
       "location": "node_modules/@napi-rs/canvas-linux-x64-musl",
-      "dependencyClass": "production-or-optional",
+      "dependencyClass": "development-only",
       "optional": true,
       "dev": false,
       "devOptional": false,
@@ -2330,36 +2168,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_napi-rs_canvas-linux-x64-musl-1.0.13-084f1a4210/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "0b8e3b4f0042f33677406344854c1dcce3a2878eb3a3f6baee58c6f5752655ce",
-          "bytes": 2705,
-          "sourceURL": "https://raw.githubusercontent.com/Brooooooklyn/canvas/00a115d9903647f116daf86eccd2c6ba36128371/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-x64-musl/-/canvas-linux-x64-musl-1.0.13.tgz",
-          "sourceArchiveSHA256": "d5e5aedf93b6e5fd6c7d1746d569b0cadd53c6b45006a206c17c48de992961ed",
-          "sourceArchiveSHA512": "6c6635af6e92d9bb3c50d14970f59c09235d0856ca7a9e4f013b2fb60b42f40e6ee92460af6fe3244fd19611cbe66f59a62c4d0e15642d8ff9875e8ac7957d60",
-          "sourceIntegrity": "sha512-bGY1r26S2bs8UNFJcPWcCSNdCFbKep5PATsvtgtC9A5u6SRgr2/jJE/RlhHL5m9ZpixNDhVkLY/5h16Kx5V9YA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@napi-rs%2fcanvas-linux-x64-musl@1.0.13",
-          "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-          "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_napi-rs_canvas-linux-x64-musl-1.0.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-linux-x64-musl/-/canvas-linux-x64-musl-1.0.13.tgz",
-          "sourceArchiveSHA256": "d5e5aedf93b6e5fd6c7d1746d569b0cadd53c6b45006a206c17c48de992961ed",
-          "sourceArchiveSHA512": "6c6635af6e92d9bb3c50d14970f59c09235d0856ca7a9e4f013b2fb60b42f40e6ee92460af6fe3244fd19611cbe66f59a62c4d0e15642d8ff9875e8ac7957d60",
-          "sourceIntegrity": "sha512-bGY1r26S2bs8UNFJcPWcCSNdCFbKep5PATsvtgtC9A5u6SRgr2/jJE/RlhHL5m9ZpixNDhVkLY/5h16Kx5V9YA=="
-        },
-        "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-        "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2367,7 +2178,7 @@
       "name": "@napi-rs/canvas-win32-arm64-msvc",
       "version": "1.0.13",
       "location": "node_modules/@napi-rs/canvas-win32-arm64-msvc",
-      "dependencyClass": "production-or-optional",
+      "dependencyClass": "development-only",
       "optional": true,
       "dev": false,
       "devOptional": false,
@@ -2386,36 +2197,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_napi-rs_canvas-win32-arm64-msvc-1.0.13-cb99054c22/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "0b8e3b4f0042f33677406344854c1dcce3a2878eb3a3f6baee58c6f5752655ce",
-          "bytes": 2705,
-          "sourceURL": "https://raw.githubusercontent.com/Brooooooklyn/canvas/00a115d9903647f116daf86eccd2c6ba36128371/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-win32-arm64-msvc/-/canvas-win32-arm64-msvc-1.0.13.tgz",
-          "sourceArchiveSHA256": "1513ad23d838ebc0b2c4ea46230b7070eab5e8f6cb4410854fbc5e6b95d806f1",
-          "sourceArchiveSHA512": "daf44f059a1a22f26b5240e16531361e7d18ae7a49442595337109002a012a3b9623a5a03f11ad52844cb3146f882b3292cf1b293485772c35e027a59671b6a8",
-          "sourceIntegrity": "sha512-2vRPBZoaIvJrUkDhZTE2Hn0YrnpJRCWVM3EJACoBKjuWI6WgPxGtUoRMsxRviCsyks8bKTSFdyw14CellnG2qA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@napi-rs%2fcanvas-win32-arm64-msvc@1.0.13",
-          "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-          "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_napi-rs_canvas-win32-arm64-msvc-1.0.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@napi-rs/canvas-win32-arm64-msvc/-/canvas-win32-arm64-msvc-1.0.13.tgz",
-          "sourceArchiveSHA256": "1513ad23d838ebc0b2c4ea46230b7070eab5e8f6cb4410854fbc5e6b95d806f1",
-          "sourceArchiveSHA512": "daf44f059a1a22f26b5240e16531361e7d18ae7a49442595337109002a012a3b9623a5a03f11ad52844cb3146f882b3292cf1b293485772c35e027a59671b6a8",
-          "sourceIntegrity": "sha512-2vRPBZoaIvJrUkDhZTE2Hn0YrnpJRCWVM3EJACoBKjuWI6WgPxGtUoRMsxRviCsyks8bKTSFdyw14CellnG2qA=="
-        },
-        "sourceRevision": "00a115d9903647f116daf86eccd2c6ba36128371",
-        "sourceRepositoryURL": "https://github.com/Brooooooklyn/canvas"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2529,36 +2313,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-android-arm-eabi-1.2.13-dbef141608/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-android-arm-eabi/-/binding-android-arm-eabi-1.2.13.tgz",
-          "sourceArchiveSHA256": "61973ad34c04878cf0ec1fbdc6b00ede0e5e7b00d4bf6ec85ca38de53d792b8f",
-          "sourceArchiveSHA512": "56efcd202ae0751bd439e689648c81d853fadece9f3bfe2e77997c7579b10f1f720f29fe98dd32fa0b2fb15be24a58be4f7eb502aa34878e84b8ca286ebc1ac0",
-          "sourceIntegrity": "sha512-Vu/NICrgdRvUOeaJZIyB2FP63s6fO/4ud5l8dXmxDx9yDyn+mN0y+gsvsVviSli+T361Aqo0h46EuMoobrwawA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-android-arm-eabi@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-android-arm-eabi-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-android-arm-eabi/-/binding-android-arm-eabi-1.2.13.tgz",
-          "sourceArchiveSHA256": "61973ad34c04878cf0ec1fbdc6b00ede0e5e7b00d4bf6ec85ca38de53d792b8f",
-          "sourceArchiveSHA512": "56efcd202ae0751bd439e689648c81d853fadece9f3bfe2e77997c7579b10f1f720f29fe98dd32fa0b2fb15be24a58be4f7eb502aa34878e84b8ca286ebc1ac0",
-          "sourceIntegrity": "sha512-Vu/NICrgdRvUOeaJZIyB2FP63s6fO/4ud5l8dXmxDx9yDyn+mN0y+gsvsVviSli+T361Aqo0h46EuMoobrwawA=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2585,36 +2342,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-android-arm64-1.2.13-ba78b41251/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-android-arm64/-/binding-android-arm64-1.2.13.tgz",
-          "sourceArchiveSHA256": "33340dadefcea9fd8eb73c8cb2c32cc21020856065c3f3da7b9cedc1ed5d2e2c",
-          "sourceArchiveSHA512": "e8b12822b1b2e6fbc27766e8367bf6b283d25198ff3d1be1a7c47fb7d2a55fe9886714e1204fd9ab1ac65f19ae357d05baf405bcb759afb4b81eb62960156111",
-          "sourceIntegrity": "sha512-6LEoIrGy5vvCd2boNnv2soPSUZj/PRvhp8R/t9KlX+mIZxThIE/ZqxrGXxmuNX0FuvQFvLdZr7S4HrYpYBVhEQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-android-arm64@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-android-arm64-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-android-arm64/-/binding-android-arm64-1.2.13.tgz",
-          "sourceArchiveSHA256": "33340dadefcea9fd8eb73c8cb2c32cc21020856065c3f3da7b9cedc1ed5d2e2c",
-          "sourceArchiveSHA512": "e8b12822b1b2e6fbc27766e8367bf6b283d25198ff3d1be1a7c47fb7d2a55fe9886714e1204fd9ab1ac65f19ae357d05baf405bcb759afb4b81eb62960156111",
-          "sourceIntegrity": "sha512-6LEoIrGy5vvCd2boNnv2soPSUZj/PRvhp8R/t9KlX+mIZxThIE/ZqxrGXxmuNX0FuvQFvLdZr7S4HrYpYBVhEQ=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2697,36 +2427,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-darwin-x64-1.2.13-81b59fa247/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-darwin-x64/-/binding-darwin-x64-1.2.13.tgz",
-          "sourceArchiveSHA256": "1252eeaf942eaa564ff77cd42f3723bdac63a2a170bae7669a3e573e9fa66d2d",
-          "sourceArchiveSHA512": "7b8af7e342398714b32640f7609071833abfac9df0c31c1d2cb6f614fb75669c9e9b6d27ad03d3d750c310491acf0c5a1ee987f30a6096ca7f3b3823ff04fa9b",
-          "sourceIntegrity": "sha512-e4r340I5hxSzJkD3YJBxgzq/rJ3wwxwdLLb2FPt1Zpyem20nrQPT11DDEEkazwxaHumH8wpglsp/Ozgj/wT6mw==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-darwin-x64@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-darwin-x64-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-darwin-x64/-/binding-darwin-x64-1.2.13.tgz",
-          "sourceArchiveSHA256": "1252eeaf942eaa564ff77cd42f3723bdac63a2a170bae7669a3e573e9fa66d2d",
-          "sourceArchiveSHA512": "7b8af7e342398714b32640f7609071833abfac9df0c31c1d2cb6f614fb75669c9e9b6d27ad03d3d750c310491acf0c5a1ee987f30a6096ca7f3b3823ff04fa9b",
-          "sourceIntegrity": "sha512-e4r340I5hxSzJkD3YJBxgzq/rJ3wwxwdLLb2FPt1Zpyem20nrQPT11DDEEkazwxaHumH8wpglsp/Ozgj/wT6mw=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2753,36 +2456,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-freebsd-x64-1.2.13-52392250cd/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-freebsd-x64/-/binding-freebsd-x64-1.2.13.tgz",
-          "sourceArchiveSHA256": "d2dfe85465eff21fef45851fd1e0d5c7acf379d021fa992415326964d82ea4b0",
-          "sourceArchiveSHA512": "8680560d9e3f2bf98929531bb2051dd637e90360e23ab279e26a5e80e6d4f53047041aed5f814b2172494110cf67fd839fdd46bcfa1bf99da1c0a2737f813949",
-          "sourceIntegrity": "sha512-hoBWDZ4/K/mJKVMbsgUd1jfpA2DiOrJ54mpegObU9TBHBBrtX4FLIXJJQRDPZ/2Dn91GvPob+Z2hwKJzf4E5SQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-freebsd-x64@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-freebsd-x64-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-freebsd-x64/-/binding-freebsd-x64-1.2.13.tgz",
-          "sourceArchiveSHA256": "d2dfe85465eff21fef45851fd1e0d5c7acf379d021fa992415326964d82ea4b0",
-          "sourceArchiveSHA512": "8680560d9e3f2bf98929531bb2051dd637e90360e23ab279e26a5e80e6d4f53047041aed5f814b2172494110cf67fd839fdd46bcfa1bf99da1c0a2737f813949",
-          "sourceIntegrity": "sha512-hoBWDZ4/K/mJKVMbsgUd1jfpA2DiOrJ54mpegObU9TBHBBrtX4FLIXJJQRDPZ/2Dn91GvPob+Z2hwKJzf4E5SQ=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2809,36 +2485,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-linux-arm-gnueabihf-1.2.13-c873a4c2f5/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-arm-gnueabihf/-/binding-linux-arm-gnueabihf-1.2.13.tgz",
-          "sourceArchiveSHA256": "ea21106a37ceba643e0e1cd9b9111f402481ac7a93f7febde61bb738ada110e3",
-          "sourceArchiveSHA512": "a05f5f66edef4d69d38950240c5c54f4f24bb759e1db42bd451a6e1ec47b6671362fb5e8a2405b0c154ba2309548b19bbed4a5c5e50d9e3023e836cdb0acb36e",
-          "sourceIntegrity": "sha512-oF9fZu3vTWnTiVAkDFxU9PJLt1nh20K9RRpuHsR7ZnE2L7XookBbDBVLojCVSLGbvtSlxeUNnjAj6DbNsKyzbg==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-linux-arm-gnueabihf@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-linux-arm-gnueabihf-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-arm-gnueabihf/-/binding-linux-arm-gnueabihf-1.2.13.tgz",
-          "sourceArchiveSHA256": "ea21106a37ceba643e0e1cd9b9111f402481ac7a93f7febde61bb738ada110e3",
-          "sourceArchiveSHA512": "a05f5f66edef4d69d38950240c5c54f4f24bb759e1db42bd451a6e1ec47b6671362fb5e8a2405b0c154ba2309548b19bbed4a5c5e50d9e3023e836cdb0acb36e",
-          "sourceIntegrity": "sha512-oF9fZu3vTWnTiVAkDFxU9PJLt1nh20K9RRpuHsR7ZnE2L7XookBbDBVLojCVSLGbvtSlxeUNnjAj6DbNsKyzbg=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2865,36 +2514,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-linux-arm64-gnu-1.2.13-c84da99916/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.2.13.tgz",
-          "sourceArchiveSHA256": "137b29a5fba6d1ad81235da65891a33fdc73ffdf2a22336929e6d4332640c2fd",
-          "sourceArchiveSHA512": "0d3a5bffe8cc8aa58c3e0a619f892c5b5cd6f972c9e9d249f4532f9c893d236f752e109cb4c3e131826b3f9b7da7a0bda9adca5da7437541191c168f87790dc5",
-          "sourceIntegrity": "sha512-DTpb/+jMiqWMPgphn4ksW1zW+XLJ6dJJ9FMvnIk9I291LhCctMPhMYJrP5t9p6C9qa3KXadDdUEZHBaPh3kNxQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-linux-arm64-gnu@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-linux-arm64-gnu-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.2.13.tgz",
-          "sourceArchiveSHA256": "137b29a5fba6d1ad81235da65891a33fdc73ffdf2a22336929e6d4332640c2fd",
-          "sourceArchiveSHA512": "0d3a5bffe8cc8aa58c3e0a619f892c5b5cd6f972c9e9d249f4532f9c893d236f752e109cb4c3e131826b3f9b7da7a0bda9adca5da7437541191c168f87790dc5",
-          "sourceIntegrity": "sha512-DTpb/+jMiqWMPgphn4ksW1zW+XLJ6dJJ9FMvnIk9I291LhCctMPhMYJrP5t9p6C9qa3KXadDdUEZHBaPh3kNxQ=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2921,36 +2543,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-linux-arm64-musl-1.2.13-74f00cb831/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-arm64-musl/-/binding-linux-arm64-musl-1.2.13.tgz",
-          "sourceArchiveSHA256": "e0cbd4ed2133d27c16b3dd85a5afe8d328db76d9828245c3b509e4a8bd1f73fa",
-          "sourceArchiveSHA512": "c54f8abeff4dd80dd2637e73161d45596363c5b69d13f04a7aa9e45deeef49c538199b30ef9ec19559832c84d912af033e993a9bbba80d890aecffb1fee5393b",
-          "sourceIntegrity": "sha512-xU+Kvv9N2A3SY35zFh1FWWNjxbadE/BKeqnkXe7vScU4GZsw757BlVmDLITZEq8DPpk6m7uoDYkK7P+x/uU5Ow==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-linux-arm64-musl@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-linux-arm64-musl-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-arm64-musl/-/binding-linux-arm64-musl-1.2.13.tgz",
-          "sourceArchiveSHA256": "e0cbd4ed2133d27c16b3dd85a5afe8d328db76d9828245c3b509e4a8bd1f73fa",
-          "sourceArchiveSHA512": "c54f8abeff4dd80dd2637e73161d45596363c5b69d13f04a7aa9e45deeef49c538199b30ef9ec19559832c84d912af033e993a9bbba80d890aecffb1fee5393b",
-          "sourceIntegrity": "sha512-xU+Kvv9N2A3SY35zFh1FWWNjxbadE/BKeqnkXe7vScU4GZsw757BlVmDLITZEq8DPpk6m7uoDYkK7P+x/uU5Ow=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -2977,36 +2572,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-linux-ppc64-gnu-1.2.13-0bcb76486e/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-ppc64-gnu/-/binding-linux-ppc64-gnu-1.2.13.tgz",
-          "sourceArchiveSHA256": "63a981d1c0cf179ad6e5488f6e856a6d0f9b9cc01ca3ffe86e403afd31505bcc",
-          "sourceArchiveSHA512": "5cc93f867861db9a10ef9e8b7256f5435d61e25974c42d04b1ae70e15ce9fa6004d92dc018981e3344a89eb22063c7c78636ab6fa85ca13bb0a051b45553f68a",
-          "sourceIntegrity": "sha512-XMk/hnhh25oQ756Lclb1Q11h4ll0xC0Esa5w4Vzp+mAE2S3AGJgeM0SonrIgY8fHhjarb6hcoTuwoFG0VVP2ig==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-linux-ppc64-gnu@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-linux-ppc64-gnu-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-ppc64-gnu/-/binding-linux-ppc64-gnu-1.2.13.tgz",
-          "sourceArchiveSHA256": "63a981d1c0cf179ad6e5488f6e856a6d0f9b9cc01ca3ffe86e403afd31505bcc",
-          "sourceArchiveSHA512": "5cc93f867861db9a10ef9e8b7256f5435d61e25974c42d04b1ae70e15ce9fa6004d92dc018981e3344a89eb22063c7c78636ab6fa85ca13bb0a051b45553f68a",
-          "sourceIntegrity": "sha512-XMk/hnhh25oQ756Lclb1Q11h4ll0xC0Esa5w4Vzp+mAE2S3AGJgeM0SonrIgY8fHhjarb6hcoTuwoFG0VVP2ig=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -3033,36 +2601,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-linux-s390x-gnu-1.2.13-db7b393402/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-s390x-gnu/-/binding-linux-s390x-gnu-1.2.13.tgz",
-          "sourceArchiveSHA256": "b387845f9b24da121b6f11c6d75d242894e6704ed7f096c267a8759bda8838dd",
-          "sourceArchiveSHA512": "5350684c7626972c04da7dc75168f367ef0442c2abf8ec29c58b8359ab9bc78dad50bf1048bee73aa473fcd5476a789b6c53f7335471ba9af3ff035c6cc2a3ab",
-          "sourceIntegrity": "sha512-U1BoTHYmlywE2n3HUWjzZ+8EQsKr+OwpxYuDWaubx42tUL8QSL7nOqRz/NVHanibbFP3M1Rxuprz/wNcbMKjqw==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-linux-s390x-gnu@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-linux-s390x-gnu-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-s390x-gnu/-/binding-linux-s390x-gnu-1.2.13.tgz",
-          "sourceArchiveSHA256": "b387845f9b24da121b6f11c6d75d242894e6704ed7f096c267a8759bda8838dd",
-          "sourceArchiveSHA512": "5350684c7626972c04da7dc75168f367ef0442c2abf8ec29c58b8359ab9bc78dad50bf1048bee73aa473fcd5476a789b6c53f7335471ba9af3ff035c6cc2a3ab",
-          "sourceIntegrity": "sha512-U1BoTHYmlywE2n3HUWjzZ+8EQsKr+OwpxYuDWaubx42tUL8QSL7nOqRz/NVHanibbFP3M1Rxuprz/wNcbMKjqw=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -3145,36 +2686,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-linux-x64-musl-1.2.13-4f466c36c0/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-x64-musl/-/binding-linux-x64-musl-1.2.13.tgz",
-          "sourceArchiveSHA256": "4cc27485f7a7a85293f11a9b590689825550065b34db6514d0ccd87fff99e2a0",
-          "sourceArchiveSHA512": "5b47ae652e3453857a2649849d50885fd99cb0be9c6d74385fc736c3e30c3888c583af135d45bebb7453fb67b5b75a6ff6683f10fde90ed2b73ce5dd43b471cb",
-          "sourceIntegrity": "sha512-W0euZS40U4V6JkmEnVCIX9mcsL6cbXQ4X8c2w+MMOIjFg68TXUW+u3RT+2e1t1pv9mg/EP3pDtK3POXdQ7Rxyw==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-linux-x64-musl@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-linux-x64-musl-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-linux-x64-musl/-/binding-linux-x64-musl-1.2.13.tgz",
-          "sourceArchiveSHA256": "4cc27485f7a7a85293f11a9b590689825550065b34db6514d0ccd87fff99e2a0",
-          "sourceArchiveSHA512": "5b47ae652e3453857a2649849d50885fd99cb0be9c6d74385fc736c3e30c3888c583af135d45bebb7453fb67b5b75a6ff6683f10fde90ed2b73ce5dd43b471cb",
-          "sourceIntegrity": "sha512-W0euZS40U4V6JkmEnVCIX9mcsL6cbXQ4X8c2w+MMOIjFg68TXUW+u3RT+2e1t1pv9mg/EP3pDtK3POXdQ7Rxyw=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -3201,36 +2715,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-openharmony-arm64-1.2.13-4f1d1480aa/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-openharmony-arm64/-/binding-openharmony-arm64-1.2.13.tgz",
-          "sourceArchiveSHA256": "ebef90cb3e6200c7aa0dc9ada70e30e6d6af7703a17b5590af12fb9679756f5e",
-          "sourceArchiveSHA512": "768fc017fe27f4c46c8626b76b9697a32f3133673a9a07d3e83ec7fdd63a9b2e73fa17c2211e1a6fb9a4e08463fbe9ec110a4acb7f647740d09c3abeafaf76b7",
-          "sourceIntegrity": "sha512-do/AF/4n9MRshia3a5aXoy8xM2c6mgfT6D7H/dY6my5z+hfCIR4ab7mk4IRj++nsEQpKy39kd0DQnDq+r692tw==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-openharmony-arm64@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-openharmony-arm64-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-openharmony-arm64/-/binding-openharmony-arm64-1.2.13.tgz",
-          "sourceArchiveSHA256": "ebef90cb3e6200c7aa0dc9ada70e30e6d6af7703a17b5590af12fb9679756f5e",
-          "sourceArchiveSHA512": "768fc017fe27f4c46c8626b76b9697a32f3133673a9a07d3e83ec7fdd63a9b2e73fa17c2211e1a6fb9a4e08463fbe9ec110a4acb7f647740d09c3abeafaf76b7",
-          "sourceIntegrity": "sha512-do/AF/4n9MRshia3a5aXoy8xM2c6mgfT6D7H/dY6my5z+hfCIR4ab7mk4IRj++nsEQpKy39kd0DQnDq+r692tw=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -3257,36 +2744,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_rolldown_binding-win32-arm64-msvc-1.2.13-f03f7c2f7c/audited-upstream/upstream/LICENSE",
-          "originalPath": "upstream/LICENSE",
-          "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734",
-          "bytes": 1302,
-          "sourceURL": "https://raw.githubusercontent.com/rolldown/rolldown/f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127/LICENSE",
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-win32-arm64-msvc/-/binding-win32-arm64-msvc-1.2.13.tgz",
-          "sourceArchiveSHA256": "7a4bf7d7f12f00066f50b080416722391aaceaa47d094b295ab019a5839e4771",
-          "sourceArchiveSHA512": "e85b547f67096686eeb497719c6617f33d2fb5b82a5346f6bfcbdf0619176fdc29d8ca69305b64ba713e21a3a7b728b4d6b9084283d6d861c006d7f3b02d0145",
-          "sourceIntegrity": "sha512-6FtUf2cJZobutJdxnGYX8z0vtbgqU0b2v8vfBhkXb9wp2MppMFtkunE+IaOntyi01rkIQoPW2GHABtfzsC0BRQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@rolldown%2fbinding-win32-arm64-msvc@1.2.13",
-          "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-          "sourceRepositoryURL": "https://github.com/rolldown/rolldown",
-          "sourcePath": "LICENSE",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_rolldown_binding-win32-arm64-msvc-1.2.13/upstream/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@rolldown/binding-win32-arm64-msvc/-/binding-win32-arm64-msvc-1.2.13.tgz",
-          "sourceArchiveSHA256": "7a4bf7d7f12f00066f50b080416722391aaceaa47d094b295ab019a5839e4771",
-          "sourceArchiveSHA512": "e85b547f67096686eeb497719c6617f33d2fb5b82a5346f6bfcbdf0619176fdc29d8ca69305b64ba713e21a3a7b728b4d6b9084283d6d861c006d7f3b02d0145",
-          "sourceIntegrity": "sha512-6FtUf2cJZobutJdxnGYX8z0vtbgqU0b2v8vfBhkXb9wp2MppMFtkunE+IaOntyi01rkIQoPW2GHABtfzsC0BRQ=="
-        },
-        "sourceRevision": "f7de35f45bcd4cb8e4b6d8d11e74fbfb20b03127",
-        "sourceRepositoryURL": "https://github.com/rolldown/rolldown"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -3601,70 +3061,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_tauri-apps_cli-darwin-x64-2.12.2-d46212e37f/audited-upstream/upstream/LICENSE-APACHE-2.0",
-          "originalPath": "upstream/LICENSE-APACHE-2.0",
-          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
-          "bytes": 10174,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-APACHE-2.0",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-darwin-x64/-/cli-darwin-x64-2.12.2.tgz",
-          "sourceArchiveSHA256": "6905952da0337c8a2697c3c00a0feb66d7a77d2702607cb55e413fead2ff6ead",
-          "sourceArchiveSHA512": "d82c988c9f37dc9077b0a473e01d16fd3bf8a0e542d7ac2cd5bc5d4825a3d57beb99a9d6c2f662f7d7b9b4d228087c0785c3a6d2387eb21d0f08643296ce99fb",
-          "sourceIntegrity": "sha512-2CyYjJ833JB3sKRz4B0W/Tv4oOVC16ws1bxdSCWj1XvrmanWwvZi99e5tNIoCHwHhcOm0jh+sh0PCGQyls6Z+w==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-darwin-x64@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-APACHE-2.0",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-darwin-x64-2.12.2/upstream/LICENSE-APACHE-2.0"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-darwin-x64-2.12.2-d46212e37f/audited-upstream/upstream/LICENSE-MIT",
-          "originalPath": "upstream/LICENSE-MIT",
-          "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d",
-          "bytes": 1090,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-MIT",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-darwin-x64/-/cli-darwin-x64-2.12.2.tgz",
-          "sourceArchiveSHA256": "6905952da0337c8a2697c3c00a0feb66d7a77d2702607cb55e413fead2ff6ead",
-          "sourceArchiveSHA512": "d82c988c9f37dc9077b0a473e01d16fd3bf8a0e542d7ac2cd5bc5d4825a3d57beb99a9d6c2f662f7d7b9b4d228087c0785c3a6d2387eb21d0f08643296ce99fb",
-          "sourceIntegrity": "sha512-2CyYjJ833JB3sKRz4B0W/Tv4oOVC16ws1bxdSCWj1XvrmanWwvZi99e5tNIoCHwHhcOm0jh+sh0PCGQyls6Z+w==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-darwin-x64@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-MIT",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-darwin-x64-2.12.2/upstream/LICENSE-MIT"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-darwin-x64-2.12.2-d46212e37f/audited-upstream/upstream/LICENSE.spdx",
-          "originalPath": "upstream/LICENSE.spdx",
-          "sha256": "5e834fe9788c524210deda859c46a550ffa5aa0cba9ea0572f0d81120e97c008",
-          "bytes": 889,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE.spdx",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-darwin-x64/-/cli-darwin-x64-2.12.2.tgz",
-          "sourceArchiveSHA256": "6905952da0337c8a2697c3c00a0feb66d7a77d2702607cb55e413fead2ff6ead",
-          "sourceArchiveSHA512": "d82c988c9f37dc9077b0a473e01d16fd3bf8a0e542d7ac2cd5bc5d4825a3d57beb99a9d6c2f662f7d7b9b4d228087c0785c3a6d2387eb21d0f08643296ce99fb",
-          "sourceIntegrity": "sha512-2CyYjJ833JB3sKRz4B0W/Tv4oOVC16ws1bxdSCWj1XvrmanWwvZi99e5tNIoCHwHhcOm0jh+sh0PCGQyls6Z+w==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-darwin-x64@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE.spdx",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-darwin-x64-2.12.2/upstream/LICENSE.spdx"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-darwin-x64/-/cli-darwin-x64-2.12.2.tgz",
-          "sourceArchiveSHA256": "6905952da0337c8a2697c3c00a0feb66d7a77d2702607cb55e413fead2ff6ead",
-          "sourceArchiveSHA512": "d82c988c9f37dc9077b0a473e01d16fd3bf8a0e542d7ac2cd5bc5d4825a3d57beb99a9d6c2f662f7d7b9b4d228087c0785c3a6d2387eb21d0f08643296ce99fb",
-          "sourceIntegrity": "sha512-2CyYjJ833JB3sKRz4B0W/Tv4oOVC16ws1bxdSCWj1XvrmanWwvZi99e5tNIoCHwHhcOm0jh+sh0PCGQyls6Z+w=="
-        },
-        "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-        "sourceRepositoryURL": "https://github.com/tauri-apps/tauri"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -3691,70 +3090,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-arm-gnueabihf-2.12.2-bda5277930/audited-upstream/upstream/LICENSE-APACHE-2.0",
-          "originalPath": "upstream/LICENSE-APACHE-2.0",
-          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
-          "bytes": 10174,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-APACHE-2.0",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm-gnueabihf/-/cli-linux-arm-gnueabihf-2.12.2.tgz",
-          "sourceArchiveSHA256": "587664505518dd2dd8fcdc8a6d0aab4f001e63eab0c94c669fe38efa29f63871",
-          "sourceArchiveSHA512": "bafb76c5ba277b825fb4a6ab7a5b2c8bce8aaa797b2621b54a6879f807be9d99ad33e2548531a6aa472a7d43d7456f18830a20f763ce66f778a060cdf63f1e5d",
-          "sourceIntegrity": "sha512-uvt2xbone4JftKarelssi86Kqnl7JiG1Smh5+Ae+nZmtM+JUhTGmqkcqfUPXRW8Ygwog92POZvd4oGDN9j8eXQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-arm-gnueabihf@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-APACHE-2.0",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-arm-gnueabihf-2.12.2/upstream/LICENSE-APACHE-2.0"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-arm-gnueabihf-2.12.2-bda5277930/audited-upstream/upstream/LICENSE-MIT",
-          "originalPath": "upstream/LICENSE-MIT",
-          "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d",
-          "bytes": 1090,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-MIT",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm-gnueabihf/-/cli-linux-arm-gnueabihf-2.12.2.tgz",
-          "sourceArchiveSHA256": "587664505518dd2dd8fcdc8a6d0aab4f001e63eab0c94c669fe38efa29f63871",
-          "sourceArchiveSHA512": "bafb76c5ba277b825fb4a6ab7a5b2c8bce8aaa797b2621b54a6879f807be9d99ad33e2548531a6aa472a7d43d7456f18830a20f763ce66f778a060cdf63f1e5d",
-          "sourceIntegrity": "sha512-uvt2xbone4JftKarelssi86Kqnl7JiG1Smh5+Ae+nZmtM+JUhTGmqkcqfUPXRW8Ygwog92POZvd4oGDN9j8eXQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-arm-gnueabihf@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-MIT",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-arm-gnueabihf-2.12.2/upstream/LICENSE-MIT"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-arm-gnueabihf-2.12.2-bda5277930/audited-upstream/upstream/LICENSE.spdx",
-          "originalPath": "upstream/LICENSE.spdx",
-          "sha256": "5e834fe9788c524210deda859c46a550ffa5aa0cba9ea0572f0d81120e97c008",
-          "bytes": 889,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE.spdx",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm-gnueabihf/-/cli-linux-arm-gnueabihf-2.12.2.tgz",
-          "sourceArchiveSHA256": "587664505518dd2dd8fcdc8a6d0aab4f001e63eab0c94c669fe38efa29f63871",
-          "sourceArchiveSHA512": "bafb76c5ba277b825fb4a6ab7a5b2c8bce8aaa797b2621b54a6879f807be9d99ad33e2548531a6aa472a7d43d7456f18830a20f763ce66f778a060cdf63f1e5d",
-          "sourceIntegrity": "sha512-uvt2xbone4JftKarelssi86Kqnl7JiG1Smh5+Ae+nZmtM+JUhTGmqkcqfUPXRW8Ygwog92POZvd4oGDN9j8eXQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-arm-gnueabihf@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE.spdx",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-arm-gnueabihf-2.12.2/upstream/LICENSE.spdx"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm-gnueabihf/-/cli-linux-arm-gnueabihf-2.12.2.tgz",
-          "sourceArchiveSHA256": "587664505518dd2dd8fcdc8a6d0aab4f001e63eab0c94c669fe38efa29f63871",
-          "sourceArchiveSHA512": "bafb76c5ba277b825fb4a6ab7a5b2c8bce8aaa797b2621b54a6879f807be9d99ad33e2548531a6aa472a7d43d7456f18830a20f763ce66f778a060cdf63f1e5d",
-          "sourceIntegrity": "sha512-uvt2xbone4JftKarelssi86Kqnl7JiG1Smh5+Ae+nZmtM+JUhTGmqkcqfUPXRW8Ygwog92POZvd4oGDN9j8eXQ=="
-        },
-        "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-        "sourceRepositoryURL": "https://github.com/tauri-apps/tauri"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -3781,70 +3119,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-arm64-gnu-2.12.2-e8767214cb/audited-upstream/upstream/LICENSE-APACHE-2.0",
-          "originalPath": "upstream/LICENSE-APACHE-2.0",
-          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
-          "bytes": 10174,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-APACHE-2.0",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm64-gnu/-/cli-linux-arm64-gnu-2.12.2.tgz",
-          "sourceArchiveSHA256": "2a4d22bad71e51c376fa47fd3a5fa921a4c338dd2c19a47db55dbff216efe358",
-          "sourceArchiveSHA512": "0d9943276e2eded96870a398ab347e6f633e42bfb958572830167b11f7611cde63dd95f0041a66b381b883236f3c2ada939bccce6759eb979c0573c9702fb9b0",
-          "sourceIntegrity": "sha512-DZlDJ24u3tlocKOYqzR+b2M+Qr+5WFcoMBZ7EfdhHN5j3ZXwBBpms4G4gyNvPCrak5vMzmdZ65ecBXPJcC+5sA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-arm64-gnu@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-APACHE-2.0",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-arm64-gnu-2.12.2/upstream/LICENSE-APACHE-2.0"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-arm64-gnu-2.12.2-e8767214cb/audited-upstream/upstream/LICENSE-MIT",
-          "originalPath": "upstream/LICENSE-MIT",
-          "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d",
-          "bytes": 1090,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-MIT",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm64-gnu/-/cli-linux-arm64-gnu-2.12.2.tgz",
-          "sourceArchiveSHA256": "2a4d22bad71e51c376fa47fd3a5fa921a4c338dd2c19a47db55dbff216efe358",
-          "sourceArchiveSHA512": "0d9943276e2eded96870a398ab347e6f633e42bfb958572830167b11f7611cde63dd95f0041a66b381b883236f3c2ada939bccce6759eb979c0573c9702fb9b0",
-          "sourceIntegrity": "sha512-DZlDJ24u3tlocKOYqzR+b2M+Qr+5WFcoMBZ7EfdhHN5j3ZXwBBpms4G4gyNvPCrak5vMzmdZ65ecBXPJcC+5sA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-arm64-gnu@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-MIT",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-arm64-gnu-2.12.2/upstream/LICENSE-MIT"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-arm64-gnu-2.12.2-e8767214cb/audited-upstream/upstream/LICENSE.spdx",
-          "originalPath": "upstream/LICENSE.spdx",
-          "sha256": "5e834fe9788c524210deda859c46a550ffa5aa0cba9ea0572f0d81120e97c008",
-          "bytes": 889,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE.spdx",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm64-gnu/-/cli-linux-arm64-gnu-2.12.2.tgz",
-          "sourceArchiveSHA256": "2a4d22bad71e51c376fa47fd3a5fa921a4c338dd2c19a47db55dbff216efe358",
-          "sourceArchiveSHA512": "0d9943276e2eded96870a398ab347e6f633e42bfb958572830167b11f7611cde63dd95f0041a66b381b883236f3c2ada939bccce6759eb979c0573c9702fb9b0",
-          "sourceIntegrity": "sha512-DZlDJ24u3tlocKOYqzR+b2M+Qr+5WFcoMBZ7EfdhHN5j3ZXwBBpms4G4gyNvPCrak5vMzmdZ65ecBXPJcC+5sA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-arm64-gnu@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE.spdx",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-arm64-gnu-2.12.2/upstream/LICENSE.spdx"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm64-gnu/-/cli-linux-arm64-gnu-2.12.2.tgz",
-          "sourceArchiveSHA256": "2a4d22bad71e51c376fa47fd3a5fa921a4c338dd2c19a47db55dbff216efe358",
-          "sourceArchiveSHA512": "0d9943276e2eded96870a398ab347e6f633e42bfb958572830167b11f7611cde63dd95f0041a66b381b883236f3c2ada939bccce6759eb979c0573c9702fb9b0",
-          "sourceIntegrity": "sha512-DZlDJ24u3tlocKOYqzR+b2M+Qr+5WFcoMBZ7EfdhHN5j3ZXwBBpms4G4gyNvPCrak5vMzmdZ65ecBXPJcC+5sA=="
-        },
-        "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-        "sourceRepositoryURL": "https://github.com/tauri-apps/tauri"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -3871,70 +3148,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-arm64-musl-2.12.2-dd89307db8/audited-upstream/upstream/LICENSE-APACHE-2.0",
-          "originalPath": "upstream/LICENSE-APACHE-2.0",
-          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
-          "bytes": 10174,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-APACHE-2.0",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.12.2.tgz",
-          "sourceArchiveSHA256": "f2b505f8b57421dc097dc2f552414bb567e2287b11d362ab0f39c59ba6b2316f",
-          "sourceArchiveSHA512": "a5bf914d95181ffa74811e23e1e7020aaf8535fcf75b778ab9442f544067ecc419c7a0f37cb3bb15a633b763720ca5a974d37794fd7499dccebf0dd1e4fe5a01",
-          "sourceIntegrity": "sha512-pb+RTZUYH/p0gR4j4ecCCq+FNfz3W3eKuUQvVEBn7MQZx6DzfLO7FaYzt2NyDKWpdNN3lP10mdzOvw3R5P5aAQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-arm64-musl@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-APACHE-2.0",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-arm64-musl-2.12.2/upstream/LICENSE-APACHE-2.0"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-arm64-musl-2.12.2-dd89307db8/audited-upstream/upstream/LICENSE-MIT",
-          "originalPath": "upstream/LICENSE-MIT",
-          "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d",
-          "bytes": 1090,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-MIT",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.12.2.tgz",
-          "sourceArchiveSHA256": "f2b505f8b57421dc097dc2f552414bb567e2287b11d362ab0f39c59ba6b2316f",
-          "sourceArchiveSHA512": "a5bf914d95181ffa74811e23e1e7020aaf8535fcf75b778ab9442f544067ecc419c7a0f37cb3bb15a633b763720ca5a974d37794fd7499dccebf0dd1e4fe5a01",
-          "sourceIntegrity": "sha512-pb+RTZUYH/p0gR4j4ecCCq+FNfz3W3eKuUQvVEBn7MQZx6DzfLO7FaYzt2NyDKWpdNN3lP10mdzOvw3R5P5aAQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-arm64-musl@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-MIT",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-arm64-musl-2.12.2/upstream/LICENSE-MIT"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-arm64-musl-2.12.2-dd89307db8/audited-upstream/upstream/LICENSE.spdx",
-          "originalPath": "upstream/LICENSE.spdx",
-          "sha256": "5e834fe9788c524210deda859c46a550ffa5aa0cba9ea0572f0d81120e97c008",
-          "bytes": 889,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE.spdx",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.12.2.tgz",
-          "sourceArchiveSHA256": "f2b505f8b57421dc097dc2f552414bb567e2287b11d362ab0f39c59ba6b2316f",
-          "sourceArchiveSHA512": "a5bf914d95181ffa74811e23e1e7020aaf8535fcf75b778ab9442f544067ecc419c7a0f37cb3bb15a633b763720ca5a974d37794fd7499dccebf0dd1e4fe5a01",
-          "sourceIntegrity": "sha512-pb+RTZUYH/p0gR4j4ecCCq+FNfz3W3eKuUQvVEBn7MQZx6DzfLO7FaYzt2NyDKWpdNN3lP10mdzOvw3R5P5aAQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-arm64-musl@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE.spdx",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-arm64-musl-2.12.2/upstream/LICENSE.spdx"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.12.2.tgz",
-          "sourceArchiveSHA256": "f2b505f8b57421dc097dc2f552414bb567e2287b11d362ab0f39c59ba6b2316f",
-          "sourceArchiveSHA512": "a5bf914d95181ffa74811e23e1e7020aaf8535fcf75b778ab9442f544067ecc419c7a0f37cb3bb15a633b763720ca5a974d37794fd7499dccebf0dd1e4fe5a01",
-          "sourceIntegrity": "sha512-pb+RTZUYH/p0gR4j4ecCCq+FNfz3W3eKuUQvVEBn7MQZx6DzfLO7FaYzt2NyDKWpdNN3lP10mdzOvw3R5P5aAQ=="
-        },
-        "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-        "sourceRepositoryURL": "https://github.com/tauri-apps/tauri"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -3961,70 +3177,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-riscv64-gnu-2.12.2-6ab1df0c43/audited-upstream/upstream/LICENSE-APACHE-2.0",
-          "originalPath": "upstream/LICENSE-APACHE-2.0",
-          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
-          "bytes": 10174,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-APACHE-2.0",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-riscv64-gnu/-/cli-linux-riscv64-gnu-2.12.2.tgz",
-          "sourceArchiveSHA256": "a1a2b9cc47e22c38407aa51c85cb769c008870323d13976d275ca6b69c5558cc",
-          "sourceArchiveSHA512": "9e2744bc3509c8760d6c8bfd31493a2a2122c7c2177d18785a3d86d9203983c9c59a06c10b06b350d598886fcb84d78d6df66904c2dead1054b684392b41a274",
-          "sourceIntegrity": "sha512-nidEvDUJyHYNbIv9MUk6KiEix8IXfRh4Wj2G2SA5g8nFmgbBCwazUNWYiG/LhNeNbfZpBMLerRBUtoQ5K0GidA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-riscv64-gnu@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-APACHE-2.0",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-riscv64-gnu-2.12.2/upstream/LICENSE-APACHE-2.0"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-riscv64-gnu-2.12.2-6ab1df0c43/audited-upstream/upstream/LICENSE-MIT",
-          "originalPath": "upstream/LICENSE-MIT",
-          "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d",
-          "bytes": 1090,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-MIT",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-riscv64-gnu/-/cli-linux-riscv64-gnu-2.12.2.tgz",
-          "sourceArchiveSHA256": "a1a2b9cc47e22c38407aa51c85cb769c008870323d13976d275ca6b69c5558cc",
-          "sourceArchiveSHA512": "9e2744bc3509c8760d6c8bfd31493a2a2122c7c2177d18785a3d86d9203983c9c59a06c10b06b350d598886fcb84d78d6df66904c2dead1054b684392b41a274",
-          "sourceIntegrity": "sha512-nidEvDUJyHYNbIv9MUk6KiEix8IXfRh4Wj2G2SA5g8nFmgbBCwazUNWYiG/LhNeNbfZpBMLerRBUtoQ5K0GidA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-riscv64-gnu@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-MIT",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-riscv64-gnu-2.12.2/upstream/LICENSE-MIT"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-riscv64-gnu-2.12.2-6ab1df0c43/audited-upstream/upstream/LICENSE.spdx",
-          "originalPath": "upstream/LICENSE.spdx",
-          "sha256": "5e834fe9788c524210deda859c46a550ffa5aa0cba9ea0572f0d81120e97c008",
-          "bytes": 889,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE.spdx",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-riscv64-gnu/-/cli-linux-riscv64-gnu-2.12.2.tgz",
-          "sourceArchiveSHA256": "a1a2b9cc47e22c38407aa51c85cb769c008870323d13976d275ca6b69c5558cc",
-          "sourceArchiveSHA512": "9e2744bc3509c8760d6c8bfd31493a2a2122c7c2177d18785a3d86d9203983c9c59a06c10b06b350d598886fcb84d78d6df66904c2dead1054b684392b41a274",
-          "sourceIntegrity": "sha512-nidEvDUJyHYNbIv9MUk6KiEix8IXfRh4Wj2G2SA5g8nFmgbBCwazUNWYiG/LhNeNbfZpBMLerRBUtoQ5K0GidA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-riscv64-gnu@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE.spdx",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-riscv64-gnu-2.12.2/upstream/LICENSE.spdx"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-riscv64-gnu/-/cli-linux-riscv64-gnu-2.12.2.tgz",
-          "sourceArchiveSHA256": "a1a2b9cc47e22c38407aa51c85cb769c008870323d13976d275ca6b69c5558cc",
-          "sourceArchiveSHA512": "9e2744bc3509c8760d6c8bfd31493a2a2122c7c2177d18785a3d86d9203983c9c59a06c10b06b350d598886fcb84d78d6df66904c2dead1054b684392b41a274",
-          "sourceIntegrity": "sha512-nidEvDUJyHYNbIv9MUk6KiEix8IXfRh4Wj2G2SA5g8nFmgbBCwazUNWYiG/LhNeNbfZpBMLerRBUtoQ5K0GidA=="
-        },
-        "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-        "sourceRepositoryURL": "https://github.com/tauri-apps/tauri"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -4141,70 +3296,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-x64-musl-2.12.2-7a9d1156a1/audited-upstream/upstream/LICENSE-APACHE-2.0",
-          "originalPath": "upstream/LICENSE-APACHE-2.0",
-          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
-          "bytes": 10174,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-APACHE-2.0",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-x64-musl/-/cli-linux-x64-musl-2.12.2.tgz",
-          "sourceArchiveSHA256": "87b4de87a3745359346012f051ec76776f9691bf4a0801c2c3878ca27c7e119f",
-          "sourceArchiveSHA512": "32b8e0a19d3db3c1ec9fdf57bf148dbcaf0d4136718bb5e2c8adc5c71cadcdf1e0cf68dbdea513ebd099b6ca2446437fcdd8bdac282b32dabec3d5cd2028dc7d",
-          "sourceIntegrity": "sha512-MrjgoZ09s8Hsn99XvxSNvK8NQTZxi7XiyK3FxxytzfHgz2jb3qUT69CZtsokRkN/zdi9rCgrMtq+w9XNICjcfQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-x64-musl@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-APACHE-2.0",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-x64-musl-2.12.2/upstream/LICENSE-APACHE-2.0"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-x64-musl-2.12.2-7a9d1156a1/audited-upstream/upstream/LICENSE-MIT",
-          "originalPath": "upstream/LICENSE-MIT",
-          "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d",
-          "bytes": 1090,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-MIT",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-x64-musl/-/cli-linux-x64-musl-2.12.2.tgz",
-          "sourceArchiveSHA256": "87b4de87a3745359346012f051ec76776f9691bf4a0801c2c3878ca27c7e119f",
-          "sourceArchiveSHA512": "32b8e0a19d3db3c1ec9fdf57bf148dbcaf0d4136718bb5e2c8adc5c71cadcdf1e0cf68dbdea513ebd099b6ca2446437fcdd8bdac282b32dabec3d5cd2028dc7d",
-          "sourceIntegrity": "sha512-MrjgoZ09s8Hsn99XvxSNvK8NQTZxi7XiyK3FxxytzfHgz2jb3qUT69CZtsokRkN/zdi9rCgrMtq+w9XNICjcfQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-x64-musl@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-MIT",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-x64-musl-2.12.2/upstream/LICENSE-MIT"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-linux-x64-musl-2.12.2-7a9d1156a1/audited-upstream/upstream/LICENSE.spdx",
-          "originalPath": "upstream/LICENSE.spdx",
-          "sha256": "5e834fe9788c524210deda859c46a550ffa5aa0cba9ea0572f0d81120e97c008",
-          "bytes": 889,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE.spdx",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-x64-musl/-/cli-linux-x64-musl-2.12.2.tgz",
-          "sourceArchiveSHA256": "87b4de87a3745359346012f051ec76776f9691bf4a0801c2c3878ca27c7e119f",
-          "sourceArchiveSHA512": "32b8e0a19d3db3c1ec9fdf57bf148dbcaf0d4136718bb5e2c8adc5c71cadcdf1e0cf68dbdea513ebd099b6ca2446437fcdd8bdac282b32dabec3d5cd2028dc7d",
-          "sourceIntegrity": "sha512-MrjgoZ09s8Hsn99XvxSNvK8NQTZxi7XiyK3FxxytzfHgz2jb3qUT69CZtsokRkN/zdi9rCgrMtq+w9XNICjcfQ==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-linux-x64-musl@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE.spdx",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-linux-x64-musl-2.12.2/upstream/LICENSE.spdx"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-linux-x64-musl/-/cli-linux-x64-musl-2.12.2.tgz",
-          "sourceArchiveSHA256": "87b4de87a3745359346012f051ec76776f9691bf4a0801c2c3878ca27c7e119f",
-          "sourceArchiveSHA512": "32b8e0a19d3db3c1ec9fdf57bf148dbcaf0d4136718bb5e2c8adc5c71cadcdf1e0cf68dbdea513ebd099b6ca2446437fcdd8bdac282b32dabec3d5cd2028dc7d",
-          "sourceIntegrity": "sha512-MrjgoZ09s8Hsn99XvxSNvK8NQTZxi7XiyK3FxxytzfHgz2jb3qUT69CZtsokRkN/zdi9rCgrMtq+w9XNICjcfQ=="
-        },
-        "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-        "sourceRepositoryURL": "https://github.com/tauri-apps/tauri"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -4231,70 +3325,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_tauri-apps_cli-win32-arm64-msvc-2.12.2-d7ea055aab/audited-upstream/upstream/LICENSE-APACHE-2.0",
-          "originalPath": "upstream/LICENSE-APACHE-2.0",
-          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
-          "bytes": 10174,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-APACHE-2.0",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-arm64-msvc/-/cli-win32-arm64-msvc-2.12.2.tgz",
-          "sourceArchiveSHA256": "c79c78e0bca49bcd74d97d69f31cc780eb63ee5b8609c51811b7ac16eff0e469",
-          "sourceArchiveSHA512": "051f8260cee21779647f24ed564c0c414fecf61c1e80ba63dd4a838dac4a08f9a2c5009ad5cb0104fcb70bbe55f8584bb4e8c85cd9dae06b7a566f68c5b57ea8",
-          "sourceIntegrity": "sha512-BR+CYM7iF3lkfyTtVkwMQU/s9hwegLpj3UqDjaxKCPmixQCa1csBBPy3C75V+FhLtOjIXNna4Gt6Vm9oxbV+qA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-win32-arm64-msvc@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-APACHE-2.0",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-win32-arm64-msvc-2.12.2/upstream/LICENSE-APACHE-2.0"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-win32-arm64-msvc-2.12.2-d7ea055aab/audited-upstream/upstream/LICENSE-MIT",
-          "originalPath": "upstream/LICENSE-MIT",
-          "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d",
-          "bytes": 1090,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-MIT",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-arm64-msvc/-/cli-win32-arm64-msvc-2.12.2.tgz",
-          "sourceArchiveSHA256": "c79c78e0bca49bcd74d97d69f31cc780eb63ee5b8609c51811b7ac16eff0e469",
-          "sourceArchiveSHA512": "051f8260cee21779647f24ed564c0c414fecf61c1e80ba63dd4a838dac4a08f9a2c5009ad5cb0104fcb70bbe55f8584bb4e8c85cd9dae06b7a566f68c5b57ea8",
-          "sourceIntegrity": "sha512-BR+CYM7iF3lkfyTtVkwMQU/s9hwegLpj3UqDjaxKCPmixQCa1csBBPy3C75V+FhLtOjIXNna4Gt6Vm9oxbV+qA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-win32-arm64-msvc@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-MIT",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-win32-arm64-msvc-2.12.2/upstream/LICENSE-MIT"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-win32-arm64-msvc-2.12.2-d7ea055aab/audited-upstream/upstream/LICENSE.spdx",
-          "originalPath": "upstream/LICENSE.spdx",
-          "sha256": "5e834fe9788c524210deda859c46a550ffa5aa0cba9ea0572f0d81120e97c008",
-          "bytes": 889,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE.spdx",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-arm64-msvc/-/cli-win32-arm64-msvc-2.12.2.tgz",
-          "sourceArchiveSHA256": "c79c78e0bca49bcd74d97d69f31cc780eb63ee5b8609c51811b7ac16eff0e469",
-          "sourceArchiveSHA512": "051f8260cee21779647f24ed564c0c414fecf61c1e80ba63dd4a838dac4a08f9a2c5009ad5cb0104fcb70bbe55f8584bb4e8c85cd9dae06b7a566f68c5b57ea8",
-          "sourceIntegrity": "sha512-BR+CYM7iF3lkfyTtVkwMQU/s9hwegLpj3UqDjaxKCPmixQCa1csBBPy3C75V+FhLtOjIXNna4Gt6Vm9oxbV+qA==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-win32-arm64-msvc@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE.spdx",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-win32-arm64-msvc-2.12.2/upstream/LICENSE.spdx"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-arm64-msvc/-/cli-win32-arm64-msvc-2.12.2.tgz",
-          "sourceArchiveSHA256": "c79c78e0bca49bcd74d97d69f31cc780eb63ee5b8609c51811b7ac16eff0e469",
-          "sourceArchiveSHA512": "051f8260cee21779647f24ed564c0c414fecf61c1e80ba63dd4a838dac4a08f9a2c5009ad5cb0104fcb70bbe55f8584bb4e8c85cd9dae06b7a566f68c5b57ea8",
-          "sourceIntegrity": "sha512-BR+CYM7iF3lkfyTtVkwMQU/s9hwegLpj3UqDjaxKCPmixQCa1csBBPy3C75V+FhLtOjIXNna4Gt6Vm9oxbV+qA=="
-        },
-        "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-        "sourceRepositoryURL": "https://github.com/tauri-apps/tauri"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -4321,70 +3354,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/_tauri-apps_cli-win32-ia32-msvc-2.12.2-4d298630a9/audited-upstream/upstream/LICENSE-APACHE-2.0",
-          "originalPath": "upstream/LICENSE-APACHE-2.0",
-          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
-          "bytes": 10174,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-APACHE-2.0",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-ia32-msvc/-/cli-win32-ia32-msvc-2.12.2.tgz",
-          "sourceArchiveSHA256": "f495cfa45cfaaaf4104cb4d1a3da5ba898686f7598170930f4e1b49b6c3ad8c8",
-          "sourceArchiveSHA512": "cce0c9a3d9774db34133e1ab3bfc8fa867842cd30ae5c8c873e40787559073797cb43fa30d919343262e0315620ac33a521e6e589fff4670991bd2d7aefb17c3",
-          "sourceIntegrity": "sha512-zODJo9l3TbNBM+GrO/yPqGeELNMK5cjIc+QHh1WQc3l8tD+jDZGTQyYuAxViCsM6Uh5uWJ//RnCZG9LXrvsXww==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-win32-ia32-msvc@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-APACHE-2.0",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-win32-ia32-msvc-2.12.2/upstream/LICENSE-APACHE-2.0"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-win32-ia32-msvc-2.12.2-4d298630a9/audited-upstream/upstream/LICENSE-MIT",
-          "originalPath": "upstream/LICENSE-MIT",
-          "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d",
-          "bytes": 1090,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE-MIT",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-ia32-msvc/-/cli-win32-ia32-msvc-2.12.2.tgz",
-          "sourceArchiveSHA256": "f495cfa45cfaaaf4104cb4d1a3da5ba898686f7598170930f4e1b49b6c3ad8c8",
-          "sourceArchiveSHA512": "cce0c9a3d9774db34133e1ab3bfc8fa867842cd30ae5c8c873e40787559073797cb43fa30d919343262e0315620ac33a521e6e589fff4670991bd2d7aefb17c3",
-          "sourceIntegrity": "sha512-zODJo9l3TbNBM+GrO/yPqGeELNMK5cjIc+QHh1WQc3l8tD+jDZGTQyYuAxViCsM6Uh5uWJ//RnCZG9LXrvsXww==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-win32-ia32-msvc@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE-MIT",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-win32-ia32-msvc-2.12.2/upstream/LICENSE-MIT"
-        },
-        {
-          "path": "texts/npm/_tauri-apps_cli-win32-ia32-msvc-2.12.2-4d298630a9/audited-upstream/upstream/LICENSE.spdx",
-          "originalPath": "upstream/LICENSE.spdx",
-          "sha256": "5e834fe9788c524210deda859c46a550ffa5aa0cba9ea0572f0d81120e97c008",
-          "bytes": 889,
-          "sourceURL": "https://raw.githubusercontent.com/tauri-apps/tauri/5b23c82ea5ba6b9aec420dd71f60493edc486aa9/LICENSE.spdx",
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-ia32-msvc/-/cli-win32-ia32-msvc-2.12.2.tgz",
-          "sourceArchiveSHA256": "f495cfa45cfaaaf4104cb4d1a3da5ba898686f7598170930f4e1b49b6c3ad8c8",
-          "sourceArchiveSHA512": "cce0c9a3d9774db34133e1ab3bfc8fa867842cd30ae5c8c873e40787559073797cb43fa30d919343262e0315620ac33a521e6e589fff4670991bd2d7aefb17c3",
-          "sourceIntegrity": "sha512-zODJo9l3TbNBM+GrO/yPqGeELNMK5cjIc+QHh1WQc3l8tD+jDZGTQyYuAxViCsM6Uh5uWJ//RnCZG9LXrvsXww==",
-          "revisionEvidenceURL": "https://registry.npmjs.org/-/npm/v1/attestations/@tauri-apps%2fcli-win32-ia32-msvc@2.12.2",
-          "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-          "sourceRepositoryURL": "https://github.com/tauri-apps/tauri",
-          "sourcePath": "LICENSE.spdx",
-          "inheritance": "package-or-ancestor-license",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/_tauri-apps_cli-win32-ia32-msvc-2.12.2/upstream/LICENSE.spdx"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/@tauri-apps/cli-win32-ia32-msvc/-/cli-win32-ia32-msvc-2.12.2.tgz",
-          "sourceArchiveSHA256": "f495cfa45cfaaaf4104cb4d1a3da5ba898686f7598170930f4e1b49b6c3ad8c8",
-          "sourceArchiveSHA512": "cce0c9a3d9774db34133e1ab3bfc8fa867842cd30ae5c8c873e40787559073797cb43fa30d919343262e0315620ac33a521e6e589fff4670991bd2d7aefb17c3",
-          "sourceIntegrity": "sha512-zODJo9l3TbNBM+GrO/yPqGeELNMK5cjIc+QHh1WQc3l8tD+jDZGTQyYuAxViCsM6Uh5uWJ//RnCZG9LXrvsXww=="
-        },
-        "sourceRevision": "5b23c82ea5ba6b9aec420dd71f60493edc486aa9",
-        "sourceRepositoryURL": "https://github.com/tauri-apps/tauri"
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -8649,28 +7621,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/lightningcss-android-arm64-1.33.0-c80101cedb/audited-upstream/archive/LICENSE",
-          "originalPath": "archive/LICENSE",
-          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
-          "bytes": 15648,
-          "sourceURL": "https://registry.npmjs.org/lightningcss-android-arm64/-/lightningcss-android-arm64-1.33.0.tgz",
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-android-arm64/-/lightningcss-android-arm64-1.33.0.tgz",
-          "sourceArchiveSHA256": "e6fd2befa439a4934dd50a9283820a7b95725246a3251c60588f074aff20509a",
-          "sourceIntegrity": "sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg==",
-          "archivePath": "package/LICENSE",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/lightningcss-android-arm64-1.33.0/archive/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-android-arm64/-/lightningcss-android-arm64-1.33.0.tgz",
-          "sourceArchiveSHA256": "e6fd2befa439a4934dd50a9283820a7b95725246a3251c60588f074aff20509a",
-          "sourceIntegrity": "sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg=="
-        }
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -8745,28 +7698,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/lightningcss-darwin-x64-1.33.0-3a7b00d9fb/audited-upstream/archive/LICENSE",
-          "originalPath": "archive/LICENSE",
-          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
-          "bytes": 15648,
-          "sourceURL": "https://registry.npmjs.org/lightningcss-darwin-x64/-/lightningcss-darwin-x64-1.33.0.tgz",
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-darwin-x64/-/lightningcss-darwin-x64-1.33.0.tgz",
-          "sourceArchiveSHA256": "c0b555fe6ec4c5c660503b1e87aad7ac90ba5af1e2cb1742155d485a39d5b973",
-          "sourceIntegrity": "sha512-Z5UPAxzrjlWNNyGy6i65cJzzvgJ5D3T6wMvs+gWpY9d7qRhANrxqAp6LhxIgZhWEw18RfJTGcRxjuLIBr+m8XQ==",
-          "archivePath": "package/LICENSE",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/lightningcss-darwin-x64-1.33.0/archive/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-darwin-x64/-/lightningcss-darwin-x64-1.33.0.tgz",
-          "sourceArchiveSHA256": "c0b555fe6ec4c5c660503b1e87aad7ac90ba5af1e2cb1742155d485a39d5b973",
-          "sourceIntegrity": "sha512-Z5UPAxzrjlWNNyGy6i65cJzzvgJ5D3T6wMvs+gWpY9d7qRhANrxqAp6LhxIgZhWEw18RfJTGcRxjuLIBr+m8XQ=="
-        }
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -8793,28 +7727,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/lightningcss-freebsd-x64-1.33.0-8d2809f2a8/audited-upstream/archive/LICENSE",
-          "originalPath": "archive/LICENSE",
-          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
-          "bytes": 15648,
-          "sourceURL": "https://registry.npmjs.org/lightningcss-freebsd-x64/-/lightningcss-freebsd-x64-1.33.0.tgz",
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-freebsd-x64/-/lightningcss-freebsd-x64-1.33.0.tgz",
-          "sourceArchiveSHA256": "828e9a915d504a2796bdbe56643397d3ac639bf9abc629ba11163e7b7ef150a6",
-          "sourceIntegrity": "sha512-QQM/Ti/hQajJwCY+RiWuCZ9sdtI/XQk7nDK5vC8kkdwixezOlDgvDx7+RT+QjK6FcFT4MpsuoBnHIo/O3StRRg==",
-          "archivePath": "package/LICENSE",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/lightningcss-freebsd-x64-1.33.0/archive/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-freebsd-x64/-/lightningcss-freebsd-x64-1.33.0.tgz",
-          "sourceArchiveSHA256": "828e9a915d504a2796bdbe56643397d3ac639bf9abc629ba11163e7b7ef150a6",
-          "sourceIntegrity": "sha512-QQM/Ti/hQajJwCY+RiWuCZ9sdtI/XQk7nDK5vC8kkdwixezOlDgvDx7+RT+QjK6FcFT4MpsuoBnHIo/O3StRRg=="
-        }
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -8841,28 +7756,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/lightningcss-linux-arm-gnueabihf-1.33.0-2d1a9d6155/audited-upstream/archive/LICENSE",
-          "originalPath": "archive/LICENSE",
-          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
-          "bytes": 15648,
-          "sourceURL": "https://registry.npmjs.org/lightningcss-linux-arm-gnueabihf/-/lightningcss-linux-arm-gnueabihf-1.33.0.tgz",
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-linux-arm-gnueabihf/-/lightningcss-linux-arm-gnueabihf-1.33.0.tgz",
-          "sourceArchiveSHA256": "b2a0af78c27da36a2449c2fe71eb3730e6c40d7aaab20bdc3689282432bb3117",
-          "sourceIntegrity": "sha512-N7FVBe6iS24MlM6R/4RBTxGhQheZGs7tiQ9U32UtF75NzP5Q7xWPRqLBCKxlRQRk3rY1jCIPLzx7WzOhuUIRLQ==",
-          "archivePath": "package/LICENSE",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/lightningcss-linux-arm-gnueabihf-1.33.0/archive/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-linux-arm-gnueabihf/-/lightningcss-linux-arm-gnueabihf-1.33.0.tgz",
-          "sourceArchiveSHA256": "b2a0af78c27da36a2449c2fe71eb3730e6c40d7aaab20bdc3689282432bb3117",
-          "sourceIntegrity": "sha512-N7FVBe6iS24MlM6R/4RBTxGhQheZGs7tiQ9U32UtF75NzP5Q7xWPRqLBCKxlRQRk3rY1jCIPLzx7WzOhuUIRLQ=="
-        }
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -8889,28 +7785,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/lightningcss-linux-arm64-gnu-1.33.0-47ed93c3c3/audited-upstream/archive/LICENSE",
-          "originalPath": "archive/LICENSE",
-          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
-          "bytes": 15648,
-          "sourceURL": "https://registry.npmjs.org/lightningcss-linux-arm64-gnu/-/lightningcss-linux-arm64-gnu-1.33.0.tgz",
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-linux-arm64-gnu/-/lightningcss-linux-arm64-gnu-1.33.0.tgz",
-          "sourceArchiveSHA256": "257b51498dfd90fc99b87afd28408ff9b53162e521db4e06a493e356b8536711",
-          "sourceIntegrity": "sha512-j2v/itmy4HlNxlc6voKXYgBqNi0Ng2LShg4z7GufpEgs05P+2suBVyi9I6YHq5uoVFx9ETin3eCEhLVyXGQnKg==",
-          "archivePath": "package/LICENSE",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/lightningcss-linux-arm64-gnu-1.33.0/archive/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-linux-arm64-gnu/-/lightningcss-linux-arm64-gnu-1.33.0.tgz",
-          "sourceArchiveSHA256": "257b51498dfd90fc99b87afd28408ff9b53162e521db4e06a493e356b8536711",
-          "sourceIntegrity": "sha512-j2v/itmy4HlNxlc6voKXYgBqNi0Ng2LShg4z7GufpEgs05P+2suBVyi9I6YHq5uoVFx9ETin3eCEhLVyXGQnKg=="
-        }
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -8937,28 +7814,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/lightningcss-linux-arm64-musl-1.33.0-97679ba0dd/audited-upstream/archive/LICENSE",
-          "originalPath": "archive/LICENSE",
-          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
-          "bytes": 15648,
-          "sourceURL": "https://registry.npmjs.org/lightningcss-linux-arm64-musl/-/lightningcss-linux-arm64-musl-1.33.0.tgz",
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-linux-arm64-musl/-/lightningcss-linux-arm64-musl-1.33.0.tgz",
-          "sourceArchiveSHA256": "048a00d8ef519a413e01907a5a50e01d7c4e86ddcde49a5020eed7747196b9f6",
-          "sourceIntegrity": "sha512-yiO5ROMuYQgXbC60yjZU5CYSFZGKXL0HFATXt9mHJn1+zW55oCtMI9NfcVhYLMFDL7gV7oBPon/EmMMGg2OvtQ==",
-          "archivePath": "package/LICENSE",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/lightningcss-linux-arm64-musl-1.33.0/archive/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-linux-arm64-musl/-/lightningcss-linux-arm64-musl-1.33.0.tgz",
-          "sourceArchiveSHA256": "048a00d8ef519a413e01907a5a50e01d7c4e86ddcde49a5020eed7747196b9f6",
-          "sourceIntegrity": "sha512-yiO5ROMuYQgXbC60yjZU5CYSFZGKXL0HFATXt9mHJn1+zW55oCtMI9NfcVhYLMFDL7gV7oBPon/EmMMGg2OvtQ=="
-        }
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -9033,28 +7891,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/lightningcss-linux-x64-musl-1.33.0-50d86c87e0/audited-upstream/archive/LICENSE",
-          "originalPath": "archive/LICENSE",
-          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
-          "bytes": 15648,
-          "sourceURL": "https://registry.npmjs.org/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.33.0.tgz",
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.33.0.tgz",
-          "sourceArchiveSHA256": "f3a1a10f3c393db5ce03438035b94fcd48bc7b7b52bb97f76a3ed52784624441",
-          "sourceIntegrity": "sha512-RYiYbkokw0trfKqqzfF55lginwEPrD3OJDfTuJzFs1MK6iFnDenaz1fqLLtX4ITG3OktJQXOeTaw1awrBAlZPw==",
-          "archivePath": "package/LICENSE",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/lightningcss-linux-x64-musl-1.33.0/archive/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.33.0.tgz",
-          "sourceArchiveSHA256": "f3a1a10f3c393db5ce03438035b94fcd48bc7b7b52bb97f76a3ed52784624441",
-          "sourceIntegrity": "sha512-RYiYbkokw0trfKqqzfF55lginwEPrD3OJDfTuJzFs1MK6iFnDenaz1fqLLtX4ITG3OktJQXOeTaw1awrBAlZPw=="
-        }
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {
@@ -9081,28 +7920,9 @@
         "repositoryURL": null
       },
       "review": [],
-      "documents": [
-        {
-          "path": "texts/npm/lightningcss-win32-arm64-msvc-1.33.0-62c5aa2e51/audited-upstream/archive/LICENSE",
-          "originalPath": "archive/LICENSE",
-          "sha256": "5eba353fe5076ac3432177f8ab1cf75e3afcd0584251e37c3bfead5f447d040e",
-          "bytes": 15648,
-          "sourceURL": "https://registry.npmjs.org/lightningcss-win32-arm64-msvc/-/lightningcss-win32-arm64-msvc-1.33.0.tgz",
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-win32-arm64-msvc/-/lightningcss-win32-arm64-msvc-1.33.0.tgz",
-          "sourceArchiveSHA256": "9c211ef0a63a92626091f7c0a97b0ddb39b4278da5b11d13512b7eed9680bd7d",
-          "sourceIntegrity": "sha512-1K+MPfLSFVpphzpdbfkhlWk6wBrTObBzS2T6db10PNOZgR9GoVsAWzwNyuhUYYbTp23j+4RrncfujZ4uAzXvwA==",
-          "archivePath": "package/LICENSE",
-          "evidencePath": "compliance/third-party-sources/license-evidence/texts/npm/lightningcss-win32-arm64-msvc-1.33.0/archive/LICENSE"
-        }
-      ],
-      "supplementalEvidence": "compliance/third-party-sources/license-evidence/manifest.json (UPSTREAM_TEXT_COLLECTED)",
-      "upstreamProvenance": {
-        "archive": {
-          "sourceArchiveURL": "https://registry.npmjs.org/lightningcss-win32-arm64-msvc/-/lightningcss-win32-arm64-msvc-1.33.0.tgz",
-          "sourceArchiveSHA256": "9c211ef0a63a92626091f7c0a97b0ddb39b4278da5b11d13512b7eed9680bd7d",
-          "sourceIntegrity": "sha512-1K+MPfLSFVpphzpdbfkhlWk6wBrTObBzS2T6db10PNOZgR9GoVsAWzwNyuhUYYbTp23j+4RrncfujZ4uAzXvwA=="
-        }
-      },
+      "outOfBuildPlatformScope": true,
+      "scopeNote": "Platform variant outside the CI build scope (win32-x64-msvc / linux-x64-gnu / darwin-arm64): development-toolchain optional native package, not built, tested or distributed by this repository; archived per-platform license evidence is intentionally not collected (owner decision 2026-11-18, see scripts/build-platform-scope.mjs).",
+      "documents": [],
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
     },
     {

@@ -51,7 +51,7 @@ cargo fmt --manifest-path src-tauri/Cargo.toml --check
 
 ## 约定
 
-- 行为变化请同步更新 `docs/PRD.md`（需求边界）与 `docs/CHANGELOG.md`（未发布节）
+- 行为变化请同步更新 `docs/CHANGELOG.md`（未发布节）
 - `public/renderers/` 是本地 vendored 第三方资产，不要手改其中文件；升级流程保持 `public/renderers/manifest.json` 与 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) 同步
 - 换行符统一 LF（`.gitattributes` 已固定）
 - 提交信息用简体中文或英文均可，一行说清「改了什么、为什么」

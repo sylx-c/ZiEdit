@@ -11,7 +11,7 @@
 - [ ] `cargo test --manifest-path src-tauri/Cargo.toml` 通过
 - [ ] `cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings` 通过
 - [ ] `cargo fmt --manifest-path src-tauri/Cargo.toml --check` 通过
-- [ ] 行为变化已同步 `docs/PRD.md` 与 `docs/CHANGELOG.md`（未发布节）
+- [ ] 行为变化已同步 `docs/CHANGELOG.md`（未发布节）
 - [ ] 不包含 `public/renderers/` 内第三方文件的手工改动
 
 ## 验证方式
