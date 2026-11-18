@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-// 语料原取 AGENTS.md（2026-11-18 随仓库瘦身撤出跟踪）；此处内嵌等价语料：
+// 内嵌等价中文语料（2026-11-18 仓库瘦身去外部文件依赖）：
 // 首屏（0–1483）内含真实表格，其后仍有大量未构建块，驱动「预算切片 + TableWidget 保留」路径。
 const agentsDoc = Array.from({ length: 40 }, (_, i) =>
   `## 章节 ${i}\n\n说明段落 ${i}：跨平台离线文件查看与编辑工具，大文本与代码查看编辑、Markdown 写作预览。\n\n` +

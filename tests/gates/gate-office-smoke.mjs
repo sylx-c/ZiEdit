@@ -1,7 +1,7 @@
 // gate-office-smoke.mjs —— Office 功能冒烟（批 2/5/6 验收）：xlsx 显示值 + 公式开关、
 // docx 富预览真实渲染。夹具复用 release-fixtures（完整 OPC xlsx 含日期/百分比/公式格）。
 // 差异清单/双表/修订报告在对比视图内，需双文件对话框选择，无法经文件参数直达——
-// 由 cargo 199 + vitest 1402 契约覆盖（见 docs/changes/office-compare-batch6-closeout.md）。
+// 由 cargo 199 + vitest 1402 契约覆盖（见工程化收尾记录）。
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';

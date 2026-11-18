@@ -68,7 +68,7 @@ jobs:
       - run: npm run license:check
 
   # 批6 工程化收口 B2：依赖安全审计（npm + cargo），独立 job 并行，不阻塞 build。
-  # 口径：真实漏洞不硬压（无 continue-on-error / ignore）；已知待修项见 docs/changes/eng-batch6-closeout.md。
+  # 口径：真实漏洞不硬压（无 continue-on-error / ignore）；已知待修项见工程化收尾记录。
   audit:
     name: 安全审计（npm audit + cargo audit）
     runs-on: ubuntu-latest
