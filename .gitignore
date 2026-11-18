@@ -49,3 +49,4 @@ tests/gates/__pycache__/
 .dsh-vision-router/
 
 AGENTS.md
+docs/changes/
