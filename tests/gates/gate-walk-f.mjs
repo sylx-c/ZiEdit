@@ -11,7 +11,7 @@
 //     documentElement.classList 去 th-paper/th-cool/th-graphite/th-black、加 `th-${key}`，并
 //     setAttribute('data-tone', tone)。主题类与 data-tone 均挂 <html>。
 //   主题清单：chrome.ts:665-670 THEMES = paper(light)/cool(light)/graphite(dark)/black(dark)；
-//   令牌口径见 docs/design/README.md「色彩令牌」节（th-<key> + data-tone 挂 <html>）。
+//   令牌口径见设计归档「色彩令牌」节（th-<key> + data-tone 挂 <html>）。
 //   产品内路径：app.ts:3966-3972 `view.theme` → openThemeDialog → applyTheme；
 //   app.ts:3971 注释明确「CM6 即时渲染直接使用主题令牌；重挂会丢光标」——主题只换 CSS 令牌不换几何（判据 2 依据）。
 //   CDP 最短路径：Runtime.evaluate 直接复刻 applyTheme 三行 DOM 操作（等效、零副作用、不经对话框）。

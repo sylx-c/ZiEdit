@@ -1,5 +1,5 @@
 // chrome —— 定稿窗口 chrome 部件：动作注册表 / 菜单栏 / 工具栏 / 命令面板 / 主题 / 对话框
-// （001 v0.6 规则 19-24，视觉与交互规格 docs/design/app/；决策 009）
+// （001 v0.6 规则 19-24，视觉与交互规格已归档；决策 009）
 // 约定：命令与菜单、工具栏、快捷键同源（ActionRegistry 单一事实来源）。
 
 import { dict, t, tf } from '../common/i18n';
@@ -27,7 +27,7 @@ export function L(label: string | undefined): string {
   return isI18nKey(label) ? t(label) : label;
 }
 
-// ── 图标库（定稿 16×16 网格，data 见 docs/design/app demo） ──
+// ── 图标库（定稿 16×16 网格，data 见设计归档 demo） ──
 // H-2 重绘（审计 §3.1）：编辑/格式化/换行/文字/文本视图/列模式六枚改直角几何 + miter 连接，
 // 不再引入斜线/弧线；实物工具语义保留（编辑=文档+光标、格式化=缩进阶梯、换行=直角折返）。
 export const ICONS = {

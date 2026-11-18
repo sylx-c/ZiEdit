@@ -3,7 +3,7 @@
 @font-face{font-family:'JetBrains Mono';src:url('/fonts/JetBrainsMono-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
 @font-face{font-family:'JetBrains Mono';src:url('/fonts/JetBrainsMono-Italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
 
-/* ZiEdit 定稿样式（docs/design/app/，决策 009：oklch 设计令牌四主题）
+/* ZiEdit 定稿样式（决策 009：oklch 设计令牌四主题）
    —— 旧占位样式已于换肤批替换；模块类名保持（tv-/hv-/ev-/csv-/md-/sym-/ov-/ctx-/fif-/sum-/set-），
       chrome 类名按定稿（titlebar/menubar/toolbar/sidebar/tabs/statusbar/dlg/cmd）。 */
 :root{
@@ -1659,7 +1659,7 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 /* 查找命中高亮（FindBar「全部高亮」在 IR 的视口承载，规则 20） */
 .md-ir .mdir-findhit{background:var(--find-hl);border-radius:2px}
 
-/* ── 深度对比视图（008 v0.4 重设计，视觉定稿 docs/design/compare/compare-view.html）──
+/* ── 深度对比视图（008 v0.4 重设计，视觉定稿已归档）──
    三层头（身份统计行 34 / 类别过滤行 28 / A-B 对齐列头 24）+ 滚动区 + 概览条；
    滚动区与概览条起点由 --cmp-top（运行时量出的头高，view.ts measureTop）驱动，
    概览条宽度 --cmp-map-w（12px）。六类按功能色板着色。 */

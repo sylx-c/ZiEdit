@@ -1,4 +1,4 @@
-// compare-view —— 深度对比视图（008 子 PRD，视觉定稿 docs/design/compare/compare-view.html）
+// compare-view —— 深度对比视图（008 子需求，视觉定稿已归档）
 // 三层头（身份统计行 / 类别过滤行 / A-B 对齐列头）+ 差异导航 + 概览视口框；
 // 块级虚拟滚动（行文本按需取：相等块走 text_lines，变更块走 compare_detail 六类分类）。
 // 性能红线：内容只在可视窗口按块拉取，永不整文件进前端。布局判决在 layout.ts（纯函数，可单测）。

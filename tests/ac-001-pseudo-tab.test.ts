@@ -14,7 +14,7 @@ describe('001/002 AC：伪标签不适用编辑入口（P0-2）', () => {
   it('isVirtualTab：对比与尾随台是伪标签，真实路径与草稿不是', () => {
     expect(isVirtualTab('compare://E:\\a.txt|E:\\b.txt')).toBe(true);
     expect(isVirtualTab('tail://')).toBe(true);
-    expect(isVirtualTab('E:\\work\\editor\\AGENTS.md')).toBe(false);
+    expect(isVirtualTab('E:\\work\\editor\\NOTES.md')).toBe(false);
     expect(isVirtualTab('draft://scratch-1')).toBe(false); // 草稿可编辑，非虚标签
     expect(isVirtualTab('')).toBe(false);
   });
