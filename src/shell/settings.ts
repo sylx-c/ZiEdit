@@ -1,7 +1,7 @@
 import { getLang, t, type Lang } from '../common/i18n';
 import { clampFontSize } from '../common/fontSize';
 import type { Settings } from '../common/ipc';
-import { overlayDialog, type OverlayMask } from './chrome';
+import { overlayDialog, DLG_SEARCH_ICON, type OverlayMask } from './chrome';
 import './settings.css';
 
 /** The shell retains ownership of persistence, language switching and view effects. */
@@ -26,9 +26,16 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
     return el;
   };
   const body = node('div', 'settings-content');
-  const intro = node('p', 'settings-intro', t('set.intro'));
-  const search = node('input', 'settings-search');
+  const searchWrap = node('div', 'dlg-search');
+  const searchIcon = node('span', 'dlg-search-icon');
+  searchIcon.innerHTML = DLG_SEARCH_ICON;
+  // 'settings-search' 无样式，仅作测试选择器钩子保留（样式走 .dlg-search-input）。
+  const search = node('input', 'dlg-search-input settings-search');
   search.type = 'search'; search.placeholder = t('set.search'); search.setAttribute('aria-label', t('set.search'));
+  search.autocomplete = 'off'; search.spellcheck = false;
+  const searchClear = node('button', 'dlg-search-clear', '×');
+  searchClear.type = 'button'; searchClear.setAttribute('aria-label', t('help.clearSearch')); searchClear.hidden = true;
+  searchWrap.append(searchIcon, search, searchClear);
   const nav = node('nav', 'settings-nav'); nav.setAttribute('aria-label', t('set.title'));
   const scroll = node('div', 'settings-scroll');
   scroll.tabIndex = 0;
@@ -74,13 +81,10 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
     el.append(label, controls);
     return el;
   };
-  const group = (key: string, hint: string, ...rows: HTMLElement[]): void => {
+  const group = (key: string, ...rows: HTMLElement[]): void => {
     const fieldset = node('fieldset', 'settings-group');
     const legend = node('legend', '', t(key));
-    const description = node('p', 'settings-group-hint', t(hint));
-    description.id = `${prefix}-hint-${key.replace(/^.*\./, '')}`;
-    fieldset.setAttribute('aria-describedby', description.id);
-    fieldset.append(legend, description, ...rows); form.append(fieldset);
+    fieldset.append(legend, ...rows); form.append(fieldset);
   };
   const color = (name: string, key: string, value: string | undefined, fallback: string) => {
     const enabled = checkbox(`${name}Enabled`, !!value);
@@ -98,21 +102,21 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
   const density = select('uiDensity', initial.uiDensity ?? 'compact', [['compact', 'set.densityCompact'], ['comfortable', 'set.densityComfortable']]);
   const line = color('lineHl', 'set.lineHl', initial.lineHl, '#eaeef4');
   const treeShowAll = checkbox('fileTreeShowAll', initial.fileTreeShowAll === true);
-  group('set.grpAppearance', 'set.hintAppearance', row('set.theme', theme), row('set.density', density), row('set.lineHl', line.enabled, line.picker),
+  group('set.grpAppearance', row('set.theme', theme), row('set.density', density), row('set.lineHl', line.enabled, line.picker),
     row('set.treeShowAll', treeShowAll));
 
   const readOnly = checkbox('readOnlyMode', initial.readOnlyMode === true);
   const fontSize = number('fontSize', initial.fontSize ?? 12, 10, 18);
   const markers = identify(node('input', ''), 'columnMarkers');
   markers.value = (initial.columnMarkers ?? []).join(','); markers.placeholder = t('set.markersPh');
-  group('set.grpEdit', 'set.hintEdit', row('set.readOnlyMode', readOnly), row('set.fontSize', fontSize), row('set.markers', markers));
+  group('set.grpEdit', row('set.readOnlyMode', readOnly), row('set.fontSize', fontSize), row('set.markers', markers));
 
   const markdown = select('mdDefaultMode', initial.mdDefaultMode ?? 'ir', [
     ['ir', 'set.mdIr'], ['source', 'set.mdSource'], ['preview', 'act.mdPreview'],
   ]);
   const readingWidth = select('mdReadingWidth', initial.mdReadingWidth ?? 'standard', [['narrow', 'set.widthNarrow'], ['standard', 'set.widthStandard'], ['wide', 'set.widthWide']]);
   const autoHideMinimap = checkbox('minimapAutoHideShort', initial.minimapAutoHideShort === true);
-  group('set.grpMarkdown', 'set.hintMarkdown', row('set.mdDefault', markdown), row('set.mdWidth', readingWidth), row('set.minimapAutoHide', autoHideMinimap));
+  group('set.grpMarkdown', row('set.mdDefault', markdown), row('set.mdWidth', readingWidth), row('set.minimapAutoHide', autoHideMinimap));
 
   const diffKeys = ['add', 'del', 'chg'] as const;
   const diffLabels = ['set.diffAdd', 'set.diffDel', 'set.diffChg'];
@@ -122,10 +126,10 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
     for (const diff of diffs) { diff.enabled.checked = false; diff.picker.disabled = true; }
   });
   const resetRow = node('div', 'settings-reset'); resetRow.append(reset);
-  group('set.grpCompare', 'set.hintCompare', ...diffs.map((diff, i) => row(diffLabels[i]!, diff.enabled, diff.picker)), resetRow);
+  group('set.grpCompare', ...diffs.map((diff, i) => row(diffLabels[i]!, diff.enabled, diff.picker)), resetRow);
 
   const outline = color('outlineCur', 'set.outlineCur', initial.outlineCur, '#3377cc');
-  group('set.grpOutline', 'set.hintOutline', row('set.outlineCur', outline.enabled, outline.picker));
+  group('set.grpOutline', row('set.outlineCur', outline.enabled, outline.picker));
 
   const autosave = number('autoSaveSec', initial.autoSaveSec ?? 15, 0);
   const target = select('autoSaveTarget', initial.autoSaveTarget ?? 'sidecar', [
@@ -160,7 +164,7 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
   const keep = number('backupKeep', initial.backupKeep ?? 3, 0, 10);
   keep.disabled = !backup.checked;
   backup.addEventListener('change', () => { keep.disabled = !backup.checked; });
-  group('set.grpBackup', 'set.hintBackup', row('set.autosave', autosave), row('set.autoSaveTarget', target), directoryRow,
+  group('set.grpBackup', row('set.autosave', autosave), row('set.autoSaveTarget', target), directoryRow,
     row('settings.closeAutoSave', closeAutoSave), row('set.backupOn', backup), row('set.backupKeep', keep));
 
   const language = select('language', getLang(), [['zh-CN', 'common.langZh'], ['en-US', 'common.langEn']]);
@@ -175,16 +179,30 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
   const refreshClear = (): void => { clear.hidden = close.value !== 'ask' || !ctx.getSettings().rememberedCloseAction; };
   clear.addEventListener('click', () => { ctx.clearRemembered(); refreshClear(); });
   close.addEventListener('change', refreshClear); refreshClear();
-  group('set.grpAdvanced', 'set.hintAdvanced', row('common.language', language), row('set.closeBehavior', close, clear));
+  group('set.grpAdvanced', row('common.language', language), row('set.closeBehavior', close, clear));
 
-  // Category navigation and search operate on the existing fieldsets; no setting state is recreated.
+  // Category tabs show one group at a time; search flips to a flat cross-group result list.
+  // Tabs and filtering operate on the existing fieldsets; no setting state is recreated.
   const groups = Array.from(form.querySelectorAll<HTMLElement>('.settings-group'));
   const navItems = new Map<HTMLElement, HTMLButtonElement>();
+  const empty = node('p', 'settings-empty', t('set.noMatch'));
+  empty.hidden = true;
+  scroll.append(empty);
+  let activeGroup = groups[0]!;
+  const showGroup = (fieldset: HTMLElement): void => {
+    activeGroup = fieldset;
+    for (const groupEl of groups) groupEl.hidden = groupEl !== activeGroup;
+    for (const [groupEl, button] of navItems) {
+      if (groupEl === activeGroup) button.setAttribute('aria-current', 'true');
+      else button.removeAttribute('aria-current');
+    }
+    scroll.scrollTop = 0;
+  };
   for (const fieldset of groups) {
     const legend = fieldset.querySelector('legend')?.textContent ?? '';
     const button = node('button', 'settings-nav-item', legend);
     button.type = 'button';
-    button.addEventListener('click', () => { search.value = ''; filterSettings(); fieldset.scrollIntoView({ block: 'start' }); });
+    button.addEventListener('click', () => { search.value = ''; filterSettings(); showGroup(fieldset); });
     navItems.set(fieldset, button);
     nav.append(button);
   }
@@ -199,14 +217,17 @@ export function openSettingsDialog(ctx: SettingsDialogContext): OverlayMask {
         if (visible) visibleRows++;
       }
       const hidden = !!query && visibleRows === 0;
-      fieldset.hidden = hidden;
+      fieldset.hidden = query ? hidden : fieldset !== activeGroup;
       const navItem = navItems.get(fieldset);
       if (navItem) navItem.hidden = hidden;
     }
+    empty.hidden = !(!!query && groups.every(groupEl => groupEl.hidden));
+    searchClear.hidden = search.value.length === 0;
   }
   search.addEventListener('input', filterSettings);
-  const workspace = node('div', 'settings-workspace'); workspace.append(nav, scroll);
-  body.append(intro, search, workspace, footer);
+  searchClear.addEventListener('click', () => { search.value = ''; filterSettings(); search.focus(); });
+  showGroup(activeGroup);
+  body.append(searchWrap, nav, scroll, footer);
 
   let mask: OverlayMask;
   cancel.addEventListener('click', () => mask.close());

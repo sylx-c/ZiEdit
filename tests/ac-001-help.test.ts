@@ -31,12 +31,12 @@ describe('帮助中心查阅交互', () => {
     mask.querySelectorAll<HTMLButtonElement>('.help-filter')[2]!.click();
     expect(mask.querySelectorAll('tbody tr')).toHaveLength(0);
     expect(mask.querySelector('.help-empty')?.textContent).toBe(t('help.noResults'));
-    mask.querySelector<HTMLButtonElement>('.help-search-clear')!.click();
+    mask.querySelector<HTMLButtonElement>('.dlg-search-clear')!.click();
     expect(input.value).toBe('');
     expect(mask.querySelectorAll('tbody tr')).toHaveLength(1);
     expect(mask.querySelector('tbody tr')?.textContent).toContain(t('act.find'));
     expect(document.activeElement).toBe(input);
-    expect(mask.querySelector('.help-search-clear')?.hasAttribute('hidden')).toBe(true);
+    expect(mask.querySelector('.dlg-search-clear')?.hasAttribute('hidden')).toBe(true);
   });
 
   it('键帽保留+键和方向键的原快捷键语义', () => {

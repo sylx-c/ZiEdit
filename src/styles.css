@@ -1187,7 +1187,12 @@ button{font:inherit}
 .st-led.warn{background:var(--c-amber)}
 .st-led.off{background:var(--border-strong)}
 
-/* ── 覆盖层：对话框（定稿 .dlg：顶对齐 96px + 18px 内边距 + h4 标题） ── */
+/* ── 覆盖层：对话框（定稿 .dlg：顶对齐 96px + 18px 内边距 + h4 标题） ──
+ * 弹窗尺度三档（B 体系统一，2026-11）：
+ *   S 常规小框  默认 .ov-box      顶对齐96px · 边距18 · 标题13.5 · 关闭钮26@(10,10) · 宽360–720 自适应
+ *   M 中型      .settings-dialog  居中 · 560px · 边距20 · 标题15 · 关闭钮28@(20,20)
+ *   L 大型      .help-dialog      居中 · 700px（指南 820）· 边距24 · 标题17 · 关闭钮28@(20,20)
+ * 新弹窗按档归位；搜索框用 .dlg-search 复合组件，文字控件焦点 = 边框强调+光晕，按钮焦点 = outline 环。 */
 .ov-mask{
   position:fixed;inset:0;z-index:200;
   overscroll-behavior:none;
@@ -1220,18 +1225,19 @@ button{font:inherit}
 }
 .help-dialog.ov-box>h4{font-size:17px;line-height:24px;font-weight:600;margin:0 40px 4px 0;letter-spacing:0}
 .help-dialog .ov-close{top:20px;right:20px;width:28px;height:28px}
+.help-dialog .dlg-search{height:36px}
 .help-content{display:flex;flex-direction:column;min-height:0;gap:16px}
 .help-intro{font-size:12px;line-height:1.7;color:var(--muted);padding-right:28px}
 .help-controls{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
-.help-search{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border:1px solid var(--border-strong);border-radius:7px;background:var(--bg)}
-.help-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
-.help-search-icon{display:flex;color:var(--muted);flex-shrink:0}
-.help-search-icon svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5}
-.help-search-input{min-width:0;width:100%;height:100%;border:0;outline:0;background:transparent;color:var(--fg);font:inherit;font-size:12.5px}
-.help-search-input::-webkit-search-cancel-button{-webkit-appearance:none}
-.help-search-input::placeholder{color:var(--muted)}
-.help-search-clear{border:0;background:var(--hover);border-radius:4px;color:var(--muted);width:22px;height:22px;flex-shrink:0;cursor:pointer;font-size:17px;line-height:1}
-.help-search-clear[hidden]{display:none}
+.dlg-search{display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border:1px solid var(--border-strong);border-radius:7px;background:var(--bg)}
+.dlg-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.dlg-search-icon{display:flex;color:var(--muted);flex-shrink:0}
+.dlg-search-icon svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5}
+.dlg-search-input{min-width:0;width:100%;height:100%;border:0;outline:0;background:transparent;color:var(--fg);font:inherit;font-size:12.5px}
+.dlg-search-input::-webkit-search-cancel-button{-webkit-appearance:none}
+.dlg-search-input::placeholder{color:var(--muted)}
+.dlg-search-clear{border:0;background:var(--hover);border-radius:4px;color:var(--muted);width:22px;height:22px;flex-shrink:0;cursor:pointer;font-size:17px;line-height:1}
+.dlg-search-clear[hidden]{display:none}
 .help-filters{display:flex;gap:4px;flex-wrap:wrap}
 .help-filter{height:27px;padding:0 12px;border:1px solid transparent;border-radius:5px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px}
 .help-filter:hover{color:var(--fg);background:var(--hover)}
@@ -1267,7 +1273,8 @@ button{font:inherit}
 .guide-title{font-size:16px;font-weight:600;line-height:1.5;margin:0 0 18px}
 .guide-paragraph{font-size:13px;line-height:1.95;color:var(--fg);overflow-wrap:anywhere}
 .guide-paragraph+.guide-paragraph{margin-top:14px}
-.help-dialog button:focus-visible,.help-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.help-dialog button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.help-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 @media(max-width:620px){
   .help-mask{padding:12px}
   .help-dialog.ov-box{padding:18px;max-height:calc(100dvh - 24px)}
@@ -1300,6 +1307,7 @@ button{font:inherit}
 .dlg-btn:hover{background:var(--hover);border-color:var(--border-strong)}
 .dlg-btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .dlg-btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.dlg-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .dlg-input{
   width:100%;height:32px;padding:0 11px;border:1px solid var(--border);
   border-radius:7px;background:var(--bg);color:var(--fg);

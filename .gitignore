@@ -45,3 +45,5 @@ tests/gates/__pycache__/
 
 # deepwork 状态（oh-my-opencode-slim）
 .slim/deepwork/
+
+.dsh-vision-router/

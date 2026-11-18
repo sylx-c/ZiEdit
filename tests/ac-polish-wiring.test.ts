@@ -53,6 +53,6 @@ describe('打磨接线', () => {
     expect(settingsDialog).toContain("row('settings.closeAutoSave', closeAutoSave)");
     expect(settingsDialog).toContain("checkbox('closeAutoSave', initial.closeAutoSave === true)");
     expect(settingsDialog).toContain('closeAutoSave: closeAutoSave.checked');
-    expect(settingsDialog).toContain("group('set.grpBackup', 'set.hintBackup'");
+    expect(settingsDialog).toContain("group('set.grpBackup', row('set.autosave'");
   });
 });

@@ -916,6 +916,10 @@ function syncModalBackground(): void {
     if (child.parentElement === document.body) break;
   }
 }
+/** 弹窗共用复合搜索框（.dlg-search）的放大镜图标，单一样式来源（B 体系统一）。 */
+export const DLG_SEARCH_ICON =
+  '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.5"/><path d="m10.2 10.2 3.4 3.4"/></svg>';
+
 export function overlayDialog(title: string, body: HTMLElement, onClose: () => void): OverlayMask {
   const mask = document.createElement('div');
   mask.className = 'ov-mask';

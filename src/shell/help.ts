@@ -1,5 +1,5 @@
 import { t, tf } from '../common/i18n';
-import { ActionRegistry, L, overlayDialog, type ActionDef, type OverlayMask } from './chrome';
+import { ActionRegistry, DLG_SEARCH_ICON, L, overlayDialog, type ActionDef, type OverlayMask } from './chrome';
 
 const GROUPS: ActionDef['group'][] = ['file', 'edit', 'find', 'view', 'tools', 'help'];
 const GROUP_LABELS: Record<ActionDef['group'], string> = {
@@ -54,17 +54,17 @@ export function openShortcuts(reg: ActionRegistry): OverlayMask {
   const body = el('div', 'help-content');
   const intro = el('p', 'help-intro', t('help.shortcutIntro'));
   const controls = el('div', 'help-controls');
-  const searchWrap = el('div', 'help-search');
-  const searchIcon = el('span', 'help-search-icon');
-  searchIcon.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.5"/><path d="m10.2 10.2 3.4 3.4"/></svg>';
-  const search = el('input', 'help-search-input');
+  const searchWrap = el('div', 'dlg-search');
+  const searchIcon = el('span', 'dlg-search-icon');
+  searchIcon.innerHTML = DLG_SEARCH_ICON;
+  const search = el('input', 'dlg-search-input');
   search.type = 'search';
   search.placeholder = t('help.search');
   search.setAttribute('aria-label', t('help.searchLabel'));
   search.autofocus = true;
   search.autocomplete = 'off';
   search.spellcheck = false;
-  const clear = el('button', 'help-search-clear', '×');
+  const clear = el('button', 'dlg-search-clear', '×');
   clear.type = 'button';
   clear.setAttribute('aria-label', t('help.clearSearch'));
   clear.hidden = true;

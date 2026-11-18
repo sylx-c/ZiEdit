@@ -159,3 +159,71 @@ describe('设置结构与状态', () => {
     expect(document.activeElement).toBe(trigger);
   });
 });
+
+describe('分类页签与搜索扁平模式（2026-11-18 弹窗瘦身 A 方案）', () => {
+  const search = (f: ReturnType<typeof fixture>) => f.mask.querySelector<HTMLInputElement>('.settings-search')!;
+  const clearBtn = (f: ReturnType<typeof fixture>) => f.mask.querySelector<HTMLButtonElement>('.dlg-search-clear')!;
+  const tabs = (f: ReturnType<typeof fixture>) => [...f.mask.querySelectorAll<HTMLButtonElement>('.settings-nav-item')];
+  const visibleGroups = (f: ReturnType<typeof fixture>) => [...f.mask.querySelectorAll('fieldset')].filter(g => !g.hidden);
+  const type = (f: ReturnType<typeof fixture>, value: string) => {
+    const el = search(f); el.value = value; el.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+
+  it('初始仅显示一个分组，首个页签携带 aria-current', () => {
+    const f = fixture();
+    expect(visibleGroups(f)).toHaveLength(1);
+    expect(visibleGroups(f)[0]!.querySelector('legend')?.textContent).toBe(t('set.grpAppearance'));
+    const current = tabs(f).filter(b => b.getAttribute('aria-current') === 'true');
+    expect(current).toHaveLength(1);
+    expect(current[0]!.textContent).toBe(t('set.grpAppearance'));
+  });
+
+  it('点击页签切换可见分组并转移 aria-current', () => {
+    const f = fixture();
+    const backupTab = tabs(f).find(b => b.textContent === t('set.grpBackup'))!;
+    backupTab.click();
+    expect(visibleGroups(f)).toHaveLength(1);
+    expect(visibleGroups(f)[0]!.querySelector('legend')?.textContent).toBe(t('set.grpBackup'));
+    expect(backupTab.getAttribute('aria-current')).toBe('true');
+    expect(tabs(f).find(b => b.textContent === t('set.grpAppearance'))!.hasAttribute('aria-current')).toBe(false);
+  });
+
+  it('搜索跨组扁平展示，清除钮恢复当前分组并回焦输入框', () => {
+    const f = fixture();
+    tabs(f).find(b => b.textContent === t('set.grpAppearance'))!.click();
+    type(f, '字号');
+    expect(visibleGroups(f)[0]!.querySelector('legend')?.textContent).toBe(t('set.grpEdit'));
+    expect(clearBtn(f).hidden).toBe(false);
+    clearBtn(f).click();
+    expect(search(f).value).toBe('');
+    expect(clearBtn(f).hidden).toBe(true);
+    expect(visibleGroups(f)).toHaveLength(1);
+    expect(visibleGroups(f)[0]!.querySelector('legend')?.textContent).toBe(t('set.grpAppearance'));
+    expect(document.activeElement).toBe(search(f));
+  });
+
+  it('搜索态点击页签：清空搜索并整组展示该分组', () => {
+    const f = fixture();
+    type(f, '字号');
+    expect(clearBtn(f).hidden).toBe(false);
+    const mdTab = tabs(f).find(b => b.textContent === t('set.grpMarkdown'))!;
+    mdTab.click();
+    expect(search(f).value).toBe('');
+    expect(visibleGroups(f)).toHaveLength(1);
+    expect(visibleGroups(f)[0]!.querySelector('legend')?.textContent).toBe(t('set.grpMarkdown'));
+    expect(f.mask.querySelector('.settings-empty')!.hidden).toBe(true);
+  });
+
+  it('无匹配查询显示空态，恢复匹配后空态隐去、页签可见性同步', () => {
+    const f = fixture();
+    type(f, '绝不存在的查询词xyz');
+    expect(visibleGroups(f)).toHaveLength(0);
+    const empty = f.mask.querySelector<HTMLParagraphElement>('.settings-empty')!;
+    expect(empty.hidden).toBe(false);
+    expect(tabs(f).every(b => b.hidden)).toBe(true);
+    type(f, '主题');
+    expect(empty.hidden).toBe(true);
+    expect(tabs(f).some(b => !b.hidden)).toBe(true);
+    expect(visibleGroups(f)[0]!.querySelector('legend')?.textContent).toBe(t('set.grpAppearance'));
+  });
+});
