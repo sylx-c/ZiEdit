@@ -40,13 +40,19 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
   private indices = new WeakMap<HTMLElement, number>();
   private origin = 0;
   private input = 0;
+  /** 记锚时的 input 版本与视觉锚文档位置：scrolled/rememberAnchor 区分用户滚动与原生校正回声（见注释）。 */
+  private anchorInput = -1;
+  private visualDocTop: number | null = null;
   private pointer = false;
   private programTop: number | undefined;
   private rootSize = { width: -1, height: -1 };
   constructor(readonly element: HTMLElement, readonly root: HTMLElement) {
     surfaces.set(element, this);
-    // 原生锚定在图片固有尺寸参与布局时、绘制前生效；禁用它会先闪移一帧，
-    // 等 load/RO 通知后才补偿。下面的文字锚只修正原生锚定尚未处理的差值。
+    // 原生滚动锚定保留开启：渐进渲染交付大段真实高度（滚轮风暴后 4 万+px）时浏览器
+    // 逐帧兜底，自家文字锚独力承担会有数十 px 残差（真机 md-surfaces settle 判据，
+    // 2026-11-18 overflowAnchor=none 试验实测 22-63px 后回退）。其与自家补偿的竞态
+    // （部分校正触发 scroll 重记基线、反吞视觉锚补偿）改由 scrolled() 的输入版本
+    // 守卫化解：无新输入而视觉锚位移的滚动按原生校正处理、恢复而非重记。
     element.style.overflowAnchor = 'auto';
     element.addEventListener('scroll', this.scrolled, { passive: true });
     for (const event of ['wheel', 'touchstart', 'keydown']) element.addEventListener(event, this.userInput, { passive: true });
@@ -134,7 +140,18 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
   };
   private rememberAnchor(): void {
     if (this.pendingAnchor) return;
+    // 原生锚定部分校正的 scroll 回声不得重记视觉锚：记锚后无新输入（input 版本未变）
+    // 且视觉锚的文档位置（scrollTop＋视口位置）发生变化——位移只能来自布局交付
+    // （字体/图片/渐进渲染），保留旧视觉锚，让随后 layoutChanged 补偿回位移前的
+    // 阅读位置（修前无条件重记，原生校正量与真实位移的差值被吞为「用户新位置」，
+    // 字号/图片变化偶发 224-302px 无补偿漂移，真机 navigation 门约 1/8 概率锁定，
+    // 2026-11-18 插桩定位）。纯滚动（文档位置不变）与有新输入的滚动照常重记。
+    if (this.visual?.element.isConnected && this.input === this.anchorInput) {
+      const top = (this.visual.range ?? this.visual.element).getBoundingClientRect().top;
+      if (this.visualDocTop !== null && Math.abs(this.element.scrollTop + top - this.visualDocTop) > .5) return;
+    }
     this.anchor = this.capture(); this.visual = null;
+    this.anchorInput = this.input;
     this.visualScrollTop = this.element.scrollTop;
     const column = this.root.getBoundingClientRect(), viewport = this.element.getBoundingClientRect();
     if (this.restoredElement?.isConnected) {
@@ -142,7 +159,8 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
       if (rect.height > 0 && rect.bottom >= viewport.top && rect.top <= viewport.bottom) {
         // 恢复目标可能位于标题上边距内；命中测试会选到前一块的图片/文字。
         // 后续异步高度交付仍锚定已恢复的块，不能悄悄改换阅读目标。
-        this.visual = { element: this.restoredElement, top: rect.top }; return;
+        this.visual = { element: this.restoredElement, top: rect.top };
+        this.visualDocTop = this.element.scrollTop + rect.top; return;
       }
       this.restoredElement = null;
     }
@@ -151,6 +169,7 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
     const caret = (document as Document & { caretRangeFromPoint?: (x:number,y:number)=>Range|null }).caretRangeFromPoint?.(x,y);
     if (caret && caret.startContainer.nodeType === Node.TEXT_NODE && this.root.contains(caret.startContainer) && caret.getClientRects().length) {
       this.visual = { element:caret.startContainer.parentElement!, range:caret, top:caret.getBoundingClientRect().top };
+      this.visualDocTop = this.element.scrollTop + this.visual.top;
     } else {
       const hit = document.elementFromPoint?.(x,y)?.closest('p,h1,h2,h3,h4,h5,h6,li,td,th,.md-code-chunk,pre');
       const target = hit ?? this.atY(this.element.scrollTop + y - viewport.top)?.element;
@@ -163,8 +182,10 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
         if (range && text) { range.setStart(text, 0); range.setEnd(text, Math.min(1, text.textContent?.length ?? 0)); }
         const measured = range && typeof range.getClientRects === 'function' && range.getClientRects().length ? range : undefined;
         this.visual = { element:target, range:measured, top:(measured ?? target).getBoundingClientRect().top };
+        this.visualDocTop = this.element.scrollTop + this.visual.top;
       }
     }
+    if (!this.visual) this.visualDocTop = null;
   }
   private layoutChanged(): void {
     if (this.dead) return;
@@ -195,8 +216,22 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
   }
   private watchAsset(image: HTMLImageElement): void {
     if (!this.root.contains(image)) return;
+    // 无尺寸线索的图片先经 .md-asset-reserve 收为 0 高（styles.css；边距盒表现与浏览器
+    // 加载前一致），真实高度只在 load/error 任务内释放——落位位移与锚定补偿因此处于
+    // 同一任务、绘制之前。Chromium 对图片是「固有尺寸先进布局绘制、load 事件后到」，
+    // 若不在落位前接管，补偿必然晚一帧（真机 navigation 门约 1/8 概率采样到 224px
+    // 单帧漂移，2026-11-18 插桩定位：漂移恰为图片高、次帧即回）。原生 overflow-anchor
+    // 曾被用于堵此缝，但其锚点与阅读锚不同位时会反吞自家补偿（见构造器注释），已弃用。
+    if (!image.complete && !image.classList.contains('md-asset-reserve') && !image.getAttribute('width') && !image.getAttribute('height')
+      && !image.style.height && !image.style.aspectRatio) {
+      image.classList.add('md-asset-reserve');
+    }
     this.assets.set(image, 2);
     if (!this.assetFrame) this.assetFrame = requestAnimationFrame(this.checkAssets);
+  }
+  /** load/error 任务内释放 0 高占位；须在锚定补偿（layoutChanged）之前调用，位移与补偿同帧。 */
+  private releaseReserve(image: HTMLImageElement): void {
+    image.classList.remove('md-asset-reserve');
   }
   private checkAssets = (): void => {
     this.assetFrame = 0;
@@ -217,6 +252,7 @@ export class ReadingSurface implements ScrollSurfaceAdapter {
     // 必须在load事件任务内、布局首次绘制前完成，否则判据采样会捕获
     // 一个整帧的可见位移（navigation 门 224px 漂移的迟到主环）。
     if (event.target instanceof HTMLImageElement && this.root.contains(event.target)) {
+      this.releaseReserve(event.target);
       this.watchAsset(event.target);
       this.layoutChanged();
     }

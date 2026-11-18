@@ -101,7 +101,13 @@ describe('AC-28 块级缓存渲染（注入假渲染器）', () => {
     ];
     const canonical = (root: HTMLElement): string => [...root.children].map(el => {
       const clone = el.cloneNode(true) as HTMLElement;
-      for (const n of [clone, ...clone.querySelectorAll('[data-line]')]) n.removeAttribute('data-line');
+      // data-line 为行号后处理标记、.md-asset-reserve 为阅读面加载期占位状态（jsdom 无加载，
+      // MutationObserver 异步补类会使两路序列化时序不一致）——均为呈现态，语义对比前摘除。
+      for (const n of [clone, ...clone.querySelectorAll('[data-line],.md-asset-reserve')]) {
+        n.removeAttribute('data-line');
+        n.classList.remove('md-asset-reserve');
+        if (!n.getAttribute('class')) n.removeAttribute('class');
+      }
       return clone.outerHTML;
     }).join('');
     for (const doc of corpus) {

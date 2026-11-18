@@ -1017,6 +1017,9 @@ button{font:inherit}
 /* 行内元素与 IR 同值（.mdir-link/-highlight/-sup/-sub/-img）：修前预览缺这些规则——大图撑出阅读栏，
    链接与 ==高亮== 走浏览器默认蓝/黄，暗色主题下刺眼，同一文档两种形态观感不一。 */
 .md-preview .md-col img{max-width:100%;height:auto;overflow-anchor:none}
+/* 无尺寸图片加载期 0 高占位：reading-surface.watchAsset 加载、load/error 任务内释放，
+   落位位移与锚定补偿同帧完成（消灭「固有尺寸先进布局绘制、load 补偿后到」的一帧跳动）。 */
+.md-preview .md-col img.md-asset-reserve{height:0}
 /* :where 压低特异性：目录（.md-toc a）等既有专门规则照旧胜出 */
 .md-preview .md-col :where(a){color:var(--accent);text-decoration:underline}
 .md-preview .md-col mark{background:var(--find-hl);color:inherit}
