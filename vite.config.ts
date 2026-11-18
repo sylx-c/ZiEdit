@@ -39,7 +39,7 @@ export default defineConfig(() => ({
     __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
     __BUILD_CHANNEL__: JSON.stringify(process.env.ZIEDIT_CHANNEL === "release" ? "release" : "dev"),
   },
-  // 验收测试按子 PRD 的 AC 编号命名放 tests/（AGENTS.md 目录契约）
+  // 验收测试按子 PRD 的 AC 编号命名放 tests/（目录契约）
   test: {
     maxWorkers: 4,
     include: ["src/**/*.test.ts", "tests/**/*.test.ts"],

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 发布说明格式守卫（2026-11-18）：拦截「内部草稿内容流入公开 Release」这类人肉失误。
 // 用法：node scripts/check-release-notes.mjs docs/tmp/release-<版本>/notes.md
-// 规则来源 AGENTS.md §5 固定版式。CI 不跑（notes 在 docs/tmp 不入库）；发布前本地必跑。
+// 规则来源仓库发布版式规范（§5）。CI 不跑（notes 在 docs/tmp 不入库）；发布前本地必跑。
 import fs from 'node:fs';
 const file = process.argv[2];
 if (!file || !fs.existsSync(file)) { console.error('用法: node scripts/check-release-notes.mjs <notes.md>'); process.exit(2); }

@@ -1,6 +1,6 @@
 //! file_engine —— 分块读取、行锚点索引（决策 002，spike 实证参数）
 //! 64KB 分块 positioned read + LRU 256 块缓存 + 4KB 行锚点。
-//! 性能红线：任何路径不得把整个文件读入内存（AGENTS.md）。
+//! 性能红线：任何路径不得把整个文件读入内存（工程红线）。
 
 use std::collections::HashMap;
 use std::fs::File;

@@ -9,7 +9,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
-/// 编辑缓冲上限（PRD 002/005 与 AGENTS.md 口径统一为 10MB；AC-21 ≤10MB 守卫）
+/// 编辑缓冲上限（需求 002/005 口径统一为 10MB；AC-21 ≤10MB 守卫）
 pub const READ_ALL_LIMIT: u64 = 10 * 1024 * 1024;
 /// 保存正文的编码后上限。编辑打开仍是 10MB；这里拦住 IPC 传入的无界字符串，并给草稿留出长于打开上限的保存空间。
 pub const SAVE_MAX_BYTES: u64 = 32 * 1024 * 1024;
