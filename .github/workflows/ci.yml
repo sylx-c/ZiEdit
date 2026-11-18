@@ -75,11 +75,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       # npm audit 只读 package-lock.json，无需 npm ci；runner 默认官方 registry，audit 端点可用。
-      # audit-level=high：high 及以上失败。低级别漏报名义上放行，避免离线桌面应用长期被 low/moderate 打红。
-      # 已知状态：markdown-it 15.0.0–15.0.2 存在 1 条 high（GHSA-gfr2-rv44-r23c），修复版 15.0.3，
-      # 升级运行时依赖归 Lead 处理，此前本步骤如实失败。
-      - name: npm audit（生产与开发依赖，high 及以上失败）
-        run: npm audit --audit-level=high
+      # 口径分两层（2026-11-18 起）：
+      #  1) 生产依赖（--omit=dev）：high 及以上无条件失败，无豁免；
+      #  2) 全量（生产+开发）：经 scripts/audit-dev-exemptions.mjs，仅放行清单内
+      #     「构建期工具链、不随应用分发、上游暂无补丁」的公告（当前：picomatch
+      #     GHSA-fc5q-39xc-vjpf，上游全部版本受影响且未发补丁，vite 最新版仍依赖），
+      #     清单外 high 及以上照旧失败。上游出补丁后升级依赖并删除条目。
+      # 低级别漏报名义上放行，避免离线桌面应用长期被 low/moderate 打红。
+      - name: npm audit（生产依赖，high 及以上失败，无豁免）
+        run: npm audit --omit=dev --audit-level=high
+      - name: npm audit（全量，豁免清单外 high 及以上失败）
+        run: node scripts/audit-dev-exemptions.mjs
       - uses: dtolnay/rust-toolchain@stable
       # cargo audit 选 cargo install --locked 而非 rustsec/audit-check@v2.0.0：后者镜像内 cargo-audit
       # 版本固定偏旧，对本仓库 Cargo.lock version 4 的解析兼容存疑，且 fork PR 上 Checks API 会失败；
