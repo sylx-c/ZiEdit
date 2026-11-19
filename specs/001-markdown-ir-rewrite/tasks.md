@@ -39,7 +39,7 @@ description: "Task list for feature implementation"
 
 **Purpose**: 在改任何代码之前锁住当前行为事实；未完成前禁止任何用户故事开工。
 
-- [ ] T003 对五份基准语料（GFM 表格含粗体行内码 / 真 ATX 标题 1–6 / 围栏内假标题 / `---` 下划线行 / 嵌套列表+引用+行内公式）在即时渲染、分屏、独立预览三面截图，存 `docs/tmp/ir-rewrite-baselines/`
+- [x] T003 对五份基准语料（GFM 表格含粗体行内码 / 真 ATX 标题 1–6 / 围栏内假标题 / `---` 下划线行 / 嵌套列表+引用+行内公式）在即时渲染、分屏、独立预览三面截图，存 `docs/tmp/ir-rewrite-baselines/`
 - [x] T004 [P] 审计 spec.md Edge Cases（空文档/单标题、跨块选区、解析未就绪、IME、表格 500/501 行、未闭合围栏）的现有测试覆盖并记录到 `docs/tmp/ir-rewrite-baselines/coverage.md`；在 `src/markdown-view/live-heading.test.ts` 增加「空光标在块外 / 块内 / 块边界」三种场景装饰断言，对审计发现的空缺在对应现有测试文件补回归测试
 - [x] T005 [P] 在 `src/markdown-view/render-correctness.test.ts` 增加五份语料断言（不归一化 `s`/`del`）
 - [x] T006 在 `src/markdown-view/ir-perf.ts` 增加四个计数探针：`typingRebuildMs` / `scrollReplaceCount` / `cursorWidthChange` / `decoRebuildRange`
