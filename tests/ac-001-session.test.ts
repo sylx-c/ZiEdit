@@ -3,7 +3,7 @@
 // 纯逻辑层验证，不依赖 DOM 与 Tauri runtime；跨平台一致（AC-3 的逻辑子集）。
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { shell, startShell, settle, tabNames, clickText } from './shell-behavior-harness';
-import { namedSessionsLoad, recoveryDiscard, recoveryList, recoveryRead, textSave } from '../src/common/ipc';
+import { namedSessionsLoad, openFile, recoveryDiscard, recoveryList, recoveryRead, textSave } from '../src/common/ipc';
 import { t } from '../src/common/i18n';
 import { TabStore } from '../src/common/state';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
@@ -210,6 +210,23 @@ describe('异常恢复条目', () => {
     expect(shell.alert).toHaveBeenCalledWith(expect.stringContaining(kind === 'error' ? 'Cannot decrypt' : t('rec.missing')));
     expect(shell.flash).not.toHaveBeenCalledWith(t('rec.restored'));
     expect(vi.mocked(recoveryDiscard).mock.calls.flatMap(call => call[0])).not.toContain('draft://bad');
+  });
+  it('存量坏标志草稿快照（draft:false + draft:// key）按草稿恢复，不当文件打开', async () => {
+    // 修前缺陷：视图切换通道曾以 draft:false 写 draft://N 快照；恢复分岔只认标志，
+    // 把伪路径当真实文件 open_file（Windows ERROR_INVALID_NAME → E1001），
+    // 再汇总「原文件无法打开，恢复快照仍保留」。修后分岔按 key 形态兜底。
+    vi.useFakeTimers();
+    vi.mocked(recoveryList).mockResolvedValueOnce({ crashed: true, items: [{ key: 'draft://1', ts: 1, bytes: 10, draft: false }] });
+    vi.mocked(recoveryRead).mockResolvedValueOnce({ key: 'draft://1', content: 'legacy draft', mtime: 0, len: 0, draft: false, ts: 1 });
+    await startShell();
+    clickText('.dlg-btn', t('rec.restore')); await settle();
+    expect(openFile).not.toHaveBeenCalledWith('draft://1');
+    // 内容经 documents.drafts → 挂载时作 initialDoc 注入编辑面（newDraft 不直写 tab 字段）
+    expect(shell.store.tabs.some((tab: { path: string }) => /^draft:\/\//.test(tab.path))).toBe(true);
+    expect(shell.edit.opts.initialDoc).toBe('legacy draft');
+    expect(recoveryDiscard).toHaveBeenCalledWith(['draft://1']); // 恢复即弃旧快照（F8）
+    expect(shell.flash).toHaveBeenCalledWith(t('rec.restored'));
+    expect(shell.alert).not.toHaveBeenCalled(); // 无 E1001、无 rec.failed
   });
   it('损坏条目展示原因；恢复正常条目时不读取或丢弃损坏条目', async () => {
     vi.useFakeTimers();

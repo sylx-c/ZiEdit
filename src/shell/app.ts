@@ -1602,7 +1602,10 @@ export async function boot(): Promise<void> {
           const dt = store.tabs.find(t => t.path === path);
           if (dt) dt.draftContent = doc;
         }
-        if (dirty) writeSnapshot(path, doc, false);
+        // 草稿快照必须带 draft 标志（修前硬编码 false：崩溃恢复把 draft://N 当真实文件
+        // 打开，Windows 以 ERROR_INVALID_NAME（os error 123）拒绝，连报 E1001 与
+        // 「原文件无法打开」；且同 key 覆盖会把自动保存写的正确 draft:true 记录也盖掉）
+        if (dirty) writeSnapshot(path, doc, path.startsWith('draft://'));
       } else if (store.tabs.some(t => t.path === path && t.language !== 'Markdown')) {
         // 普通文本同样保留选区与滚动；脏缓冲仍沿用原有保存通道。
         if (currentView.view && !discardedBuffers.has(path)) {
@@ -6301,7 +6304,11 @@ export async function boot(): Promise<void> {
           try {
             const rec = await recoveryRead(it.key);
             if (!rec) throw new Error($t('rec.missing'));
-            if (it.draft) {
+            // 分岔双保险：除记录自带的 draft 标志外，key 形态（draft://）同样判草稿——
+            // 修前视图切换通道硬编码 false 写坏过存量快照（见 maybeRenderView 的
+            // writeSnapshot 注释），按 key 兜底让这些坏记录也能恢复成草稿而不是
+            // 拿伪路径去 open_file（E1001 / os error 123）
+            if (it.draft || it.key.startsWith('draft://')) {
               newDraft(rec.content);
               void recoveryDiscard([it.key]).catch(() => void 0); // F8（审计）：恢复即弃旧草稿快照，防下次崩溃重复出现
               continue;
