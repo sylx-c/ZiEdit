@@ -3,7 +3,7 @@ import { expect, it, vi } from 'vitest';
 import { EditorView } from '@codemirror/view';
 import { forceParsing } from '@codemirror/language';
 import { LivePreviewView } from './livepreview';
-import { liveViewport } from './live-block-field';
+import { liveViewport } from './md-view-plugin';
 import { cellRange } from './table-editor';
 import { safeCell } from './table-model';
 import { referenceField, referencesReady } from './live-state';

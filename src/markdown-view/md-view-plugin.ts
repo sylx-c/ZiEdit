@@ -1,30 +1,73 @@
-// markdown-view/live-block-field —— 块级件装饰（表格/分隔线）与查找高亮承载
-// （批次 4 自 livepreview.ts 拆分，行为不变；liveBlockField 含 v0.40 纯选区差集重建路径，整块原样搬移）。
+// markdown-view/md-view-plugin —— REQ-014 P1：即时渲染单一编排引擎（统一投影器架构）。
+// 组成（承载机制按 contracts/rendering-seams.md §2 的实证修正）：
+//   ① projectionHost —— 薄 StateField 宿主：事务内同步消费重建，存储行内/块级/间距三组装饰，
+//      经 EditorView.decorations.from **直接提供**（CM6 规定经函数提供的装饰不得含块级件）；
+//   ② mdViewOrchestrator —— 单一编排 ViewPlugin：吸收原 viewportReporter（视口报告/几何观察/
+//      用户滚动判别/停稳）与分片续跑调度；不含自己的投影逻辑。
+// 五级 needsRebuild 分级（data-model.md §3）：
+//   视口内文档变更 → 整视口一次同步纯函数投影（键入路径，不再需要旧快路）；
+//   视口变化 → 新视口重建（用户滚动走增量边缘 + 延迟分片；程序跳转完整同步）；
+//   ActiveBlocks 变化 → 只重建变化前后涉及的活动块（行内）+ 受追踪块级件翻转集；
+//   同块内纯选区变化 → 只更新该块行内装饰；
+//   纯滚动 → 对新进视口区间增量投影，不动已挂载装饰（scrollReplaceCount=0 的机制基础）。
+// 行为基线：本文件为 updateLiveBlocks（live-block-field）与 liveDeco 插件（livepreview 内联）
+// 的保持式合并；块高预言机（block-height-cache/layout/spacing）调用点原样保留，P3 统一删除。
 import { EditorView, ViewPlugin, Decoration, WidgetType, type DecorationSet, type ViewUpdate } from '@codemirror/view';
-import { StateEffect, StateField, type EditorState, type Range, type Transaction } from '@codemirror/state';
+import { StateEffect, StateField, type EditorState, type Extension, type Range, type Transaction, type Text } from '@codemirror/state';
 import { syntaxTree, syntaxTreeAvailable } from '@codemirror/language';
 import { compositionActive } from '../common/composition';
 import { notifyCmRestoreLayout } from '../common/scroll-anchor';
 import { trackUserScroll, userScrolledRecently, clearUserScroll } from '../common/user-scroll';
 import { buildNeedleRe } from '../text-view/findbar';
 import type { FindOptions } from '../common/ipc';
-import { fenceSourceChanged } from './writing';
+import { fenceSourceChanged, inlineFormatField } from './writing';
 import { blockLayout, SOURCE_LINE_HEIGHT_PX, TABLE_ROW_ESTIMATE_PX } from './layout';
-import { irPerfEnabled, recordBlockDecos, recordBlockLayout, irWorkStart, recordIrWork } from './ir-perf';
-import { referenceField, emojiField, referencesReady, emojisReady, currentPosition, VIEWPORT_MARGIN } from './live-state';
-import { makeActiveProbe, visitVisible, fenceLines, tableDecos, type TableData } from './projector';
+import { irPerfEnabled, recordBlockDecos, recordBlockLayout, recordLiveDeco, irWorkStart, recordIrWork } from './ir-perf';
+import { referenceField, emojiField, referencesReady, emojisReady, currentPosition, imageContext, mdTouchedField, VIEWPORT_MARGIN } from './live-state';
+import { projectViewport, makeActiveProbe, visitVisible, fenceLines, tableDecos, type TableData, type ProjectionLens } from './projector';
 import { RenderWidget, CodeLabelWidget, TocWidget, HrWidget, codeContainer, editingFence, renderContextOf } from './live-widgets';
 import { renderBlockAt } from './render-model';
-import { missingWindows, decorationSliceEnd } from './deco-window';
-import { paragraphTypingWindow } from './typing-window';
-import { requestIrFrame, cancelIrFrame, measureAfterRender } from './frame-work';
 import { blockHeightCache, heightMeasurements } from './block-height-cache';
 import { dispatchIrLayout } from './ir-layout';
+import { requestIrFrame, cancelIrFrame, measureAfterRender } from './frame-work';
+import { activeBlocks } from './active-block';
 
-// ── 块级件装饰（表格/分隔线）：liveBlockField（StateField）承载 ──
-// CM6 约束：ViewPlugin 提供的装饰不得为块级/跨行替换（块级件参与高度测量，须由状态层产出）。
-// 视口不在事务里：viewportReporter 以 effect 报界。纯文本变更先映射保旧件（键入期解析未完成，
-// 立即重建会让表格件闪源码）；选区/视口/解析推进（树快照变化）且树已解析到界内时才重建。
+// ── 窗口数学（自 deco-window.ts 内联；原文件随 T012 删除） ──
+
+interface DecoWindow { from: number; to: number }
+
+/** 普通行完整归属一片；超长行仍分片，最多多处理 256 字符，不能因对齐变成整条巨行。 */
+function decorationSliceEnd(doc: Text, from: number, end: number, budget: number): number {
+  const target = Math.min(end, from + budget), line = doc.lineAt(target);
+  return Math.min(end, line.to - target <= 256 ? line.to : line.from > from ? line.from : target);
+}
+
+/** 从目标视口减去已完成的片段；未完成的计划不算覆盖，滚动中断不会留下永久空洞。 */
+function missingWindows(target: DecoWindow, covered: readonly DecoWindow[]): DecoWindow[] {
+  const missing: DecoWindow[] = [];
+  let from = target.from;
+  for (const range of [...covered].sort((a, b) => a.from - b.from)) {
+    if (range.to <= from || range.from >= target.to) continue;
+    if (range.from > from) missing.push({ from, to: range.from });
+    from = Math.max(from, range.to);
+  }
+  if (from < target.to) missing.push({ from, to: target.to });
+  return missing;
+}
+
+function clipWindows(target: DecoWindow, covered: readonly DecoWindow[]): DecoWindow[] {
+  const result: DecoWindow[] = [];
+  for (const range of [...covered].sort((a, b) => a.from - b.from)) {
+    const from = Math.max(target.from, range.from), to = Math.min(target.to, range.to);
+    if (from >= to) continue;
+    const last = result[result.length - 1];
+    if (last && last.to >= from) last.to = Math.max(last.to, to);
+    else result.push({ from, to });
+  }
+  return result;
+}
+
+// ── 效果与宿主状态 ──
 
 export const liveViewport = StateEffect.define<{ from: number; to: number; scrolling?: boolean }>();
 export const blockSliceReady = StateEffect.define<object>();
@@ -32,7 +75,23 @@ export const blockSliceReady = StateEffect.define<object>();
 export const liveGeometryChanged = StateEffect.define<null>();
 const BLOCK_SLICE_CHARS = 2048;
 
-interface PendingBlocks { next: number; end: number; token: object; first?: boolean; remaining?: { from: number; to: number }[]; budgeted?: boolean }
+interface PendingSlices { next: number; end: number; token: object; first?: boolean; remaining?: DecoWindow[]; budgeted?: boolean }
+
+export interface ProjectionState {
+  /** 行内/行类装饰（原 liveDeco 插件输出；函数通道合规——不含块级件）。 */
+  inline: DecorationSet;
+  /** 块级件装饰（表格/分隔线/显示公式/围栏标签；经宿主直接提供满足 CM6 块级约束）。 */
+  block: DecorationSet;
+  /** 块间空行行高装饰（mdir-gap；P3 删除 JS 间距模型时移除）。 */
+  layout: DecorationSet;
+  from: number; to: number;
+  /** 行内已覆盖窗口（滚动增量投影的覆盖记账）。 */
+  covered: DecoWindow[];
+  tables: Map<number, TableData>;
+  pending?: PendingSlices;
+  deferred?: boolean;
+}
+
 class BlockPlaceholder extends WidgetType {
   constructor(private height: number, private provideHeight?: () => number | undefined) { super(); }
   get estimatedHeight(): number {
@@ -45,35 +104,17 @@ class BlockPlaceholder extends WidgetType {
     dom.style.height = this.estimatedHeight + 'px'; dom.setAttribute('aria-hidden', 'true'); return dom;
   }
 }
+
 /** 边界归属按装饰起点去重；首片允许包含跨入视口的完整块级件。 */
-function appendBlockSlice(kept: DecorationSet, built: DecorationSet, from: number, to: number, first: boolean, last: boolean): DecorationSet {
+function appendSlice(kept: DecorationSet, built: DecorationSet, from: number, to: number, first: boolean, last: boolean): DecorationSet {
   const add: Range<Decoration>[] = [];
   for (let c = built.iter(); c.value; c.next()) {
     if ((c.from >= from || (first && c.to >= from)) && (c.from < to || (last && c.from === to))) add.push(c.value.range(c.from, c.to));
   }
   return kept.update({ add, sort: true });
 }
-function advanceBlocks(state: EditorState, value: LiveBlockState, pending: PendingBlocks, first: boolean): LiveBlockState {
-  const from = pending.next;
-  // 行/间距装饰位于 line.from，语法节点可从缩进之后开始。字符边界截在
-  // 两者之间会先删除旧装饰、又把它排除在相邻两片之外，造成停滚时补回间距。
-  // 几何刷新虽不使用滚动占位，也必须遵守已登记的交互分片预算。
-  const to = decorationSliceEnd(state.doc, from, pending.end, pending.budgeted || value.deferred ? 256 : BLOCK_SLICE_CHARS);
-  // 解析未就绪保留原分片进度，待语法树推进后继续，不能把计划窗口当作已完成。
-  if (!syntaxTreeAvailable(state, to)) return { ...value, pending };
-  if (irPerfEnabled()) { recordBlockLayout(from, to); recordBlockDecos(from, to); }
-  const next = pending.remaining?.[0];
-  // 分片只替换自己负责的窗口；未构建的后续区间保留旧件，避免每片把整块表格清成源码。
-  const keep = (set: DecorationSet): DecorationSet => set.update({
-    filter: (start, end) => (first ? end < from : start < from) || (start >= to && !(to === state.doc.length && start === to)),
-  });
-  return { ...value,
-    set: appendBlockSlice(keep(value.set), buildBlockDecos(state, from, to, value.tables, value.deferred), from, to, first, to === state.doc.length),
-    layout: appendBlockSlice(keep(value.layout), blockLayout(state, from, to), from, to, first, to === state.doc.length),
-    pending: to < pending.end ? { ...pending, next: to, first: false }
-      : next ? { ...pending, next: next.from, end: next.to, first: false, remaining: pending.remaining!.slice(1) } : undefined,
-  };
-}
+
+// ── 块级件构建（自 live-block-field 原样搬移；P3 删除高度预言机时收缩） ──
 
 function buildBlockDecos(state: EditorState, from: number, to: number, tables: Map<number, TableData>, deferred = false): DecorationSet {
   const started = irWorkStart();
@@ -90,10 +131,8 @@ function buildBlockDecosInner(state: EditorState, from: number, to: number, tabl
     if (index.metadata.frontMatter && node.name !== 'Document' && node.from < currentPosition(index, index.metadata.frontMatter.to)) return false;
     const selected = state.selection.ranges.some(r => !r.empty && r.from < node.to && r.to > node.from
       && (r.from < node.from || r.to > node.to));
-    // Setext 标题已全局不解析（noSetextHeading）：原下划线行隐藏块随之移除，
-    // 下划线行按 HorizontalRule 走 HrWidget。
-    // 公式/图表滚动中也直接上实件（挂载只建 DOM，重活在渲染队列空闲时做；已渲染过的同步出图），
-    // 加载态按估计/实测高度预留。修前滚动中一律换占位、停稳再换回：每次换件高度都变，停手后内容上下弹。
+    // Setext 标题已全局不解析（noSetextHeading）：下划线行按 HorizontalRule 走 HrWidget。
+    // 公式/图表滚动中也直接上实件（挂载只建 DOM，重活在渲染队列空闲时做；已渲染过的同步出图）。
     const rendered = renderBlockAt(node.node, (a, b) => doc.sliceString(a, b));
     if (rendered?.display) {
       if (!selected) {
@@ -121,7 +160,6 @@ function buildBlockDecosInner(state: EditorState, from: number, to: number, tabl
     }
     if (node.name === 'Table') {
       if (!selected) {
-        // (2026-10-29 高度预言机) 不解析单元格，仅对小型同步表格建立内容身份。
         const cache = state.facet(blockHeightCache);
         const lines = doc.lineAt(Math.max(node.from, node.to - 1)).number - doc.lineAt(node.from).number + 1;
         const container = codeContainer(node.node);
@@ -134,7 +172,6 @@ function buildBlockDecosInner(state: EditorState, from: number, to: number, tabl
           return !/!\[|\$|<img\b|<svg\b/i.test(source)
             ? cache.identity('Table', source, container.inset, container.quoted, tableFrom, tableTo) : undefined;
         } : undefined;
-        // 构建期只取已有绑定；占位首次读取高度或实表注册 DOM 时才生成内容键。
         const identity = bound;
         if (!deferred && provideIdentity) cache!.defer(tableFrom, provideIdentity);
         const height = cache?.get(identity);
@@ -165,14 +202,71 @@ function buildBlockDecosInner(state: EditorState, from: number, to: number, tabl
   return out.length ? Decoration.set(out, true) : Decoration.none;
 }
 
-interface LiveBlockState { set: DecorationSet; layout: DecorationSet; from: number; to: number; tables: Map<number, TableData>; pending?: PendingBlocks; deferred?: boolean }
+// ── 行内投影（lens 装配 + 视口窗口） ──
 
-function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState {
-    const started = irWorkStart();
-    try {
+function lensOf(state: EditorState): ProjectionLens {
+  const formatted = state.field(inlineFormatField, false);
+  return {
+    ranges: state.selection.ranges,
+    touched: state.field(mdTouchedField, false) === true,
+    formatted: formatted ? { from: formatted.from, to: formatted.to, pending: formatted.pending } : null,
+    get emojis() { return state.field(emojiField, false) ?? {}; },
+    refs: () => state.field(referenceField, false)?.urls ?? new Map(),
+    fenceEditing: pos => editingFence(state, pos),
+  };
+}
+
+function buildInline(state: EditorState, from: number, to: number): DecorationSet {
+  const started = irWorkStart();
+  try {
+    const index = state.field(referenceField, false);
+    if (!index) return Decoration.none;
+    return projectViewport(state.doc, syntaxTree(state), { from, to }, index, lensOf(state),
+      state.facet(imageContext).baseDir, state.facet(imageContext).remoteResolve);
+  } finally { recordIrWork('liveDeco', started); }
+}
+
+/** 行内区间合并：替换窗口内旧装饰，保留窗外（与旧 appendSlice 同口径）。 */
+function mergeInlineWindow(kept: DecorationSet, built: DecorationSet, from: number, to: number, docLength: number): DecorationSet {
+  const add: Range<Decoration>[] = [];
+  for (let c = built.iter(); c.value; c.next()) {
+    if (c.from >= from && (c.from < to || (to === docLength && c.from === to))) add.push(c.value.range(c.from, c.to));
+  }
+  return kept.update({ filter: f => f < from || (f >= to && !(to === docLength && f === to)), add, sort: true });
+}
+
+// ── 宿主 update：五级 needsRebuild 分级（事务内同步） ──
+
+function advanceSlices(state: EditorState, value: ProjectionState, pending: PendingSlices, first: boolean): ProjectionState {
+  const from = pending.next;
+  // 行/间距装饰位于 line.from，语法节点可从缩进之后开始。字符边界截在两者之间会先删旧装饰、
+  // 又把它排除在相邻两片之外，造成停滚时补回间距。
+  const to = decorationSliceEnd(state.doc, from, pending.end, pending.budgeted || value.deferred ? 256 : BLOCK_SLICE_CHARS);
+  // 解析未就绪保留原分片进度，待语法树推进后继续。
+  if (!syntaxTreeAvailable(state, to)) return { ...value, pending };
+  if (irPerfEnabled()) { recordBlockLayout(from, to); recordBlockDecos(from, to); }
+  const keep = (set: DecorationSet): DecorationSet => set.update({
+    filter: (start, end) => (first ? end < from : start < from) || (start >= to && !(to === state.doc.length && start === to)),
+  });
+  const next = pending.remaining?.[0];
+  const covered = clipWindows({ from: 0, to: state.doc.length }, [...value.covered, { from, to }]);
+  return { ...value,
+    inline: mergeInlineWindow(value.inline, buildInline(state, from, to), from, to, state.doc.length),
+    block: appendSlice(keep(value.block), buildBlockDecos(state, from, to, value.tables, value.deferred), from, to, first, to === state.doc.length),
+    layout: appendSlice(keep(value.layout), blockLayout(state, from, to), from, to, first, to === state.doc.length),
+    covered,
+    pending: to < pending.end ? { ...pending, next: to, first: false }
+      : next ? { ...pending, next: next.from, end: next.to, first: false, remaining: pending.remaining!.slice(1) } : undefined,
+  };
+}
+
+function updateProjection(prev: ProjectionState, tr: Transaction): ProjectionState {
+  const started = irWorkStart();
+  try {
     let from = tr.changes.mapPos(Math.min(prev.from, tr.startState.doc.length));
     let to = tr.changes.mapPos(Math.min(prev.to, tr.startState.doc.length));
-    const set = prev.set.map(tr.changes);
+    const inline = prev.inline.map(tr.changes);
+    const block = prev.block.map(tr.changes);
     const vp = tr.effects.find(e => e.is(liveViewport));
     const geometryChanged = tr.effects.some(e => e.is(liveGeometryChanged));
     const heightCache = tr.state.facet(blockHeightCache);
@@ -194,49 +288,27 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
       tables.set(tr.changes.mapPos(start, 1), end === data.to ? data : { ...data, to: end });
     }
     const deferred = geometryChanged || tr.docChanged ? false : vp ? vp.value.scrolling === true : prev.deferred;
-    const mapped: LiveBlockState = { set, layout: prev.layout.map(tr.changes), from, to, tables, deferred, pending: tr.docChanged ? undefined : prev.pending };
+    const mapped: ProjectionState = { inline, block, layout: prev.layout.map(tr.changes), from, to, covered: prev.covered, tables, deferred, pending: tr.docChanged ? undefined : prev.pending };
     if (tr.state.field(compositionActive, false)) return mapped;
-    // 块间空行的行高装饰（mdir-gap）只改 line class/CSS 变量、不建 DOM，但决定行高：
-    // 跟随重型块件走预算分片会让新入视口的空行先按整行高渲染、分片到达后再塌成间距，
-    // 停滚后逐步收缩（真机 trace 实测单步 21.6→10.8px、锚漂 9.578125px 且不恢复）。
-    // 故视口/停稳事务内同步交付 gap 装饰（语法树可用时），重型块件（set）仍走预算分片。
-    const mergeLayoutNow = (kept: DecorationSet, from: number, to: number): DecorationSet => {
-      if (to <= from || !syntaxTreeAvailable(tr.state, to)) return kept;
-      if (irPerfEnabled()) recordBlockLayout(from, to);
-      const add: Range<Decoration>[] = [], starts = new Set<number>();
-      for (let c = blockLayout(tr.state, from, to).iter(); c.value; c.next()) { add.push(c.value.range(c.from, c.to)); starts.add(c.from); }
-      return kept.update({ filter: f => !starts.has(f), add, sort: true });
-    };
+    // 几何变化与停滚补齐走共享帧队列，不能绕过预算同步重建整个视口。
     if (geometryChanged) {
-      // 几何变化与停滚补齐走共享帧队列，不能绕过预算同步重建整个视口。
-      // （不加 mergeLayoutNow：停稳事务把整窗 blockLayout 塞进单笔事务，dense-2m 实测
-      // 出 ≥100ms 长任务与异步超时；滚动路径的同步 gap 交付已覆盖迟到源，见下方 mergeLayoutNow。）
-      return { ...mapped, pending: { next: sliceFrom, end: sliceTo, token: {}, first: true, budgeted: true } };
+      return { ...mapped, covered: [], pending: { next: sliceFrom, end: sliceTo, token: {}, first: true, budgeted: true } };
     }
-    if (tr.docChanged && !prev.pending && !prev.set.size && !tr.effects.length
-      && tr.startState.readOnly === tr.state.readOnly
-      && tr.startState.field(referenceField).inlineKey === tr.state.field(referenceField).inlineKey
-      && tr.startState.field(compositionActive, false) === tr.state.field(compositionActive, false)
-      && paragraphTypingWindow(tr.startState, tr.state, tr.changes)) return mapped;
     const continuation = tr.effects.find(e => e.is(blockSliceReady));
     if (continuation && !tr.docChanged && prev.pending?.token === continuation.value)
-      return advanceBlocks(tr.state, mapped, prev.pending, prev.pending.first === true);
-    // 解析推进信号：Language.setState 事务使树快照换代（syntaxTree 按状态读 LanguageState；
-    // 该静态 effect 本版 .d.ts 未声明，树快照比对为同一信号的公开面）
+      return advanceSlices(tr.state, mapped, prev.pending, prev.pending.first === true);
+    // 解析推进信号（树快照换代等）与强制条件同旧口径。
     const forced = tr.selection != null || vp != null || tr.effects.some(e => e.is(referencesReady) || e.is(emojisReady) || e.is(fenceSourceChanged))
       || tr.startState.readOnly !== tr.state.readOnly
       || tr.startState.field(compositionActive, false) !== tr.state.field(compositionActive, false)
       || syntaxTree(tr.startState) !== syntaxTree(tr.state);
     if (!forced && !tr.docChanged) return mapped;
-    // 大文档 forced 全视口重建（挂载/滚动/解析/非空选区）先交付首片；
-    // 空光标纯移动仍走下方 v0.40 差集路径，绝不退化为全量重建。
     const pureCursor = !tr.docChanged && tr.selection != null && vp == null
       && tr.effects.length === 0 && syntaxTree(tr.startState) === syntaxTree(tr.state)
       && tr.startState.readOnly === tr.state.readOnly
       && tr.startState.field(compositionActive, false) === tr.state.field(compositionActive, false)
       && tr.startState.selection.ranges.every(r => r.empty) && tr.state.selection.ranges.every(r => r.empty);
     // 纯视口事务：重叠部分不重建。跨边界的块整块保留，新增边缘只扫描一次。
-    // 分片尚未完成时不把计划区间误当作已完成覆盖，仍由原分片路径补齐。
     const pureViewport = vp != null && !tr.docChanged && tr.selection == null
       && !!prev.deferred === !!deferred
       && tr.effects.every(e => e.is(liveViewport))
@@ -248,62 +320,73 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
     // 向下滚动时已交付前缀仍有效，延续下一片而非从新视口头重来。
     if (pureViewport && prev.pending && !prev.pending.remaining?.length && sliceFrom >= oldFrom && sliceFrom < prev.pending.next && sliceTo >= prev.pending.next) {
       const coveredEnd = Math.min(prev.pending.end, sliceTo);
+      const mergeLayoutNow = (kept: DecorationSet, mFrom: number, mTo: number): DecorationSet => {
+        if (mTo <= mFrom || !syntaxTreeAvailable(tr.state, mTo)) return kept;
+        const add: Range<Decoration>[] = [], starts = new Set<number>();
+        for (let c = blockLayout(tr.state, mFrom, mTo).iter(); c.value; c.next()) { add.push(c.value.range(c.from, c.to)); starts.add(c.from); }
+        return kept.update({ filter: f => !starts.has(f), add, sort: true });
+      };
       return { ...mapped,
-        set: set.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo }),
+        inline: mergeInlineWindow(inline, buildInline(tr.state, sliceFrom, sliceTo), sliceFrom, sliceTo, tr.newDoc.length),
+        block: block.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo }),
         layout: mergeLayoutNow(mapped.layout.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo }), coveredEnd, sliceTo),
         pending: prev.pending.next < sliceTo ? { ...prev.pending, end: sliceTo } : undefined,
       };
     }
     if (pureViewport && !prev.pending && sliceFrom < oldTo && sliceTo > oldFrom && prev.to > prev.from
       && syntaxTreeAvailable(tr.startState, prev.to) && syntaxTreeAvailable(tr.state, to)) {
-      let nextSet = set.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo });
-      let nextLayout = mapped.layout.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo });
       const edges = missingWindows({ from: sliceFrom, to: sliceTo }, [{ from: oldFrom, to: oldTo }]);
-      if (deferred) {
-        const edge = edges[0];
-        for (const uncovered of edges) nextLayout = mergeLayoutNow(nextLayout, uncovered.from, uncovered.to);
-        return { ...mapped, set: nextSet, layout: nextLayout, pending: edge
-          ? { next: edge.from, end: edge.to, token: {}, remaining: edges.slice(1), budgeted: true } : undefined };
-      }
+      const keptInline = inline.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo });
       const merge = (kept: DecorationSet, built: DecorationSet): DecorationSet => {
         const add: Range<Decoration>[] = [], starts = new Set<number>();
         for (let c = built.iter(); c.value; c.next()) { add.push(c.value.range(c.from, c.to)); starts.add(c.from); }
         return kept.update({ filter: f => !starts.has(f), add, sort: true });
       };
+      if (deferred) {
+        const mergeLayoutNow = (kept: DecorationSet, mFrom: number, mTo: number): DecorationSet => {
+          if (mTo <= mFrom || !syntaxTreeAvailable(tr.state, mTo)) return kept;
+          const add: Range<Decoration>[] = [], starts = new Set<number>();
+          for (let c = blockLayout(tr.state, mFrom, mTo).iter(); c.value; c.next()) { add.push(c.value.range(c.from, c.to)); starts.add(c.from); }
+          return kept.update({ filter: f => !starts.has(f), add, sort: true });
+        };
+        let nextLayout = mapped.layout.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo });
+        const edge = edges[0];
+        for (const uncovered of edges) nextLayout = mergeLayoutNow(nextLayout, uncovered.from, uncovered.to);
+        return { ...mapped, inline: keptInline, block: block.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo }), layout: nextLayout, pending: edge
+          ? { next: edge.from, end: edge.to, token: {}, remaining: edges.slice(1), budgeted: true } : undefined };
+      }
+      let nextBlock = block.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo });
+      let nextLayout = mapped.layout.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo });
       for (const edge of edges) {
         if (irPerfEnabled()) { recordBlockDecos(edge.from, edge.to); recordBlockLayout(edge.from, edge.to); }
-        nextSet = merge(nextSet, buildBlockDecos(tr.state, edge.from, edge.to, tables, deferred));
+        nextBlock = merge(nextBlock, buildBlockDecos(tr.state, edge.from, edge.to, tables, deferred));
         nextLayout = merge(nextLayout, blockLayout(tr.state, edge.from, edge.to));
       }
-      return { ...mapped, set: nextSet, layout: nextLayout, pending: undefined };
+      return { ...mapped, inline: keptInline, block: nextBlock, layout: nextLayout, pending: undefined };
     }
     if (vp?.value.scrolling && forced && !pureCursor)
-      return { ...mapped, layout: mergeLayoutNow(mapped.layout, sliceFrom, sliceTo),
+      return { ...mapped,
+        inline: mergeInlineWindow(inline, buildInline(tr.state, sliceFrom, sliceTo), sliceFrom, sliceTo, tr.newDoc.length),
+        covered: [{ from: sliceFrom, to: sliceTo }],
         pending: { next: sliceFrom, end: sliceTo, token: {}, first: true, budgeted: true } };
-    if (forced && !pureCursor && tr.newDoc.length >= 256 * 1024 && sliceTo - sliceFrom > BLOCK_SLICE_CHARS)
-      return advanceBlocks(tr.state, mapped, { next: sliceFrom, end: sliceTo, token: {},
+    if (forced && !pureCursor && tr.newDoc.length >= 256 * 1024 && sliceTo - sliceFrom > BLOCK_SLICE_CHARS && !tr.docChanged)
+      return advanceSlices(tr.state, mapped, { next: sliceFrom, end: sliceTo, token: {},
         ...(!tr.docChanged && vp && prev.deferred ? { budgeted: true } : {}) }, true);
-    // 解析未及界内：留待解析推进事务再建（闪源码优于错位件）
-    if (!syntaxTreeAvailable(tr.state, Math.min(tr.state.doc.length, to))) return mapped;
-    // 排版与网格分开更新：空行键入后立即恢复行高，不必重建活动表格。
-    if (irPerfEnabled()) recordBlockLayout(sliceFrom, sliceTo);
-    const layout = blockLayout(tr.state, sliceFrom, sliceTo);
-    // 纯选区差分重建（v0.40 规则 27）：forced 仅由选区驱动、无文档变更且前后选区均空时，
-    // 只对块级装饰随活动态翻转的块做窄区间重建；其余 forced 源（含非空选区事务）维持全视口重建。
-    // 空选区限定使 :1035/:1071 的 selected 外延谓词在差分路径内恒 false。
-    if (forced && !tr.docChanged && vp == null
-      && !tr.effects.some(e => e.is(referencesReady) || e.is(emojisReady) || e.is(fenceSourceChanged))
-      && tr.startState.readOnly === tr.state.readOnly
-      && tr.startState.field(compositionActive, false) === tr.state.field(compositionActive, false)
-      && syntaxTree(tr.startState) === syntaxTree(tr.state)
-      && tr.startState.selection.ranges.every(r => r.empty) && tr.state.selection.ranges.every(r => r.empty)) {
-      const prevProbe = makeActiveProbe(tr.startState.selection.ranges);
-      const currProbe = makeActiveProbe(tr.state.selection.ranges);
-      // 翻转集（块级装饰随空光标移动可翻转的节点）：
-      // - HorizontalRule / TableOfContents / 显示 RenderBlock：active 探针翻转（:1056/1060/1030）；
-      // - FencedCode：editingFence 位随光标离开围栏行衰减（writing.ts:71）→ 起始围栏折叠态翻转；
-      // - Table：空↔空下 selected 恒 false 且 tableDecos 无 active 门 → 装饰不变，不入翻转集。
-      // （SetextHeading 臂随 noSetextHeading 全局移除：下划线行已按 HorizontalRule 走探针臂。）
+    // ── 纯光标差分（五级口径：ActiveBlocks 变化 / 同块纯选区） ──
+    if (pureCursor) {
+      const prevBlocks = activeBlocks(tr.startState);
+      const currBlocks = activeBlocks(tr.state);
+      // 变化涉及的行内重建区间：变化块并集（同块移动时为该块本身——行内标记随光标翻转）。
+      let inlineFrom = -1, inlineTo = -1;
+      const union: { from: number; to: number }[] = [];
+      for (const b of prevBlocks) if (!currBlocks.some(c => c.from === b.from && c.to === b.to)) union.push(b);
+      for (const b of currBlocks) if (!prevBlocks.some(c => c.from === b.from && c.to === b.to)) union.push(b);
+      if (!union.length && currBlocks.length) union.push(...currBlocks.map(b => ({ from: b.from, to: b.to })));
+      for (const b of union) {
+        if (inlineFrom < 0 || b.from < inlineFrom) inlineFrom = b.from;
+        if (inlineTo < 0 || b.to > inlineTo) inlineTo = b.to;
+      }
+      // 受追踪块级件翻转集（块级装饰随空光标移动可翻转的节点：HR/TOC/显示渲染块/围栏折叠态）。
       let dirtyFrom = -1, dirtyTo = -1;
       visitVisible(syntaxTree(tr.state).topNode, Math.max(0, from - VIEWPORT_MARGIN), Math.min(tr.state.doc.length, to + VIEWPORT_MARGIN), node => {
         const name = node.name;
@@ -319,8 +402,8 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
           was = fenceEditing(tr.startState);
           is = fenceEditing(tr.state);
         } else {
-          was = prevProbe(node.from, node.to);
-          is = currProbe(node.from, node.to);
+          was = makeActiveProbe(tr.startState.selection.ranges)(node.from, node.to);
+          is = makeActiveProbe(tr.state.selection.ranges)(node.from, node.to);
         }
         if (was !== is) {
           if (dirtyFrom < 0) { dirtyFrom = node.from; dirtyTo = node.to; }
@@ -328,34 +411,61 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
         }
         return false;
       });
-      if (dirtyFrom < 0) return { ...mapped, layout, pending: tr.docChanged ? undefined : prev.pending };
+      if (irPerfEnabled()) recordBlockLayout(sliceFrom, sliceTo);
+      const layout = blockLayout(tr.state, sliceFrom, sliceTo);
+      if (dirtyFrom < 0 && inlineFrom < 0) return { ...mapped, layout, pending: prev.pending };
+      const nextInline = inlineFrom < 0 ? inline
+        : mergeInlineWindow(inline, buildInline(tr.state, Math.max(inlineFrom, sliceFrom), Math.min(inlineTo, sliceTo)), Math.max(inlineFrom, sliceFrom), Math.min(inlineTo, sliceTo), tr.newDoc.length);
+      if (dirtyFrom < 0) return { ...mapped, inline: nextInline, layout, pending: prev.pending };
       if (irPerfEnabled()) recordBlockDecos(dirtyFrom, dirtyTo);
-      const kept = set.update({ filter: (f, t) => t < dirtyFrom || f > dirtyTo });
+      const kept = block.update({ filter: (f, t) => t < dirtyFrom || f > dirtyTo });
       const rebuilt = buildBlockDecos(tr.state, dirtyFrom, dirtyTo, tables);
       const additions: Range<Decoration>[] = [];
       const cursor = rebuilt.iter();
       while (cursor.value) { additions.push(cursor.value.range(cursor.from, cursor.to)); cursor.next(); }
-      return { ...mapped, set: kept.update({ filter: () => true, add: additions }), layout, pending: prev.pending };
+      return { ...mapped, inline: nextInline, block: kept.update({ filter: () => true, add: additions }), layout, pending: prev.pending };
     }
-    if (irPerfEnabled() && forced) recordBlockDecos(sliceFrom, sliceTo);
-    return { set: forced ? buildBlockDecos(tr.state, sliceFrom, sliceTo, tables, deferred) : set, layout, from, to, tables, deferred };
-    } finally { recordIrWork('blockField', started); }
+    // ── 全量重建（文档变更/挂载/树推进/引用与表情更新/非空选区） ──
+    // 行内投影不被解析可用性拦截（旧 liveDeco 口径：部分树也按可见区间投影，键入即时反馈）；
+    // 块级/间距在解析未及界内时保留旧件，待树推进事务再建（闪源码优于错位件）。
+    // 键入的 liveDeco 探针记录由编排插件按实时 view.viewport 完成（见 mdViewOrchestrator.update）。
+    const typingSync = tr.docChanged && (tr.isUserEvent('input.type') || tr.isUserEvent('input') || tr.isUserEvent('delete') || tr.isUserEvent('paste') || tr.isUserEvent('drop'));
+    const inlineBuilt = mergeInlineWindow(inline, buildInline(tr.state, sliceFrom, sliceTo), sliceFrom, sliceTo, tr.newDoc.length);
+    if (!syntaxTreeAvailable(tr.state, Math.min(tr.state.doc.length, to))) {
+      return { ...mapped, inline: inlineBuilt, covered: [{ from: sliceFrom, to: sliceTo }] };
+    }
+    if (irPerfEnabled()) recordBlockLayout(sliceFrom, sliceTo);
+    const layout = blockLayout(tr.state, sliceFrom, sliceTo);
+    if (irPerfEnabled()) {
+      recordBlockDecos(sliceFrom, sliceTo);
+    }
+    const blockBuilt = buildBlockDecos(tr.state, sliceFrom, sliceTo, tables, deferred);
+    if (tr.docChanged && tr.newDoc.length >= 256 * 1024 && sliceTo - sliceFrom > BLOCK_SLICE_CHARS && !typingSync) {
+      // 大文档非键入全量重建：先交付首片，其余走预算分片（行内首片同步覆盖键入位）。
+      return advanceSlices(tr.state, { ...mapped, inline: inlineBuilt, layout }, { next: sliceFrom, end: sliceTo, token: {}, first: true,
+        ...(!tr.docChanged && vp && prev.deferred ? { budgeted: true } : {}) }, true);
+    }
+    return { inline: inlineBuilt,
+      block: blockBuilt, layout, from, to, covered: [{ from: sliceFrom, to: sliceTo }], tables, deferred };
+  } finally { recordIrWork('blockField', started); }
 }
 
-export const liveBlockField = StateField.define<LiveBlockState>({
-  create: (): LiveBlockState => ({ set: Decoration.none, layout: Decoration.none, from: 0, to: 0, tables: new Map() }),
-  provide: f => [EditorView.decorations.from(f, s => s.set), EditorView.decorations.from(f, s => s.layout)],
-  update: updateLiveBlocks,
+export const projectionField = StateField.define<ProjectionState>({
+  create: (): ProjectionState => ({ inline: Decoration.none, block: Decoration.none, layout: Decoration.none, from: 0, to: 0, covered: [], tables: new Map() }),
+  provide: f => [
+    EditorView.decorations.from(f, s => s.inline),
+    EditorView.decorations.from(f, s => s.block),
+    EditorView.decorations.from(f, s => s.layout),
+  ],
+  update: updateProjection,
 });
 
-/** 目标视口已解析并交付全部块级装饰，CM 可以按实际替换块恢复块内位置。 */
+/** 目标视口已解析并交付全部块级装饰，CM 可以按实际替换块恢复块内位置（P3 前保留）。 */
 export function liveAnchorReady(view: EditorView, line: number): boolean {
-  const state = view.state, doc = state.doc, blocks = state.field(liveBlockField);
+  const state = view.state, doc = state.doc, blocks = state.field(projectionField);
   const pos = doc.line(Math.min(doc.lines, Math.max(1, Math.floor(line)))).from;
   if (pos < blocks.from || pos > blocks.to || blocks.pending || blocks.deferred
     || !syntaxTreeAvailable(state, Math.min(doc.length, blocks.to + VIEWPORT_MARGIN))) return false;
-  // StateField 交付装饰与 CM 高度图生效并非同一时刻。必须等目标替换件真正进入高度图，
-  // 否则这里看到的仍是普通源码行，下一次 CM 测量会把恢复位置带回块首。
   let expected = false;
   for (let node = syntaxTree(state).resolveInner(pos, 1); node; node = node.parent!) {
     const selected = state.selection.ranges.some(r => !r.empty && r.from < node.to && r.to > node.from
@@ -369,7 +479,7 @@ export function liveAnchorReady(view: EditorView, line: number): boolean {
     }
   }
   let replacement: { from: number; to: number } | undefined;
-  blocks.set.between(pos, pos, (from, to, decoration) => {
+  blocks.block.between(pos, pos, (from, to, decoration) => {
     if (decoration.spec.blockAtomic && from <= pos && to >= pos) replacement = { from, to };
   });
   if (!replacement) return !expected;
@@ -377,8 +487,9 @@ export function liveAnchorReady(view: EditorView, line: number): boolean {
   return measured.from <= replacement.from && measured.to >= replacement.to;
 }
 
-/** 视口变化经帧队列报给状态层；避免在 CM 测量/ResizeObserver 的微任务里再次改布局。 */
-export const viewportReporter = ViewPlugin.fromClass(
+// ── 编排插件（吸收 viewportReporter + 分片续跑；不含投影逻辑） ──
+
+export const mdViewOrchestrator = ViewPlugin.fromClass(
   class {
     private dead = false;
     private pending = false;
@@ -430,7 +541,6 @@ export const viewportReporter = ViewPlugin.fromClass(
       this.view.state.facet(blockHeightCache)?.invalidateLayout();
       heightMeasurements(this.view)?.measure();
       this.geometryDirty = true;
-      // (2026-10-30 M12) minimap 拖拽中不触发 settle 补偿——拖拽本身就在设置 scrollTop，补偿会与用户意图对抗
       this.scrolling = false;
       clearUserScroll(this.view.scrollDOM);
       this.ignoreScrollUntil = performance.now() + 100;
@@ -443,9 +553,7 @@ export const viewportReporter = ViewPlugin.fromClass(
       const moved = scrollTop !== this.lastScrollTop || scrollLeft !== this.lastScrollLeft;
       this.lastScrollTop = scrollTop; this.lastScrollLeft = scrollLeft;
       if (!moved) return;
-      // 只有用户发起的滚动才进入滚动占位模式。CM6 滚动锚因块高度变化改写 scrollTop 也会派发 scroll，
-      // 修前把它当用户在滚：进占位→高度变→锚点再补偿→再派发 scroll，停手后视口往复回弹。
-      // 程序跳转（大纲/查找/切换还原）同理不进占位：目标视口直接完整渲染。
+      // 只有用户发起的滚动才进入滚动占位模式；程序跳转/滚动锚补偿直接完整渲染。
       if (!userScrolledRecently(this.view.scrollDOM)) { this.report(this.view); return; }
       if (performance.now() - this.lastEdit < 100 || performance.now() < this.ignoreScrollUntil || this.geometryDirty) return;
       this.scrolling = true;
@@ -457,8 +565,6 @@ export const viewportReporter = ViewPlugin.fromClass(
       }, 100);
       this.report(this.view);
     };
-    /** 停稳：逐片完成滚动期的延迟块。视觉位置交给 CM6 自带的滚动锚（更新前记锚块、测量后
-     *  按其高度差改 scrollTop）——修前这里另写一次像素补偿，与 CM6 的锚定叠加成双重补偿。 */
     private restoreSettledAnchor(): void {
       if (this.dead) return;
       clearUserScroll(this.view.scrollDOM);
@@ -469,16 +575,20 @@ export const viewportReporter = ViewPlugin.fromClass(
     }
     update(u: ViewUpdate): void {
       notifyCmRestoreLayout(u.view);
-      if (u.docChanged) { this.lastEdit = performance.now(); this.scrolling = false; clearTimeout(this.settleTimer); }
+      if (u.docChanged || u.geometryChanged) u.view.scrollDOM.dispatchEvent(new Event('md-layout'));
+      if (u.docChanged) {
+        this.lastEdit = performance.now(); this.scrolling = false; clearTimeout(this.settleTimer);
+        // 键入探针按实时视口记录（旧 liveDeco ViewPlugin 口径：状态层读不到 view.viewport）。
+        if (irPerfEnabled()) recordLiveDeco(Math.max(0, u.view.viewport.from - VIEWPORT_MARGIN), Math.min(u.view.state.doc.length, u.view.viewport.to + VIEWPORT_MARGIN));
+      }
       if (u.viewportChanged) this.report(u.view);
       this.cancelFrame();
-      const pending = u.state.field(liveBlockField).pending;
+      const pending = u.state.field(projectionField).pending;
       if (pending && !u.state.field(compositionActive, false)) {
         const next = () => {
           this.frame = 0;
-          if (!this.dead && u.view.state.field(liveBlockField).pending?.token === pending.token) {
+          if (!this.dead && u.view.state.field(projectionField).pending?.token === pending.token) {
             dispatchIrLayout(u.view, blockSliceReady.of(pending.token));
-            // 行内与块装饰都写完后，由 CM 一次测量完成本片高度与锚定。
             measureAfterRender(u.view, () => { if (!this.dead) { u.view.lineBlockAtHeight(0); notifyCmRestoreLayout(u.view); } });
           }
         };
@@ -503,9 +613,8 @@ export const viewportReporter = ViewPlugin.fromClass(
       this.reportFrame = requestIrFrame(() => {
         this.reportFrame = 0;
         this.pending = false;
-        // 期间可能撤销/缩短文档，必须取派发时视口，不能回灌旧坐标。
         if (this.dead) return;
-        const { from, to } = view.viewport, previous = view.state.field(liveBlockField);
+        const { from, to } = view.viewport, previous = view.state.field(projectionField);
         const geometryChanged = this.geometryDirty;
         const complete = geometryChanged || this.settleDirty;
         this.geometryDirty = false;
@@ -517,7 +626,6 @@ export const viewportReporter = ViewPlugin.fromClass(
           measureAfterRender(view, () => { if (!this.dead) { view.lineBlockAtHeight(0); notifyCmRestoreLayout(view); } });
         }
         if (complete) {
-          // 停滚只补齐正文，不作废同一字体/宽度下的表格行高。
           if (geometryChanged) view.scrollDOM.dispatchEvent(new Event('mdir-layout-refresh'));
           view.requestMeasure();
         }
@@ -526,7 +634,16 @@ export const viewportReporter = ViewPlugin.fromClass(
   }
 );
 
-// ── 查找高亮（FindBar「全部高亮」视口承载，规则 20） ──
+/** 即时渲染统一引擎装配（livepreview 以此替换 liveBlockField + viewportReporter + liveDeco 三件）。 */
+export function mdViewEngine(): Extension {
+  return [
+    projectionField,
+    EditorView.atomicRanges.of(view => view.state.field(projectionField).block.update({ filter: (_from, _to, value) => !!(value.spec.fence || value.spec.blockAtomic || (value as unknown as { widget?: WidgetType & { fence?: boolean } }).widget?.fence) })),
+    mdViewOrchestrator,
+  ];
+}
+
+// ── 查找高亮（FindBar「全部高亮」视口承载，自 live-block-field 搬移） ──
 
 export interface LiveFindQuery { needle: string; opts: FindOptions }
 export const findQueryChanged = StateEffect.define<null>();

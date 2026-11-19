@@ -46,10 +46,10 @@ describe('MD-06 正在键入的闭合围栏', () => {
     main.dispatch({ selection: { anchor: source.length } }); type(main, mark);
     expect(main.state.doc.toString()).toBe(source + mark);
     await until(() => main.contentDOM.textContent?.endsWith(mark) === true);
-    const { liveBlockField } = await import('../src/markdown-view/live-block-field');
+    const { projectionField } = await import('../src/markdown-view/md-view-plugin');
     const close = main.state.doc.lineAt(main.state.doc.length);
     const hidden: number[] = [];
-    main.state.field(liveBlockField).set.between(close.from, close.to, (from, to) => {
+    main.state.field(projectionField).block.between(close.from, close.to, (from, to) => {
       if (from <= close.from && to >= close.to) hidden.push(from);
     });
     expect(hidden).toEqual([]);
