@@ -43,6 +43,21 @@ const counters: Record<'liveDeco' | 'blockDecos' | 'blockLayout', RebuildCounter
   blockDecos: { count: 0, lastWindow: null },
   blockLayout: { count: 0, lastWindow: null },
 };
+// —— REQ-014 P0 计数探针（语义见 specs/001-markdown-ir-rewrite）——
+// typingRebuildMs：input.type 文档变更事务的 t0→t3 总耗时（事务起点到 DOM 提交）；
+// cursorWidthChange：同一行内纯选区移动导致该行渲染内容宽度变化的次数（>0.5px 视为变化）；
+// scrollReplaceCount：纯滚动（无文档/选区变更）期间，先前已挂载且源码位置仍在视口 ±300 内的
+//   异步块根（.md-render-target / .mdir-tablebox / img）被卸载替换的次数；
+// decoRebuild：recordWindow 调用口径的装饰重建窗口统计（calls / lastFrom / lastTo / maxSpan）。
+const typingSamples = new RingBuffer<number>();
+let cursorWidthChanges = 0;
+let scrollReplacements = 0;
+const decoRangeStats = { calls: 0, lastFrom: null as number | null, lastTo: null as number | null, maxSpan: 0 };
+type WidthBaseline = { width: number; line: number };
+const widthBaselines = new WeakMap<EditorView, WidthBaseline | null>();
+const asyncRoots = new WeakMap<EditorView, Map<Element, number>>();
+const req014HasData = (): boolean =>
+  typingSamples.snapshot().length > 0 || cursorWidthChanges > 0 || scrollReplacements > 0 || decoRangeStats.calls > 0;
 let starts = new WeakMap<EditorState, number>();
 let phases = new WeakMap<ViewUpdate, { t1: number; t2: number }>();
 
@@ -60,6 +75,10 @@ function recordWindow(counter: RebuildCounter, from: number, to: number): void {
   exposeSnapshot();
   counter.count++;
   counter.lastWindow = { from, to };
+  decoRangeStats.calls++;
+  decoRangeStats.lastFrom = from;
+  decoRangeStats.lastTo = to;
+  decoRangeStats.maxSpan = Math.max(decoRangeStats.maxSpan, to - from);
 }
 export function recordLiveDeco(from: number, to: number): void { recordWindow(counters.liveDeco, from, to); }
 export function recordBlockDecos(from: number, to: number): void { recordWindow(counters.blockDecos, from, to); }
@@ -83,11 +102,31 @@ export function irPerfSnapshot() {
     counters: { liveDeco: counterSnapshot(counters.liveDeco), blockDecos: counterSnapshot(counters.blockDecos), blockLayout: counterSnapshot(counters.blockLayout) },
     fullRebuildEvents: fullRebuildEvents.snapshot().map(event => ({ ...event })),
     ...(irPerfEnabled() || work.length ? { workSamples: work.map(sample => ({ ...sample })) } : {}),
+    ...(irPerfEnabled() || req014HasData() ? {
+      req014: {
+        typingRebuildMs: (() => {
+          const sorted = typingSamples.snapshot().slice().sort((a, b) => a - b);
+          return {
+            count: sorted.length,
+            p50: percentileOf(sorted, 0.5), p95: percentileOf(sorted, 0.95), max: sorted[sorted.length - 1] ?? 0,
+          };
+        })(),
+        cursorWidthChange: cursorWidthChanges,
+        scrollReplaceCount: scrollReplacements,
+        decoRebuild: { ...decoRangeStats },
+      },
+    } : {}),
   };
 }
 
+function percentileOf(sorted: readonly number[], fraction: number): number {
+  return sorted.length ? sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * fraction) - 1)] : 0;
+}
+
 export function irPerfReset(): void {
-  segments.reset(); fullRebuildEvents.reset(); workSamples.reset();
+  segments.reset(); fullRebuildEvents.reset(); workSamples.reset(); typingSamples.reset();
+  cursorWidthChanges = 0; scrollReplacements = 0;
+  decoRangeStats.calls = 0; decoRangeStats.lastFrom = null; decoRangeStats.lastTo = null; decoRangeStats.maxSpan = 0;
   for (const counter of Object.values(counters)) { counter.count = 0; counter.lastWindow = null; }
   starts = new WeakMap(); phases = new WeakMap();
 }
@@ -122,12 +161,52 @@ const domCommitted = Prec.highest(EditorView.updateListener.of(update => {
     const t0 = starts.get(tr.startState);
     if (t0 === undefined) continue;
     segments.push({ t0, ...phase, t3, docChanged: tr.docChanged, length: tr.newDoc.length });
+    if (tr.docChanged && tr.isUserEvent('input.type')) typingSamples.push(t3 - t0);
     starts.delete(tr.startState);
   }
   phases.delete(update);
 }));
 
+// REQ-014 P0：行宽稳定性与纯滚动替换探针。探针只读 DOM 状态、全程 try 守护，
+// 不承担正确性职责；jsdom 下 Range/几何为桩值，测量自然归零（不影响单测口径）。
+const req014GeometryProbe = EditorView.updateListener.of(update => {
+  if (!irPerfEnabled()) return;
+  const view = update.view;
+  if (update.docChanged) {
+    widthBaselines.set(view, null);
+  } else if (update.selectionSet) {
+    try {
+      const head = update.state.selection.main.head;
+      const lineNo = update.state.doc.lineAt(head).number;
+      const spot = view.domAtPos(head);
+      const lineEl = (spot.node instanceof Element ? spot.node : spot.node.parentElement)?.closest('.cm-line') ?? null;
+      if (lineEl) {
+        const range = document.createRange();
+        range.selectNodeContents(lineEl);
+        const width = range.getBoundingClientRect().width;
+        const baseline = widthBaselines.get(view) ?? null;
+        if (baseline && baseline.line === lineNo && Math.abs(width - baseline.width) > 0.5) cursorWidthChanges++;
+        widthBaselines.set(view, { width, line: lineNo });
+      } else widthBaselines.set(view, null);
+    } catch { widthBaselines.set(view, null); }
+  }
+  try {
+    const live = new Map<Element, number>();
+    for (const el of [...view.dom.querySelectorAll('.md-render-target, .mdir-tablebox, img')] as HTMLElement[]) {
+      try { live.set(el, view.posAtDOM(el, 0)); } catch { /* 无法定位的根不入册 */ }
+    }
+    if (update.viewportChanged && !update.docChanged && !update.selectionSet) {
+      const previous = asyncRoots.get(view);
+      if (previous) for (const [el, pos] of previous) {
+        if (!live.has(el) && !el.isConnected
+          && pos >= view.viewport.from - 300 && pos <= view.viewport.to + 300) scrollReplacements++;
+      }
+    }
+    asyncRoots.set(view, live);
+  } catch { /* 探针不承担正确性 */ }
+});
+
 export function irPerfProbe(): Extension {
   if (irPerfEnabled()) exposeSnapshot();
-  return [transactionStart, stateFieldsDone, decorationsDone, domCommitted];
+  return [transactionStart, stateFieldsDone, decorationsDone, domCommitted, req014GeometryProbe];
 }

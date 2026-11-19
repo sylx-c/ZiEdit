@@ -82,3 +82,19 @@ it('正文 + 下划长划线渲染为段落 + 分隔线（不再升级标题）'
     expect(host.textContent).not.toContain('**');
   } finally { dispose(); }
 });
+
+// REQ-014 P0 覆盖审计补缺：仅含单一标题的文档（无正文）挂载与投影正常，光标进入展开、离开收起。
+it('仅含单一标题的文档：挂载不抛、投影正常、标记显隐切换', async () => {
+  const { host, preview, dispose } = await mount('# 仅标题\n');
+  try {
+    await vi.waitFor(() => expect(host.textContent).toContain('仅标题'), { timeout: 2500 });
+    const doc = preview.view.state.doc;
+    const heading = doc.line(1);
+    // 空光标置于标题正文内部：井号展开。
+    preview.view.dispatch({ selection: { anchor: heading.from + 2 }, userEvent: 'select.pointer' });
+    await settle(host, true);
+    // 离开到文末：井号收起。
+    preview.view.dispatch({ selection: { anchor: doc.length }, userEvent: 'select.pointer' });
+    await settle(host, false);
+  } finally { dispose(); }
+});

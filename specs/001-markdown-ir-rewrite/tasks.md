@@ -28,8 +28,8 @@ description: "Task list for feature implementation"
 
 **Purpose**: 环境与基线就绪，确认改造前一切绿。
 
-- [ ] T001 验证门禁环境与基线：Windows 60Hz 本地物理控制台（确认无远程显示适配器活跃）、`npm ci`、标准提交前门禁全绿；记录 `npm test` 的 141 文件改造前基线与各项数值
-- [ ] T002 创建本地行为基准目录 `docs/tmp/ir-rewrite-baselines/`（已 gitignore，不入公开仓库）
+- [x] T001 验证门禁环境与基线：Windows 60Hz 本地物理控制台（确认无远程显示适配器活跃）、`npm ci`、标准提交前门禁全绿；记录 `npm test` 的 141 文件改造前基线与各项数值
+- [x] T002 创建本地行为基准目录 `docs/tmp/ir-rewrite-baselines/`（已 gitignore，不入公开仓库）
 
 **Checkpoint**: 基线全绿，可开始 P0。
 
@@ -40,10 +40,10 @@ description: "Task list for feature implementation"
 **Purpose**: 在改任何代码之前锁住当前行为事实；未完成前禁止任何用户故事开工。
 
 - [ ] T003 对五份基准语料（GFM 表格含粗体行内码 / 真 ATX 标题 1–6 / 围栏内假标题 / `---` 下划线行 / 嵌套列表+引用+行内公式）在即时渲染、分屏、独立预览三面截图，存 `docs/tmp/ir-rewrite-baselines/`
-- [ ] T004 [P] 审计 spec.md Edge Cases（空文档/单标题、跨块选区、解析未就绪、IME、表格 500/501 行、未闭合围栏）的现有测试覆盖并记录到 `docs/tmp/ir-rewrite-baselines/coverage.md`；在 `src/markdown-view/live-heading.test.ts` 增加「空光标在块外 / 块内 / 块边界」三种场景装饰断言，对审计发现的空缺在对应现有测试文件补回归测试
-- [ ] T005 [P] 在 `src/markdown-view/render-correctness.test.ts` 增加五份语料断言（不归一化 `s`/`del`）
-- [ ] T006 在 `src/markdown-view/ir-perf.ts` 增加四个计数探针：`typingRebuildMs` / `scrollReplaceCount` / `cursorWidthChange` / `decoRebuildRange`
-- [ ] T007 P0 检查点：标准提交前门禁全绿、四探针可读数；覆盖审计无未处置空缺
+- [x] T004 [P] 审计 spec.md Edge Cases（空文档/单标题、跨块选区、解析未就绪、IME、表格 500/501 行、未闭合围栏）的现有测试覆盖并记录到 `docs/tmp/ir-rewrite-baselines/coverage.md`；在 `src/markdown-view/live-heading.test.ts` 增加「空光标在块外 / 块内 / 块边界」三种场景装饰断言，对审计发现的空缺在对应现有测试文件补回归测试
+- [x] T005 [P] 在 `src/markdown-view/render-correctness.test.ts` 增加五份语料断言（不归一化 `s`/`del`）
+- [x] T006 在 `src/markdown-view/ir-perf.ts` 增加四个计数探针：`typingRebuildMs` / `scrollReplaceCount` / `cursorWidthChange` / `decoRebuildRange`
+- [x] T007 P0 检查点：标准提交前门禁全绿、四探针可读数；覆盖审计无未处置空缺
 
 **Checkpoint**: 行为基准与探针就绪——用户故事（阶段）实现可以开始。
 

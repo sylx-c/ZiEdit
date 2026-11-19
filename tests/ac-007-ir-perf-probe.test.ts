@@ -284,4 +284,26 @@ describe('007 AC-36 IR performance probe', () => {
     await vi.advanceTimersByTimeAsync(300);
     expect(irPerfSnapshot().fullRebuildEvents.filter(event => event.kind === 'referencesReady')).toHaveLength(0);
   });
+
+  // REQ-014 P0：四个计数探针可在快照中读数；禁用且无数据时该节不出现（保持禁用态严格快照口径）。
+  it('exposes REQ-014 probes (typingRebuildMs/cursorWidthChange/scrollReplaceCount/decoRebuild)', async () => {
+    vi.stubGlobal('__ZIEDIT_IR_PERF__', true);
+    const preview = await mount('plain');
+    type(preview.view, 'x');
+
+    const snapshot = irPerfSnapshot();
+    expect(snapshot.req014).toBeDefined();
+    expect(snapshot.req014!.typingRebuildMs.count).toBe(1);
+    expect(snapshot.req014!.typingRebuildMs.max).toBeGreaterThanOrEqual(snapshot.req014!.typingRebuildMs.p50);
+    expect(snapshot.req014!.cursorWidthChange).toBe(0);
+    expect(snapshot.req014!.scrollReplaceCount).toBe(0);
+    expect(snapshot.req014!.decoRebuild.calls).toBeGreaterThanOrEqual(1);
+    expect(snapshot.req014!.decoRebuild.lastFrom).not.toBeNull();
+    expect(snapshot.req014!.decoRebuild.maxSpan).toBeGreaterThan(0);
+
+    vi.stubGlobal('__ZIEDIT_IR_PERF__', false);
+    expect(irPerfSnapshot().req014).toEqual(snapshot.req014); // 已有数据仍可读
+    irPerfReset();
+    expect(irPerfSnapshot().req014).toBeUndefined(); // 禁用且无数据：节整体缺席
+  });
 });
