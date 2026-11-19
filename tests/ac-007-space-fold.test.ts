@@ -6,7 +6,7 @@ import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { ensureSyntaxTree } from '@codemirror/language';
 import { buildLiveDeco } from '../src/markdown-view/live-deco';
 import { emojiField, referenceField } from '../src/markdown-view/live-state';
-import { findHighlighter } from '../src/markdown-view/live-block-field';
+import { findHighlighter } from '../src/markdown-view/md-view-plugin';
 
 function mount(anchor: number, head = anchor) {
   const source = '甲   乙\n\n`code   literal`\n\n尾段';

@@ -75,9 +75,9 @@ description: "Task list for feature implementation"
 
 - [x] T008 [US1] 新建 `src/markdown-view/active-block.ts`：实现 `activeBlocks(state): ActiveBlocks`，空光标返回零/一个块、非空选区按文档序返回全部相交块；逐字段依据 data-model.md §1 的 `ActiveBlock.from`、`ActiveBlock.to`、`ActiveBlock.kind`；在 `src/markdown-view/active-block.test.ts` 覆盖空光标、块边界与跨块选区
 - [x] T009 [US1] 新建 `src/markdown-view/projector.ts`：从 `src/markdown-view/live-deco.ts` 提取投影核心为纯函数 `projectViewport(doc, tree, viewport, active: ActiveBlocks, refs, emojis, baseDir, remoteResolve?)`，契约按 contracts/rendering-seams.md §2；在 `src/markdown-view/projector.test.ts` 覆盖纯函数输入、行 class 与块级 replace 输出
-- [ ] T010 [US1] 新建 `src/markdown-view/md-view-plugin.ts`：单一 ViewPlugin（blockAtomic），`needsRebuild` 五级分级按 data-model.md §3（视口内变更只作一次同步投影/视口变化/ActiveBlocks 集合变化/同块纯选区/纯滚动）；在 `src/markdown-view/md-view-plugin.test.ts` 覆盖五级调度与已挂载块零替换
-- [ ] T011 [US1] `src/markdown-view/livepreview.ts` 换用新插件，移除 liveDeco ViewPlugin + liveBlockField StateField 装配；类壳精简（目标 ≤400 行，P6 复核）
-- [ ] T012 [US1] 新引擎测试稳定后删除 `src/markdown-view/live-block-field.ts`、`src/markdown-view/deco-window.ts`、`src/markdown-view/typing-window.ts`，并按处置表删除 `src/markdown-view/typing-window.test.ts`、`src/markdown-view/geometry-refresh.test.ts`、`src/markdown-view/ir-cache.test.ts`；迁移 `src/markdown-view/input-order.test.ts` 的 liveViewport 依赖，修复其余受影响引用
+- [x] T010 [US1] 新建 `src/markdown-view/md-view-plugin.ts`：单一 ViewPlugin（blockAtomic），`needsRebuild` 五级分级按 data-model.md §3（视口内变更只作一次同步投影/视口变化/ActiveBlocks 集合变化/同块纯选区/纯滚动）；在 `src/markdown-view/md-view-plugin.test.ts` 覆盖五级调度与已挂载块零替换
+- [x] T011 [US1] `src/markdown-view/livepreview.ts` 换用新插件，移除 liveDeco ViewPlugin + liveBlockField StateField 装配；类壳精简（目标 ≤400 行，P6 复核）
+- [x] T012 [US1] 新引擎测试稳定后删除 `src/markdown-view/live-block-field.ts`、`src/markdown-view/deco-window.ts`、`src/markdown-view/typing-window.ts`，并按处置表删除 `src/markdown-view/typing-window.test.ts`、`src/markdown-view/geometry-refresh.test.ts`、`src/markdown-view/ir-cache.test.ts`；迁移 `src/markdown-view/input-order.test.ts` 的 liveViewport 依赖，修复其余受影响引用
 - [ ] T013 [US1] P1 检查点：标准提交前门禁 + gate-ir-settle + gate-md-editing 全绿；typingRebuildMs P95 ≤8ms、scrollReplaceCount = 0
 
 **Checkpoint**: US1 独立可测交付——两套引擎已合一，键入跟手达标。

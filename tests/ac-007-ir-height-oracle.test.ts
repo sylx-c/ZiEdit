@@ -4,7 +4,7 @@ import { EditorState } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
 import { BlockHeightCache, blockHeightCache, BlockHeightMeasurements } from '../src/markdown-view/block-height-cache';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
-import { liveBlockField, liveViewport, liveGeometryChanged, blockSliceReady } from '../src/markdown-view/live-block-field';
+import { projectionField as liveBlockField, liveViewport, liveGeometryChanged, blockSliceReady } from '../src/markdown-view/md-view-plugin';
 import { referenceField, emojiField } from '../src/markdown-view/live-state';
 
 it('实测内容在滚出及停稳期间保留，编辑身份不误命中', () => {
@@ -28,10 +28,10 @@ it('实测内容在滚出及停稳期间保留，编辑身份不误命中', () =
     measurements.unregister(box); box.remove();
     state = state.update({ effects: liveViewport.of({ from: 0, to: doc.length, scrolling: true }) }).state;
     state = state.update({ effects: blockSliceReady.of(state.field(liveBlockField).pending!.token) }).state;
-    const widget = state.field(liveBlockField).set.iter().value!.spec.widget;
+    const widget = state.field(liveBlockField).block.iter().value!.spec.widget;
     expect(widget.estimatedHeight).toBe(137.25);
     state = state.update({ effects: liveGeometryChanged.of(null) }).state;
-    expect(state.field(liveBlockField).set.iter().value!.spec.widget.estimatedHeight).toBe(137.25);
+    expect(state.field(liveBlockField).block.iter().value!.spec.widget.estimatedHeight).toBe(137.25);
     state = state.update({ changes: { from: doc.indexOf('b |'), insert: 'changed' } }).state;
     expect(cache.get(identity)).toBeUndefined();
   } finally { measurements.destroy(); content.remove(); }
