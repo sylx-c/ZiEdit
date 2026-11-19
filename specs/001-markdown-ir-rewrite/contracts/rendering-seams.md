@@ -13,7 +13,7 @@
 
 ## 2. 投影器纯函数契约：`projector.ts`
 
-- 签名语义：`(doc, tree, viewport(±300 字符), active, refs, emojis, baseDir, remoteResolve?) → DecorationSet`。
+- 签名语义：`(doc, tree, viewport(±300 字符), active: ActiveBlocks, refs, emojis, baseDir, remoteResolve?) → DecorationSet`；`ActiveBlocks` 的定义见 data-model.md §1。
 - **必须**：只读语法树 + 文本 + 光标集合；不读 DOM、不异步、不保存状态；同步完成（无图无公式正文 ≤2ms 基准）。
 - **必须**：块级标记（`#` `>` `-`）只输出行 class（留白栏承载），不插入标记文本进正文行。
 - **必须**：异步块（公式 / Mermaid / 图片 / 表格）只输出 `Decoration.replace({ block: true })`。

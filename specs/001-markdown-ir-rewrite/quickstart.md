@@ -7,14 +7,14 @@
 ## 前置条件
 
 - Node 24（满足 pdfjs-dist engines）、`npm ci` 已安装依赖。
-- 单元/集成验证：`npm test`、`npx tsc --noEmit`。
+- 每次提交前固定通过：`npm test`、`npx tsc --noEmit`、`cargo test --manifest-path src-tauri/Cargo.toml`、`cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings`、`cargo fmt --manifest-path src-tauri/Cargo.toml --check`、`npm run license:check`；涉及分发材料时加 `npm run license:dist`。
 - 原生性能门禁（仅 Windows）：**60Hz 本地物理控制台**（远程虚拟屏 32Hz 会让帧节律门禁全挂，先确认无远程显示适配器活跃）；每阶段独立运行目录，不跨阶段复用 profile。
 
 ## 阶段门禁矩阵（每阶段必须全绿才进下一阶段）
 
 | 阶段 | 命令 | 通过条件 |
 |---|---|---|
-| P0–P6 通用 | `npm test` ＋ `npx tsc --noEmit` | 141 测试文件全绿、类型零错误 |
+| P0–P6 通用 | 上述完整提交前门禁 | 全部保留测试与检查通过；141 文件仅是 P0 改造前基线，不作为删除旧测试后的最终数量 |
 | P1 | gate-ir-settle、gate-md-editing | 探针 typingRebuildMs P95 ≤8ms；scrollReplaceCount = 0 |
 | P2 | + gate-md-structure、gate-md-consistency | cursorWidthChange = 0；五语料三面截图一致 |
 | P3 | + gate-scroll-position、gate-md-surfaces | 停稳顶部位移 ≤1px |

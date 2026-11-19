@@ -19,7 +19,7 @@
 ## 2. 关键机制可行性（已验证的事实依据）
 
 - **ViewPlugin 承载块级装饰**：CM6 6.x 允许 ViewPlugin 提供块级装饰（blockAtomic 前提），由此可消除 liveBlockField 的 StateField——这是「两套合一」的技术前提。
-- **needsRebuild 五级分级**：视口内文档变更→重建视口内；视口变化→重建新视口；光标块进出（activeBlock 边界跨越）→只重建光标前后各一块；纯选区变化→只更新光标块行内装饰；纯滚动→对新进视口区间增量投影，不动已挂载装饰。
+- **needsRebuild 五级分级**：视口内文档变更→执行一次同步纯函数视口投影；视口变化→重建新视口；活动块集合变化（`ActiveBlocks` 成员或边界变化）→只重建变化前后涉及的活动块；同块内纯选区变化→只更新该块行内装饰；纯滚动→对新进视口区间增量投影，不动已挂载装饰。
 - **异步块高度策略**：挂件 estimatedHeight 给占位初值，渲染完成后 `requestMeasure` 仅更新高度图、不写 scrollTop——取代高度预言机。
 - **块级标记留白栏**：`Decoration.line({ class })` + CSS `::before` 伪元素承载 `#` `>` `-`，不把标记文本插入正文行——消除行宽跳动的关键。
 - **表格直接 DOM**：现行 cooperative-table（Lezer 扩展）+ table-viewport（行虚拟化）+ table-editor（内嵌 CM6）共 648 行是「DOM 当状态」最重的部分；替换为 `TableWidget.toDOM()` 生成真 `<table>`、单元格 contenteditable、blur 单事务写回；≤500 行全渲染、>500 行退化源码显示（Typora 行为）。Tab/Shift-Tab/Mod-Enter 操作逻辑从 live-table-actions.ts 提取保留。
