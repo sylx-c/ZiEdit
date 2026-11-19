@@ -429,22 +429,27 @@ function updateProjection(prev: ProjectionState, tr: Transaction): ProjectionSta
     // 行内投影不被解析可用性拦截（旧 liveDeco 口径：部分树也按可见区间投影，键入即时反馈）；
     // 块级/间距在解析未及界内时保留旧件，待树推进事务再建（闪源码优于错位件）。
     // 键入的 liveDeco 探针记录由编排插件按实时 view.viewport 完成（见 mdViewOrchestrator.update）。
-    const typingSync = tr.docChanged && (tr.isUserEvent('input.type') || tr.isUserEvent('input') || tr.isUserEvent('delete') || tr.isUserEvent('paste') || tr.isUserEvent('drop'));
-    const inlineBuilt = mergeInlineWindow(inline, buildInline(tr.state, sliceFrom, sliceTo), sliceFrom, sliceTo, tr.newDoc.length);
     if (!syntaxTreeAvailable(tr.state, Math.min(tr.state.doc.length, to))) {
-      return { ...mapped, inline: inlineBuilt, covered: [{ from: sliceFrom, to: sliceTo }] };
+      return { ...mapped, inline: mergeInlineWindow(inline, buildInline(tr.state, sliceFrom, sliceTo), sliceFrom, sliceTo, tr.newDoc.length), covered: [{ from: sliceFrom, to: sliceTo }] };
     }
     if (irPerfEnabled()) recordBlockLayout(sliceFrom, sliceTo);
     const layout = blockLayout(tr.state, sliceFrom, sliceTo);
     if (irPerfEnabled()) {
       recordBlockDecos(sliceFrom, sliceTo);
     }
-    const blockBuilt = buildBlockDecos(tr.state, sliceFrom, sliceTo, tables, deferred);
-    if (tr.docChanged && tr.newDoc.length >= 256 * 1024 && sliceTo - sliceFrom > BLOCK_SLICE_CHARS && !typingSync) {
-      // 大文档非键入全量重建：先交付首片，其余走预算分片（行内首片同步覆盖键入位）。
+    if (tr.newDoc.length >= 256 * 1024 && sliceTo - sliceFrom > BLOCK_SLICE_CHARS) {
+      if (tr.docChanged) {
+        // 大文档键入：光标锚定首片同步交付（±1k 字符即时反馈），其余视口预算分片续跑；
+        // 锚前区域保留映射旧装饰，不闪源码（冷启动密集语料下整视口同步重建实测会击穿 50ms 事务硬线）。
+        const anchor = Math.max(sliceFrom, Math.min(tr.state.selection.main.head, sliceTo) - 1024);
+        return advanceSlices(tr.state, mapped, { next: anchor, end: sliceTo, token: {}, first: false }, false);
+      }
+      const inlineBuilt = mergeInlineWindow(inline, buildInline(tr.state, sliceFrom, sliceTo), sliceFrom, sliceTo, tr.newDoc.length);
       return advanceSlices(tr.state, { ...mapped, inline: inlineBuilt, layout }, { next: sliceFrom, end: sliceTo, token: {}, first: true,
         ...(!tr.docChanged && vp && prev.deferred ? { budgeted: true } : {}) }, true);
     }
+    const inlineBuilt = mergeInlineWindow(inline, buildInline(tr.state, sliceFrom, sliceTo), sliceFrom, sliceTo, tr.newDoc.length);
+    const blockBuilt = buildBlockDecos(tr.state, sliceFrom, sliceTo, tables, deferred);
     return { inline: inlineBuilt,
       block: blockBuilt, layout, from, to, covered: [{ from: sliceFrom, to: sliceTo }], tables, deferred };
   } finally { recordIrWork('blockField', started); }
