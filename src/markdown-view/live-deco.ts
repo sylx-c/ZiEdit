@@ -214,6 +214,11 @@ function buildLiveDecoInner(
   const blockActive = makeActiveProbe(ranges);
   const selected = (from: number, to: number): boolean => ranges.some(r => !r.empty && r.from < to && r.to > from);
   const touched = view.state.field(mdTouchedField, false) === true;
+  // 标题井号活动探针（2026-11-19 收紧）：空光标须严格落在标题行内部——行首/行尾两端的
+  // 贴边位（点在标题旁边的空白处即落于此）不展开井号；非空选区相交仍展开，编辑操作可见。
+  const headingCaretInside = (node: SyntaxNode): boolean => ranges.some(r => r.empty
+    ? touched && r.head > node.from && r.head < node.to
+    : r.from < node.to && r.to > node.from);
   const refs = (): ReadonlyMap<string, string> => referenceUrls(view.state);
   const renderContext = renderContextOf(index);
   const from = bounds?.from ?? Math.max(0, view.viewport.from - VIEWPORT_MARGIN);
@@ -229,18 +234,14 @@ function buildLiveDecoInner(
     if (node.name !== 'Document' && index.metadata.frontMatter && node.from < currentPosition(index, index.metadata.frontMatter.to)) {
       decorateLines(node, 'mdir-frontmatter'); return;
     }
-    const heading = /^(?:ATX|Setext)Heading([1-6])$/.exec(node.name);
+    const heading = /^ATXHeading([1-6])$/.exec(node.name);
     if (heading) {
-      const underline = node.name.startsWith('Setext') ? node.getChild('HeaderMark') : null;
-      const headingActive = touched && blockActive(node.from, node.to);
-      if (underline && !selected(node.from, node.to) && !headingActive) {
-        for (let n = doc.lineAt(Math.max(node.from, from)).number; n < doc.lineAt(underline.from).number; n++)
-          out.push(Decoration.line({ class: 'mdir-h' + heading[1] }).range(doc.line(n).from));
-      } else decorateLines(node, 'mdir-h' + heading[1]);
+      // Setext 标题已全局不解析（noSetextHeading）：此处只需处理单行 ATX。
+      decorateLines(node, 'mdir-h' + heading[1]);
       const oldOffset = index.mapping?.invertedDesc.mapPos(doc.lineAt(node.from).from, -1) ?? doc.lineAt(node.from).from;
       const item = index.headings.get(oldOffset);
       if (item) out.push(Decoration.line({ attributes: { id: item.id, 'data-line': String(doc.lineAt(node.from).number - 1) } }).range(doc.lineAt(node.from).from));
-      if (!selected(node.from, node.to) && !headingActive) headingDecos(node, doc, out);
+      if (!selected(node.from, node.to) && !headingCaretInside(node)) headingDecos(node, doc, out);
       inline(node);
       return;
     }

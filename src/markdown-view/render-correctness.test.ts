@@ -10,6 +10,9 @@ import MarkdownIt from 'markdown-it';
 import { createBlockRenderer } from './blockcache';
 
 const ORACLE = new MarkdownIt({ html: false, linkify: true, typographer: false });
+// Setext 标题与 Lezer 侧 noSetextHeading 同口径禁用：正文 + 下划长划线 = 段落 + 水平分隔线
+//（2026-11-19 展示一致性修复；参考引擎与主路径行为一致才可比）。
+ORACLE.block.ruler.disable('lheading', true);
 
 /** 结构签名只比对块/行内标签序列与叶子文本，忽略 class/data-line/对齐等属性差异。 */
 const TAGS = new Set([
@@ -39,7 +42,10 @@ function signature(html: string): string {
 
 /** 只收标准 GFM 构造：项目自定义语法（==高亮==、^上标^、$公式$、脚注、emoji、任务列表）不参与参考比对。 */
 const CORPUS: ReadonlyArray<{ name: string; src: string }> = [
-  { name: '标题与 Setext', src: '# H1\n\n## H2\n\nSetext\n===\n\n### H3\n' },
+  { name: '标题（ATX）与 === 续行', src: '# H1\n\n## H2\n\nSetext\n===\n\n### H3\n' },
+  { name: '正文加下划长划线不再升级标题', src: '正文一\n\n**加粗行** 说明\n---------------------------------\n\n后续\n' },
+  { name: '多行虚线表格尾行保持段落', src: '  头甲 头乙\n  ---- ----\n  **A** 甲\n  **B** 乙\n  ------------------\n' },
+  { name: 'GFM 表格后紧跟下划线', src: '| a | b |\n| --- | --- |\n| 1 | 2 |\n-----\n' },
   { name: '段落与行内格式', src: '段落 **粗体** *斜体* `行内码` ~~删除~~ [链接](https://example.com)\n' },
   { name: '列表', src: '- 一\n- 二\n  - 二点一\n\n1. 甲\n2. 乙\n' },
   { name: '引用', src: '> 引用\n>\n> 续\n' },

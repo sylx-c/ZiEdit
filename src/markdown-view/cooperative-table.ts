@@ -1,5 +1,5 @@
 import { Table, parser, type BlockContext, type Element, type MarkdownConfig } from '@lezer/markdown';
-import { Tree } from '@lezer/common';
+import { Tree, type SyntaxNode } from '@lezer/common';
 
 interface TableProgress { row: number; setext: boolean }
 const progress = new WeakMap<BlockContext, TableProgress>();
@@ -78,9 +78,21 @@ export const cooperativeTableParser: MarkdownConfig = {
         if (!tree || !normalized.has(cx)) return tree;
         const children: Tree[] = [], positions: number[] = [];
         for (let node = tree.topNode.firstChild; node; node = node.nextSibling) {
-          const legacy = node.name === 'Table' && node.getChild('HeaderMark')
-            ? cx.parser.configure({ remove: ['CooperativeTable'] }).parse(input.read(node.from, node.to)).topNode.firstChild : null;
-          children.push(legacy?.toTree() ?? node.toTree()); positions.push(node.from);
+          // 表尾下划线行交回原规则重解析：Setext 全局不解析后，重解析产出是
+          // 「Table + 分隔线/段落」等多个顶层块，须整组拼回（修前只取 firstChild，
+          // 会把尾随的分隔线块静默丢掉）。范围含下划线行，node.from + child.from 为绝对位。
+          // 重解析意外产出空树时保留原节点，不静默丢块。
+          if (node.name === 'Table' && node.getChild('HeaderMark')) {
+            const reparsed = cx.parser.configure({ remove: ['CooperativeTable'] }).parse(input.read(node.from, node.to)).topNode;
+            const first: SyntaxNode | null = reparsed.firstChild;
+            if (first) {
+              for (let child: SyntaxNode | null = first; child; child = child.nextSibling) {
+                children.push(child.toTree()); positions.push(node.from + child.from);
+              }
+              continue;
+            }
+          }
+          children.push(node.toTree()); positions.push(node.from);
         }
         return new Tree(tree.type, children, positions, tree.length);
       },

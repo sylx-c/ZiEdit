@@ -11,7 +11,7 @@ import type { FindOptions } from '../common/ipc';
 import { fenceSourceChanged } from './writing';
 import { blockLayout, SOURCE_LINE_HEIGHT_PX, TABLE_ROW_ESTIMATE_PX } from './layout';
 import { irPerfEnabled, recordBlockDecos, recordBlockLayout, irWorkStart, recordIrWork } from './ir-perf';
-import { referenceField, emojiField, mdTouchedField, referencesReady, emojisReady, currentPosition, VIEWPORT_MARGIN } from './live-state';
+import { referenceField, emojiField, referencesReady, emojisReady, currentPosition, VIEWPORT_MARGIN } from './live-state';
 import { makeActiveProbe, visitVisible, fenceLines, tableDecos, type TableData } from './live-deco';
 import { RenderWidget, CodeLabelWidget, TocWidget, HrWidget, codeContainer, editingFence, renderContextOf } from './live-widgets';
 import { renderBlockAt } from './render-model';
@@ -90,15 +90,8 @@ function buildBlockDecosInner(state: EditorState, from: number, to: number, tabl
     if (index.metadata.frontMatter && node.name !== 'Document' && node.from < currentPosition(index, index.metadata.frontMatter.to)) return false;
     const selected = state.selection.ranges.some(r => !r.empty && r.from < node.to && r.to > node.from
       && (r.from < node.from || r.to > node.to));
-    if (node.name.startsWith('SetextHeading') && !state.selection.ranges.some(r => !r.empty && r.from < node.to && r.to > node.from)
-      && !(state.field(mdTouchedField, false) === true && active(node.from, node.to))) {
-      const underline = node.node.getChild('HeaderMark');
-      if (underline) {
-        const line = doc.lineAt(underline.from);
-        out.push(Decoration.replace({ block: true }).range(line.from, line.to));
-      }
-      return false;
-    }
+    // Setext 标题已全局不解析（noSetextHeading）：原下划线行隐藏块随之移除，
+    // 下划线行按 HorizontalRule 走 HrWidget。
     // 公式/图表滚动中也直接上实件（挂载只建 DOM，重活在渲染队列空闲时做；已渲染过的同步出图），
     // 加载态按估计/实测高度预留。修前滚动中一律换占位、停稳再换回：每次换件高度都变，停手后内容上下弹。
     const rendered = renderBlockAt(node.node, (a, b) => doc.sliceString(a, b));
@@ -306,26 +299,20 @@ function updateLiveBlocks(prev: LiveBlockState, tr: Transaction): LiveBlockState
       && tr.startState.selection.ranges.every(r => r.empty) && tr.state.selection.ranges.every(r => r.empty)) {
       const prevProbe = makeActiveProbe(tr.startState.selection.ranges);
       const currProbe = makeActiveProbe(tr.state.selection.ranges);
-      const prevTouched = tr.startState.field(mdTouchedField, false) === true;
-      const currTouched = tr.state.field(mdTouchedField, false) === true;
       // 翻转集（块级装饰随空光标移动可翻转的节点）：
       // - HorizontalRule / TableOfContents / 显示 RenderBlock：active 探针翻转（:1056/1060/1030）；
       // - FencedCode：editingFence 位随光标离开围栏行衰减（writing.ts:71）→ 起始围栏折叠态翻转；
-      // - SetextHeading：下划线隐藏谓词镜像（:1019，overlap 在空选区下恒 false，保留无损）；
       // - Table：空↔空下 selected 恒 false 且 tableDecos 无 active 门 → 装饰不变，不入翻转集。
+      // （SetextHeading 臂随 noSetextHeading 全局移除：下划线行已按 HorizontalRule 走探针臂。）
       let dirtyFrom = -1, dirtyTo = -1;
       visitVisible(syntaxTree(tr.state).topNode, Math.max(0, from - VIEWPORT_MARGIN), Math.min(tr.state.doc.length, to + VIEWPORT_MARGIN), node => {
         const name = node.name;
         const isDisplayRender = renderBlockAt(node.node, (a, b) => tr.state.doc.sliceString(a, b))?.display === true;
         const tracked = name === 'HorizontalRule' || name === 'TableOfContents' || isDisplayRender;
-        const isSetext = name.startsWith('SetextHeading');
         const isFence = name === 'FencedCode';
-        if (!tracked && !isSetext && !isFence) return name === 'Document' || name === 'Blockquote' || name === 'BulletList' || name === 'OrderedList' || name === 'ListItem';
+        if (!tracked && !isFence) return name === 'Document' || name === 'Blockquote' || name === 'BulletList' || name === 'OrderedList' || name === 'ListItem';
         let was: boolean | number, is: boolean | number;
-        if (isSetext) {
-          was = prevTouched && prevProbe(node.from, node.to);
-          is = currTouched && currProbe(node.from, node.to);
-        } else if (isFence) {
+        if (isFence) {
           const { open, close } = fenceLines(node.node, tr.state.doc);
           const fenceEditing = (state: EditorState): number => Number(editingFence(state, open.from))
             + (close !== null && editingFence(state, close.from) ? 2 : 0);

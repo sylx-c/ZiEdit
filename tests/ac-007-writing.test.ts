@@ -132,12 +132,14 @@ describe('007 AC-30 连续写作', () => {
     await until(() => !main.contentDOM.textContent?.includes('#'));
     expect(main.state.doc.toString()).toBe(source);
   });
-  it('Setext 标题光标进入显下划线（v0.39）', async () => {
+  it('正文加下划线不再是标题：=== 保持字面段落，光标进出无显隐切换（Setext 移除）', async () => {
     const source = '标题\n===\n\n正文';
-    const { main } = await mount(source);
-    await until(() => !main.contentDOM.textContent?.includes('==='));
-    main.dispatch({ selection: { anchor: 2 }, userEvent: 'select.pointer' });
+    const { main, host } = await mount(source);
     await until(() => !!main.contentDOM.textContent?.includes('==='));
+    expect(host.querySelectorAll('.mdir-h1, .mdir-h2')).toHaveLength(0);
+    main.dispatch({ selection: { anchor: 2 }, userEvent: 'select.pointer' });
+    await new Promise(resolve => setTimeout(resolve, 120));
+    expect(main.contentDOM.textContent).toContain('===');
     expect(main.state.doc.toString()).toBe(source);
   });
   it('空语言中选中bash再Enter，先写入候选再进正文，标签不回退text', async () => {
@@ -154,16 +156,18 @@ describe('007 AC-30 连续写作', () => {
     expect(main.state.selection.main.head).toBe(8);
     await until(() => host.querySelector('.mdir-codelabel')?.textContent === 'bash');
   });
-  it('下划线标题在光标进入后仍隐藏标记，跨块选择可达源码且不改原文', async () => {
-    const source = '标题\n===\n\n正文';
+  it('正文加长划线渲染为段落加分隔线件，光标进入不露源码且不改原文（Setext 移除）', async () => {
+    const source = '标题\n---\n\n正文';
     const { main, host } = await mount(source);
-    main.dispatch({ selection: { anchor: source.length } });
-    await until(() => !main.contentDOM.textContent?.includes('==='));
-    expect(host.querySelectorAll('.mdir-h1')).toHaveLength(1);
-    main.dispatch({ selection: { anchor: 1 } });
-    expect(main.contentDOM.textContent).not.toContain('===');
-    main.dispatch({ selection: { anchor: 1, head: source.length } });
-    await until(() => !!main.contentDOM.textContent?.includes('==='));
+    await until(() => host.querySelectorAll('.mdir-hr').length === 1);
+    expect(host.querySelectorAll('.mdir-h1, .mdir-h2')).toHaveLength(0);
+    expect(main.contentDOM.textContent).not.toContain('---');
+    main.dispatch({ selection: { anchor: 1 }, userEvent: 'select.pointer' });
+    await new Promise(resolve => setTimeout(resolve, 120));
+    expect(main.contentDOM.textContent).toContain('标题');
+    expect(main.contentDOM.textContent).not.toContain('---');
+    main.dispatch({ selection: { anchor: 1, head: source.length }, userEvent: 'select.pointer' });
+    await until(() => !!main.contentDOM.textContent?.includes('---'));
     expect(main.state.doc.toString()).toBe(source);
   });
   it('段落分隔空行保持原文，进入可输入；不带显式选区的插入立即恢复正文并可撤销', async () => {

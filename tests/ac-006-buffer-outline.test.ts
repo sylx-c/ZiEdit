@@ -15,10 +15,10 @@ vi.mock('../src/common/ipc', () => ({
 }));
 
 afterEach(() => vi.unstubAllGlobals());
-it('编辑面大纲解析当前未保存的标题与Setext', async () => {
+it('编辑面大纲解析当前未保存的标题（Setext 下划线不再成标题）', async () => {
   const session = new MarkdownDocumentClient();
   const { metadata } = await session.render('# Changed\n\nSecond\n---\n', true);
-  expect(metadata.headings.map(h => [h.text, h.line])).toEqual([['Changed', 0], ['Second', 2]]);
+  expect(metadata.headings.map(h => [h.text, h.line])).toEqual([['Changed', 0]]);
   session.destroy();
 });
 

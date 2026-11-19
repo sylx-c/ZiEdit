@@ -39,7 +39,7 @@ describe('FC 收口：冷启动就绪屏障', () => {
   it('源码大纲：extractHeadingsReady 冷启动含实体/引用文档不抛错且解码正确', async () => {
     __coldStartForTest();
     const heads = await extractHeadingsReady(DOC);
-    expect(heads[0]!.text).toBe('T&#65;&#38;B'); // text 沿用源码（既有口径）
+    expect(heads[0]!.text).toBe('TA&B'); // 大纲文本剥源码标记并解码实体（2026-11-19 口径：与 id 同源）
     expect(heads[0]!.id).toBe('tab'); // id 基于实体解码后的标题文本（需 unescapeAll）
     expect(heads[0]!.level).toBe(1);
   });

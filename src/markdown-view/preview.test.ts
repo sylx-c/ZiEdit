@@ -26,4 +26,22 @@ describe('extractHeadings（007-AC-2 大纲联动）', () => {
     expect(heads).toHaveLength(1);
     expect(heads[0].text).toBe('好');
   });
+
+  it('正文加下划长划线不再是标题（Setext 全局不解析）', () => {
+    const heads = extractHeadings('# 一级\n\n**Git** 分支说明\n---------------------------------\n');
+    expect(heads).toHaveLength(1);
+    expect(heads[0].text).toBe('一级');
+  });
+
+  it('大纲条目剥离行内标记（加粗/行内码/斜体）', () => {
+    const heads = extractHeadings('## **加粗** 与 `行内码` 和 *斜体*\n');
+    expect(heads).toHaveLength(1);
+    expect(heads[0].text).toBe('加粗 与 行内码 和 斜体');
+  });
+
+  it('大纲条目剥离链接与图片标记，保留可读文字', () => {
+    const heads = extractHeadings('## 参考 [链接文字](https://example.com) 与 ![替代文字](a.png)\n');
+    expect(heads).toHaveLength(1);
+    expect(heads[0].text).toBe('参考 链接文字 与 替代文字');
+  });
 });

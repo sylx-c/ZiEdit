@@ -1,9 +1,11 @@
 import { expect, it } from 'vitest';
 import { parser, GFM } from '@lezer/markdown';
 import { TreeFragment, type Tree } from '@lezer/common';
-import { markdownSyntaxExtensions } from './extensions';
+import { markdownSyntaxExtensions, noSetextHeading } from './extensions';
 
-const legacy = parser.configure(GFM), current = parser.configure(markdownSyntaxExtensions);
+// 参照系同口径去掉 Setext（项目级块策略）：本测试锁定的是合作表格与原 GFM 表格机的
+// 节点/范围/续行语义一致，Setext 差异由 render-correctness 的专用语料覆盖。
+const legacy = parser.configure([GFM, noSetextHeading]), current = parser.configure(markdownSyntaxExtensions);
 function nodes(tree: Tree): unknown[] {
   const result: unknown[] = [];
   tree.iterate({ enter(node) { result.push([node.name, node.from, node.to]); } });
