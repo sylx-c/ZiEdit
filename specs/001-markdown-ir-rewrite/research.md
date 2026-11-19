@@ -18,7 +18,13 @@
 
 ## 2. 关键机制可行性（已验证的事实依据）
 
-- **ViewPlugin 承载块级装饰**：CM6 6.x 允许 ViewPlugin 提供块级装饰（blockAtomic 前提），由此可消除 liveBlockField 的 StateField——这是「两套合一」的技术前提。
+- **ViewPlugin 承载块级装饰**：~~CM6 6.x 允许~~ **实施期实证修正（2026-11-20）**——安装版 @codemirror/view 对
+  `EditorView.decorations` facet 的规定：只有**直接提供**的装饰集可影响纵向布局（含块级件），**经函数提供**的
+  （即 ViewPlugin 装饰通道）不得引入块级件或跨行替换。原设计稿「blockAtomic 允许 ViewPlugin 提供块级装饰」
+  系误读（blockAtomic 是光标原子性属性，非提供通道许可）。修正后的承载机制：**单一投影器纯函数 + 单一编排
+  ViewPlugin + 一个薄 StateField 宿主**（存储投影输出并经 `EditorView.decorations.from(field, …)` 直接提供，
+  与现行 liveBlockField 同一合规通道）。「两套引擎合一」的目标不变——StateField 仅是 CM6 强制的块级装饰
+  合规载体，不含自己的调度/分片/测量逻辑，全部重建决策由编排插件按五级分级驱动。
 - **needsRebuild 五级分级**：视口内文档变更→执行一次同步纯函数视口投影；视口变化→重建新视口；活动块集合变化（`ActiveBlocks` 成员或边界变化）→只重建变化前后涉及的活动块；同块内纯选区变化→只更新该块行内装饰；纯滚动→对新进视口区间增量投影，不动已挂载装饰。
 - **异步块高度策略**：挂件 estimatedHeight 给占位初值，渲染完成后 `requestMeasure` 仅更新高度图、不写 scrollTop——取代高度预言机。
 - **块级标记留白栏**：`Decoration.line({ class })` + CSS `::before` 伪元素承载 `#` `>` `-`，不把标记文本插入正文行——消除行宽跳动的关键。

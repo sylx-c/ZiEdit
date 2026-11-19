@@ -12,7 +12,7 @@ import { fenceSourceChanged } from './writing';
 import { blockLayout, SOURCE_LINE_HEIGHT_PX, TABLE_ROW_ESTIMATE_PX } from './layout';
 import { irPerfEnabled, recordBlockDecos, recordBlockLayout, irWorkStart, recordIrWork } from './ir-perf';
 import { referenceField, emojiField, referencesReady, emojisReady, currentPosition, VIEWPORT_MARGIN } from './live-state';
-import { makeActiveProbe, visitVisible, fenceLines, tableDecos, type TableData } from './live-deco';
+import { makeActiveProbe, visitVisible, fenceLines, tableDecos, type TableData } from './projector';
 import { RenderWidget, CodeLabelWidget, TocWidget, HrWidget, codeContainer, editingFence, renderContextOf } from './live-widgets';
 import { renderBlockAt } from './render-model';
 import { missingWindows, decorationSliceEnd } from './deco-window';
