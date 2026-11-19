@@ -54,6 +54,9 @@ export function __coldStartForTest(): void {
 }
 
 function configure(md: MarkdownIt): MarkdownIt {
+  // Setext 标题与 Lezer 侧同口径禁用（2026-11-19 展示一致性修复）：正文 + 下划长划线
+  // 渲染为「段落 + 水平分隔线」，不再把加粗行/多行表格尾行升级成大标题。
+  md.block.ruler.disable('lheading', true);
   md.inline.ruler.before('emphasis', 'ziedit_math', (state, silent) => {
     const start = state.pos;
     if (state.src[start] !== '$' || state.src[start - 1] === '$' || state.src[start + 1] === '$' || /\s/.test(state.src[start + 1] ?? ' ')) return false;

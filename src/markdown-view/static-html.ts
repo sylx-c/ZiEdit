@@ -102,7 +102,8 @@ export function renderStaticHtml(text: string, tree: Tree, metadata: MarkdownMet
     const name = node.name, tag = vocabulary[name];
     if (tag) return '<' + tag + '>' + inline(node) + '</' + tag + '>';
     if (/(?:Mark|Delimiter|LinkTitle|LinkLabel|CodeInfo|FootnoteIndent)$/.test(name)) return '';
-    const heading = /^(?:ATXHeading|SetextHeading)([1-6])$/.exec(name);
+    // 仅 ATX（Setext 已全局不解析，见 extensions.ts noSetextHeading）。
+    const heading = /^ATXHeading([1-6])$/.exec(name);
     if (heading) {
       let start = node.from, end = node.to;
       for (const mark of node.getChildren('HeaderMark')) if (mark.from === node.from) start = mark.to; else end = mark.from;

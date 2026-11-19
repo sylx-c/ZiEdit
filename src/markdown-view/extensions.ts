@@ -92,5 +92,11 @@ export const liveMarkdownExtensions: MarkdownConfig = {
   } }],
 };
 
+/** Setext 标题不再按标题解析（2026-11-19 展示一致性修复）：正文下一行的 =====/-----
+ *  长划线曾把加粗行、多行表格尾行误升级成大字号标题。移除该叶解析器后正文行独立成段、
+ *  下划线行按分隔线渲染——阅读态 markdown-it 同步禁用 lheading（md.ts），三个渲染面与
+ *  大纲提取同口径。 */
+export const noSetextHeading: MarkdownConfig = { remove: ['SetextHeading'] };
+
 /** Worker、源码与即时渲染共享语法；大表不能在源码面退化成整篇超大段落。 */
-export const markdownSyntaxExtensions = [cooperativeTableNodes, GFM, cooperativeTableParser, Superscript, Subscript, liveMarkdownExtensions];
+export const markdownSyntaxExtensions = [cooperativeTableNodes, GFM, cooperativeTableParser, Superscript, Subscript, liveMarkdownExtensions, noSetextHeading];

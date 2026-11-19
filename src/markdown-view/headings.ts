@@ -1,5 +1,5 @@
 import { parser as baseParser, GFM, Superscript, Subscript } from '@lezer/markdown';
-import { liveMarkdownExtensions } from './extensions';
+import { liveMarkdownExtensions, noSetextHeading } from './extensions';
 import type { Tree, SyntaxNode } from '@lezer/common';
 import { renderBlockAt, renderPlaceholder, escapeRenderText, type RenderBlock } from './render-model';
 import { mdLinkTools } from './md-link';
@@ -36,7 +36,9 @@ export interface MarkdownMetadata {
 // markdown-it 链接/实体工具经同步接缝获取（./md-link，perf-silk Pass 1 FC① 收尾）：
 // 主线程由 md.ts 共享单例注入、worker 由 headings-worker 入口注入——本文件不再静态
 // import markdown-it，主 chunk 首屏体积随之解除该依赖。
-const indexParser = baseParser.configure([GFM, Superscript, Subscript, liveMarkdownExtensions]);
+// 与编辑器/静态序列化同一口径：Setext 标题不解析（正文成段、下划线行成分隔线），
+// 大纲只认 ATX 标题。传入树（编辑器 tree）亦按同配置解析，不存在带 SetextHeading 的输入。
+const indexParser = baseParser.configure([GFM, Superscript, Subscript, liveMarkdownExtensions, noSetextHeading]);
 export const normalizeReference = (label: string): string => label.trim().replace(/\s+/g, ' ').toLowerCase().toUpperCase();
 
 /** 输入必须来自已解析的URL或Autolink节点，不能把任意正文猜成地址。 */
@@ -170,16 +172,19 @@ export function extractMarkdownMetadata(markdown: string, parsedTree?: Tree): Ma
   const verbatimRanges: SourceRange[] = [], rawMathRanges: SourceRange[] = [], autoLinks: SourceRange[] = [];
   tree.iterate({ enter(node) {
     if (frontMatter && node.from < frontMatter.to && node.name !== 'Document') return false;
-    const heading = /^(?:ATXHeading|SetextHeading)([1-6])$/.exec(node.name);
+    // 仅 ATX 计入大纲（Setext 已全局不按标题解析，见 noSetextHeading）。
+    const heading = /^ATXHeading([1-6])$/.exec(node.name);
     if (heading) {
       let from = node.from, to = node.to;
       for (const mark of node.node.getChildren('HeaderMark')) {
         if (mark.from === node.from) from = mark.to;
         else to = mark.from;
       }
-      const text = markdown.slice(from, to).trim();
       while (lineOffset < node.from) if (markdown.charCodeAt(lineOffset++) === 10) lineNumber++;
-      if (text) out.push({ level: Number(heading[1]), text, id: headingId(plain(node.node, from, to), ids, counters), line: lineNumber });
+      // 大纲/目录条目用剥离行内标记的纯文本（2026-11-19：修前 `**加粗**`、`行内码` 的
+      // 原始定界符直接进侧栏条目）；空壳标题（纯标记无文字）不产出条目。
+      const content = plain(node.node, from, to).trim();
+      if (content) out.push({ level: Number(heading[1]), text: content, id: headingId(content, ids, counters), line: lineNumber });
     }
     if (node.name === 'Subscript') subscriptRanges.push({ from: node.from, to: node.to });
     if (node.name === 'Highlight') highlightRanges.push({ from: node.from, to: node.to });

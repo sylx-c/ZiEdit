@@ -141,9 +141,9 @@ describe('AC-17 单次变更集合', () => {
 });
 
 describe('AC-16 extractHeadings（迁 preview.ts，带行号）', () => {
-  it('Setext 标题和嵌套引用标题可提取，围栏内伪 Setext 不算', () => {
+  it('嵌套引用标题可提取；Setext 下划线与围栏内伪 Setext 不算', () => {
     const hs = extractHeadings('Title\n=====\n\nSub\n---\n\n> ## Quote\n\n```\nFake\n===\n```');
-    expect(hs.map(h => [h.level, h.text, h.line])).toEqual([[1,'Title',0],[2,'Sub',3],[2,'Quote',6]]);
+    expect(hs.map(h => [h.level, h.text, h.line])).toEqual([[2, 'Quote', 6]]);
   });
   it('行号字段与围栏跳过', () => {
     const mdText = '# A\n\ntext\n```md\n# fake\n```\n## B';

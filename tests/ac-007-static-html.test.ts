@@ -18,6 +18,8 @@ describe('AC-007 Lezer 静态序列化语义锁', () => {
   it('标题 ID 与迁移前 markdown-it 规则兼容（实体/转义/图片/跨行/重复消歧）', () => {
     const source = '# Hello **World**\n\n# A &amp; B\n\n# A\\_B\n\n# ![a _b_ &amp;](image.png)\n\none\ntwo\n===\n\n# Repeat\n\n# Repeat-1\n\n# Repeat';
     const old = new MarkdownIt({ html: false }), used = new Set<string>(), counters = new Map<string, number>();
+    // 参照系与主路径同口径：正文 + 下划线不再成标题（2026-11-19 展示一致性修复）。
+    old.block.ruler.disable('lheading', true);
     const tokens = old.parse(source, {}), ids: string[] = [];
     for (let i = 0; i < tokens.length; i++) if (tokens[i]!.type === 'heading_open') {
       const plain = old.parseInline(tokens[i + 1]!.content, {})[0]!.children!.filter(t => !t.type.endsWith('_open') && !t.type.endsWith('_close')).map(t => t.content).join('');
