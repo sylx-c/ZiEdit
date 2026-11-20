@@ -490,17 +490,25 @@ export class TableEditWidget extends WidgetType {
     liveBoxes.add(box);
     hydrateCellImages(box, view, this.baseDir, view.state.facet(imageContext).remoteResolve);
     hydrateCellNotes(box, view);
-    // 实测高度记忆：同签名表格的滚动占位件用实测值（停稳换实表零位移）。
-    // 延迟取值——挂载即量的高度是纯文本占位期（惰性渲染前），行内标记渲染后行高可变。
+    // 实测高度记忆：同签名表格的首帧钉扎与滚动占位共用。量取时机=惰性渲染队列排空后
+    // 连续两帧高度稳定（盲延 350ms 可能在队列排空前量取占位期高度——钉扎错值即停稳
+    // 3px 回归；渲染后行高随标记/字体度量化）。
     const header = this.header, rows = this.rows;
-    setTimeout(() => {
-      if (!this || !box.isConnected) return;
-      view.requestMeasure({
-        key: box,
-        read: () => (box.isConnected ? box.getBoundingClientRect().height : 0),
-        write: height => rememberTableHeight(header, rows, height),
-      });
-    }, 350);
+    const capture = (attempt: number): void => {
+      if (!box.isConnected) return;
+      if (!cellRenderSettled() && attempt < 240) { setTimeout(() => capture(attempt + 1), 25); return; }
+      let last = -1, stable = 0;
+      const poll = (): void => {
+        if (!box.isConnected) return;
+        const h = Math.round(box.getBoundingClientRect().height * 10) / 10;
+        stable = Math.abs(h - last) < 0.05 ? stable + 1 : 0;
+        last = h;
+        if (stable >= 2) { rememberTableHeight(header, rows, h); return; }
+        if (stable > -10) requestAnimationFrame(poll);
+      };
+      requestAnimationFrame(poll);
+    };
+    capture(0);
     return box;
   }
   destroy(dom: HTMLElement): void {
