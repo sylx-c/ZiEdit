@@ -127,8 +127,14 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
           if (top === null || version !== layoutVersion) return;
           const drifted = Math.abs(scroller.scrollTop - top) > .5;
           if (drifted) scroller.scrollTop = top;
-          if (!drifted || ++rechecks >= 5) cancel();
-          else quietTimer = setTimeout(() => { quietTimer = undefined; cancel(); }, 3000); // 无进一步布局通知即终止
+          // REQ-014 P6：写入后追加分阶段终检——装饰交付期的 map/DOM 短暂失同步会让早期
+          // 写入落在错位（漂移 372 行实测）；静定后按稳定高度图再校，无漂移即终止。
+          if (!drifted) cancel();
+          else if (++rechecks >= 6) cancel();
+          else {
+            clearTimeout(quietTimer);
+            quietTimer = setTimeout(() => { quietTimer = undefined; if (active) measure(); }, 400);
+          }
         },
       });
     }); });
