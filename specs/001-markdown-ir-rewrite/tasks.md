@@ -126,10 +126,10 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 4
 
-- [ ] T022 [US4] 删除 `src/markdown-view/preview.ts` 中 `renderMarkdown` / `renderMarkdownBlock` / `renderMarkdownInline`，三面输出统一走 `src/markdown-view/static-html.ts` 的 `renderStaticHtml`（契约 contracts/rendering-seams.md §1）
-- [ ] T023 [US4] `src/markdown-view/blockcache.ts` fallback 路径改为：Lezer 序列化失败时显示源码 + 错误提示，不再二次渲染
-- [ ] T024 [US4] 表格单元格行内渲染改为调用 `renderStaticHtml`（传入单元格子树片段）——过渡期接缝，P5 随新表格挂件收口
-- [ ] T025 [US4] `src/markdown-view/md.ts` 删除全部渲染逻辑，仅保留 `loadMarkdownIt()` 用于工具注入（validateLink / unescapeAll / normalizeLink）；删除 `src/markdown-view/projector.ts` 从旧实现继承的 `md-space-fold` IR 独有折行差，并清理 `src/styles.css` 对应规则
+- [x] T022 [US4] 删除 `src/markdown-view/preview.ts` 中 `renderMarkdown` / `renderMarkdownBlock` / `renderMarkdownInline`，三面输出统一走 `src/markdown-view/static-html.ts` 的 `renderStaticHtml`（契约 contracts/rendering-seams.md §1）
+- [x] T023 [US4] `src/markdown-view/blockcache.ts` fallback 路径改为：Lezer 序列化失败时显示源码 + 错误提示，不再二次渲染
+- [x] T024 [US4] 表格单元格行内渲染改为调用 `renderStaticHtml`（传入单元格子树片段）——过渡期接缝，P5 随新表格挂件收口
+- [x] T025 [US4] `src/markdown-view/md.ts` 删除全部渲染逻辑，仅保留 `loadMarkdownIt()` 用于工具注入（validateLink / unescapeAll / normalizeLink）；删除 `src/markdown-view/projector.ts` 从旧实现继承的 `md-space-fold` IR 独有折行差，并清理 `src/styles.css` 对应规则
 - [ ] T026 [US4] P4 检查点：标准提交前门禁 + P3 原生门禁 + gate-md-structure（五份新语料）全绿；五语料三面截图不归一化一致（对照 `docs/tmp/ir-rewrite-baselines/` 更新基准）
 
 **Checkpoint**: US4 交付——三面一致。

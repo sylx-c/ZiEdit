@@ -1593,7 +1593,9 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .md-ir .mdir-quote-space{border-left:4px solid var(--border-strong)}
 /* 行内观感（活动块由引擎显源码无装饰；以下为非活动块的标记隐藏后观感） */
 .md-ir .mdir-strong{font-weight:700}
-.md-ir .md-space-fold{font-size:0;line-height:0}
+/* REQ-014 P4（T023/P25）：安全降级=源码可见 + 提示；md-space-fold IR 折行差随统一渲染政策删除 */
+.md-preview .md-col.md-fallback::before{content:attr(data-fallback-note);display:block;padding:6px 10px;margin-bottom:8px;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:12px}
+.md-preview .md-col .md-fallback-src{white-space:pre-wrap;font-family:var(--code-font,monospace);font-size:calc(var(--md-fs-base) * .92);color:var(--fg)}
 .md-ir .mdir-em{font-style:italic}
 .md-ir .mdir-strike{text-decoration:line-through}
 .md-ir .mdir-icode{font-family:var(--mono);font-size:.9em;background:var(--md-code-bg);padding:1px 3px;border-radius:3px}

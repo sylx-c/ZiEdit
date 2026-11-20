@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { extractMarkdownMetadata, projectMarkdownSource } from '../src/markdown-view/headings';
-import { renderMarkdown } from '../src/markdown-view/preview';
-import { renderStaticHtml, staticMarkdownParser } from '../src/markdown-view/static-html';
+import { renderStaticHtml, staticMarkdownParser, renderCellHtml } from '../src/markdown-view/static-html';
 import { cleanRenderHtml, createRenderContext, diagramSourceError } from '../src/markdown-view/render-service';
 
 afterEach(() => { vi.restoreAllMocks(); document.body.replaceChildren(); });
@@ -31,18 +30,21 @@ describe('007-AC-33 离线公式与图表', () => {
     expect(html).toContain('<pre><code>$$\nunclosed</code></pre>');
   });
 
-  it('主路径直接产出渲染占位，回退路径与表格使用相同占位结构', () => {
+  it('统一序列化直接产出渲染占位，单元格片段路与整面同构（REQ-014 P4：回退渲染路径删除）', () => {
     // v0.42 改锁登记：offlinePreviewHtml（旧渲染器二次渲染前接管）作废——Lezer 序列化
     // 在产 HTML 时即出 md-render-target 占位，不存在「引擎自动加载前接管」的面。
+    // P4 改锁登记：markdown-it 回退路径删除，占位结构一致性改锁「片段路 vs 整面路」。
     const source = '$x^2$\n\n```mermaid\ngraph LR; A-->B\n```';
     const tree = staticMarkdownParser.parse(source);
     const root = document.createElement('div');
     root.innerHTML = renderStaticHtml(source, tree, extractMarkdownMetadata(source, tree));
     expect(root.querySelectorAll('.language-math,.language-mermaid')).toHaveLength(0);
     expect([...root.querySelectorAll<HTMLElement>('.md-render-target')].map(el => el.dataset.renderKind)).toEqual(['math', 'mermaid']);
-    root.innerHTML = renderMarkdown('Before $x^2$\n\n$$\na+b\n$$\n\n| A |\n|---|\n| $c^2$ |');
-    expect(root.querySelectorAll('.md-render-target')).toHaveLength(3);
-    expect(root.querySelector('td .md-render-target code')?.textContent).toBe('c^2');
+    const tableRoot = document.createElement('div');
+    tableRoot.innerHTML = renderStaticHtml('| A |\n|---|\n| $c^2$ |', staticMarkdownParser.parse('| A |\n|---|\n| $c^2$ |'), extractMarkdownMetadata('| A |\n|---|\n| $c^2$ |'));
+    expect(tableRoot.querySelectorAll('.md-render-target')).toHaveLength(1);
+    expect(tableRoot.querySelector('td .md-render-target code')?.textContent).toBe('c^2');
+    expect(renderCellHtml('$c^2$')).toContain('data-render-kind="math"');
   });
 
   it('SVG 保留本地 marker 与字形，移除事件、外部引用和可执行节点', () => {

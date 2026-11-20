@@ -12,10 +12,11 @@ import { cellRange, activeCell, openCellEditor, syncCellEditor, destroyCellEdito
 import { cellInlineText } from './table-model';
 import { TableViewport, TABLE_ROW_ESTIMATE_PX, SOURCE_LINE_HEIGHT_PX, tableCellAt, tableRowNumber } from './table-viewport';
 import { fenceSourceChanged, fenceSourceField, fenceDraftField } from './writing';
-import { localImagePath, renderMarkdownInline, type HeadingItem } from './preview';
+import { localImagePath, type HeadingItem } from './preview';
+import { renderCellHtml } from './static-html';
 import { type RenderBlock } from './render-model';
 import { createRenderContext, mountRender, renderMountKey, rememberedRenderHeight, rememberRenderHeight, type RenderContext } from './render-service';
-import { currentPosition, referenceField, emojiField, imageContext, type ReferenceIndex } from './live-state';
+import { currentPosition, referenceField, imageContext, type ReferenceIndex } from './live-state';
 
 /** 装饰构建期的图片 src 解析（规则 21：非活动块装饰件构建时解析相对路径 → asset 协议） */
 function localImgPath(src: string, baseDir: string | null): string | null {
@@ -519,7 +520,7 @@ export class TableWidget extends WidgetType {
         const text = values[col] ?? '';
         let html = cache.get(text);
         if (html === undefined) {
-          html = renderMarkdownInline(cellInlineText(text), this.references?.definitions, this.emojis, this.references?.footnotes);
+          html = renderCellHtml(cellInlineText(text), this.references?.definitions, this.references?.footnotes);
           if (cache.size < 1024) cache.set(text, html);
         }
         if (cell.dataset.mdCellHtml !== html) { cell.innerHTML = html; cell.dataset.mdCellHtml = html; }
@@ -567,7 +568,7 @@ export class TableWidget extends WidgetType {
       const { row, col } = (e as CustomEvent<{ row: number; col: number }>).detail;
       const range = cellRange(view, box, row, col);
       const index = view.state.field(referenceField);
-      if (range) cell.innerHTML = renderMarkdownInline(cellInlineText(view.state.doc.sliceString(range.from, range.to)), index.definitions, view.state.field(emojiField), index.footnotes);
+      if (range) cell.innerHTML = renderCellHtml(cellInlineText(view.state.doc.sliceString(range.from, range.to)), index.definitions, index.footnotes);
       hydrateTableImages(box, view);
       hydrateTableNotes(box, view);
       hydrateTableRenders(box, view);
