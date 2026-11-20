@@ -470,11 +470,16 @@ export class TableEditWidget extends WidgetType {
     hydrateCellImages(box, view, this.baseDir, view.state.facet(imageContext).remoteResolve);
     hydrateCellNotes(box, view);
     // 实测高度记忆：同签名表格的滚动占位件用实测值（停稳换实表零位移）。
-    view.requestMeasure({
-      key: box,
-      read: () => (box.isConnected ? box.getBoundingClientRect().height : 0),
-      write: height => rememberTableHeight(this.header, this.rows, height),
-    });
+    // 延迟取值——挂载即量的高度是纯文本占位期（惰性渲染前），行内标记渲染后行高可变。
+    const header = this.header, rows = this.rows;
+    setTimeout(() => {
+      if (!this || !box.isConnected) return;
+      view.requestMeasure({
+        key: box,
+        read: () => (box.isConnected ? box.getBoundingClientRect().height : 0),
+        write: height => rememberTableHeight(header, rows, height),
+      });
+    }, 350);
     return box;
   }
   destroy(dom: HTMLElement): void {
