@@ -7,7 +7,7 @@ import { ensureSyntaxTree } from '@codemirror/language';
 import { editorMarkdown } from './editor-language';
 import { referenceField, emojiField } from './live-state';
 import { projectionField, liveViewport } from './md-view-plugin';
-import { TableWidget } from './live-widgets';
+import { TableEditWidget } from './table-widget';
 import { loadMarkdownIt } from './md';
 
 beforeAll(async () => { await loadMarkdownIt(); });
@@ -23,11 +23,11 @@ function stateOf(doc = DOC) {
   return state;
 }
 
-function tableWidgetOf(state: ReturnType<typeof stateOf>): TableWidget | null {
-  let widget: TableWidget | null = null;
+function tableWidgetOf(state: ReturnType<typeof stateOf>): TableEditWidget | null {
+  let widget: TableEditWidget | null = null;
   state.field(projectionField).block.between(0, state.doc.length, (_from, _to, deco) => {
     const w = deco.spec.widget;
-    if (w instanceof TableWidget && widget === null) widget = w;
+    if (w instanceof TableEditWidget && widget === null) widget = w;
   });
   return widget;
 }

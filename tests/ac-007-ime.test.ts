@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
+// REQ-014 P5：单元格为 contenteditable 直接编辑——IME 语义按新口径锁定：
+//   组合期间候选确认键（isComposing keydown）不拦截不导航；组合文本留在格内，离格一次性
+//   单事务提交（一次撤销恢复整格）；主编辑器组合保护（装饰冻结）不变。
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EditorView } from '@codemirror/view';
 import { undo } from '@codemirror/commands';
-import { Transaction } from '@codemirror/state';
 import { LivePreviewView } from '../src/markdown-view/livepreview';
 import { ActionRegistry } from '../src/shell/chrome';
 
@@ -19,30 +20,28 @@ async function mount(source: string) {
   mounted.push(v); await until(() => !!v.view);
   return { v, host };
 }
-function composition(view: EditorView, type: 'compositionstart' | 'compositionend') {
-  view.contentDOM.dispatchEvent(new CompositionEvent(type, { bubbles: true }));
+function composition(el: Element, type: 'compositionstart' | 'compositionend') {
+  el.dispatchEvent(new CompositionEvent(type, { bubbles: true }));
 }
-function key(view: EditorView, key: string) {
-  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, isComposing: true });
-  view.contentDOM.dispatchEvent(event);
-  return event;
-}
-async function cellEditor(host: HTMLElement) {
-  await until(() => !!host.querySelector('td'));
-  host.querySelector('td')!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-  return EditorView.findFromDOM(host.querySelector('td .cm-editor')!)!;
+/** P5 单元格激活：mousedown → contenteditable 源文本态。 */
+async function activeCell(host: HTMLElement): Promise<HTMLTableCellElement> {
+  await until(() => !!host.querySelector('.mdir-table td'));
+  const cell = host.querySelector<HTMLTableCellElement>('.mdir-table tbody td')!;
+  cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+  await until(() => cell.getAttribute('contenteditable') === 'true');
+  return cell;
 }
 
-describe('007 中文组合输入生命周期（原生 IME 的自动回归补充）', () => {
+describe('007 中文组合输入生命周期（P5 contenteditable 口径）', () => {
   it('compositionstart 首次改字前就保护行内 DOM，结束后恢复渲染', async () => {
     const { v, host } = await mount('**粗体** 后续');
     v.view.dispatch({ selection: { anchor: v.view.state.doc.length } });
     await until(() => !!host.querySelector('.mdir-strong'));
     const strong = host.querySelector('.mdir-strong');
-    composition(v.view, 'compositionstart');
+    composition(v.view.contentDOM, 'compositionstart');
     v.view.dispatch({ selection: { anchor: 3 } });
     expect(host.querySelector('.mdir-strong')).toBe(strong);
-    composition(v.view, 'compositionend');
+    composition(v.view.contentDOM, 'compositionend');
     await until(() => host.querySelector('.mdir-strong') === null);
     expect(v.getMarkdown()).toBe('**粗体** 后续');
   });
@@ -50,49 +49,51 @@ describe('007 中文组合输入生命周期（原生 IME 的自动回归补充�
   it('候选确认 Enter/Tab/Esc 不导航、不撤销并且不 preventDefault', async () => {
     const source = '| 甲 | 乙 |\n|---|---|\n| 内容 | 值 |\n\n尾';
     const { v, host } = await mount(source);
-    const cell = await cellEditor(host);
+    const cell = await activeCell(host);
     composition(cell, 'compositionstart');
+    cell.textContent += '你';
     for (const name of ['Tab', 'Enter', 'Escape']) {
-      expect(key(cell, name).defaultPrevented).toBe(false);
-      expect(host.querySelector('td .cm-editor')).toBe(cell.dom);
+      const event = new KeyboardEvent('keydown', { key: name, bubbles: true, cancelable: true, isComposing: true });
+      cell.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(false);
+      expect(cell.getAttribute('contenteditable')).toBe('true'); // 未导航离开
     }
     composition(cell, 'compositionend');
-    expect(v.getMarkdown()).toBe(source);
+    expect(v.getMarkdown()).toBe(source); // 未提交、未派生改写
+    expect(cell.textContent).toBe('内容你'); // 组合文本留在格内
   });
 
-  it('组合期间表格结构更新保留活动格，提交后才应用新网格', async () => {
+  it('组合期间表格结构更新替换网格，离格提交写回正确格', async () => {
     const source = '| 甲 | 乙 |\n|---|---|\n| 内容 | 值 |\n\n尾';
     const { v, host } = await mount(source);
-    const cell = await cellEditor(host);
+    const cell = await activeCell(host);
     composition(cell, 'compositionstart');
-    const at = source.indexOf('\n\n');
-    v.view.dispatch({ changes: { from: at, insert: '\n| 新 | 行 |' } });
-    await new Promise(r => setTimeout(r, 70));
-    expect(host.querySelector('td .cm-editor')).toBe(cell.dom);
-    expect(host.querySelectorAll('tbody tr')).toHaveLength(1);
+    cell.textContent += '字';
+    v.view.dispatch({ changes: { from: source.indexOf('\n\n'), insert: '\n| 新 | 行 |' } });
+    // 组合保护冻结装饰重建：结构变更在 compositionend 后的重建事务才上屏。
     composition(cell, 'compositionend');
     await until(() => host.querySelectorAll('tbody tr').length === 2);
+    // 换件销毁前未提交的编辑已一次性写回（内容字），新网格含新增行。
+    await until(() => v.getMarkdown() !== source);
+    expect(v.getMarkdown()).toContain('| 内容字 |');
     expect(v.getMarkdown()).toContain('| 新 | 行 |');
   });
 
-  it('长时间选词仍是一组撤销，不与前后普通输入合并', async () => {
+  it('长时间选词一次提交一组撤销，不与前后普通输入合并', async () => {
     const source = '| 甲 | 乙 |\n|---|---|\n| 内容 | 值 |\n\n尾';
     const { v, host } = await mount(source);
-    const cell = await cellEditor(host);
-    cell.dispatch({ ...cell.state.replaceSelection('A'), userEvent: 'input.type' });
+    const cell = await activeCell(host);
+    cell.textContent = '内容A';
     composition(cell, 'compositionstart');
-    const time = Date.now();
-    cell.dispatch({ ...cell.state.replaceSelection('ni'), userEvent: 'input.type.compose', annotations: Transaction.time.of(time) });
-    cell.dispatch({ changes: { from: 3, to: 5, insert: '你' }, userEvent: 'input.type.compose', annotations: Transaction.time.of(time + 1000) });
+    cell.textContent = '内容A你';
     composition(cell, 'compositionend');
     await new Promise(r => setTimeout(r, 30));
-    cell.dispatch({ ...cell.state.replaceSelection('B'), userEvent: 'input.type' });
+    cell.textContent = '内容A你B';
+    v.view.focus();
+    cell.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    await until(() => v.getMarkdown().includes('| 内容A你B |'));
     expect(undo(v.view)).toBe(true);
-    expect(v.getMarkdown()).toContain('| 内容A你 |');
-    expect(undo(v.view)).toBe(true);
-    expect(v.getMarkdown()).toContain('| 内容A |');
-    expect(undo(v.view)).toBe(true);
-    expect(v.getMarkdown()).toBe(source);
+    expect(v.getMarkdown()).toBe(source); // P5：整格一次提交 → 一次撤销回原表
   });
 
   it('组合键不派发全局命令，兼容 keyCode 229', () => {
@@ -103,65 +104,18 @@ describe('007 中文组合输入生命周期（原生 IME 的自动回归补充�
     expect(run).not.toHaveBeenCalled();
   });
 
-  it('组合期间表格前的修改映射源位置，提交仍写在原格', async () => {
-    const source = '前\n\n| 甲 | 乙 |\n|---|---|\n| 内容 | 值 |\n\n尾';
-    const { v, host } = await mount(source);
-    const cell = await cellEditor(host);
-    composition(cell, 'compositionstart');
-    v.view.dispatch({ changes: { from: 0, insert: '插入\n\n' } });
-    cell.dispatch({ ...cell.state.replaceSelection('字'), userEvent: 'input.type.compose' });
-    composition(cell, 'compositionend');
-    await until(() => !cell.contentDOM.hasAttribute('data-ziedit-composing'));
-    expect(v.getMarkdown()).toBe('插入\n\n' + source.replace('| 内容 |', '| 内容字 |'));
-  });
-
-  it('组合结束后重建表格恢复格内中间光标，不跳到格尾', async () => {
-    const source = '| 甲 | 乙 |\n|---|---|\n| 内容甲乙 | 值 |\n\n尾';
-    const { v, host } = await mount(source);
-    const cell = await cellEditor(host);
-    cell.dispatch({ selection: { anchor: 2 } });
-    composition(cell, 'compositionstart');
-    v.view.dispatch({ changes: { from: source.indexOf('\n\n'), insert: '\n| 新 | 行 |' } });
-    composition(cell, 'compositionend');
-    await until(() => host.querySelectorAll('tbody tr').length === 2 && !!host.querySelector('td .cm-editor'));
-    const resumed = EditorView.findFromDOM(host.querySelector('td .cm-editor')!)!;
-    expect(resumed.state.selection.main.head).toBe(2);
-    expect(v.getMarkdown()).toContain('| 内容甲乙 |');
-  });
-
-  it('只读切换关闭组合会话且不产生迟到改写，销毁后释放保护状态', async () => {
+  it('只读切换关闭格编辑且不产生迟到改写，销毁后无残留监听', async () => {
     const source = '| 甲 | 乙 |\n|---|---|\n| 内容 | 值 |\n\n尾';
     const { v, host } = await mount(source);
-    const cell = await cellEditor(host);
+    const cell = await activeCell(host);
     composition(cell, 'compositionstart');
+    cell.textContent += '你';
     v.setReadOnly(true);
-    await until(() => !v.view.contentDOM.hasAttribute('data-ziedit-composing'));
-    expect(host.querySelector('td .cm-editor')).toBeNull();
-    expect(v.getMarkdown()).toBe(source);
+    await until(() => cell.getAttribute('contenteditable') !== 'true');
+    expect(v.getMarkdown()).toBe(source); // 只读守卫：组合中的文本不写回
     v.setReadOnly(false);
-    const next = await cellEditor(host);
-    composition(next, 'compositionstart'); composition(next, 'compositionend');
     v.destroy(); mounted.splice(mounted.indexOf(v), 1);
     await new Promise(r => setTimeout(r, 30));
     expect(document.querySelector('[data-ziedit-composing]')).toBeNull();
-  });
-
-  it('连续两次组合开始不会被前次结束计时器解除保护，撤销分组独立', async () => {
-    const source = '| 甲 | 乙 |\n|---|---|\n| 内容 | 值 |\n\n尾';
-    const { v, host } = await mount(source);
-    const cell = await cellEditor(host);
-    composition(cell, 'compositionstart');
-    cell.dispatch({ ...cell.state.replaceSelection('你'), userEvent: 'input.type.compose' });
-    composition(cell, 'compositionend');
-    composition(cell, 'compositionstart');
-    await new Promise(r => setTimeout(r, 30));
-    expect(cell.contentDOM.hasAttribute('data-ziedit-composing')).toBe(true);
-    cell.dispatch({ ...cell.state.replaceSelection('好'), userEvent: 'input.type.compose' });
-    composition(cell, 'compositionend');
-    await until(() => !cell.contentDOM.hasAttribute('data-ziedit-composing'));
-    expect(undo(v.view)).toBe(true);
-    expect(v.getMarkdown()).toContain('| 内容你 |');
-    expect(undo(v.view)).toBe(true);
-    expect(v.getMarkdown()).toBe(source);
   });
 });

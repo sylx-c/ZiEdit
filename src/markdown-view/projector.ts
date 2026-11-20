@@ -12,7 +12,8 @@ import { markdownIt } from './md';
 import { splitTableRow } from './table-model';
 import { renderBlockAt } from './render-model';
 import { currentPosition, normalizeLabel, linkUrlOfNode, type ReferenceIndex } from './live-state';
-import { TextWidget, ImgWidget, TaskWidget, FootnoteWidget, RenderWidget, TableWidget, codeContainer, renderContextOf, cellAlign } from './live-widgets';
+import { TextWidget, ImgWidget, TaskWidget, FootnoteWidget, RenderWidget, codeContainer, renderContextOf, cellAlign } from './live-widgets';
+import { TableEditWidget } from './table-widget';
 
 /** 投影透镜：调用方从视图状态收集的全部只读输入（纯函数不接触 EditorView/EditorState）。 */
 export interface ProjectionLens {
@@ -179,7 +180,7 @@ export function fenceLines(node: SyntaxNode, doc: Text) {
 
 /** GFM 表格：整块网格渲染（块级替换件；调用方为块级投影/块装饰承载） */
 export interface TableData { header: string[]; align: ('left' | 'center' | 'right')[]; rows: string[][]; to?: number }
-export function tableDecos(node: SyntaxNode, doc: Text, out: Range<Decoration>[], references: ReferenceIndex | null, tables: Map<number, TableData>, emojis: Readonly<Record<string, string>>): void {
+export function tableDecos(node: SyntaxNode, doc: Text, out: Range<Decoration>[], references: ReferenceIndex | null, tables: Map<number, TableData>, _emojis: Readonly<Record<string, string>>, baseDir: string | null = null): void {
   let data = tables.get(node.from);
   if (!data || data.to !== node.to) {
     const lines = doc.sliceString(node.from, node.to).split('\n').map(l => l.replace(/^\s*(?:>\s*)+/, '')).filter(l => l.trim());
@@ -188,15 +189,16 @@ export function tableDecos(node: SyntaxNode, doc: Text, out: Range<Decoration>[]
     tables.set(node.from, data);
     if (tables.size > 32) tables.delete(tables.keys().next().value!);
   }
+  // REQ-014 P5（REQ-014.8）：>500 行整表退化为源码显示（不产挂件，Typora 行为）。
+  if (data.rows.length + 1 > 500) return;
   // 引用前缀连同表格投影，否则会在网格前留下一个空的CM正文行。
   const line = doc.lineAt(node.from);
   const from = /^[\t >]*$/.test(doc.sliceString(line.from, node.from)) ? line.from : node.from;
   const { inset, quoted } = codeContainer(node);
   out.push(Decoration.replace({
     block: true, blockAtomic: true,
-    widget: new TableWidget(data.header, data.align, data.rows, node.from, node.to,
-      doc.lineAt(Math.max(node.from, node.to - 1)).number - doc.lineAt(node.from).number + 1,
-      references, emojis, inset, quoted),
+    widget: new TableEditWidget(data.header, data.align, data.rows, node.from, node.to,
+      references, inset, quoted, baseDir),
   }).range(from, node.to));
 }
 

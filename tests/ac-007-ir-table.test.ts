@@ -94,7 +94,10 @@ describe('AC-27 表格导航与加行加列（规则 23 M2，通行表格语义�
       (table.querySelectorAll('tbody td')[2] as HTMLElement).dispatchEvent(
         new MouseEvent('mousedown', { bubbles: true, cancelable: true })
       );
-      expect(host.querySelector('td .cm-editor')?.textContent).toContain('3');
+      // REQ-014 P5：contenteditable 单元格（无嵌套 CM）——按下即切源文本并进入编辑态。
+      const cell = table.querySelectorAll('tbody td')[2] as HTMLElement;
+      expect(cell.getAttribute('contenteditable')).toBe('true');
+      expect(cell.textContent).toContain('3');
       expect(host.querySelector('.mdir-table')).toBe(table);
     } finally { v.destroy(); }
   });

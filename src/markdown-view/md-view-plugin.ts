@@ -27,6 +27,7 @@ import { RenderWidget, CodeLabelWidget, TocWidget, HrWidget, codeContainer, edit
 import { renderBlockAt } from './render-model';
 import { requestIrFrame, cancelIrFrame, measureAfterRender } from './frame-work';
 import { activeBlocks } from './active-block';
+import { closeAllTableEdits } from './table-widget';
 
 // ── 窗口数学（自 deco-window.ts 内联；原文件随 T012 删除） ──
 
@@ -127,8 +128,9 @@ function buildBlockDecosInner(state: EditorState, from: number, to: number, tabl
     if (node.name === 'Table') {
       // 滚动延迟只针对「尚未挂载过」的表格：已挂载实表不降级（销毁编辑器会重复水合）；
       // P3 起无占位预言机——未挂载表格在延迟分片落地前保持源码形态。
+      // P5：>500 行退化源码由 tableDecos 统一判定。
       if (!selected && (!deferred || tables.has(node.from))) {
-        tableDecos(node, doc, out, index, tables, state.field(emojiField));
+        tableDecos(node, doc, out, index, tables, state.field(emojiField), state.facet(imageContext).baseDir);
       }
       return false;
     }
@@ -484,6 +486,7 @@ export const mdViewOrchestrator = ViewPlugin.fromClass(
     update(u: ViewUpdate): void {
       notifyCmRestoreLayout(u.view);
       if (u.docChanged || u.geometryChanged) u.view.scrollDOM.dispatchEvent(new Event('md-layout'));
+      if (u.startState.readOnly !== u.state.readOnly) closeAllTableEdits(u.view); // P5：只读切换即关活动格
       if (u.docChanged) {
         this.lastEdit = performance.now(); this.scrolling = false; clearTimeout(this.settleTimer);
         // 键入探针按实时视口记录（旧 liveDeco ViewPlugin 口径：状态层读不到 view.viewport）。

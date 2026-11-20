@@ -1,6 +1,5 @@
 import { GFM, Superscript, Subscript, type MarkdownConfig } from '@lezer/markdown';
 import { tags } from '@lezer/highlight';
-import { cooperativeTableNodes, cooperativeTableParser } from './cooperative-table';
 
 /** 已有静态渲染扩展的源位置语义，编辑时仍保留原 Markdown。 */
 export const liveMarkdownExtensions: MarkdownConfig = {
@@ -98,5 +97,6 @@ export const liveMarkdownExtensions: MarkdownConfig = {
  *  大纲提取同口径。 */
 export const noSetextHeading: MarkdownConfig = { remove: ['SetextHeading'] };
 
-/** Worker、源码与即时渲染共享语法；大表不能在源码面退化成整篇超大段落。 */
-export const markdownSyntaxExtensions = [cooperativeTableNodes, GFM, cooperativeTableParser, Superscript, Subscript, liveMarkdownExtensions, noSetextHeading];
+/** Worker、源码与即时渲染共享语法；大表不能在源码面退化成整篇超大段落。
+ *  REQ-014 P5：cooperative-table 协作解析器删除（>500 行由投影器退化源码，Typora 行为）。 */
+export const markdownSyntaxExtensions = [GFM, Superscript, Subscript, liveMarkdownExtensions, noSetextHeading];
