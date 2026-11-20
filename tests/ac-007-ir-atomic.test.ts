@@ -128,17 +128,16 @@ describe('007 v0.40 差分路径谓词门回归（规则 27 修正）', () => {
 });
 
 describe('007 v0.40 保守托底高度（规则 27）', () => {
-  it('RenderWidget/TableWidget estimatedHeight ≥ 源行数×21.6 且 ≥ 显示下限', async () => {
-    // 通过源码结构锁：常量与 widget 实现不漂移（REQ-014 P3 起常量随 table-viewport.ts 承载，
-    // 断言对象随迁，锁语义不变）
-    const viewport = readFileSync(resolve(__dirname, '../src/markdown-view/table-viewport.ts'), 'utf8');
-    const lp = readFileSync(resolve(__dirname, '../src/markdown-view/live-widgets.ts'), 'utf8');
-    expect(viewport).toContain('SOURCE_LINE_HEIGHT_PX = 21.6');
+  it('RenderWidget/TableEditWidget estimatedHeight ≥ 源行数×21.6 且 ≥ 显示下限（P5 常量随 table-widget/live-widgets 承载）', async () => {
+    const widgets = readFileSync(resolve(__dirname, '../src/markdown-view/live-widgets.ts'), 'utf8');
+    const table = readFileSync(resolve(__dirname, '../src/markdown-view/table-widget.ts'), 'utf8');
+    expect(widgets).toContain('SOURCE_LINE_HEIGHT_PX = 21.6');
     // RenderWidget：max(源行数×行高, 40)
-    expect(lp).toMatch(/class RenderWidget[\s\S]*?estimatedHeight[\s\S]*?Math\.max\(lines \* SOURCE_LINE_HEIGHT_PX, 40\)/);
-    // TableWidget：max(源行数×行高, (行数+1)×表格行高初值)；初值随表格 CSS（padding 13px×2 + 行高 20px + 边框）
-    expect(viewport).toContain('TABLE_ROW_ESTIMATE_PX = 48');
-    expect(lp).toMatch(/class TableWidget[\s\S]*?estimatedHeight[\s\S]*?Math\.max\(Math\.max\(1, this\.sourceLines\) \* SOURCE_LINE_HEIGHT_PX, \(this\.rows\.length \+ 1\) \* TABLE_ROW_ESTIMATE_PX\)/);
+    expect(widgets).toMatch(/class RenderWidget[\s\S]*?estimatedHeight[\s\S]*?Math\.max\(lines \* SOURCE_LINE_HEIGHT_PX, 40\)/);
+    // TableEditWidget：(行数+1)×表格行高初值（P5 直接 DOM 全量渲染，无源行数混合项）；
+    // 初值随表格 CSS（padding 13px×2 + 行高 20px + 边框）
+    expect(table).toContain('TABLE_ROW_ESTIMATE_PX = 48');
+    expect(table).toMatch(/class TableEditWidget[\s\S]*?estimatedHeight[\s\S]*?return \(this\.rows\.length \+ 1\) \* ROW_ESTIMATE_PX/);
   });
 
   it('CSS 源行高契约不漂移（基准 13.5px×1.6，随 --md-fs-user 等比派生）', () => {
@@ -152,9 +151,9 @@ describe('007 v0.40 保守托底高度（规则 27）', () => {
     expect(m![1]).toContain('line-height:1.6');
     // 显示公式占位 min-height 40px 与 RenderWidget 下限一致
     expect(css).toContain('.md-render-target[data-render-display="1"]{display:block;min-height:40px');
-    // 表格行高初值与 TableWidget 下限同源（2026-10-30 起共用 layout.ts TABLE_ROW_ESTIMATE_PX，对齐当前表格 CSS）
-    const tv = readFileSync(resolve(__dirname, '../src/markdown-view/table-viewport.ts'), 'utf8');
-    expect(tv).toContain('() => TABLE_ROW_ESTIMATE_PX');
+    // 表格行高初值与 TableEditWidget 下限同源（P5 起承载于 table-widget.ts，对齐当前表格 CSS）
+    const tw = readFileSync(resolve(__dirname, '../src/markdown-view/table-widget.ts'), 'utf8');
+    expect(tw).toContain('TABLE_ROW_ESTIMATE_PX = 48');
     expect(css).toMatch(/\.md-ir \.mdir-table :is\(th,td\)\{[^}]*padding:13px 16px[^}]*line-height:20px/);
   });
 });

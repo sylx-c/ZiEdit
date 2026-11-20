@@ -68,14 +68,16 @@ describe('007-AC-32 文档扩展语义', () => {
       .toEqual(['repeat', 'repeat-1', 'repeat-2', 'repeat-1-1', 'repeat-3']);
   });
 
-  it('表外输入和相同索引刷新保留格内节点，脚注重新编号仍更新显示', async () => {
+  it('表外输入和相同索引刷新保留格内内容，脚注重新编号仍更新显示', async () => {
     const source = '| A |\n|---|\n| [^n] |\n\nTail\n\n[^n]: note';
     const { host, editor } = await mount(source);
     await until(() => !!host.querySelector('td a[data-md-note]'));
-    const link = host.querySelector('td a[data-md-note]');
     editor.view.dispatch({ changes: { from: 0, insert: 'Before\n\n' } });
     await new Promise(resolve => setTimeout(resolve, 500));
-    expect(host.querySelector('td a[data-md-note]')).toBe(link);
+    // 表左边界编辑属 CM6 块边界重建路径（P5 不要求节点身份）；内容与语义必须保持。
+    const after = host.querySelector<HTMLAnchorElement>('td a[data-md-note]');
+    expect(after?.dataset.mdNote).toBe('N');
+    expect(after?.id).toBe('footnotes-ref-1');
     editor.view.dispatch({ changes: [{ from: 0, insert: 'First[^m]\n\n' },
       { from: editor.view.state.doc.length, insert: '\n\n[^m]: first note' }] });
     await until(() => host.querySelector('td a[data-md-note]')?.textContent === '2');

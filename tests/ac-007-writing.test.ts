@@ -6,7 +6,6 @@ import { ensureSyntaxTree } from '@codemirror/language';
 import { startCompletion, currentCompletions, setSelectedCompletion } from '@codemirror/autocomplete';
 import { LivePreviewView } from '../src/markdown-view/livepreview';
 import { parseTablePaste, pasteTable, resizeTable, runTableOperation, tableModel } from '../src/markdown-view/table-model';
-import { tableCellAt } from '../src/markdown-view/table-viewport';
 import { compositionChanged } from '../src/common/composition';
 
 vi.mock('../src/common/ipc', () => ({ textOpen: async () => ({ newline: 'lf' }), textReadAll: async () => '', textSave: async () => ({ len: 0 }) }));
@@ -397,27 +396,24 @@ describe('007 AC-30 连续写作', () => {
 });
 
 describe('007 AC-31 表格主事务', () => {
-  it('大表仅挂载行窗口，跨窗Tab保持逻辑行；离屏活动格保留DOM、主历史可撤销', async () => {
+  it('220 行表全量渲染（P5 起无行窗口），跨行 Tab 保持逻辑行，编辑写回且主历史可撤销', async () => {
     const source = '| A | B |\n|---|---|\n' + Array.from({ length: 220 }, (_, i) => `| a${i} | b${i} |`).join('\n') + '\n\n后';
     const { main, host } = await mount(source);
     await until(() => !!host.querySelector('.mdir-table'));
+    // 后台解析渐进扩展同一张表，挂件会整只替换（行数变化 → eq 不成立）：等全表到齐后重取引用。
+    await until(() => host.querySelectorAll('tr[data-md-row]').length >= 221);
     const box = host.querySelector<HTMLElement>('.mdir-tablebox')!;
-    // 后台解析会渐进扩展同一张表：慢机上首帧仅部分行（未过 160 窗口阈值、未分窗），
-    // 直接断言会把扩展中的行数当窗口大小。等全表（220 数据行）到齐再断言窗口。
-    await until(() => Number(box.dataset.mdTableRows ?? 0) >= 220);
-    expect(host.querySelectorAll('tr[data-md-row]').length).toBeLessThan(80);
-    const cell = tableCellAt(box, 180, 1)!;
+    expect(Number(box.dataset.mdTableRows)).toBeGreaterThanOrEqual(221); // REQ-014 P5：≤500 行全量渲染。
+    const cell = box.querySelector<HTMLTableCellElement>('[data-md-row="180"][data-md-col="1"]')!;
     expect(cell.textContent).toBe('b179');
     cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    const dom = cell.querySelector('.cm-editor')!;
-    const editor = EditorView.findFromDOM(dom)!;
-    editor.dispatch({ changes: { from: editor.state.doc.length, insert: '改' }, userEvent: 'input.type' });
-    tableCellAt(box, 210, 0);
+    expect(cell.getAttribute('contenteditable')).toBe('true');
+    cell.textContent = 'b179改';
+    // 点另一格提交前格（单事务写回）。
+    const other = box.querySelector<HTMLTableCellElement>('[data-md-row="181"][data-md-col="0"]')!;
+    other.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
     await until(() => main.state.doc.toString().includes('b179改'));
-    expect(cell.querySelector('.cm-editor')).toBe(dom);
-    key(editor, 'Tab');
-    await until(() => !!box.querySelector('[data-md-row="181"] .cm-editor'));
-    expect(box.querySelector('[data-md-row="181"] .cm-content')?.textContent).toBe('a180');
+    expect(other.textContent).toBe('a180');
     expect(undo(main)).toBe(true);
     expect(main.state.doc.toString()).toBe(source);
   });
@@ -460,19 +456,22 @@ describe('007 AC-31 表格主事务', () => {
     expect(main.state.doc.toString()).toContain('\n> | 保留 | 甲 | 乙 |');
     undo(main); undo(main); expect(main.state.doc.toString()).toBe(source);
   });
-  it('Ctrl+Enter在当前格下插行并恢复同列，工具条对齐、尺寸和只读守卫可达', async () => {
+  it('Ctrl+Enter在当前格下插行并恢复同列，工具条对齐、尺寸和只读守卫可达（P5 contenteditable 口径）', async () => {
     const { main, host, view } = await mount(SOURCE);
-    const cell = host.querySelectorAll('tbody tr')[0]!.querySelectorAll('td')[1]!;
+    const cell = host.querySelectorAll('tbody tr')[0]!.querySelectorAll('td')[1]! as HTMLTableCellElement;
     cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    let editor = EditorView.findFromDOM(host.querySelector('td .cm-editor')!)!;
-    key(editor, 'Enter', { ctrlKey: true });
-    await until(() => host.querySelectorAll('tbody tr').length === 3 && !!host.querySelector('td .cm-editor'));
-    editor = EditorView.findFromDOM(host.querySelector('td .cm-editor')!)!;
-    expect(editor.contentDOM.getAttribute('aria-label')).toBe('表格第 3 行第 2 列');
+    expect(cell.getAttribute('contenteditable')).toBe('true');
+    cell.focus();
+    cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true, cancelable: true }));
+    await until(() => host.querySelectorAll('tbody tr').length === 3);
+    // 插行后微任务聚焦同列新格。
+    await until(() => {
+      const next = host.querySelector('[data-md-row="3"][data-md-col="1"]') as HTMLTableCellElement | null;
+      return !!next?.getAttribute('contenteditable');
+    });
     const select = host.querySelector<HTMLSelectElement>('.mdir-tabletools select')!;
     select.value = 'right'; select.dispatchEvent(new Event('change'));
-    await until(() => !!host.querySelector('td .cm-editor'));
-    expect(tableModel(main.state, SOURCE.indexOf('|'))?.rows[1]?.[1]).toBe('---:');
+    await until(() => tableModel(main.state, SOURCE.indexOf('|'))?.rows[1]?.[1] === '---:');
     view.setReadOnly(true);
     const before = main.state.doc.toString();
     expect(resizeTable(main, SOURCE.indexOf('|'), 5, 5)).toBe(false);

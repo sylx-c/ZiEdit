@@ -38,8 +38,6 @@ import { readClipboardText, writeClipboardText } from '../common/clipboard';
 import { t, tf } from '../common/i18n';
 import { FindBar } from '../text-view/findbar';
 import { runMdFormat, editMarkdownLink, MD_INLINE_COMMANDS, MD_BLOCK_COMMANDS, type MdFormatCmd } from './mdformat';
-import { destroyCellEditor } from './table-editor';
-import { tableRowNumber } from './table-viewport';
 import { markdownWriting, markdownIndent, codeIndent, inlineFormatChanged, inlineFormatField, inlineFormatMarks, inlineFormatOpen, inlineFormatClose, type InlineFormat } from './writing';
 import { trackImageTarget } from './imagehost';
 import { snapshotDocument } from '../common/snapshot';
@@ -191,7 +189,7 @@ export class LivePreviewView {
   get isReadOnly(): boolean { return this.readOnlyControl.enabled; }
   setReadOnly(on: boolean): void {
     this.readOnlyControl.set(this.view, on);
-    if (on) for (const box of this.host.querySelectorAll<HTMLElement>('.mdir-tablebox')) destroyCellEditor(box);
+    // P5：活动格由编排插件在只读事务后统一关闭（closeAllTableEdits），此处无需逐 box 处理。
   }
   private dirty = false;
   private saveQueue: Promise<void> = Promise.resolve();
@@ -477,7 +475,7 @@ export class LivePreviewView {
         const tr = cell.closest('tr');
         const table = cell.closest('table');
         if (tr && table) {
-          const domRow = tableRowNumber(cell);
+          const domRow = Number(cell.dataset.mdRow ?? (cell.parentElement as HTMLTableRowElement | null)?.rowIndex ?? 0);
           if (domRow >= 0) items.unshift(tableMenuItems(this.view, this.host, this.isReadOnly, domRow, cell.cellIndex, Number(cell.closest<HTMLElement>('.mdir-tablebox')!.dataset.mdTableFrom))[0]!);
         }
       } else {
