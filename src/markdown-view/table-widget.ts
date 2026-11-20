@@ -494,6 +494,8 @@ export class TableEditWidget extends WidgetType {
     // 3px 回归；渲染后行高随标记/字体度量化）。
     const header = this.header, rows = this.rows;
     const capture = (attempt: number): void => {
+      // CM6 块件 DOM 插入晚于 toDOM 返回（度量相位）——未连接带界重试，勿同步退出。
+      if (!box.isConnected && attempt < 240) { setTimeout(() => capture(attempt + 1), 25); return; }
       if (!box.isConnected) return;
       if (!cellRenderSettled() && attempt < 240) { setTimeout(() => capture(attempt + 1), 25); return; }
       // 自然高 = 揭钉同步量取（同任务复原，浏览器不渲染中间态）。
