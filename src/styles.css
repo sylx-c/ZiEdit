@@ -1675,7 +1675,7 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .md-ir .mdir-tabletools label{display:inline-flex;align-items:center;gap:3px;margin-left:4px}
 .md-ir .mdir-tabletools input{width:52px;height:24px;box-sizing:border-box}
 .md-ir .mdir-tabletools select{height:24px;max-width:130px}
-.md-ir table.mdir-table{border-collapse:collapse;width:100%}  /* 撑满阅读栏，与渲染预览一致（6f7eaf6 定稿只落在预览侧） */
+.md-ir table.mdir-table{border-collapse:collapse;width:100%;table-layout:fixed}  /* 撑满阅读栏，与渲染预览一致（6f7eaf6 定稿只落在预览侧）；P6 fixed：列宽由表头（同步渲染）锁定，表体惰性换装不回流列宽 */
 .md-ir .mdir-table :is(thead,.mdir-table-even){background:transparent}
 .md-ir .mdir-table .mdir-table-even{background:color-mix(in srgb,var(--fg) 3%,transparent)}
 .md-ir .mdir-table .mdir-table-head{background:color-mix(in srgb,var(--fg) 8%,#2e3035);color:color-mix(in srgb,#fff 90%,var(--bg));font-weight:600}
