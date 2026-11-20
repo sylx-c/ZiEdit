@@ -333,6 +333,11 @@ export class TableEditWidget extends WidgetType {
     box.dataset.mdTableTo = String(this.to);
     box.dataset.mdTableRows = String(this.rows.length + 1);
     box.dataset.mdTableCols = String(this.header.length);
+    // REQ-014 P6：停稳换装瞬态钉扎——实表首帧布局可比终态短 ~3px（次帧纠正），配合浏览器
+    // 滚动锚定的不对称补偿（缩有补、长无补）留下 3px 净位移（settle 门禁残差机制级根因）。
+    // 有同签名记忆高度时首帧即钉住，消灭瞬态；测量后 CM 高度图接管。
+    const remembered = rememberedTableHeight(this.header, this.rows);
+    if (remembered) box.style.height = remembered + 'px';
     const table = document.createElement('table');
     table.className = 'mdir-table';
     table.setAttribute('aria-rowcount', String(this.rows.length + 1));
