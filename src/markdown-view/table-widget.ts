@@ -44,9 +44,9 @@ export function cellRange(main: EditorView, box: HTMLElement, row: number, col: 
   return { from, to };
 }
 
-/** 表格行高初值（迁自 table-viewport，随其退役）：实测 ≈ 47.3px/行（padding 13×2 + 行高 20 + 边框 1，
- *  非整数取整差累积即停稳跳变——停稳门禁 E1 残差 2.1px 实证）。改表格 padding/行高时同步此值。 */
-export const TABLE_ROW_ESTIMATE_PX = 47.3;
+/** 表格行高初值（迁自 table-viewport，随其退役）：真机实测 48.7px/行（padding 13×2 + 行高 20
+ *  + 行边框累积；3 行盒 146.1px 实测，stub 须精确否则停稳换实表跳变）。改表格 CSS 时同步此值。 */
+export const TABLE_ROW_ESTIMATE_PX = 48.7;
 const ROW_ESTIMATE_PX = TABLE_ROW_ESTIMATE_PX;
 
 /** 实表实测高度记忆（按行数+首行单元格签名）：同签名表格的占位件用实测值，停稳换实表零位移。 */

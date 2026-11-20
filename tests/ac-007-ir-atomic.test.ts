@@ -136,7 +136,7 @@ describe('007 v0.40 保守托底高度（规则 27）', () => {
     expect(widgets).toMatch(/class RenderWidget[\s\S]*?estimatedHeight[\s\S]*?Math\.max\(lines \* SOURCE_LINE_HEIGHT_PX, 40\)/);
     // TableEditWidget：(行数+1)×表格行高初值（P5 直接 DOM 全量渲染，无源行数混合项）；
     // 初值随表格 CSS（padding 13px×2 + 行高 20px + 边框）
-    expect(table).toContain('TABLE_ROW_ESTIMATE_PX = 47.3'); // P6 实测校准（停稳残差 2.1px→0.3px）
+    expect(table).toContain('TABLE_ROW_ESTIMATE_PX = 48.7'); // P6 真机实测（3 行盒 146.1px）
     expect(table).toMatch(/class TableEditWidget[\s\S]*?estimatedHeight[\s\S]*?return \(this\.rows\.length \+ 1\) \* ROW_ESTIMATE_PX/);
   });
 
@@ -153,7 +153,7 @@ describe('007 v0.40 保守托底高度（规则 27）', () => {
     expect(css).toContain('.md-render-target[data-render-display="1"]{display:block;min-height:40px');
     // 表格行高初值与 TableEditWidget 下限同源（P5 起承载于 table-widget.ts，对齐当前表格 CSS）
     const tw = readFileSync(resolve(__dirname, '../src/markdown-view/table-widget.ts'), 'utf8');
-    expect(tw).toContain('TABLE_ROW_ESTIMATE_PX = 47.3');
+    expect(tw).toContain('TABLE_ROW_ESTIMATE_PX = 48.7');
     expect(css).toMatch(/\.md-ir \.mdir-table :is\(th,td\)\{[^}]*padding:13px 16px[^}]*line-height:20px/);
   });
 });
