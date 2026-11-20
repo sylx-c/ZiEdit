@@ -4,7 +4,7 @@
 //   一次调用覆盖一个视口区间（viewport ±300 余量由调用方计算后传入）。
 // P1 过渡说明：本文件先承载行内/行类/行内部件投影（原 buildLiveDecoInner 语义）；
 // 块级件投影（表格/分隔线/显示公式/围栏标签）在 T010–T011 编排插件合并后并入同一函数输出。
-import { Decoration, type DecorationSet } from '@codemirror/view';
+import { Decoration, WidgetType, type DecorationSet } from '@codemirror/view';
 import { type Range, type Text } from '@codemirror/state';
 import type { SyntaxNode, Tree } from '@lezer/common';
 import { decodeMarkdownEntity } from './preview';
@@ -393,9 +393,11 @@ export function projectViewport(
     }
   });
   decorate(tree.topNode);
-  // ── REQ-014 P3：块间距 CSS 承载（原 layout.ts/spacing.ts 的 JS px 模型删除）──
+  // ── REQ-014 P3/P6：块间距 CSS 承载（原 layout.ts/spacing.ts 的 JS px 模型删除）──
   // 空行区间折叠为令牌间距：首空行 padding-top = calc(前块 after + 后块 before)，其余空行高 0；
-  // 紧邻块对（无空行，如列表项）在后块首行加 mdir-gap-pad；文档尾部预留末块 after + block-gap。
+  // 紧邻块对（无空行，如列表项）改为独立块挂件承载（元素 rect 顶 = 文本顶，与预览 margin 语义
+  // 对齐——padding 落在后块行内会把间隙算进该块 rect，真机一致性门按元素顶比对会系统性偏小）；
+  // 文档尾部预留末块 after + block-gap；列表项对用 --md-list-gap（旧 layout.ts 父容器口径）。
   // 令牌求和全部发生在 CSS calc，JS 只选令牌名（与渲染预览 .md-col 同一套令牌）。
   const gapEdgeToken = (nodeName: string | null, edge: 'before' | 'after'): string => {
     if (!nodeName) return '';
@@ -406,15 +408,21 @@ export function projectViewport(
   };
   const GAP_MARKERS2 = new Set(['QuoteMark', 'ListMark']);
   const GAP_CONTAINERS2 = new Set(['Document', 'Blockquote', 'BulletList', 'OrderedList', 'ListItem']);
-  const gapLines = (start: number, end: number, prev: SyntaxNode | null, next: SyntaxNode | null, tail: boolean): void => {
+  const gapLines = (start: number, end: number, prev: SyntaxNode | null, next: SyntaxNode | null, tail: boolean, parentName = 'Document'): void => {
+    const adjacent = end < start;
+    const listPair = adjacent && !tail && (parentName === 'BulletList' || parentName === 'OrderedList');
     const afterVar = gapEdgeToken(prev?.name ?? null, 'after');
     const beforeVar = tail || !next ? '--md-block-gap' : gapEdgeToken(next.name, 'before');
-    const style = `--mdir-gap-after:${afterVar ? `var(${afterVar})` : '0px'};--mdir-gap-before:var(${beforeVar})`;
-    if (end < start) {
-      // 紧邻块对：后块首行 padding-top 承载（padding 参与 CM 行高测量，margin 不参与）。
-      if (!tail && next && prev) out.push(Decoration.line({ class: 'mdir-gap-pad', attributes: { style } }).range(doc.lineAt(next.from).from));
+    if (adjacent) {
+      if (tail || !next || !prev) return;
+      // 列表项对（同容器相邻）用紧凑列表间隙；其余块对 = 前块 after + 后块 before。
+      const height = listPair
+        ? (afterVar ? `calc(var(${afterVar}) + var(--md-list-gap))` : 'var(--md-list-gap)')
+        : `calc(${afterVar ? `var(${afterVar}) + ` : ''}var(${beforeVar}))`;
+      out.push(Decoration.widget({ block: true, side: -1, widget: new BlockGapWidget(height) }).range(doc.lineAt(next.from).from));
       return;
     }
+    const style = `--mdir-gap-after:${afterVar ? `var(${afterVar})` : '0px'};--mdir-gap-before:var(${beforeVar})`;
     const lo = doc.lineAt(from).number, hi = doc.lineAt(to).number;
     let allocated = false;
     for (let n = Math.max(start, lo); n <= Math.min(end, hi); n++) {
@@ -441,7 +449,7 @@ export function projectViewport(
       if (GAP_MARKERS2.has(child.name)) continue;
       const start = previous ? doc.lineAt(Math.max(previous.from, previous.to - 1)).number + 1 : doc.lineAt(parent.from).number;
       const end = doc.lineAt(child.from).number - 1;
-      gapLines(start, end, previous, child, false);
+      gapLines(start, end, previous, child, false, parent.name);
       walkGaps(child);
       previous = child;
     }
@@ -451,4 +459,26 @@ export function projectViewport(
   };
   walkGaps(tree.topNode);
   return Decoration.set(out, true);
+}
+
+/** 紧邻块对间隙挂件：独立块元素承载高度（元素 rect 顶 = 文本顶，与预览 margin 语义对齐）。 */
+class BlockGapWidget extends WidgetType {
+  constructor(private height: string) { super(); }
+  eq(other: BlockGapWidget): boolean { return other.height === this.height; }
+  get estimatedHeight(): number {
+    const mults: Record<string, number> = { '--md-block-gap': 0.8, '--md-list-gap': 0.25, '--md-rule-gap': 1.4,
+      '--md-h1-before': 2.475, '--md-h1-after': 1.2375, '--md-h2-before': 1.925, '--md-h2-after': 0.9625,
+      '--md-h3-before': 1.65, '--md-h3-after': 0.825, '--md-h4-before': 0.8, '--md-h4-after': 0.55,
+      '--md-h5-before': 0.8, '--md-h5-after': 0.55, '--md-h6-before': 0.8, '--md-h6-after': 0.55 };
+    let total = 0;
+    for (const token of this.height.match(/--md-[\w-]+/g) ?? []) total += mults[token] ?? 0;
+    return total * 13.5;
+  }
+  toDOM(): HTMLElement {
+    const el = document.createElement('div');
+    el.className = 'mdir-block-gap';
+    el.style.height = this.height;
+    el.setAttribute('aria-hidden', 'true');
+    return el;
+  }
 }
