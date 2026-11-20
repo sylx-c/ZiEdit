@@ -964,12 +964,31 @@ button{font:inherit}
 .md-preview .md-col .md-render-target[data-render-display="1"]{margin-block:var(--md-block-gap) 0}
 .md-preview .md-col :is(h1,h2,h3,h4,h5,h6){line-height:1.35;font-weight:600}
 /* 标题与正文同源（007 规则 16）：嵌套容器不再逐级放大字号，边距复用 IR 令牌。 */
-.md-preview .md-col h1{font-size:calc(var(--md-fs-base) * 2.25);margin-block:var(--md-h1-before) var(--md-h1-after)}
-.md-preview .md-col h2{font-size:calc(var(--md-fs-base) * 1.75);margin-block:var(--md-h2-before) var(--md-h2-after)}
-.md-preview .md-col h3{font-size:calc(var(--md-fs-base) * 1.5);margin-block:var(--md-h3-before) var(--md-h3-after)}
-.md-preview .md-col h4{font-size:calc(var(--md-fs-base) * 1.25);margin-block:var(--md-h4-before) var(--md-h4-after)}
-.md-preview .md-col h5{font-size:calc(var(--md-fs-base) * 0.875);margin-block:var(--md-h5-before) var(--md-h5-after)}
-.md-preview .md-col h6{font-size:calc(var(--md-fs-base) * 0.85);margin-block:var(--md-h6-before) var(--md-h6-after);color:var(--muted)}
+.md-preview .md-col h1{font-size:calc(var(--md-fs-base) * 2.25);margin-block:var(--md-h1-before) var(--md-h1-after);
+  /* REQ-014 P6：预览标题与 IR 同款左侧留白栏（级别色条）——三面 textX/观感一致 */
+  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
+.md-preview .md-col h1::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
+  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
+.md-preview .md-col h2{font-size:calc(var(--md-fs-base) * 1.75);margin-block:var(--md-h2-before) var(--md-h2-after);
+  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
+.md-preview .md-col h2::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
+  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
+.md-preview .md-col h3{font-size:calc(var(--md-fs-base) * 1.5);margin-block:var(--md-h3-before) var(--md-h3-after);
+  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
+.md-preview .md-col h3::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
+  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
+.md-preview .md-col h4{font-size:calc(var(--md-fs-base) * 1.25);margin-block:var(--md-h4-before) var(--md-h4-after);
+  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
+.md-preview .md-col h4::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
+  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
+.md-preview .md-col h5{font-size:calc(var(--md-fs-base) * 0.875);margin-block:var(--md-h5-before) var(--md-h5-after);
+  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
+.md-preview .md-col h5::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
+  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
+.md-preview .md-col h6{font-size:calc(var(--md-fs-base) * 0.85);margin-block:var(--md-h6-before) var(--md-h6-after);color:var(--muted);
+  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
+.md-preview .md-col h6::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
+  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
 /* 列表嵌套（007 规则 16）：每级容器累加 1.6em，与 IR 深度投影一致。 */
 .md-preview .md-col :is(ul,ol){padding-inline-start:1.6em}
 .md-preview .md-col li{margin-block:var(--md-list-gap)}
@@ -1581,10 +1600,11 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .md-ir .cm-line.mdir-h6{font-size:calc(var(--md-fs-base) * 0.85)}
 .md-ir .cm-line.mdir-h6{color:var(--muted)}
 .md-ir .cm-line.mdir-h1,.md-ir .cm-line.mdir-h2{border-bottom:1px solid var(--border)}
-/* REQ-014 P3：块间距 CSS 承载——空行折叠为令牌间距（calc 求和发生在 CSS，与预览同一套令牌）。
-   首空行 padding-top = 前块 after + 后块 before；其余空行高 0；紧邻块对用 mdir-gap-pad 行 padding。 */
+/* REQ-014 P3/P6：块间距 CSS 承载——空行折叠为令牌间距（calc 求和发生在 CSS，与预览同一套令牌）。
+   首空行 padding-top = 前块 after + 后块 before；其余空行高 0；紧邻块对改独立块挂件 mdir-block-gap
+   （元素 rect 顶 = 文本顶，真机一致性门按元素顶比对；列表项对挂件高 --md-list-gap）。 */
 .md-ir .cm-line.mdir-gap{height:auto;min-height:0;line-height:0;padding-top:calc(var(--mdir-gap-after,0px) + var(--mdir-gap-before,0px))}
-.md-ir .cm-line.mdir-gap-pad{padding-top:calc(var(--mdir-gap-after,0px) + var(--mdir-gap-before,0px))}
+.md-ir .mdir-block-gap{pointer-events:none}
 /* 大纲跳转闪示：目标标题行 1.5s 背景脉冲（与侧栏选中条呼应，双主题共用 accent 派生色） */
 .md-ir .cm-line.mdir-flash{animation:mdir-flash-kf 1.5s ease-out}
 @keyframes mdir-flash-kf{0%{background:color-mix(in srgb,var(--accent) 28%,transparent)}60%{background:color-mix(in srgb,var(--accent) 12%,transparent)}100%{background:transparent}}
