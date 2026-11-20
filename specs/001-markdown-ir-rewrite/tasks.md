@@ -109,9 +109,9 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 3
 
-- [ ] T018 [US3] `src/markdown-view/live-widgets.ts`：公式/Mermaid/图片挂件 `toDOM()` 先渲染固定高度占位（estimatedHeight 初值语义按 data-model.md §5），挂载完成后 `view.requestMeasure()` 仅更新高度图、不写 scrollTop
-- [ ] T019 [US3] 删除 `src/markdown-view/ir-layout.ts`（gapAnchor）及 `src/markdown-view/livepreview.ts` 中 `liveAnchorReady` / `revealWhenReady` 依赖高度预言机的路径（直接 dispatch，不追加 scrollIntoView）；同阶段删除 `src/markdown-view/ir-layout.test.ts`
-- [ ] T020 [US3] 删除 `src/markdown-view/block-height-cache.ts`、`src/markdown-view/layout.ts`、`src/markdown-view/spacing.ts` 及处置表指定的 `src/markdown-view/block-height-cache.test.ts`、`src/markdown-view/row-height-cache.test.ts`、`src/markdown-view/spacing-contract.test.ts`；同步解除 `src/markdown-view/livepreview.ts`、`src/markdown-view/live-widgets.ts`、`src/markdown-view/table-viewport.ts` 对三类旧模型的引用；IR 段落间距在 `src/styles.css` 改由 line class 单边 `margin-top` 承载
+- [x] T018 [US3] `src/markdown-view/live-widgets.ts`：公式/Mermaid/图片挂件 `toDOM()` 先渲染固定高度占位（estimatedHeight 初值语义按 data-model.md §5），挂载完成后 `view.requestMeasure()` 仅更新高度图、不写 scrollTop
+- [x] T019 [US3] 删除 `src/markdown-view/ir-layout.ts`（gapAnchor）及 `src/markdown-view/livepreview.ts` 中 `liveAnchorReady` / `revealWhenReady` 依赖高度预言机的路径（直接 dispatch，不追加 scrollIntoView）；同阶段删除 `src/markdown-view/ir-layout.test.ts`
+- [x] T020 [US3] 删除 `src/markdown-view/block-height-cache.ts`、`src/markdown-view/layout.ts`、`src/markdown-view/spacing.ts` 及处置表指定的 `src/markdown-view/block-height-cache.test.ts`、`src/markdown-view/row-height-cache.test.ts`、`src/markdown-view/spacing-contract.test.ts`；同步解除 `src/markdown-view/livepreview.ts`、`src/markdown-view/live-widgets.ts`、`src/markdown-view/table-viewport.ts` 对三类旧模型的引用；IR 段落间距在 `src/styles.css` 改由 line class 单边 `margin-top` 承载
 - [ ] T021 [US3] P3 检查点：标准提交前门禁 + P2 原生门禁 + gate-scroll-position + gate-md-surfaces 全绿；停稳 ≤1px、10 秒滚动零替换
 
 **Checkpoint**: US3 交付——滚动与停稳稳定。

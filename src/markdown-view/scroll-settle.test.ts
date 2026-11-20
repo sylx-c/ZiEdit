@@ -14,7 +14,7 @@ it('table measurements report height changes without writing the editor scroll p
   const viewport = new TableViewport(view, box, table, 300, 1, row => {
     const tr = document.createElement('tr'); tr.dataset.mdRow = String(row); tr.insertCell();
     tr.getBoundingClientRect = () => ({ height } as DOMRect); return tr;
-  }, () => null, () => {}, undefined, () => 32); // 行高初值固定 32：本例只锁「停稳至多补偿一次」，与默认初值无关
+  }, () => null, () => {}, () => 32); // 行高初值固定 32：本例只锁「停稳至多补偿一次」，与默认初值无关
   const positions: number[] = [];
   try {
     scrollDOM.scrollTop = 640; scrollDOM.dispatchEvent(new Event('scroll'));

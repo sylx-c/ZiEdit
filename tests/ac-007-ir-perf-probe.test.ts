@@ -80,8 +80,9 @@ describe('007 AC-36 IR performance probe', () => {
     expect(segment.t2).toBeLessThanOrEqual(segment.t3);
     expect(snapshot.summary.count).toBe(1);
     expect(snapshot.counters.liveDeco.count).toBe(1);
-    expect(snapshot.counters.blockLayout.count).toBe(1);
     expect(snapshot.counters.blockDecos.count).toBe(1);
+    // REQ-014 P3：JS 间距模型（blockLayout 流）已删除——计数恒零。
+    expect(snapshot.counters.blockLayout.count).toBe(0);
     expect(preview.view.contentDOM.textContent).toBe('xplain');
     expect(Reflect.get(globalThis, '__ZIEDIT_IR_PERF_DATA__')).toEqual(snapshot);
     expect(Object.getOwnPropertyDescriptor(globalThis, '__ZIEDIT_IR_PERF_DATA__')?.get).toBeTypeOf('function');
