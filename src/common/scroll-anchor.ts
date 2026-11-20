@@ -100,6 +100,10 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
   let quietTimer: ReturnType<typeof setTimeout> | undefined;
   const cancel = (): void => {
     if (!active) return;
+    if ((globalThis as { __ANC__?: boolean }).__ANC__) {
+      // eslint-disable-next-line no-console
+      console.log('[anchor:cancel]', new Error('stack').stack?.split('\n').slice(1, 4).join(' | '));
+    }
     active = false; cancelAnimationFrame(frame); clearTimeout(quietTimer);
     for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) scroller.removeEventListener(event, cancel);
     if (pendingRestores.get(view)?.cancel === cancel) pendingRestores.delete(view);
@@ -130,7 +134,15 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
       if (!current()) { cancel(); return; }
       view.requestMeasure({
         read: v => {
-          if (!current()) { cancel(); return null; }
+          if (!current()) {
+            if ((globalThis as { __ANC__?: boolean }).__ANC__) {
+              // eslint-disable-next-line no-console
+              console.log('[anchor:read-cancel]', 'active=', active, 'connected=', view.dom.isConnected,
+                'clientH=', scroller.clientHeight, 'docSame=', view.state.doc === doc,
+                'usv=', userScrollVersion(scroller), 'usv0=', inputVersion);
+            }
+            cancel(); return null;
+          }
           try {
             if (options?.ready && !options.ready(v, anchor.line)) return null;
             return cmLineTop(v, anchor.line, 'start');

@@ -23,7 +23,7 @@ import {
   drawSelection,
 } from '@codemirror/view';
 import { bufferHistory, ReadOnlyControl, restoreBufferScroll, type EditorBuffer } from '../common/editor-buffer';
-import { cancelCmRestore, cmCaptureAnchor, cmRestoreAnchor, cmScrollToLine, cmVisibleLines, type ScrollAnchor } from '../common/scroll-anchor';
+import { cancelCmRestore, cmCaptureAnchor, cmRestoreAnchor, cmScrollToLine, cmTopLine, cmVisibleLines, type ScrollAnchor } from '../common/scroll-anchor';
 import { compositionGuard, isComposing } from '../common/composition';
 import { EditorState } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap, undo, redo, selectAll } from '@codemirror/commands';
@@ -249,6 +249,18 @@ export class LivePreviewView {
     this.tracker.prime(this.view);
     void loadUnicodeEmojis().then(map => { if (!this.destroyed) this.view.dispatch({ effects: emojisReady.of(map) }); });
     restoreBufferScroll(this.view, this.opts.buffer, 'ir', { ready: liveAnchorReady });
+    // REQ-014 P6：挂载期装饰分片交付使高度图/DOM 短暂失同步，跨形态首次恢复可落错且
+    // cmRestoreAnchor 内循环在真机停摆（jsdom 复现不了；基线对照实测漂移 372 行）。
+    // 挂载后按稳定布局复核一次：漂移超一行即整体重恢复（二次恢复作用于已稳定高度图）。
+    const mountAnchor = this.opts.buffer?.anchor;
+    if (mountAnchor) setTimeout(() => {
+      if (this.destroyed || !this.view) return;
+      try {
+        if (Math.abs(cmTopLine(this.view) - mountAnchor.line) > 1) {
+          restoreBufferScroll(this.view, this.opts.buffer, 'ir', { ready: liveAnchorReady });
+        }
+      } catch { /* 布局暂不可读：放弃复核，保持首次恢复位置 */ }
+    }, 600);
     this.stopParseWarmup = startParseWarmup(this.view, () => !this.destroyed);
     this.revealWhenReady();
     this.opts.onReady?.({
