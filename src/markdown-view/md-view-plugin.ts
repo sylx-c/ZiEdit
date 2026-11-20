@@ -503,34 +503,9 @@ export const mdViewOrchestrator = ViewPlugin.fromClass(
       if (this.dead) return;
       clearUserScroll(this.view.scrollDOM);
       this.ignoreScrollUntil = performance.now() + 100;
-      // REQ-014 P6：停稳行位对称补偿——scroller 已禁原生滚动锚定（其「缩有补/长无补」
-      // 不对称即停稳 3px 净位移根源），停稳补齐重建前后按「视口顶源码行 + 像素偏移」
-      // 自行对齐：重建事务落地并测量后把该行拉回原屏幕位置（双向对称，无净残差）。
-      const view = this.view, scroller = view.scrollDOM;
-      let anchorLine = -1, anchorSub = 0;
-      try {
-        const h = scroller.getBoundingClientRect().top - view.documentTop + scroller.scrollTop;
-        const b = view.lineBlockAtHeight(Math.max(0, h));
-        const line = view.state.doc.lineAt(b.from);
-        void line;
-        anchorLine = line.number;
-        anchorSub = b.height > 0 ? Math.min(1, Math.max(0, (h - b.top) / b.height)) : 0;
-      } catch { anchorLine = -1; }
       this.settleDirty = true;
-      this.report(view);
+      this.report(this.view);
       this.view.scrollDOM.dispatchEvent(new Event('mdir-scroll-settle'));
-      if (anchorLine >= 0) {
-        measureAfterRender(view, () => {
-          if (this.dead) return;
-          try {
-            const target = view.state.doc.line(Math.min(view.state.doc.lines, Math.max(1, anchorLine)));
-            const block = view.lineBlockAt(target.from);
-            const docOffset = view.documentTop - scroller.getBoundingClientRect().top + scroller.scrollTop;
-            const want = block.top + docOffset + anchorSub * block.height;
-            if (Math.abs(scroller.scrollTop - want) > 0.5) scroller.scrollTop = want;
-          } catch { /* 布局暂不可读：放弃本次补偿 */ }
-        });
-      }
     }
     update(u: ViewUpdate): void {
       notifyCmRestoreLayout(u.view);
