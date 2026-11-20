@@ -85,7 +85,7 @@ describe('跨形态恢复多行块的源码位置', () => {
     expect(scroller.scrollTop).toBeCloseTo(140);
   });
 
-  it('等待块装饰和连续布局更新结束后只恢复一次', () => {
+  it('等待块装饰和连续布局更新结束后恢复；晚到布局仅在漂移时再恢复一次（有界）', () => {
     vi.useFakeTimers();
     const { view, scroller, next, frames, deliver } = setup();
     let ready = false;
@@ -98,9 +98,13 @@ describe('跨形态恢复多行块的源码位置', () => {
     expect(frames.size).toBe(0); // 新布局推迟旧测量
     vi.advanceTimersByTime(1); next(); next(); deliver();
     expect(scroller.scrollTop).toBeCloseTo(140);
+    // REQ-014 P6：晚到的布局通知（如视口裁剪后再估计）触发一次复核；位置未漂移则不再写入并终止。
     notifyCmRestoreLayout(view);
-    vi.advanceTimersByTime(250);
-    expect(frames.size).toBe(0);
+    vi.advanceTimersByTime(250); next(); next(); deliver();
+    expect(scroller.scrollTop).toBeCloseTo(140);
+    vi.advanceTimersByTime(3000);
+    notifyCmRestoreLayout(view); vi.advanceTimersByTime(250);
+    expect(frames.size).toBe(0); // 已取消：无漂移复核后不再响应
   });
 
   it('等待布局时新用户输入取消旧恢复', () => {
