@@ -6,8 +6,6 @@ import { EditorView } from '@codemirror/view';
 import type { StateEffect } from '@codemirror/state';
 import { userScrollVersion } from './user-scroll';
 
-function scrollerDOMRectTop(view: EditorView): number { return view.scrollDOM.getBoundingClientRect().top; }
-
 /** 位置所属的高度模型：同模型才可用像素级快照还原 */
 export type ScrollSurface = 'source' | 'ir' | 'preview';
 
@@ -100,10 +98,6 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
   let quietTimer: ReturnType<typeof setTimeout> | undefined;
   const cancel = (): void => {
     if (!active) return;
-    if ((globalThis as { __ANC__?: boolean }).__ANC__) {
-      // eslint-disable-next-line no-console
-      console.log('[anchor:cancel]', new Error('stack').stack?.split('\n').slice(1, 4).join(' | '));
-    }
     active = false; cancelAnimationFrame(frame); clearTimeout(quietTimer);
     for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) scroller.removeEventListener(event, cancel);
     if (pendingRestores.get(view)?.cancel === cancel) pendingRestores.delete(view);
@@ -134,15 +128,7 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
       if (!current()) { cancel(); return; }
       view.requestMeasure({
         read: v => {
-          if (!current()) {
-            if ((globalThis as { __ANC__?: boolean }).__ANC__) {
-              // eslint-disable-next-line no-console
-              console.log('[anchor:read-cancel]', 'active=', active, 'connected=', view.dom.isConnected,
-                'clientH=', scroller.clientHeight, 'docSame=', view.state.doc === doc,
-                'usv=', userScrollVersion(scroller), 'usv0=', inputVersion);
-            }
-            cancel(); return null;
-          }
+          if (!current()) { cancel(); return null; }
           try {
             if (options?.ready && !options.ready(v, anchor.line)) return null;
             return cmLineTop(v, anchor.line, 'start');
@@ -151,11 +137,6 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
         write: top => {
           // 新布局或新输入使这次测量过期；下次有效布局通知会重新调度。
           if (!current()) { cancel(); return; }
-          if ((globalThis as { __ANC__?: boolean }).__ANC__) {
-            // eslint-disable-next-line no-console
-            console.log('[anchor]', 'top=', top, 'scrollTop=', scroller.scrollTop, 'docTop=', view.documentTop,
-              'rectTop=', scrollerDOMRectTop(view), 'line=', anchor.line, 'null=', top === null, 'ver=', version === layoutVersion);
-          }
           if (top === null || version !== layoutVersion) {
             // REQ-014 P6：null（ready 未就绪）路径同样自排程重测——切片窗未达目标时无布局
             // 通知可等，不排程即死锁在初始钳制位（实测漂移 372 行）。有界：≤6 轮。
