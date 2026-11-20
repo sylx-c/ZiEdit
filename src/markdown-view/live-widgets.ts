@@ -33,8 +33,6 @@ function localImgPath(src: string, baseDir: string | null): string | null {
 
 const renderMounts = new WeakMap<HTMLElement, () => void>();
 const renderKeys = new WeakMap<HTMLElement, string>();
-/** 渲染件 DOM 的上次量测高度（水合高度差补偿的差分基准；重挂载即重置）。 */
-const renderDomHeights = new WeakMap<HTMLElement, number>();
 export class RenderWidget extends WidgetType {
   constructor(readonly block: RenderBlock, readonly doc: Text, readonly context: RenderContext) { super(); }
   /** 高度估计：同一块渲染过则用实测高度（重挂/滚回/离屏估计零跳变）；否则保守托底：
@@ -77,25 +75,18 @@ export class RenderWidget extends WidgetType {
     if (this.block.display) dom.style.setProperty('--md-render-reserve', this.estimatedHeight + 'px');
     const { block, context } = this;
     renderMounts.set(dom, mountRender(dom, block, context, document.documentElement.dataset.tone === 'dark',
-      () => view.dom.contains(dom), () => view.requestMeasure({ key: dom,
-        read: () => {
-          if (!dom.isConnected || dom.dataset.renderState !== 'ready') return null;
-          const rect = dom.getBoundingClientRect();
-          return { height: rect.height, top: rect.top };
-        },
-        write: measured => {
-          if (!measured) return;
-          rememberRenderHeight(block, context, measured.height);
-          // REQ-014 P6：异步块水合高度差补偿（gapAnchor 职责的最小继承，非高度预言机）——
-          // 块跨越/位于视口顶上方时，实际高度相对上次量测的增量会整体推移下方内容；
-          // 按 delta 平移 scrollTop 保持视口内容稳定（REQ-014.5 停稳 ≤1px 的机制基础）。
-          const previous = renderDomHeights.get(dom);
-          renderDomHeights.set(dom, measured.height);
-          if (previous === undefined || Math.abs(measured.height - previous) < 0.5) return;
-          const delta = measured.height - previous;
-          const scrollerTop = view.scrollDOM.getBoundingClientRect().top;
-          if (measured.top < scrollerTop) view.scrollDOM.scrollTop += delta;
-        } }), () => isComposing(view),
+      () => view.dom.contains(dom), heightDelta => {
+        // REQ-014 P6：异步块水合高度差的同任务补偿（gapAnchor 职责的最小继承，非高度预言机）。
+        // 出图在 deliver 内同步传差值：块位于视口顶上方时，增量会整体推移下方内容——
+        // 同任务平移 scrollTop，浏览器不产生中间渲染帧（停稳 ≤1px 的机制基础）。
+        if (heightDelta && Math.abs(heightDelta) >= 0.5
+          && dom.getBoundingClientRect().top < view.scrollDOM.getBoundingClientRect().top) {
+          view.scrollDOM.scrollTop += heightDelta;
+        }
+        view.requestMeasure({ key: dom,
+          read: () => dom.isConnected && dom.dataset.renderState === 'ready' ? dom.getBoundingClientRect().height : 0,
+          write: height => rememberRenderHeight(block, context, height) });
+      }, () => isComposing(view),
       () => userScrolledRecently(view.scrollDOM, 150)));
   }
   destroy(dom: HTMLElement): void { renderMounts.get(dom)?.(); renderMounts.delete(dom); renderKeys.delete(dom); }
