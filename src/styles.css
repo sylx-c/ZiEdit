@@ -1578,7 +1578,7 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
    relative 留在流内:.view{flex:1} 定尺寸,.cm-editor{height:100%} 填满(与源码编辑面同构,已验证)。 */
 .md-ir{position:relative}
 .md-ir.md-ir-loading{visibility:hidden;pointer-events:none}
-.md-ir .cm-scroller{font-family:var(--md-font-stack);font-size:var(--md-fs-base);line-height:1.6;overflow-anchor:none}/* P6：禁原生锚定（缩有补/长无补的不对称即停稳 3px 根源），停稳行位补偿由编排器对称接管 */
+.md-ir .cm-scroller{font-family:var(--md-font-stack);font-size:var(--md-fs-base);line-height:1.6}
 .md-ir .cm-content{max-width:var(--md-col);margin-inline:auto;padding:20px 24px 48px}
 .md-ir .cm-line{padding-inline:0}
 /* 标题定级（REQ-014 P2 留白栏：井号常隐，级别色条常驻左侧留白；光标进入时留白栏显示井号，
