@@ -94,7 +94,7 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
   cancelCmRestore(view);
   view.dispatch({ effects: cmRestoreEffect(view, anchor, surface) });
   if (anchor.surface === surface && anchor.snapshot) return;
-  const scroller = view.scrollDOM, doc = view.state.doc, selection = view.state.selection;
+  const scroller = view.scrollDOM, doc = view.state.doc;
   const inputVersion = userScrollVersion(scroller);
   let active = true, frame = 0, layoutVersion = 0;
   let quietTimer: ReturnType<typeof setTimeout> | undefined;
@@ -104,8 +104,11 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
     for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) scroller.removeEventListener(event, cancel);
     if (pendingRestores.get(view)?.cancel === cancel) pendingRestores.delete(view);
   };
+  // REQ-014 P6：selection 不参与存活判定——装饰交付期拉长了恢复存活期，切形态后的光标
+  // 恢复事务会改 selection 而不改行几何，旧守卫会把仍在等待的恢复静默取消（死锁在钳制位）。
+  // 文档变更/用户滚动/断连仍即时取消。
   const current = (): boolean => active && view.dom.isConnected && scroller.clientHeight > 0 && view.state.doc === doc
-    && view.state.selection === selection && userScrollVersion(scroller) === inputVersion;
+    && userScrollVersion(scroller) === inputVersion;
   // REQ-014 P6：挂载态装饰（空行折叠/表格件）与 CM6 卸载区缺省行高估计不一致——视口裁剪后的
   // 再估计可能晚于首次写入到达。写入后保留注册：晚到的布局通知（notifyCmRestoreLayout）触发
   // 一次安静复核，无漂移即取消（安静期零工作），有漂移写回并继续（≤5 轮 + 3s 无通知终止）。
