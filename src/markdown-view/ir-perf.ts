@@ -30,7 +30,7 @@ class RingBuffer<Value> {
 
 const segments = new RingBuffer<IrPerfSegment>();
 const fullRebuildEvents = new RingBuffer<FullRebuildEvent>();
-type WorkKind = 'references' | 'blockField' | 'blockLayout' | 'blockDecos' | 'liveDeco';
+type WorkKind = 'references' | 'blockField' | 'blockDecos' | 'liveDeco';
 const workSamples = new RingBuffer<{ kind: WorkKind; ms: number }>();
 /** 与粗粒度事务阶段并列，避免把 CM6 解析/高亮成本误归因给引用或装饰。 */
 export function recordIrWork(kind: WorkKind, start: number): void {
@@ -38,10 +38,11 @@ export function recordIrWork(kind: WorkKind, start: number): void {
   workSamples.push({ kind, ms: performance.now() - start });
 }
 export function irWorkStart(): number { return irPerfEnabled() ? performance.now() : -1; }
-const counters: Record<'liveDeco' | 'blockDecos' | 'blockLayout', RebuildCounter> = {
+// REQ-014 P6：blockLayout 计数器随 JS 间距模型（P3）退役删除；liveDeco/blockDecos
+// 保留（AC-36 门禁与探针测试读取）。
+const counters: Record<'liveDeco' | 'blockDecos', RebuildCounter> = {
   liveDeco: { count: 0, lastWindow: null },
   blockDecos: { count: 0, lastWindow: null },
-  blockLayout: { count: 0, lastWindow: null },
 };
 // —— REQ-014 P0 计数探针（语义见 specs/001-markdown-ir-rewrite）——
 // typingRebuildMs：input.type 文档变更事务的 t0→t3 总耗时（事务起点到 DOM 提交）；
@@ -82,7 +83,6 @@ function recordWindow(counter: RebuildCounter, from: number, to: number): void {
 }
 export function recordLiveDeco(from: number, to: number): void { recordWindow(counters.liveDeco, from, to); }
 export function recordBlockDecos(from: number, to: number): void { recordWindow(counters.blockDecos, from, to); }
-export function recordBlockLayout(from: number, to: number): void { recordWindow(counters.blockLayout, from, to); }
 export function recordFullRebuild(kind: FullRebuildKind): void {
   if (!irPerfEnabled()) return;
   exposeSnapshot();
@@ -99,7 +99,7 @@ export function irPerfSnapshot() {
   return {
     segments: samples,
     summary: { count: durations.length, p50: percentile(0.5), p95: percentile(0.95), max: durations[durations.length - 1] ?? 0 },
-    counters: { liveDeco: counterSnapshot(counters.liveDeco), blockDecos: counterSnapshot(counters.blockDecos), blockLayout: counterSnapshot(counters.blockLayout) },
+    counters: { liveDeco: counterSnapshot(counters.liveDeco), blockDecos: counterSnapshot(counters.blockDecos) },
     fullRebuildEvents: fullRebuildEvents.snapshot().map(event => ({ ...event })),
     ...(irPerfEnabled() || work.length ? { workSamples: work.map(sample => ({ ...sample })) } : {}),
     ...(irPerfEnabled() || req014HasData() ? {

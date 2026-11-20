@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EditorState, StateField } from '@codemirror/state';
 import { EditorView, ViewPlugin } from '@codemirror/view';
 import { LivePreviewView, type LivePreviewOpts } from '../src/markdown-view/livepreview';
-import { irPerfEnabled, irPerfProbe, irPerfReset, irPerfSnapshot, recordLiveDeco, recordBlockDecos, recordBlockLayout, recordFullRebuild } from '../src/markdown-view/ir-perf';
+import { irPerfEnabled, irPerfProbe, irPerfReset, irPerfSnapshot, recordLiveDeco, recordBlockDecos, recordFullRebuild } from '../src/markdown-view/ir-perf';
 
 vi.mock('../src/common/ipc', () => ({ textOpen: async () => ({ newline: 'lf' }), textReadAll: async () => '', textSave: async () => ({ len: 0 }) }));
 vi.mock('../src/markdown-view/preview', async original => ({ ...await original<object>(), loadUnicodeEmojis: async () => ({}) }));
@@ -48,19 +48,19 @@ describe('007 AC-36 IR performance probe', () => {
     expect(irPerfEnabled()).toBe(false);
 
     type(view, 'x');
-    recordLiveDeco(0, 6); recordBlockDecos(0, 6); recordBlockLayout(0, 6);
+    recordLiveDeco(0, 6); recordBlockDecos(0, 6);
     recordFullRebuild('getLines'); recordFullRebuild('referencesReady');
 
     expect(irPerfSnapshot()).toEqual({
       segments: [], summary: { count: 0, p50: 0, p95: 0, max: 0 },
       counters: {
-        liveDeco: { count: 0, lastWindow: null }, blockDecos: { count: 0, lastWindow: null }, blockLayout: { count: 0, lastWindow: null },
+        liveDeco: { count: 0, lastWindow: null }, blockDecos: { count: 0, lastWindow: null },
       },
       fullRebuildEvents: [],
     });
     expect(Reflect.has(globalThis, '__ZIEDIT_IR_PERF_DATA__')).toBe(false);
     clock.mockClear();
-    recordLiveDeco(0, 6); recordBlockDecos(0, 6); recordBlockLayout(0, 6); recordFullRebuild('getLines');
+    recordLiveDeco(0, 6); recordBlockDecos(0, 6); recordFullRebuild('getLines');
     expect(clock).not.toHaveBeenCalled();
   });
 
@@ -81,8 +81,7 @@ describe('007 AC-36 IR performance probe', () => {
     expect(snapshot.summary.count).toBe(1);
     expect(snapshot.counters.liveDeco.count).toBe(1);
     expect(snapshot.counters.blockDecos.count).toBe(1);
-    // REQ-014 P3：JS 间距模型（blockLayout 流）已删除——计数恒零。
-    expect(snapshot.counters.blockLayout.count).toBe(0);
+    // REQ-014 P6：blockLayout 计数器随 JS 间距模型退役整体移除。
     expect(preview.view.contentDOM.textContent).toBe('xplain');
     expect(Reflect.get(globalThis, '__ZIEDIT_IR_PERF_DATA__')).toEqual(snapshot);
     expect(Object.getOwnPropertyDescriptor(globalThis, '__ZIEDIT_IR_PERF_DATA__')?.get).toBeTypeOf('function');
@@ -187,7 +186,7 @@ describe('007 AC-36 IR performance probe', () => {
 
     for (const sample of [2, 8, 4, 16]) { duration = sample; type(view, 'x'); }
     view.dispatch({ selection: { anchor: 0 } });
-    recordLiveDeco(2, 4); recordBlockDecos(1, 4); recordBlockLayout(0, 4);
+    recordLiveDeco(2, 4); recordBlockDecos(1, 4);
     recordFullRebuild('referencesReady'); recordFullRebuild('getLines');
 
     const snapshot = irPerfSnapshot();

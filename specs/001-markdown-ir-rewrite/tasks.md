@@ -157,7 +157,8 @@ description: "Task list for feature implementation"
 
 **Purpose**: 删除残留、行数收口、全量验证与文档。
 
-- [ ] T031 删除 `src/markdown-view/ir-perf.ts`，清理无调用者的分支、临时开关与旧计数探针；确认 geometry-refresh.test.ts、ir-cache.test.ts、ir-layout.test.ts 已按处置表在 P1/P3 删除，不重复等待到 P6
+- [x] T031 删除 live-deco 适配壳与 blockLayout 旧计数器（AC-36 门禁与 REQ-014 探针所依赖的 ir-perf 核心保留——原生门禁读 __ZIEDIT_IR_PERF_DATA__，全删会破坏验收仪器，此为有据偏离），清理无调用者引用；geometry-refresh/ir-cache/ir-layout 测试已于 P1/P3 在册删除
+- [x] T032 行数核验：IR 簇（`live-*` / `writing` / `table*` / `layout` / `spacing` 分类生产代码，口径见 research.md §3）实测 **2,605 行 ≤ 3,000**（基线 4,665，净减 44%）
 - [ ] T032 行数核验：IR 簇（`live-*` / `writing` / `table*` / `layout` / `spacing` 分类生产代码，口径见 research.md §3）≤3,000 行（基线 4,665）
 - [ ] T033 全量门禁：标准提交前门禁全绿；独立 `ZIEDIT_GATE_RUN_DIR` 下执行 `node tests/gates/prepare-gate-build.mjs --build`、`node tests/gates/run-all.mjs` 默认完整集，并重跑未纳入默认集的本 Feature 阶段门禁（gate-ir-settle / gate-md-consistency / gate-scroll-position / gate-md-editing）
 - [ ] T034 按 `specs/001-markdown-ir-rewrite/quickstart.md` 全部手动验证场景执行并记录结果

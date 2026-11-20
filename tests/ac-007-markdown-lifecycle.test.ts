@@ -15,7 +15,7 @@ vi.mock('../src/common/ipc', () => ({
 }));
 
 if (!Range.prototype.getClientRects) Range.prototype.getClientRects = () => [] as unknown as DOMRectList;
-const { LivePreviewView, buildLiveDeco } = await import('../src/markdown-view/livepreview');
+const { LivePreviewView } = await import('../src/markdown-view/livepreview');
 const views: InstanceType<typeof LivePreviewView>[] = [];
 afterEach(() => { for (const v of views.splice(0)) v.destroy(); });
 
@@ -148,7 +148,7 @@ describe('AC-29 所见即所得操作不变量', () => {
     expect(old.getAttribute('src')).toBeNull();
   });
 
-  it.each(['code', 'quote', 'list'])('长 %s 块只在视口附近构建装饰', kind => {
+  it.each(['code', 'quote', 'list'])('长 %s 块只在视口附近构建装饰', async kind => {
     const body = kind === 'code' ? '```\n' + 'let value = 1;\n'.repeat(5000) + '```'
       : kind === 'quote' ? '> **value**\n'.repeat(5000) : '- [ ] **value**\n'.repeat(5000);
     const doc = '首\n\n' + body + '\n\n尾';
@@ -157,7 +157,12 @@ describe('AC-29 所见即所得操作不变量', () => {
     const state = editor.state;
     const from = Math.floor(doc.length / 2);
     const to = from + 200;
-    const set = buildLiveDeco({ state, viewport: { from, to } } as EditorView, null);
+    // REQ-014 P6：live-deco 壳退役，视口裁剪口径改锁统一投影器纯函数。
+    const { projectViewport } = await import('../src/markdown-view/projector');
+    const { referenceIndex } = await import('../src/markdown-view/live-state');
+    const { syntaxTree } = await import('@codemirror/language');
+    const set = projectViewport(state.doc, syntaxTree(state), { from: Math.max(0, from - 300), to: Math.min(doc.length, to + 300) },
+      referenceIndex(state.doc), { ranges: [], touched: false, formatted: null, emojis: {}, refs: () => new Map(), fenceEditing: () => false }, null);
     let count = 0;
     set.between(0, doc.length, (a, _b, d) => {
       count++;
