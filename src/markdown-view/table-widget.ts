@@ -155,6 +155,21 @@ function hydrateCellImages(box: HTMLElement, view: EditorView, baseDir: string |
   }
 }
 
+/** 单元格静态 HTML 的 LRU 缓存（滚动挂载热路径；键 = 源文本 + 引用指纹）。 */
+const cellHtmlCache = new Map<string, string>();
+function cellHtmlCached(source: string, references: ReferenceIndex | null): string {
+  const key = source + '\u0000' + (references?.inlineKey ?? '');
+  const hit = cellHtmlCache.get(key);
+  if (hit !== undefined) {
+    cellHtmlCache.delete(key); cellHtmlCache.set(key, hit); // LRU 触碰
+    return hit;
+  }
+  const html = renderCellHtml(source, references?.definitions, references?.footnotes);
+  cellHtmlCache.set(key, html);
+  if (cellHtmlCache.size > 512) cellHtmlCache.delete(cellHtmlCache.keys().next().value!);
+  return html;
+}
+
 export class TableEditWidget extends WidgetType {
   constructor(
     private header: string[],
@@ -194,10 +209,12 @@ export class TableEditWidget extends WidgetType {
     }
     return next;
   }
-  /** 指定格渲染为静态 HTML（源文本取自构建期数据或当前文档）。 */
+  /** 指定格渲染为静态 HTML（源文本取自构建期数据或当前文档）。
+   *  REQ-014 P6：滚动中同步挂载小表后，单元格 HTML（markdown-it 逐格渲染）成为滚轮响应
+   *  热路径——按（源文本 × 引用指纹）LRU 缓存，重复内容表格近零成本挂载。 */
   private renderCell(cell: HTMLTableCellElement, row: number, col: number): void {
     const source = row === 0 ? this.header[col] : this.rows[row - 1]?.[col] ?? '';
-    cell.innerHTML = renderCellHtml(cellInlineText(source), this.references?.definitions, this.references?.footnotes);
+    cell.innerHTML = cellHtmlCached(cellInlineText(source), this.references);
   }
   toDOM(view: EditorView): HTMLElement {
     const box = document.createElement('div');
@@ -245,7 +262,7 @@ export class TableEditWidget extends WidgetType {
       const committed = this.commitCell(view, box, cell);
       cell.setAttribute('contenteditable', 'false');
       if (render) {
-        cell.innerHTML = renderCellHtml(cellInlineText(committed), this.references?.definitions, this.references?.footnotes);
+        cell.innerHTML = cellHtmlCached(cellInlineText(committed), this.references);
         hydrateCellImages(box, view, this.baseDir, view.state.facet(imageContext).remoteResolve);
       }
     };
