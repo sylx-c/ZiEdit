@@ -465,6 +465,21 @@ export class TableEditWidget extends WidgetType {
   }
 }
 
+/** 滚动占位表格件（REQ-014 P6）：deferred 滚动期替代实表——高度与实表估计一致（±1.2px），
+ *  停稳补齐（complete 重建）换实表无位移；实表 DOM 构建（~15 元素/表）移出滚轮热路径
+ *  （dense-2m 2104 表实测同步挂载致滚动长任务 >100ms）。 */
+export class TableStubWidget extends WidgetType {
+  constructor(private rows: number) { super(); }
+  eq(other: TableStubWidget): boolean { return other.rows === this.rows; }
+  get estimatedHeight(): number { return (this.rows + 1) * ROW_ESTIMATE_PX; }
+  toDOM(): HTMLElement {
+    const el = document.createElement('div');
+    el.className = 'mdir-tablestub';
+    el.setAttribute('aria-hidden', 'true');
+    return el;
+  }
+}
+
 /** box 级运行态（活动格提交/关闭），供销毁与只读切换使用。 */
 const boxStates = new WeakMap<HTMLElement, { commitActive: () => void; close: () => void }>();
 const liveBoxes = new Set<HTMLElement>();
