@@ -37,10 +37,13 @@ try{
   await switchMdMode(cdp,'即时渲染');await waitFor(cdp,`!!document.querySelector('.mdir-table td')`,180000);
   await cdp.evaluate(`window.__editingMain=()=>${main};window.__editingBefore=window.__editingMain().state.doc.toString()`);
   await click(`document.querySelector('.mdir-table td')`);
-  await waitFor(cdp,`!!document.querySelector('.mdir-tablebox .cm-content')`);
+  await waitFor(cdp,"!!document.querySelector('.mdir-tablebox td[contenteditable=\"true\"]')");
   await cdp.send('Input.insertText',{text:'__NATIVE_CELL__'});
+  await pressKey(cdp,'Escape','Escape',27);
   await waitFor(cdp,`window.__editingMain().state.doc.toString().includes('__NATIVE_CELL__')`);
-  check('真实表格单元格输入同步源缓冲',true);
+  check('真实表格单元格输入经 Escape 单事务写回源缓冲',true);
+  await click(`document.querySelector('.mdir-table td')`);
+  await waitFor(cdp,"!!document.querySelector('.mdir-tablebox td[contenteditable=\"true\"]')");
   await pressKey(cdp,'Tab','Tab',9);await sleep(100);
   const tab=await cdp.evaluate(`({row:document.querySelector('.mdir-tablebox').dataset.mdTableRow,col:document.querySelector('.mdir-tablebox').dataset.mdTableCol})`);
   check('表格 Tab 移至下一格',tab.row==='1'&&tab.col==='1',tab);
@@ -53,8 +56,8 @@ try{
   const before=await cdp.evaluate('window.__editingMain().state.doc.toString()');
   await cdp.evaluate('window.__editingMain().focus()');await cdp.send('Input.insertText',{text:'MUST_NOT_INSERT'});
   await click(`document.querySelector('.mdir-table td')`);
-  const read=await cdp.evaluate(`({doc:window.__editingMain().state.doc.toString(),cell:!!document.querySelector('.mdir-tablebox .cm-content')})`);
-  check('全局只读阻止正文输入和表格编辑',read.doc===before&&!read.cell,{cellEditor:read.cell});
+  const read=await cdp.evaluate(`({doc:window.__editingMain().state.doc.toString(),cell:!!document.querySelector('.mdir-tablebox td[contenteditable="true"]')})`);
+  check('全局只读阻止正文输入和表格编辑',read.doc===before&&!read.cell,{cellEditable:read.cell});
   await readOnly();locked=false;await waitFor(cdp,'!window.__editingMain().state.readOnly');
   await click(`[...document.querySelectorAll('.sidebar-tab')].find(e=>e.textContent==='大纲')`);
   await waitFor(cdp,`!!document.querySelector('.sym-item')`);
