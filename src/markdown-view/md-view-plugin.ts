@@ -27,7 +27,7 @@ import { RenderWidget, CodeLabelWidget, TocWidget, HrWidget, codeContainer, edit
 import { renderBlockAt } from './render-model';
 import { requestIrFrame, cancelIrFrame, measureAfterRender } from './frame-work';
 import { activeBlocks } from './active-block';
-import { closeAllTableEdits } from './table-widget';
+import { closeAllTableEdits, TableStubWidget } from './table-widget';
 
 // ── 窗口数学（自 deco-window.ts 内联；原文件随 T012 删除） ──
 
@@ -127,12 +127,21 @@ function buildBlockDecosInner(state: EditorState, from: number, to: number, tabl
     }
     if (node.name === 'Table') {
       // 滚动延迟只针对「尚未挂载过」的表格：已挂载实表不降级（销毁编辑器会重复水合）；
-      // P3 起无占位预言机——未挂载表格在延迟分片落地前保持源码形态。
-      // P6 停稳修正：≤64 行的视口内表格滚动中也同步挂载（解析成本有界），否则停稳补齐
-      // 时表格从源码高度跳到实表高度，停稳门禁中线参考被推移（「停下弹一下」主诉复现）。
-      const small = doc.lineAt(node.to).number - doc.lineAt(node.from).number < 64;
-      if (!selected && (!deferred || small || tables.has(node.from))) {
+      // P6 停稳修正：deferred 滚动期出同高占位件（±1.2px），停稳补齐换实表——实表 DOM
+      // 构建移出滚轮热路径（dense-2m 同步挂载实测滚动长任务 >100ms）。
+      // P5：>500 行退化源码由 tableDecos 统一判定。
+      if (!selected && (!deferred || tables.has(node.from))) {
         tableDecos(node, doc, out, index, tables, state.field(emojiField), state.facet(imageContext).baseDir);
+      } else if (!selected) {
+        const lines = doc.sliceString(node.from, node.to).split('\n').filter(l => l.trim());
+        if (lines.length >= 2) {
+          const line = doc.lineAt(node.from);
+          const from = /^[\t >]*$/.test(doc.sliceString(line.from, node.from)) ? line.from : node.from;
+          out.push(Decoration.replace({
+            block: true, blockAtomic: true,
+            widget: new TableStubWidget(lines.length - 2),
+          }).range(from, node.to));
+        }
       }
       return false;
     }

@@ -1605,6 +1605,8 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
    （元素 rect 顶 = 文本顶，真机一致性门按元素顶比对；列表项对挂件高 --md-list-gap）。 */
 .md-ir .cm-line.mdir-gap{height:auto;min-height:0;line-height:0;padding-top:calc(var(--mdir-gap-after,0px) + var(--mdir-gap-before,0px))}
 .md-ir .mdir-block-gap{pointer-events:none}
+/* REQ-014 P6：滚动占位表格——高度由挂件 estimatedHeight 撑起（CM 高度图），停稳换实表 */
+.md-ir .mdir-tablestub{box-sizing:border-box;border:1px solid var(--border);border-radius:3px;background:color-mix(in srgb,var(--border) 12%,transparent)}
 /* 大纲跳转闪示：目标标题行 1.5s 背景脉冲（与侧栏选中条呼应，双主题共用 accent 派生色） */
 .md-ir .cm-line.mdir-flash{animation:mdir-flash-kf 1.5s ease-out}
 @keyframes mdir-flash-kf{0%{background:color-mix(in srgb,var(--accent) 28%,transparent)}60%{background:color-mix(in srgb,var(--accent) 12%,transparent)}100%{background:transparent}}
