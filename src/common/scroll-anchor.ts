@@ -6,6 +6,8 @@ import { EditorView } from '@codemirror/view';
 import type { StateEffect } from '@codemirror/state';
 import { userScrollVersion } from './user-scroll';
 
+function scrollerDOMRectTop(view: EditorView): number { return view.scrollDOM.getBoundingClientRect().top; }
+
 /** 位置所属的高度模型：同模型才可用像素级快照还原 */
 export type ScrollSurface = 'source' | 'ir' | 'preview';
 
@@ -110,10 +112,9 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
   let rechecks = 0;
   let nullStreak = 0;
   const rekick = (): void => {
-    // REQ-014 P6：初始滚动被 DOM 高度钳制（装饰未达→scrollHeight 不足）时，目标区永不进入
-    // 切片窗、ready 永假。连续两个安静期无产出即重派行级 scrollIntoView（CM 原生机制
-    // 按其高度图解析，装饰落位后钳制解除即可落准），最多补踢 3 次。
-    if (nullStreak >= 2 && rechecks < 6) {
+    // REQ-014 P6：初始滚动被 DOM 高度钳制或切片窗未达目标时 ready 永假。null 连续即重派
+    // 行级 scrollIntoView（CM 原生按高度图解析，切片落位后可落准），最多补踢 3 次。
+    if (nullStreak >= 1 && rechecks < 6) {
       rechecks += 2;
       nullStreak = 0;
       view.dispatch({ effects: cmRestoreEffect(view, anchor, surface) });
@@ -135,7 +136,23 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
         write: top => {
           // 新布局或新输入使这次测量过期；下次有效布局通知会重新调度。
           if (!current()) { cancel(); return; }
-          if (top === null || version !== layoutVersion) { if (top === null) { nullStreak++; rekick(); } return; }
+          if ((globalThis as { __ANC__?: boolean }).__ANC__) {
+            // eslint-disable-next-line no-console
+            console.log('[anchor]', 'top=', top, 'scrollTop=', scroller.scrollTop, 'docTop=', view.documentTop,
+              'rectTop=', scrollerDOMRectTop(view), 'line=', anchor.line, 'null=', top === null, 'ver=', version === layoutVersion);
+          }
+          if (top === null || version !== layoutVersion) {
+            // REQ-014 P6：null（ready 未就绪）路径同样自排程重测——切片窗未达目标时无布局
+            // 通知可等，不排程即死锁在初始钳制位（实测漂移 372 行）。有界：≤6 轮。
+            if (top === null) {
+              nullStreak++; rekick();
+              if (++rechecks < 6) {
+                clearTimeout(quietTimer);
+                quietTimer = setTimeout(() => { quietTimer = undefined; if (active) measure(); }, 400);
+              } else cancel();
+            }
+            return;
+          }
           nullStreak = 0;
           const drifted = Math.abs(scroller.scrollTop - top) > .5;
           if (drifted) scroller.scrollTop = top;

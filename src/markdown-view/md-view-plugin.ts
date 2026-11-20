@@ -380,8 +380,13 @@ export const projectionField = StateField.define<ProjectionState>({
 export function liveAnchorReady(view: EditorView, line: number): boolean {
   const state = view.state, doc = state.doc, blocks = state.field(projectionField);
   const pos = doc.line(Math.min(doc.lines, Math.max(1, Math.floor(line)))).from;
-  if (pos < blocks.from - VIEWPORT_MARGIN || pos > blocks.to + VIEWPORT_MARGIN || blocks.pending || blocks.deferred
-    || !syntaxTreeAvailable(state, Math.min(doc.length, blocks.to + VIEWPORT_MARGIN))) return false;
+  const okWindow = pos >= blocks.from - VIEWPORT_MARGIN && pos <= blocks.to + VIEWPORT_MARGIN && !blocks.pending && !blocks.deferred
+    && syntaxTreeAvailable(state, Math.min(doc.length, blocks.to + VIEWPORT_MARGIN));
+  if ((globalThis as { __ANC__?: boolean }).__ANC__ && !okWindow) {
+    // eslint-disable-next-line no-console
+    console.log('[ready-window]', 'line=', Math.floor(line), 'slice=', blocks.from, blocks.to, 'pending=', !!blocks.pending, 'deferred=', blocks.deferred);
+  }
+  if (!okWindow) return false;
   let expected = false;
   for (let node = syntaxTree(state).resolveInner(pos, 1); node; node = node.parent!) {
     const selected = state.selection.ranges.some(r => !r.empty && r.from < node.to && r.to > node.from
