@@ -374,11 +374,13 @@ export const projectionField = StateField.define<ProjectionState>({
   update: updateProjection,
 });
 
-/** 目标视口已解析并交付全部块级装饰，CM 可以按实际替换块恢复块内位置（P3 前保留）。 */
+/** 目标视口已解析并交付全部块级装饰，CM 可以按实际替换块恢复块内位置（P3 前保留）。
+ *  REQ-014 P6：判定窗放宽 ±视口边距——初始滚动若被 DOM 高度钳制，切片窗会落在目标下方，
+ *  严格 in-window 判定将永久假阴性，跨形态恢复死锁在钳制位（实测漂移 372 行）。 */
 export function liveAnchorReady(view: EditorView, line: number): boolean {
   const state = view.state, doc = state.doc, blocks = state.field(projectionField);
   const pos = doc.line(Math.min(doc.lines, Math.max(1, Math.floor(line)))).from;
-  if (pos < blocks.from || pos > blocks.to || blocks.pending || blocks.deferred
+  if (pos < blocks.from - VIEWPORT_MARGIN || pos > blocks.to + VIEWPORT_MARGIN || blocks.pending || blocks.deferred
     || !syntaxTreeAvailable(state, Math.min(doc.length, blocks.to + VIEWPORT_MARGIN))) return false;
   let expected = false;
   for (let node = syntaxTree(state).resolveInner(pos, 1); node; node = node.parent!) {
