@@ -75,18 +75,9 @@ export class RenderWidget extends WidgetType {
     if (this.block.display) dom.style.setProperty('--md-render-reserve', this.estimatedHeight + 'px');
     const { block, context } = this;
     renderMounts.set(dom, mountRender(dom, block, context, document.documentElement.dataset.tone === 'dark',
-      () => view.dom.contains(dom), heightDelta => {
-        // REQ-014 P6：异步块水合高度差的同任务补偿（gapAnchor 职责的最小继承，非高度预言机）。
-        // 出图在 deliver 内同步传差值：块位于视口顶上方时，增量会整体推移下方内容——
-        // 同任务平移 scrollTop，浏览器不产生中间渲染帧（停稳 ≤1px 的机制基础）。
-        if (heightDelta && Math.abs(heightDelta) >= 0.5
-          && dom.getBoundingClientRect().top < view.scrollDOM.getBoundingClientRect().top) {
-          view.scrollDOM.scrollTop += heightDelta;
-        }
-        view.requestMeasure({ key: dom,
-          read: () => dom.isConnected && dom.dataset.renderState === 'ready' ? dom.getBoundingClientRect().height : 0,
-          write: height => rememberRenderHeight(block, context, height) });
-      }, () => isComposing(view),
+      () => view.dom.contains(dom), () => view.requestMeasure({ key: dom,
+        read: () => dom.isConnected && dom.dataset.renderState === 'ready' ? dom.getBoundingClientRect().height : 0,
+        write: height => rememberRenderHeight(block, context, height) }), () => isComposing(view),
       () => userScrolledRecently(view.scrollDOM, 150)));
   }
   destroy(dom: HTMLElement): void { renderMounts.get(dom)?.(); renderMounts.delete(dom); renderKeys.delete(dom); }
