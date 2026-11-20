@@ -171,6 +171,17 @@ function hydrateCellImages(box: HTMLElement, view: EditorView, baseDir: string |
   }
 }
 
+/** 宽度稳定占位文本：剥离常见行内标记（宽度≈渲染态；行高跨占位→渲染过渡不变）。
+ *  完整语义渲染仍由惰性队列的 renderCellHtml 承载，此处只求几何稳定。 */
+function placeholderText(source: string): string {
+  return cellInlineText(source)
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]*)\]\[[^\]]*\]/g, '$1')
+    .replace(/\[\^([^\]]+)\]/g, '$1')
+    .replace(/(\*\*|__|\*|_|==|~~|`)/g, '');
+}
+
 /** 单元格静态 HTML 的 LRU 缓存（键 = 源文本 + 引用指纹；惰性交付与提交渲染共用）。 */
 const cellHtmlCache = new Map<string, string>();
 function cellHtmlCached(source: string, references: ReferenceIndex | null): string {
@@ -287,17 +298,17 @@ export class TableEditWidget extends WidgetType {
    *  热路径——按（源文本 × 引用指纹）LRU 缓存，重复内容表格近零成本挂载。 */
   private renderCell(cell: HTMLTableCellElement, row: number, col: number, onRendered?: (live: HTMLTableCellElement) => void, view?: EditorView): void {
     const source = row === 0 ? this.header[col] : this.rows[row - 1]?.[col] ?? '';
-    // REQ-014 P6：滚动挂载热路径——先纯文本占位（零成本），静态 HTML 进共享帧队列惰性交付；
-    // 密集语料（dense-2m）单元格内容逐块唯一，缓存无效，同步 markdown-it 逐格渲染实测
-    // 拖垮滚轮响应（p95>50ms）与键入预算（max 92ms）。交付时按表位×行列重查活格。
-    cell.textContent = cellInlineText(source);
+    // REQ-014 P6：滚动挂载热路径——先「宽度稳定」纯文本占位（剥离行内标记，宽度≈渲染态，
+    // 行高跨纯文本→渲染过渡不变——惰性占位若带标记宽度差会在停稳窗推移参考 3px 实证），
+    // 静态 HTML 进共享帧队列惰性交付；交付时按表位×行列重查活格（防装饰换代丢渲染）。
+    cell.textContent = placeholderText(source);
     const tableFrom = String(this.from);
-    const plain = cellInlineText(source);
+    const plain = cell.textContent;
     queueCellRender(
       () => {
         if (!view) return null;
         // 首选同表位活格；装饰换代中表位坐标可能瞬移（增量重解析的过渡树），回退按
-        // 「同行列 + 仍为该源纯文本」识别唯一未渲染活格（纯文本即未渲染标记）。
+        // 「同行列 + 仍为该占位文本」识别唯一未渲染活格（占位文本即未渲染标记）。
         const primary = view.dom.querySelector<HTMLTableCellElement>(`.mdir-tablebox[data-md-table-from="${tableFrom}"] [data-md-row="${row}"][data-md-col="${col}"]`);
         if (primary) return primary;
         for (const candidate of view.dom.querySelectorAll<HTMLTableCellElement>(`[data-md-row="${row}"][data-md-col="${col}"]`)) {
