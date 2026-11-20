@@ -252,6 +252,7 @@ pub fn run() {
             commands::file_create,
             commands::dir_create,
             commands::file_rename,
+            commands::paths_rename_records,
             commands::session_load,
             commands::session_save,
             commands::recent_list,

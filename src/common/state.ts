@@ -152,12 +152,13 @@ export class TabStore {
     this.emit();
   }
 
-  /** 文件/目录改名后迁移已打开标签，保留标签身份、顺序和状态。 */
-  renamePath(from: string, to: string): void {
+  /** 文件/目录改名后迁移已打开标签，保留标签身份、顺序和状态。
+   *  目录改名用前缀；单文件改名必须 exact，避免 `notes` 误迁 `notes\child.txt`。 */
+  renamePath(from: string, to: string, exact = false): void {
     from = normalizePath(from);
     to = normalizePath(to);
     for (const tab of this.tabs) {
-      if (tab.path === from || tab.path.startsWith(from + '\\') || tab.path.startsWith(from + '/')) {
+      if (tab.path === from || (!exact && (tab.path.startsWith(from + '\\') || tab.path.startsWith(from + '/')))) {
         tab.path = to + tab.path.slice(from.length);
       }
     }

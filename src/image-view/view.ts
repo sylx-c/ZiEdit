@@ -49,6 +49,11 @@ export class ImageView {
     this.path = path;
   }
 
+  /** 同类型改名后只换路径，已显示的图片不重载。 */
+  adoptPath(path: string): void {
+    this.path = path;
+  }
+
   async mount(): Promise<void> {
     this.host.innerHTML = '';
     this.wrap = document.createElement('div');
