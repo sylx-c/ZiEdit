@@ -1600,10 +1600,10 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .md-ir .cm-line.mdir-h6{font-size:calc(var(--md-fs-base) * 0.85)}
 .md-ir .cm-line.mdir-h6{color:var(--muted)}
 .md-ir .cm-line.mdir-h1,.md-ir .cm-line.mdir-h2{border-bottom:1px solid var(--border)}
-/* REQ-014 P3/P6：块间距 CSS 承载——空行保持全高（挂载区高度 == CM 卸载区行数估计，
-   停稳/跨形态滚动两门禁的失配根源修复），间距差额由 mdir-block-gap 挂件承载
-   （max(0, after+before−空行高×行数)）；紧邻块对挂件高 = after+before 或列表间隙。 */
-.md-ir .cm-line.mdir-gap{/* 仅活动态样式钩子；高度不折叠 */}
+/* REQ-014 P3/P6：块间距 CSS 承载——空行折叠为令牌间距（calc 求和发生在 CSS，与预览同一套令牌）。
+   首空行 padding-top = 前块 after + 后块 before；其余空行高 0；紧邻块对用独立块挂件 mdir-block-gap
+   （元素 rect 顶 = 文本顶，真机一致性门按元素顶比对；列表项对挂件高 --md-list-gap）。 */
+.md-ir .cm-line.mdir-gap{height:auto;min-height:0;line-height:0;padding-top:calc(var(--mdir-gap-after,0px) + var(--mdir-gap-before,0px))}
 .md-ir .mdir-block-gap{pointer-events:none}
 /* REQ-014 P6：滚动占位表格——高度由挂件 estimatedHeight 撑起（CM 高度图），停稳换实表 */
 .md-ir .mdir-tablestub{box-sizing:border-box;border:1px solid var(--border);border-radius:3px;background:color-mix(in srgb,var(--border) 12%,transparent)}
