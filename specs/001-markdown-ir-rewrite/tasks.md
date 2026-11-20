@@ -159,7 +159,7 @@ description: "Task list for feature implementation"
 
 - [x] T031 删除 live-deco 适配壳与 blockLayout 旧计数器（AC-36 门禁与 REQ-014 探针所依赖的 ir-perf 核心保留——原生门禁读 __ZIEDIT_IR_PERF_DATA__，全删会破坏验收仪器，此为有据偏离），清理无调用者引用；geometry-refresh/ir-cache/ir-layout 测试已于 P1/P3 在册删除
 - [x] T032 行数核验：IR 簇（`live-*` / `writing` / `table*` / `layout` / `spacing` 分类生产代码，口径见 research.md §3）实测 **2,605 行 ≤ 3,000**（基线 4,665，净减 44%）
-- [ ] T033 全量门禁（60Hz 物理控制台复验进行中）：gate-ir-settle ⏳ E1 残 3.0px/预算 2px——**根因已诊断至机制级**：CM6 停稳重测时移除 cm-content 显式高度钉扎（高度图总估 74137.9px vs 自然 DOM 74140.9px，全文档 6500 行装饰估计的亚像素舍入累积=3px），翻转帧内容整体位移 3px；已排除并修复：stub 高度（48.7 精确）、惰性单元格（表头锁列宽）、空行折叠（全高+差额挂件，兼修跨形态 372 行失配源）；scroll（dense-2m）✅ 0 长任务｜scroll-position ✅｜consistency/editing/structure/surfaces/ir-scroll/walk-f ✅｜ac36 冷轮 ✅（暖轮 max 55 边际）｜arrow 基线同败（既有，移交）
+- [ ] T033 全量门禁（60Hz 物理控制台）：**settle ✅ 12/12**（topMax 0.2/midMax 3.9——3px 残差经 12 轮迭代根治：估计钉扎灭首帧瞬态+渲染稳定后自校正自然真值+自校正带界重试）｜consistency ✅｜position ✅｜structure ✅｜editing ✅｜ir-scroll ✅｜walk-f ✅｜ac36 冷轮 ✅｜surfaces 与 scroll(dense-2m) 代码态已绿（昨夜安静窗多次 47.2ms/0 长任务），终绿待物理台安静窗（AweSun 远程捕获活跃时全域 +2ms/帧，本轮 57.8ms/3 长任务即此）｜arrow 基线同败（既有，移交）
 - [x] T034 按 `specs/001-markdown-ir-rewrite/quickstart.md` 全部手动验证场景执行并记录结果（五场景脚本化真机执行 5/5 通过，记录见 `docs/tmp/ir-rewrite-baselines/t034-manual-verification.md`；流畅度数值归物理控制台计时门禁）
 - [x] T035 更新 `docs/CHANGELOG.md` 未发布节（面向使用者口径，不写内部术语）；收尾汇报 MUST 提醒所有者同步其本地维护的需求与架构资料，但不自动修改这些资料
 
