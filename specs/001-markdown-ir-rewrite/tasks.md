@@ -162,7 +162,7 @@ description: "Task list for feature implementation"
 - [ ] T032 行数核验：IR 簇（`live-*` / `writing` / `table*` / `layout` / `spacing` 分类生产代码，口径见 research.md §3）≤3,000 行（基线 4,665）
 - [ ] T033 全量门禁：标准提交前门禁全绿；独立 `ZIEDIT_GATE_RUN_DIR` 下执行 `node tests/gates/prepare-gate-build.mjs --build`、`node tests/gates/run-all.mjs` 默认完整集，并重跑未纳入默认集的本 Feature 阶段门禁（gate-ir-settle / gate-md-consistency / gate-scroll-position / gate-md-editing）
 - [ ] T034 按 `specs/001-markdown-ir-rewrite/quickstart.md` 全部手动验证场景执行并记录结果
-- [ ] T035 更新 `docs/CHANGELOG.md` 未发布节（面向使用者口径，不写内部术语）；收尾汇报 MUST 提醒所有者同步其本地维护的需求与架构资料，但不自动修改这些资料
+- [x] T035 更新 `docs/CHANGELOG.md` 未发布节（面向使用者口径，不写内部术语）；收尾汇报 MUST 提醒所有者同步其本地维护的需求与架构资料，但不自动修改这些资料
 
 ---
 
