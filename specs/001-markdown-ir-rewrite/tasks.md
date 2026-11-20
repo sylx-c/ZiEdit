@@ -144,9 +144,9 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 5
 
-- [ ] T027 [US5] 新建 `src/markdown-view/table-widget.ts`：`TableEditWidget` 块级挂件，`toDOM()` 生成真 `<table>`，单元格 `contenteditable`；`TableEditWidget.data-row` 与 `TableEditWidget.data-col` 分别遵循 data-model.md §4 的同名字段定义；blur 读文本→解析→比对→单事务写回；≤500 行全渲染、>500 行退化源码；在 `src/markdown-view/table-widget.test.ts` 覆盖坐标、写回、阈值与撤销
-- [ ] T028 [US5] 从 `src/markdown-view/live-table-actions.ts` 提取 Tab / Shift-Tab / 末行新建 / Mod-Enter 键位逻辑接入新挂件；同步改造 `src/markdown-view/extensions.ts`（移除 cooperativeTableParser/Nodes 注册）、`src/markdown-view/livepreview.ts`、`src/markdown-view/live-widgets.ts`、`src/markdown-view/live-table-actions.ts`，使生产代码不再引用旧表格三件套
-- [ ] T029 [US5] 生产引用迁移通过后删除 `src/markdown-view/table-viewport.ts`、`src/markdown-view/table-editor.ts`、`src/markdown-view/cooperative-table.ts`；按处置表迁移 `src/markdown-view/input-order.test.ts`、`src/markdown-view/table-scroll.test.ts`、`src/markdown-view/scroll-settle.test.ts`，删除 `src/markdown-view/cooperative-table.test.ts` 及仅适用于旧实现的断言；保留 `src/markdown-view/table-model.ts` 纯函数
+- [x] T027 [US5] 新建 `src/markdown-view/table-widget.ts`：`TableEditWidget` 块级挂件，`toDOM()` 生成真 `<table>`，单元格 `contenteditable`；`TableEditWidget.data-row` 与 `TableEditWidget.data-col` 分别遵循 data-model.md §4 的同名字段定义；blur 读文本→解析→比对→单事务写回；≤500 行全渲染、>500 行退化源码；在 `src/markdown-view/table-widget.test.ts` 覆盖坐标、写回、阈值与撤销
+- [x] T028 [US5] 从 `src/markdown-view/live-table-actions.ts` 提取 Tab / Shift-Tab / 末行新建 / Mod-Enter 键位逻辑接入新挂件；同步改造 `src/markdown-view/extensions.ts`（移除 cooperativeTableParser/Nodes 注册）、`src/markdown-view/livepreview.ts`、`src/markdown-view/live-widgets.ts`、`src/markdown-view/live-table-actions.ts`，使生产代码不再引用旧表格三件套
+- [x] T029 [US5] 生产引用迁移通过后删除 `src/markdown-view/table-viewport.ts`、`src/markdown-view/table-editor.ts`、`src/markdown-view/cooperative-table.ts`；按处置表迁移 `src/markdown-view/input-order.test.ts`、`src/markdown-view/table-scroll.test.ts`、`src/markdown-view/scroll-settle.test.ts`，删除 `src/markdown-view/cooperative-table.test.ts` 及仅适用于旧实现的断言；保留 `src/markdown-view/table-model.ts` 纯函数
 - [ ] T030 [US5] P5 检查点：标准提交前门禁 + P4 原生门禁 + gate-md-editing（表格操作）全绿；撤销恢复单格内容验证通过
 
 **Checkpoint**: US5 交付——表格直接编辑完整可用。

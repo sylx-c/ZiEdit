@@ -189,8 +189,8 @@ export function tableDecos(node: SyntaxNode, doc: Text, out: Range<Decoration>[]
     tables.set(node.from, data);
     if (tables.size > 32) tables.delete(tables.keys().next().value!);
   }
-  // REQ-014 P5（REQ-014.8）：>500 行整表退化为源码显示（不产挂件，Typora 行为）。
-  if (data.rows.length + 1 > 500) return;
+  // REQ-014 P5（REQ-014.8 / data-model.md §4）：数据行 >500 整表退化为源码显示（不产挂件，Typora 行为）；500 行仍渲染。
+  if (data.rows.length > 500) return;
   // 引用前缀连同表格投影，否则会在网格前留下一个空的CM正文行。
   const line = doc.lineAt(node.from);
   const from = /^[\t >]*$/.test(doc.sliceString(line.from, node.from)) ? line.from : node.from;
