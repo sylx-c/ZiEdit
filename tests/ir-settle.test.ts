@@ -8,7 +8,7 @@ import { markUserScroll, trackUserScroll, userScrolledRecently } from '../src/co
 import { RenderWidget } from '../src/markdown-view/live-widgets';
 import { createRenderContext, rememberRenderHeight } from '../src/markdown-view/render-service';
 import { Minimap } from '../src/text-view/minimap';
-import { TABLE_ROW_ESTIMATE_PX } from '../src/markdown-view/layout';
+import { TABLE_ROW_ESTIMATE_PX } from '../src/markdown-view/table-viewport';
 
 afterEach(() => document.body.replaceChildren());
 

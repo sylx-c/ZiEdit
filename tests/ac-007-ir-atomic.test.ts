@@ -129,15 +129,15 @@ describe('007 v0.40 差分路径谓词门回归（规则 27 修正）', () => {
 
 describe('007 v0.40 保守托底高度（规则 27）', () => {
   it('RenderWidget/TableWidget estimatedHeight ≥ 源行数×21.6 且 ≥ 显示下限', async () => {
-    // 通过源码结构锁：layout.ts 常量与 widget 实现不漂移（批次 4 拆分后 Widget 类在 live-widgets.ts，
+    // 通过源码结构锁：常量与 widget 实现不漂移（REQ-014 P3 起常量随 table-viewport.ts 承载，
     // 断言对象随迁，锁语义不变）
-    const layout = readFileSync(resolve(__dirname, '../src/markdown-view/layout.ts'), 'utf8');
+    const viewport = readFileSync(resolve(__dirname, '../src/markdown-view/table-viewport.ts'), 'utf8');
     const lp = readFileSync(resolve(__dirname, '../src/markdown-view/live-widgets.ts'), 'utf8');
-    expect(layout).toContain('SOURCE_LINE_HEIGHT_PX = 21.6');
+    expect(viewport).toContain('SOURCE_LINE_HEIGHT_PX = 21.6');
     // RenderWidget：max(源行数×行高, 40)
     expect(lp).toMatch(/class RenderWidget[\s\S]*?estimatedHeight[\s\S]*?Math\.max\(lines \* SOURCE_LINE_HEIGHT_PX, 40\)/);
     // TableWidget：max(源行数×行高, (行数+1)×表格行高初值)；初值随表格 CSS（padding 13px×2 + 行高 20px + 边框）
-    expect(layout).toContain('TABLE_ROW_ESTIMATE_PX = 48');
+    expect(viewport).toContain('TABLE_ROW_ESTIMATE_PX = 48');
     expect(lp).toMatch(/class TableWidget[\s\S]*?estimatedHeight[\s\S]*?Math\.max\(Math\.max\(1, this\.sourceLines\) \* SOURCE_LINE_HEIGHT_PX, \(this\.rows\.length \+ 1\) \* TABLE_ROW_ESTIMATE_PX\)/);
   });
 

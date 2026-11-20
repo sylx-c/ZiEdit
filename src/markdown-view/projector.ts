@@ -179,7 +179,7 @@ export function fenceLines(node: SyntaxNode, doc: Text) {
 
 /** GFM 表格：整块网格渲染（块级替换件；调用方为块级投影/块装饰承载） */
 export interface TableData { header: string[]; align: ('left' | 'center' | 'right')[]; rows: string[][]; to?: number }
-export function tableDecos(node: SyntaxNode, doc: Text, out: Range<Decoration>[], references: ReferenceIndex | null, tables: Map<number, TableData>, emojis: Readonly<Record<string, string>>, heightIdentity?: import('./block-height-cache').HeightIdentity, heightHint?: number, provideIdentity?: () => import('./block-height-cache').HeightIdentity | undefined): void {
+export function tableDecos(node: SyntaxNode, doc: Text, out: Range<Decoration>[], references: ReferenceIndex | null, tables: Map<number, TableData>, emojis: Readonly<Record<string, string>>): void {
   let data = tables.get(node.from);
   if (!data || data.to !== node.to) {
     const lines = doc.sliceString(node.from, node.to).split('\n').map(l => l.replace(/^\s*(?:>\s*)+/, '')).filter(l => l.trim());
@@ -196,7 +196,7 @@ export function tableDecos(node: SyntaxNode, doc: Text, out: Range<Decoration>[]
     block: true, blockAtomic: true,
     widget: new TableWidget(data.header, data.align, data.rows, node.from, node.to,
       doc.lineAt(Math.max(node.from, node.to - 1)).number - doc.lineAt(node.from).number + 1,
-      references, emojis, inset, quoted, heightIdentity, heightHint, provideIdentity),
+      references, emojis, inset, quoted),
   }).range(from, node.to));
 }
 
@@ -406,5 +406,62 @@ export function projectViewport(
     }
   });
   decorate(tree.topNode);
+  // ── REQ-014 P3：块间距 CSS 承载（原 layout.ts/spacing.ts 的 JS px 模型删除）──
+  // 空行区间折叠为令牌间距：首空行 padding-top = calc(前块 after + 后块 before)，其余空行高 0；
+  // 紧邻块对（无空行，如列表项）在后块首行加 mdir-gap-pad；文档尾部预留末块 after + block-gap。
+  // 令牌求和全部发生在 CSS calc，JS 只选令牌名（与渲染预览 .md-col 同一套令牌）。
+  const gapEdgeToken = (nodeName: string | null, edge: 'before' | 'after'): string => {
+    if (!nodeName) return '';
+    const heading = /^(?:ATX|Setext)Heading([1-6])$/.exec(nodeName);
+    if (heading) return `--md-h${heading[1]}-${edge}`;
+    if (nodeName === 'HorizontalRule') return '--md-rule-gap';
+    return edge === 'before' ? '--md-block-gap' : '';
+  };
+  const GAP_MARKERS2 = new Set(['QuoteMark', 'ListMark']);
+  const GAP_CONTAINERS2 = new Set(['Document', 'Blockquote', 'BulletList', 'OrderedList', 'ListItem']);
+  const gapLines = (start: number, end: number, prev: SyntaxNode | null, next: SyntaxNode | null, tail: boolean): void => {
+    const afterVar = gapEdgeToken(prev?.name ?? null, 'after');
+    const beforeVar = tail || !next ? '--md-block-gap' : gapEdgeToken(next.name, 'before');
+    const style = `--mdir-gap-after:${afterVar ? `var(${afterVar})` : '0px'};--mdir-gap-before:var(${beforeVar})`;
+    if (end < start) {
+      // 紧邻块对：后块首行 padding-top 承载（padding 参与 CM 行高测量，margin 不参与）。
+      if (!tail && next && prev) out.push(Decoration.line({ class: 'mdir-gap-pad', attributes: { style } }).range(doc.lineAt(next.from).from));
+      return;
+    }
+    const lo = doc.lineAt(from).number, hi = doc.lineAt(to).number;
+    let allocated = false;
+    for (let n = Math.max(start, lo); n <= Math.min(end, hi); n++) {
+      const line = doc.line(n);
+      if (!/^[\t >]*$/.test(line.text)) continue;
+      out.push(Decoration.line({
+        class: 'mdir-gap' + (blockActive(line.from, line.to) ? ' mdir-gap-active' : ''),
+        ...(allocated ? {} : { attributes: { style } }),
+      }).range(line.from));
+      allocated = true; // 间距只分配一次，避免多个空行各自取整后累积亚像素偏差。
+    }
+  };
+  const walkGaps = (parent: SyntaxNode): void => {
+    if (!GAP_CONTAINERS2.has(parent.name) || parent.from > to || parent.to < from) return;
+    let child = parent.childAfter(Math.max(parent.from, from));
+    while (child && GAP_MARKERS2.has(child.name)) child = child.nextSibling;
+    if (!child) {
+      if (parent.name === 'Document' && !parent.firstChild && tree.length === doc.length) gapLines(1, doc.lines, null, null, false);
+      return;
+    }
+    let previous: SyntaxNode | null = child.prevSibling;
+    while (previous && GAP_MARKERS2.has(previous.name)) previous = previous.prevSibling;
+    for (; child && child.from <= to; child = child.nextSibling) {
+      if (GAP_MARKERS2.has(child.name)) continue;
+      const start = previous ? doc.lineAt(Math.max(previous.from, previous.to - 1)).number + 1 : doc.lineAt(parent.from).number;
+      const end = doc.lineAt(child.from).number - 1;
+      gapLines(start, end, previous, child, false);
+      walkGaps(child);
+      previous = child;
+    }
+    // 尾部可写段落预留正文块间距，首字输入时不再突然补出间距。
+    if (!child && previous && parent.name === 'Document' && tree.length === doc.length)
+      gapLines(doc.lineAt(Math.max(previous.from, previous.to - 1)).number + 1, doc.lines, previous, null, true);
+  };
+  walkGaps(tree.topNode);
   return Decoration.set(out, true);
 }

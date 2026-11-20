@@ -185,11 +185,11 @@ describe('007 AC-30 连续写作', () => {
     expect(undo(main)).toBe(true);
     expect(main.state.doc.toString()).toBe(source);
   });
-  it('代码内空行保持正文，紧邻标题和列表的块间距不插入源字符', async () => {
+  it('代码内空行保持正文，紧邻标题和列表的块间距不插入源字符（REQ-014 P3：紧邻间距为行类承载）', async () => {
     const source = '# 标题\n正文\n- 一\n- 二\n\n> ```js\n> a();\n>\n> b();\n> ```\n\n尾';
     const { main, host } = await mount(source);
     main.dispatch({ selection: { anchor: source.length } });
-    await until(() => host.querySelectorAll('.mdir-block-space').length >= 3);
+    await until(() => host.querySelectorAll('.mdir-gap-pad').length >= 3);
     const codeEmpty = [...host.querySelectorAll('.mdir-code')].find(e => !e.textContent?.trim());
     expect(codeEmpty).toBeDefined(); expect(codeEmpty!.classList.contains('mdir-gap')).toBe(false);
     expect(main.state.doc.toString()).toBe(source);

@@ -17,7 +17,6 @@ import type { MarkdownDocumentClient } from './document-client';
 // live-block-field.ts；表格交互与查找替换纯函数在 live-table-actions.ts；统计/大纲上报机构在
 // live-reporter.ts。本文件保留补全源、LiveStatus/Opts 与 LivePreviewView 类；对外 export 面
 // 完全不变（app.ts 等调用方 import 路径零变化）。
-import { BlockHeightCache, blockHeightCache } from './block-height-cache';
 import {
   EditorView,
   keymap,
@@ -315,7 +314,6 @@ export class LivePreviewView {
         selection: this.opts.buffer?.state.selection,
         extensions: [
           irPerfProbe(),
-          blockHeightCache.of(new BlockHeightCache()),
           drawSelection(),
           // CM6 baseTheme 聚焦选区为 6 类选择器 #d7d4f0，应用侧单类 var(--selection) 在顺序与特异性
           // 双重必输——用户主题挂载序在 baseTheme 后，配合 !important 定向夺回（007 v0.39 选区可见性）

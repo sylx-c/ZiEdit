@@ -10,16 +10,12 @@ import { isComposing } from '../common/composition';
 import { userScrolledRecently } from '../common/user-scroll';
 import { cellRange, activeCell, openCellEditor, syncCellEditor, destroyCellEditor, createTableTools, refreshTableTools } from './table-editor';
 import { cellInlineText } from './table-model';
-import { TableViewport, tableCellAt, tableRowNumber } from './table-viewport';
+import { TableViewport, TABLE_ROW_ESTIMATE_PX, SOURCE_LINE_HEIGHT_PX, tableCellAt, tableRowNumber } from './table-viewport';
 import { fenceSourceChanged, fenceSourceField, fenceDraftField } from './writing';
 import { localImagePath, renderMarkdownInline, type HeadingItem } from './preview';
 import { type RenderBlock } from './render-model';
 import { createRenderContext, mountRender, renderMountKey, rememberedRenderHeight, rememberRenderHeight, type RenderContext } from './render-service';
-import { SOURCE_LINE_HEIGHT_PX, TABLE_ROW_ESTIMATE_PX } from './layout';
-import { heightMeasurements, type BlockHeightMeasurements } from './block-height-cache';
 import { currentPosition, referenceField, emojiField, imageContext, type ReferenceIndex } from './live-state';
-
-const tableHeightOwners = new WeakMap<HTMLElement, BlockHeightMeasurements>();
 
 /** 装饰构建期的图片 src 解析（规则 21：非活动块装饰件构建时解析相对路径 → asset 协议） */
 function localImgPath(src: string, baseDir: string | null): string | null {
@@ -458,17 +454,7 @@ export class TableWidget extends WidgetType {
     private emojis: Readonly<Record<string, string>>,
     private inset: number,
     private quoted: number,
-    private heightIdentity?: import('./block-height-cache').HeightIdentity,
-    private heightHint?: number,
-    private provideIdentity?: () => import('./block-height-cache').HeightIdentity | undefined
   ) { super(); }
-  private resolveHeightIdentity(): import('./block-height-cache').HeightIdentity | undefined {
-    if (this.provideIdentity) {
-      this.heightIdentity = this.provideIdentity();
-      this.provideIdentity = undefined;
-    }
-    return this.heightIdentity;
-  }
   private sameContent(other: TableWidget): boolean {
     if (other.emojis !== this.emojis) return false;
     if (other.references?.inlineKey !== this.references?.inlineKey) return false;
@@ -491,18 +477,15 @@ export class TableWidget extends WidgetType {
     }
     return rows + 1;
   }
-  /** 保守托底高度：源行数×源行高与 (行数+1)×表格行高初值 32 取大。仅供 CM6 视口估计，
-   *  实际行高经 ResizeObserver/requestMeasure 回填纠偏（v0.40 规则 22 登记）。 */
+  /** 保守托底高度：源行数×源行高与 (行数+1)×表格行高初值取大。仅供 CM6 视口估计，
+   *  实际高度挂载后由 CM 实测回填（REQ-014 P3：内容高度预言机已删除）。 */
   get estimatedHeight(): number {
-    return this.heightHint ?? Math.max(Math.max(1, this.sourceLines) * SOURCE_LINE_HEIGHT_PX, (this.rows.length + 1) * TABLE_ROW_ESTIMATE_PX);
+    return Math.max(Math.max(1, this.sourceLines) * SOURCE_LINE_HEIGHT_PX, (this.rows.length + 1) * TABLE_ROW_ESTIMATE_PX);
   }
   eq(other: TableWidget): boolean {
-    return other.from === this.from && other.to === this.to && other.inset === this.inset && other.quoted === this.quoted && this.sameContent(other)
-      && other.resolveHeightIdentity()?.token === this.resolveHeightIdentity()?.token;
+    return other.from === this.from && other.to === this.to && other.inset === this.inset && other.quoted === this.quoted && this.sameContent(other);
   }
   updateDOM(dom: HTMLElement, _view: EditorView, previous: TableWidget): boolean {
-    const owner = heightMeasurements(_view);
-    if (owner) { owner.register(dom, this.resolveHeightIdentity()); tableHeightOwners.set(dom, owner); }
     const sameShape = previous.header.length === this.header.length && previous.rows.length === this.rows.length;
     const restoreFocus = !sameShape && !!activeCell(dom)?.contains(document.activeElement);
     if (!sameShape) destroyCellEditor(dom, false);
@@ -510,7 +493,7 @@ export class TableWidget extends WidgetType {
     dom.dataset.mdTableFrom = String(this.from);
     dom.dataset.mdTableTo = String(this.to);
     this.containerStyle(dom);
-    if (!this.sameContent(previous)) tableViewports.get(dom)!.update(this.rows.length + 1, this.header.length, this.rowRenderer(dom), this.resolveHeightIdentity(), row => this.estimateFormulaRow(row, dom), this.unchangedRows(previous));
+    if (!this.sameContent(previous)) tableViewports.get(dom)!.update(this.rows.length + 1, this.header.length, this.rowRenderer(dom), undefined, row => this.estimateFormulaRow(row, dom), this.unchangedRows(previous));
     syncCellEditor(_view, dom);
     hydrateTableImages(dom, _view);
     hydrateTableNotes(dom, _view);
@@ -577,7 +560,7 @@ export class TableWidget extends WidgetType {
     table.setAttribute('aria-rowcount', String(this.rows.length + 1));
     tableViewports.set(box, new TableViewport(view, box, table, this.rows.length + 1, this.header.length, this.rowRenderer(box),
       () => activeCell(box)?.parentElement as HTMLTableRowElement | null,
-      () => { hydrateTableImages(box, view); hydrateTableNotes(box, view); hydrateTableRenders(box, view); }, this.resolveHeightIdentity(),
+      () => { hydrateTableImages(box, view); hydrateTableNotes(box, view); hydrateTableRenders(box, view); },
       row => this.estimateFormulaRow(row, box)));
     box.addEventListener('mdir-cell-render', e => {
       const cell = e.target as HTMLTableCellElement;
@@ -609,13 +592,10 @@ export class TableWidget extends WidgetType {
     refreshTableTools(view, box);
     hydrateTableNotes(box, view);
     hydrateTableRenders(box, view);
-    const owner = heightMeasurements(view);
-    if (owner) { owner.register(box, this.resolveHeightIdentity()); tableHeightOwners.set(box, owner); }
     return box;
   }
   destroy(dom: HTMLElement): void {
     tableListeners.get(dom)?.abort(); tableListeners.delete(dom);
-    tableHeightOwners.get(dom)?.unregister(dom); tableHeightOwners.delete(dom);
     tableViewports.get(dom)?.destroy(); tableViewports.delete(dom);
     destroyCellEditor(dom, false);
     tableRenderCleanups.get(dom)?.forEach(cancel => cancel()); tableRenderCleanups.delete(dom);

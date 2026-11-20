@@ -15,11 +15,11 @@ const ruleOf = (selector: string): string => {
 };
 
 describe('007 空段盒尺寸稳定（反馈 2）', () => {
-  it('.mdir-gap 压缩为预览块间距，不再保留完整源行高', () => {
+  it('.mdir-gap 压缩为预览块间距，不再保留完整源行高（REQ-014 P3：令牌 calc 求和）', () => {
     const rule = ruleOf('.md-ir .cm-line.mdir-gap');
     expect(rule).toContain('min-height:0');
     expect(rule).toContain('line-height:0');
-    expect(rule).toContain('padding-top:var(--mdir-gap-height)');
+    expect(rule).toContain('padding-top:calc(var(--mdir-gap-after,0px) + var(--mdir-gap-before,0px))');
     expect(rule).not.toContain('min-height:1.6em');
   });
   it('.mdir-gap-active 不再改变盒尺寸（光标进出零位移）', () => {
@@ -28,8 +28,8 @@ describe('007 空段盒尺寸稳定（反馈 2）', () => {
     expect(rule).not.toContain('padding-top');
     expect(rule).not.toContain('height');
   });
-  it('layout.ts 仍为连续空行只在首行分配块间距（防亚像素累积口径不变）', () => {
-    const layout = readFileSync(resolve(__dirname, '../src/markdown-view/layout.ts'), 'utf8');
-    expect(layout).toContain("--mdir-gap-height:${n === start ? height : '0px'}");
+  it('projector 仍为连续空行只在首行分配块间距（防亚像素累积口径不变；原 layout.ts 已随 P3 删除）', () => {
+    const projector = readFileSync(resolve(__dirname, '../src/markdown-view/projector.ts'), 'utf8');
+    expect(projector).toContain('allocated = true; // 间距只分配一次');
   });
 });

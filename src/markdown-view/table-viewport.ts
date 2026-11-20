@@ -1,12 +1,18 @@
+// markdown-view/table-viewport —— 表格行虚拟化窗口（REQ-014 P3 起自持：行高只在挂载期内保持，
+// 跨挂载内容高度预言机已删除；本文件随 P5 表格重构整体退役）。
 import { userScrolledRecently } from '../common/user-scroll';
 import type { EditorView } from '@codemirror/view';
-import { blockHeightCache, type HeightIdentity, type RowHeightSnapshot } from './block-height-cache';
-import { TABLE_ROW_ESTIMATE_PX } from './layout';
 
 type RowRenderer = (row: number, existing?: HTMLTableRowElement) => HTMLTableRowElement;
 const windows = new WeakMap<HTMLElement, TableViewport>();
 const WINDOW_THRESHOLD = 160;
 const OVERSCAN = 12;
+
+/** 表格行高初值（px）：单元格 line-height 20px + padding 13px×2 + 1px 折叠边框（styles.css 表格段）。
+ *  改表格 padding/行高时同步此值（原 layout.ts 契约注释随文件删除迁此）。 */
+export const TABLE_ROW_ESTIMATE_PX = 48;
+/** IR 源行高（px）：13.5px×1.6（styles.css .md-ir .cm-scroller），CM6 视口高度估计基准（原 layout.ts 迁此）。 */
+export const SOURCE_LINE_HEIGHT_PX = 21.6;
 
 export function tableRowNumber(cell: HTMLTableCellElement): number {
   return Number((cell.parentElement as HTMLElement).dataset.mdRow ?? (cell.parentElement as HTMLTableRowElement).rowIndex);
@@ -25,8 +31,8 @@ export class TableViewport {
   private heights: number[] = [];
   private measured: boolean[] = [];
   private width = 0;
+  /** 几何代际：布局/字体变化自增，触发全量行高重估。 */
   private generation = 0;
-  snapshot(): RowHeightSnapshot { return { cols: this.cols, width: this.width, heights: this.heights.slice(), measured: this.measured.slice() }; }
   private offsets: number[] = [];
   private rows = 0;
   private cols = 0;
@@ -40,8 +46,7 @@ export class TableViewport {
   /** 近期 scroll 时间戳:区分「连续滚动流间隙」与「孤立程序跳转」,决定停稳是否锚点纠偏 */
   constructor(private readonly view: EditorView, private readonly box: HTMLElement, private readonly table: HTMLTableElement,
     rows: number, cols: number, render: RowRenderer, private readonly activeRow: () => HTMLTableRowElement | null,
-     private readonly changed: () => void, private identity?: HeightIdentity,
-     private estimateRow: (row: number) => number = () => TABLE_ROW_ESTIMATE_PX) {
+     private readonly changed: () => void, private estimateRow: (row: number) => number = () => TABLE_ROW_ESTIMATE_PX) {
     this.head = table.createTHead(); this.body = table.createTBody(); this.render = render;
     windows.set(box, this);
     this.lastScrollTop = view.scrollDOM.scrollTop;
@@ -55,19 +60,14 @@ export class TableViewport {
     }
     this.schedule();
   }
-  update(rows: number, cols: number, render: RowRenderer, identity = this.identity, estimateRow = this.estimateRow, unchangedRows = 0): void {
+  update(rows: number, cols: number, render: RowRenderer, _identity?: unknown, estimateRow = this.estimateRow, unchangedRows = 0): void {
     this.estimateRow = estimateRow;
-    this.identity = identity;
     const shapeChanged = this.rows !== rows || this.cols !== cols;
     const columnsChanged = this.cols !== cols;
-    const cache = this.view.state?.facet(blockHeightCache);
-    const width = this.view.contentDOM?.getBoundingClientRect().width ?? 0, generation = cache?.generation ?? 0;
-    const retained = !columnsChanged && width === this.width && generation === this.generation
-      ? Math.min(unchangedRows, this.rows, rows) : 0;
+    const width = this.view.contentDOM?.getBoundingClientRect().width ?? 0;
+    const retained = !columnsChanged && width === this.width ? Math.min(unchangedRows, this.rows, rows) : 0;
     const oldHeights = this.heights, oldMeasured = this.measured;
     this.width = width;
-    this.generation = generation;
-    const restored = this.rows === 0 && this.width > 0 ? cache?.rows(this.identity, cols, this.width) : undefined;
     this.rows = rows; this.cols = cols; this.render = render;
     this.box.dataset.mdTableRows = String(rows); this.box.dataset.mdTableCols = String(cols);
     this.table.setAttribute('aria-rowcount', String(rows));
@@ -86,10 +86,8 @@ export class TableViewport {
     }
     // 内容更新必须丢弃旧行高，但同形状更新不能移除活动编辑器的祖先 DOM：
     // DOM 重建会打断 IME 会话，使组合提交与后续输入的撤销边界丢失。
-    this.heights = restored?.heights.length === rows ? restored.heights.slice()
-      : Array.from({ length: rows }, (_, row) => row < retained ? oldHeights[row]! : this.estimateRow(row));
-    this.measured = restored?.heights.length === rows ? restored.measured.slice()
-      : Array.from({ length: rows }, (_, row) => row < retained && oldMeasured[row]!);
+    this.heights = Array.from({ length: rows }, (_, row) => row < retained ? oldHeights[row]! : this.estimateRow(row));
+    this.measured = Array.from({ length: rows }, (_, row) => row < retained && oldMeasured[row]!);
     this.reindex();
     for (const [row, dom] of this.mounted) if (row < rows) this.render(row, dom);
     this.draw(); this.schedule();
@@ -160,7 +158,6 @@ export class TableViewport {
           if (Math.abs(this.heights[row]! - height) > .5) { this.heights[row] = height; resized = true; }
         }
         if (resized) this.reindex();
-        if (this.identity) this.view.state?.facet(blockHeightCache)?.putRows(this.identity, this.snapshot(), this.generation);
         // 行高变化仅更新表格与 CM 测量，不再二次补偿整页 scrollTop。
         const first = Math.max(1, this.rowAt(measurement.top) - OVERSCAN);
         const last = Math.min(this.rows, this.rowAt(measurement.bottom) + OVERSCAN + 1);
@@ -184,12 +181,12 @@ export class TableViewport {
     this.schedule();
   };
   private geometryChanged = (): void => {
+    this.generation++;
     this.heights = this.heights.map((_, row) => this.estimateRow(row)); this.measured.fill(false); this.reindex();
     this.width = this.view.contentDOM?.getBoundingClientRect().width ?? 0;
-    this.generation = this.view.state?.facet(blockHeightCache)?.generation ?? 0;
     this.scrolling = false;
     if (!this.dead) this.schedule();
-  };
+  }
   destroy(): void {
     this.dead = true; this.observer?.disconnect();
     this.view.scrollDOM.removeEventListener('scroll', this.onScroll); windows.delete(this.box);
