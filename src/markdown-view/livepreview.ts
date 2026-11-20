@@ -53,8 +53,7 @@ import { LiveDocTracker } from './live-reporter';
 import { requestIrFrame, cancelIrFrame } from './frame-work';
 import { blockInteractions } from './block-interactions';
 
-// 对外面零变化：buildLiveDeco/referenceField 原由本文件导出，拆分后经转发保持 import 路径不变。
-export { buildLiveDeco } from './live-deco';
+// 对外面零变化：referenceField 原由本文件导出，拆分后经转发保持 import 路径不变。
 export { referenceField } from './live-state';
 
 // ── 常量 ──
