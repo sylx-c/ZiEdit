@@ -108,6 +108,17 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
   // 再估计可能晚于首次写入到达。写入后保留注册：晚到的布局通知（notifyCmRestoreLayout）触发
   // 一次安静复核，无漂移即取消（安静期零工作），有漂移写回并继续（≤5 轮 + 3s 无通知终止）。
   let rechecks = 0;
+  let nullStreak = 0;
+  const rekick = (): void => {
+    // REQ-014 P6：初始滚动被 DOM 高度钳制（装饰未达→scrollHeight 不足）时，目标区永不进入
+    // 切片窗、ready 永假。连续两个安静期无产出即重派行级 scrollIntoView（CM 原生机制
+    // 按其高度图解析，装饰落位后钳制解除即可落准），最多补踢 3 次。
+    if (nullStreak >= 2 && rechecks < 6) {
+      rechecks += 2;
+      nullStreak = 0;
+      view.dispatch({ effects: cmRestoreEffect(view, anchor, surface) });
+    }
+  };
   const measure = (): void => {
     const version = layoutVersion;
     frame = requestAnimationFrame(() => { frame = requestAnimationFrame(() => {
@@ -124,7 +135,8 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
         write: top => {
           // 新布局或新输入使这次测量过期；下次有效布局通知会重新调度。
           if (!current()) { cancel(); return; }
-          if (top === null || version !== layoutVersion) return;
+          if (top === null || version !== layoutVersion) { if (top === null) { nullStreak++; rekick(); } return; }
+          nullStreak = 0;
           const drifted = Math.abs(scroller.scrollTop - top) > .5;
           if (drifted) scroller.scrollTop = top;
           // REQ-014 P6：写入后追加分阶段终检——装饰交付期的 map/DOM 短暂失同步会让早期
