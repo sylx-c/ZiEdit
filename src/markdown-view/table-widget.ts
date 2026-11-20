@@ -475,6 +475,7 @@ export class TableStubWidget extends WidgetType {
   toDOM(): HTMLElement {
     const el = document.createElement('div');
     el.className = 'mdir-tablestub';
+    el.style.height = this.estimatedHeight + 'px'; // 挂载实测高度须与高度图估计一致（否则停稳换实表跳变）
     el.setAttribute('aria-hidden', 'true');
     return el;
   }
