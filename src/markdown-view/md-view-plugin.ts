@@ -293,24 +293,10 @@ function updateProjection(prev: ProjectionState, tr: Transaction): ProjectionSta
       }
       return { ...mapped, inline: keptInline, block: nextBlock, pending: undefined };
     }
-    if (vp?.value.scrolling && forced && !pureCursor) {
-      // 追赶路径（视口跑赢分片器）：只同步构建视口核心（±2 行）与旧窗的缺失窗（已交付
-      // 区域零重建——表格实例复用契约；滚动期块构建为同高占位件故成本有界），全窗（±边距）
-      // 交预算分片续跑——修前同步全窗 buildInline 连带触发新区同步解析，大跳步（滚动门禁
-      // 每步 ~2200px）实测 >100ms 长任务。
-      const coreFrom = tr.newDoc.lineAt(Math.max(0, Math.min(tr.newDoc.length, from - 2))).from;
-      const coreTo = tr.newDoc.lineAt(Math.min(tr.newDoc.length, to + 2)).to;
-      const coreMissing = missingWindows({ from: coreFrom, to: coreTo }, [{ from: oldFrom, to: oldTo }]);
-      let nextInline = inline.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo });
-      let nextBlock = block.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo });
-      for (const win of coreMissing) {
-        nextInline = mergeInlineWindow(nextInline, buildInline(tr.state, win.from, win.to), win.from, win.to, tr.newDoc.length);
-        nextBlock = appendSlice(nextBlock, buildBlockDecos(tr.state, win.from, win.to, tables, deferred), win.from, win.to, true, win.to === tr.newDoc.length);
-      }
-      return { ...mapped, inline: nextInline, block: nextBlock,
-        pending: { next: sliceFrom, end: sliceTo, token: {}, remaining: coreFrom > sliceFrom
-          ? [{ from: sliceFrom, to: coreFrom }, { from: coreTo, to: sliceTo }] : [{ from: coreTo, to: sliceTo }], budgeted: true, first: true } };
-    }
+    if (vp?.value.scrolling && forced && !pureCursor)
+      return { ...mapped,
+        inline: mergeInlineWindow(inline, buildInline(tr.state, sliceFrom, sliceTo), sliceFrom, sliceTo, tr.newDoc.length),
+        pending: { next: sliceFrom, end: sliceTo, token: {}, first: true, budgeted: true } };
     if (forced && !pureCursor && tr.newDoc.length >= 256 * 1024 && sliceTo - sliceFrom > BLOCK_SLICE_CHARS && !tr.docChanged)
       return advanceSlices(tr.state, mapped, { next: sliceFrom, end: sliceTo, token: {},
         ...(!tr.docChanged && vp && prev.deferred ? { budgeted: true } : {}) }, true);
