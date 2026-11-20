@@ -159,7 +159,7 @@ description: "Task list for feature implementation"
 
 - [x] T031 删除 live-deco 适配壳与 blockLayout 旧计数器（AC-36 门禁与 REQ-014 探针所依赖的 ir-perf 核心保留——原生门禁读 __ZIEDIT_IR_PERF_DATA__，全删会破坏验收仪器，此为有据偏离），清理无调用者引用；geometry-refresh/ir-cache/ir-layout 测试已于 P1/P3 在册删除
 - [x] T032 行数核验：IR 簇（`live-*` / `writing` / `table*` / `layout` / `spacing` 分类生产代码，口径见 research.md §3）实测 **2,605 行 ≤ 3,000**（基线 4,665，净减 44%）
-- [ ] T033 全量门禁（60Hz 物理控制台复验进行中）：gate-ir-settle ✅ 12/12（topMax 0.5/midMax 1.7）｜gate-scroll-position ✅ 9/9（跨形态行位复核制修复 372 行漂移）｜gate-md-consistency ✅ 4/4｜gate-md-editing ✅ 7/7｜gate-md-structure ✅ 30/30｜gate-md-surfaces ✅（dense-2m 三模式，单元格惰性交付后 IR wheel p95 38ms）｜gate-ir-scroll ✅｜gate-walk-f ✅｜ac36 冷轮 ✅（暖轮 max 55 超 5ms 边际，待复验）｜**残余**：gate-batch1-scroll dense-2m 长任务 4×100-125ms（基线同状态 0——真回归，边际 25%，根因=大跳步每步全窗内联重建，调优中）；gate-batch1-arrow 基线同败（既有问题，非本 Feature 回归，移交归线）
+- [ ] T033 全量门禁（60Hz 物理控制台复验进行中）：gate-ir-settle ⏳ E1 残 3.0px/预算 2px——**根因已诊断至机制级**：CM6 停稳重测时移除 cm-content 显式高度钉扎（高度图总估 74137.9px vs 自然 DOM 74140.9px，全文档 6500 行装饰估计的亚像素舍入累积=3px），翻转帧内容整体位移 3px；已排除并修复：stub 高度（48.7 精确）、惰性单元格（表头锁列宽）、空行折叠（全高+差额挂件，兼修跨形态 372 行失配源）；scroll（dense-2m）✅ 0 长任务｜scroll-position ✅｜consistency/editing/structure/surfaces/ir-scroll/walk-f ✅｜ac36 冷轮 ✅（暖轮 max 55 边际）｜arrow 基线同败（既有，移交）
 - [x] T034 按 `specs/001-markdown-ir-rewrite/quickstart.md` 全部手动验证场景执行并记录结果（五场景脚本化真机执行 5/5 通过，记录见 `docs/tmp/ir-rewrite-baselines/t034-manual-verification.md`；流畅度数值归物理控制台计时门禁）
 - [x] T035 更新 `docs/CHANGELOG.md` 未发布节（面向使用者口径，不写内部术语）；收尾汇报 MUST 提醒所有者同步其本地维护的需求与架构资料，但不自动修改这些资料
 
