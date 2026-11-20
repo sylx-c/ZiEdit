@@ -114,22 +114,24 @@ describe('007 AC-30 连续写作', () => {
     await until(() => main.contentDOM.textContent === 'Heading');
     expect(main.state.doc.toString()).toBe('# Heading');
   });
-  it('输入井号成标题期间保持源码可见（v0.39 活动显隐）', async () => {
+  it('输入井号成标题期间源码可见性由留白栏承载（REQ-014 P2：成题后井号常隐、留白栏显示）', async () => {
     const { view, main } = await mount('正文');
     await until(() => main.contentDOM.textContent === '正文');
     main.dispatch({ selection: { anchor: 0 }, userEvent: 'select.pointer' });
     type(main, '### ');
-    await until(() => main.contentDOM.textContent?.includes('###'));
+    // 成题后：井号从正文隐藏（范围恒定），留白栏显示井号（mdir-marks-on + data-marks）。
+    await until(() => !main.contentDOM.textContent?.includes('###'));
+    expect(main.dom.querySelector('.cm-line.mdir-marks-on[data-marks="###"]')).not.toBeNull();
     expect(view.getMarkdown()).toBe('### 正文');
   });
-  it('用户交互后光标进入标题行显井号，离开恢复渲染（v0.39）', async () => {
+  it('用户交互后光标进入标题行留白栏显井号，离开收起（REQ-014 P2 口径）', async () => {
     const source = '# 标题\n\n正文';
     const { main } = await mount(source);
     await until(() => !main.contentDOM.textContent?.includes('#'));
     main.dispatch({ selection: { anchor: 3 }, userEvent: 'select.pointer' });
-    await until(() => main.contentDOM.textContent?.includes('#'));
+    await until(() => !!main.dom.querySelector('.cm-line.mdir-marks-on[data-marks="#"]'));
     main.dispatch({ selection: { anchor: source.indexOf('正') }, userEvent: 'select.pointer' });
-    await until(() => !main.contentDOM.textContent?.includes('#'));
+    await until(() => !main.dom.querySelector('.cm-line.mdir-marks-on'));
     expect(main.state.doc.toString()).toBe(source);
   });
   it('正文加下划线不再是标题：=== 保持字面段落，光标进出无显隐切换（Setext 移除）', async () => {

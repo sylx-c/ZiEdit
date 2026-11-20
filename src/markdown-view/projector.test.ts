@@ -78,14 +78,17 @@ describe('REQ-014 T009：projectViewport 纯函数投影', () => {
     expect(decos.some(d => d.from === 2 && d.to === 4 && d.cls === undefined && d.widget !== true)).toBe(false);
   });
 
-  it('标题井号受 touched 门：未触达时贴内光标保持隐藏，触达后才展开（隐藏态=开标记吞随行空格）', () => {
+  it('标题井号 P2 留白栏：井号常隐（正文范围恒定），活动态只切换留白栏类（不受 touched 门影响的是显隐位置而非隐藏）', () => {
     const doc = '# 题\n';
-    // 未触达：headingCaretInside 恒 false → headingDecos 执行 → '# ' 被隐藏（0..2）。
+    // 未触达 + 贴内光标：井号隐藏（0..2），无 marks-on 类（留白栏只显级别色条）。
     const untouched = collect(doc, [{ from: 2, to: 2 }], { touched: false });
     expect(untouched.some(d => d.from === 0 && d.to === 2 && d.cls === undefined && d.widget !== true)).toBe(true);
-    // 触达且光标在标题内部：井号展开（不再隐藏）。
+    expect(untouched.some(d => typeof d.cls === 'string' && d.cls.includes('mdir-marks-on'))).toBe(false);
+    // 触达且光标在标题内部：井号仍隐藏，但行类带 mdir-marks-on（留白栏显示井号，宽度不变）。
     const touched = collect(doc, [{ from: 2, to: 2 }], { touched: true });
-    expect(touched.some(d => d.from === 0 && d.to === 2 && d.cls === undefined && d.widget !== true)).toBe(false);
+    expect(touched.some(d => d.from === 0 && d.to === 2 && d.cls === undefined && d.widget !== true)).toBe(true);
+    expect(touched.some(d => typeof d.cls === 'string' && d.cls.includes('mdir-marks-on'))).toBe(true);
+    expect(touched.some(d => typeof d.cls === 'string' && d.cls.includes('data-marks') === false && d.cls.includes('mdir-h1'))).toBe(true);
   });
 
   it('图片语法整体替换为图片件（widget replace，覆盖 ![alt](url)）', () => {

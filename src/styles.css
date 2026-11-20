@@ -1562,8 +1562,17 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .md-ir .cm-scroller{font-family:var(--md-font-stack);font-size:var(--md-fs-base);line-height:1.6}
 .md-ir .cm-content{max-width:var(--md-col);margin-inline:auto;padding:20px 24px 48px}
 .md-ir .cm-line{padding-inline:0}
-/* 标题定级（井号在非活动块隐藏；h1/h2 下划线与渲染预览同观感） */
-.md-ir .cm-line:is(.mdir-h1,.mdir-h2,.mdir-h3,.mdir-h4,.mdir-h5,.mdir-h6){padding-block:0;font-weight:600;line-height:1.35}
+/* 标题定级（REQ-014 P2 留白栏：井号常隐，级别色条常驻左侧留白；光标进入时留白栏显示井号，
+   正文行文本范围与起始位置恒定——cursorWidthChange=0 的机制基础） */
+.md-ir .cm-line:is(.mdir-h1,.mdir-h2,.mdir-h3,.mdir-h4,.mdir-h5,.mdir-h6){padding-block:0;font-weight:600;line-height:1.35;
+  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
+.md-ir .cm-line:is(.mdir-h1,.mdir-h2,.mdir-h3,.mdir-h4,.mdir-h5,.mdir-h6)::before{position:absolute;left:0;top:0;bottom:0;
+  width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);display:flex;align-items:center;
+  content:attr(data-marks);font-size:calc(var(--md-fs-base) * 0.72);font-family:var(--code-font,monospace);
+  color:transparent;justify-content:flex-start;overflow:hidden;white-space:pre;
+  border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
+/* 光标进入标题正文/选区相交（projector 加 mdir-marks-on）：留白栏显示井号，宽度不变 */
+.md-ir .cm-line.mdir-marks-on::before{color:var(--muted);border-left-color:var(--accent)}
 .md-ir .cm-line.mdir-h1{font-size:calc(var(--md-fs-base) * 2.25)}
 .md-ir .cm-line.mdir-h2{font-size:calc(var(--md-fs-base) * 1.75)}
 .md-ir .cm-line.mdir-h3{font-size:calc(var(--md-fs-base) * 1.5)}
