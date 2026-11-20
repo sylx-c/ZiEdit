@@ -104,6 +104,10 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
   };
   const current = (): boolean => active && view.dom.isConnected && scroller.clientHeight > 0 && view.state.doc === doc
     && view.state.selection === selection && userScrollVersion(scroller) === inputVersion;
+  // REQ-014 P6：挂载态装饰（空行折叠/表格件）与 CM6 卸载区缺省行高估计不一致——视口裁剪后的
+  // 再估计可能晚于首次写入到达。写入后保留注册：晚到的布局通知（notifyCmRestoreLayout）触发
+  // 一次安静复核，无漂移即取消（安静期零工作），有漂移写回并继续（≤5 轮 + 3s 无通知终止）。
+  let rechecks = 0;
   const measure = (): void => {
     const version = layoutVersion;
     frame = requestAnimationFrame(() => { frame = requestAnimationFrame(() => {
@@ -121,8 +125,10 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
           // 新布局或新输入使这次测量过期；下次有效布局通知会重新调度。
           if (!current()) { cancel(); return; }
           if (top === null || version !== layoutVersion) return;
-          if (Math.abs(scroller.scrollTop - top) > .5) scroller.scrollTop = top;
-          cancel();
+          const drifted = Math.abs(scroller.scrollTop - top) > .5;
+          if (drifted) scroller.scrollTop = top;
+          if (!drifted || ++rechecks >= 5) cancel();
+          else quietTimer = setTimeout(() => { quietTimer = undefined; cancel(); }, 3000); // 无进一步布局通知即终止
         },
       });
     }); });
