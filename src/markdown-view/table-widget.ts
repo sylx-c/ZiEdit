@@ -333,6 +333,10 @@ export class TableEditWidget extends WidgetType {
     box.dataset.mdTableTo = String(this.to);
     box.dataset.mdTableRows = String(this.rows.length + 1);
     box.dataset.mdTableCols = String(this.header.length);
+    // REQ-014 P6：首帧高度钉扎——实表挂件首帧可比终态高 ~3px（次帧回落；疑内层横向滚动条
+    // 首帧占位），配合浏览器锚定不对称（缩有补长无补）留 3px 净位移。恒定钉住盒高
+    // （记忆高度优先，缺省 (行数+1)×48.7 估计），首帧=终态，瞬态消灭。
+    box.style.height = (rememberedTableHeight(this.header, this.rows) ?? (this.rows.length + 1) * TABLE_ROW_ESTIMATE_PX) + 'px';
     const table = document.createElement('table');
     table.className = 'mdir-table';
     table.setAttribute('aria-rowcount', String(this.rows.length + 1));
