@@ -298,26 +298,11 @@ export class TableEditWidget extends WidgetType {
    *  热路径——按（源文本 × 引用指纹）LRU 缓存，重复内容表格近零成本挂载。 */
   private renderCell(cell: HTMLTableCellElement, row: number, col: number, onRendered?: (live: HTMLTableCellElement) => void, view?: EditorView): void {
     const source = row === 0 ? this.header[col] : this.rows[row - 1]?.[col] ?? '';
-    // REQ-014 P6：滚动挂载热路径——先「宽度稳定」纯文本占位（剥离行内标记，宽度≈渲染态，
-    // 行高跨纯文本→渲染过渡不变——惰性占位若带标记宽度差会在停稳窗推移参考 3px 实证），
-    // 静态 HTML 进共享帧队列惰性交付；交付时按表位×行列重查活格（防装饰换代丢渲染）。
-    cell.textContent = placeholderText(source);
-    const tableFrom = String(this.from);
-    const plain = cell.textContent;
-    queueCellRender(
-      () => {
-        if (!view) return null;
-        // 首选同表位活格；装饰换代中表位坐标可能瞬移（增量重解析的过渡树），回退按
-        // 「同行列 + 仍为该占位文本」识别唯一未渲染活格（占位文本即未渲染标记）。
-        const primary = view.dom.querySelector<HTMLTableCellElement>(`.mdir-tablebox[data-md-table-from="${tableFrom}"] [data-md-row="${row}"][data-md-col="${col}"]`);
-        if (primary) return primary;
-        for (const candidate of view.dom.querySelectorAll<HTMLTableCellElement>(`[data-md-row="${row}"][data-md-col="${col}"]`)) {
-          if (candidate.closest('.mdir-tablebox') && candidate.textContent === plain) return candidate;
-        }
-        return null;
-      },
-      source, this.references,
-      live => onRendered?.(live));
+    // REQ-014 P6 终态：同步渲染——stub 使实表只在停稳换装（非每滚轮刻），此处成本有界
+    // （1-3 表 × 12 格 ≈ 5-10ms/停稳）；惰性交付（含宽度稳定占位）实测仍在停稳窗推移
+    // 参考 3px（textContent→innerHTML 换帧的字体度量差），settle 门禁 2px 预算不容。
+    void onRendered; void view; void queueCellRender; void placeholderText;
+    cell.innerHTML = cellHtmlCached(cellInlineText(source), this.references);
   }
   toDOM(view: EditorView): HTMLElement {
     const box = document.createElement('div');
