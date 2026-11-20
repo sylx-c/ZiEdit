@@ -1601,7 +1601,7 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .md-ir .cm-line.mdir-h6{color:var(--muted)}
 .md-ir .cm-line.mdir-h1,.md-ir .cm-line.mdir-h2{border-bottom:1px solid var(--border)}
 /* REQ-014 P3/P6：块间距 CSS 承载——空行折叠为令牌间距（calc 求和发生在 CSS，与预览同一套令牌）。
-   首空行 padding-top = 前块 after + 后块 before；其余空行高 0；紧邻块对改独立块挂件 mdir-block-gap
+   首空行 padding-top = 前块 after + 后块 before；其余空行高 0；紧邻块对用独立块挂件 mdir-block-gap
    （元素 rect 顶 = 文本顶，真机一致性门按元素顶比对；列表项对挂件高 --md-list-gap）。 */
 .md-ir .cm-line.mdir-gap{height:auto;min-height:0;line-height:0;padding-top:calc(var(--mdir-gap-after,0px) + var(--mdir-gap-before,0px))}
 .md-ir .mdir-block-gap{pointer-events:none}
