@@ -333,10 +333,12 @@ export class TableEditWidget extends WidgetType {
     box.dataset.mdTableTo = String(this.to);
     box.dataset.mdTableRows = String(this.rows.length + 1);
     box.dataset.mdTableCols = String(this.header.length);
-    // REQ-014 P6：首帧高度钉扎——实表挂件首帧可比终态高 ~3px（次帧回落；疑内层横向滚动条
-    // 首帧占位），配合浏览器锚定不对称（缩有补长无补）留 3px 净位移。恒定钉住盒高
-    // （记忆高度优先，缺省 (行数+1)×48.7 估计），首帧=终态，瞬态消灭。
-    box.style.height = (rememberedTableHeight(this.header, this.rows) ?? (this.rows.length + 1) * TABLE_ROW_ESTIMATE_PX) + 'px';
+    // REQ-014 P6：首帧高度钉扎（仅记忆真值）——实表挂件首帧可比终态高 ~3px（次帧回落）
+    // 配合浏览器锚定不对称留 3px 净位移。行高随语料内容浮动（1 行 47.7 / 2 行 48.7），
+    // 估计值钉扎会引入对预览的恒定偏移（consistency hr.y +3.1 实证）——只用同签名实测
+    // 记忆；首次遇表自然布局（E1#1 实证通过）。
+    const remembered = rememberedTableHeight(this.header, this.rows);
+    if (remembered) box.style.height = remembered + 'px';
     const table = document.createElement('table');
     table.className = 'mdir-table';
     table.setAttribute('aria-rowcount', String(this.rows.length + 1));
