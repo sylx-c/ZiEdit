@@ -15,6 +15,7 @@ import { t } from '../common/i18n';
 import { localImagePath } from './preview';
 import { zassetUrl } from '../common/ipc';
 import { imageContext, referenceField as referenceFieldOf, currentPosition as currentPositionOf, type ReferenceIndex } from './live-state';
+import { requestIrFrame } from './frame-work';
 
 interface CellRange { from: number; to: number }
 
@@ -155,7 +156,7 @@ function hydrateCellImages(box: HTMLElement, view: EditorView, baseDir: string |
   }
 }
 
-/** 单元格静态 HTML 的 LRU 缓存（滚动挂载热路径；键 = 源文本 + 引用指纹）。 */
+/** 单元格静态 HTML 的 LRU 缓存（键 = 源文本 + 引用指纹；惰性交付与提交渲染共用）。 */
 const cellHtmlCache = new Map<string, string>();
 function cellHtmlCached(source: string, references: ReferenceIndex | null): string {
   const key = source + '\u0000' + (references?.inlineKey ?? '');
@@ -169,6 +170,51 @@ function cellHtmlCached(source: string, references: ReferenceIndex | null): stri
   if (cellHtmlCache.size > 512) cellHtmlCache.delete(cellHtmlCache.keys().next().value!);
   return html;
 }
+
+/** 单元格静态 HTML 的惰性交付队列（共享帧预算，≤4ms/帧）。
+ *  交付时按（表位 × 行列）重查活格——排队后挂件可能被整体重建（CM6 度量相位 /
+ *  装饰换代），旧闭包格已脱离文档，渲染须落到当前活格（与图片水合同口径）。 */
+interface CellRenderJob { resolve: () => HTMLTableCellElement | null; source: string; references: ReferenceIndex | null; rendered?: (live: HTMLTableCellElement) => void; enqueued: number }
+const cellRenderQueue: Array<CellRenderJob> = [];
+let cellRenderFrame = 0;
+function drainCellRender(): void {
+  cellRenderFrame = 0;
+  const deadline = performance.now() + 4;
+  let requeued = 0;
+  while (cellRenderQueue.length - requeued > 0 && performance.now() < deadline) {
+    const job = cellRenderQueue.shift()!;
+    const cell = job.resolve();
+    // 判据是「能在编辑器 DOM 内查到」而非文档连接——测试宿主可不挂在 document 上。
+    if (!cell) {
+      if (performance.now() - job.enqueued < 500) { cellRenderQueue.push(job); requeued++; continue; }
+      continue; // 500ms 仍未挂载：内容保持纯文本
+    }
+    cell.innerHTML = cellHtmlCached(job.source, job.references);
+    job.rendered?.(cell);
+    // 验证补刀：装饰换代可再换掉刚渲染的活格（eq 命中新盒），250ms 后若仍是纯文本则重渲染一次。
+    const verify = (): void => {
+      const live = job.resolve();
+      if (live && live.isConnected && live.textContent === cellInlineText(job.source)) {
+        live.innerHTML = cellHtmlCached(job.source, job.references);
+        job.rendered?.(live);
+      }
+    };
+    setTimeout(verify, 250);
+  }
+  if (cellRenderQueue.length) cellRenderFrame = requestIrFrame(drainCellRender);
+}
+function queueCellRender(resolve: () => HTMLTableCellElement | null, source: string, references: ReferenceIndex | null, rendered?: (live: HTMLTableCellElement) => void): void {
+  if (!/[*_`~[\]$]/.test(source)) {
+    const cell = resolve();
+    if (cell) rendered?.(cell); // 无行内标记：纯文本即终态（仍触发水合）
+    return;
+  }
+  cellRenderQueue.push({ resolve, source, references, rendered, enqueued: performance.now() });
+  if (!cellRenderFrame) cellRenderFrame = requestIrFrame(drainCellRender);
+}
+
+/** 单元格惰性渲染是否已排空（测试与门禁的等待位）。 */
+export function cellRenderSettled(): boolean { return cellRenderQueue.length === 0; }
 
 export class TableEditWidget extends WidgetType {
   constructor(
@@ -192,9 +238,21 @@ export class TableEditWidget extends WidgetType {
         && other.align.join() === this.align.join();
   }
   eq(other: TableEditWidget): boolean {
-    // 源码区间由装饰映射保证，不参与实例等价（否则文档前插必致 DOM 重建）。
-    return other.inset === this.inset && other.quoted === this.quoted
+    // 坐标参与等价（livepreview 的文档变更映射垫片会在装饰重建后二次映射 box 坐标，
+    // 旧 TableWidget 经 updateDOM 自愈；P5 初版误删致脚注 id/写回坐标错位）。
+    return other.from === this.from && other.to === this.to
+      && other.inset === this.inset && other.quoted === this.quoted
       && other.baseDir === this.baseDir && this.sameContent(other);
+  }
+  /** 坐标漂移（前文插改）时只刷新数据集与容器样式；内容/引用指纹变化返回 false 交重建。 */
+  updateDOM(dom: HTMLElement, _view: EditorView, previous: TableEditWidget): boolean {
+    if (!this.sameContent(previous)) return false;
+    dom.dataset.mdTableFrom = String(this.from);
+    dom.dataset.mdTableTo = String(this.to);
+    dom.style.paddingInlineStart = this.inset + 'px';
+    dom.classList.toggle('mdir-quote-block', this.quoted > 0);
+    dom.style.setProperty('--mdir-quote-depth', String(this.quoted));
+    return true;
   }
   get estimatedHeight(): number {
     return (this.rows.length + 1) * ROW_ESTIMATE_PX;
@@ -212,9 +270,28 @@ export class TableEditWidget extends WidgetType {
   /** 指定格渲染为静态 HTML（源文本取自构建期数据或当前文档）。
    *  REQ-014 P6：滚动中同步挂载小表后，单元格 HTML（markdown-it 逐格渲染）成为滚轮响应
    *  热路径——按（源文本 × 引用指纹）LRU 缓存，重复内容表格近零成本挂载。 */
-  private renderCell(cell: HTMLTableCellElement, row: number, col: number): void {
+  private renderCell(cell: HTMLTableCellElement, row: number, col: number, onRendered?: (live: HTMLTableCellElement) => void, view?: EditorView): void {
     const source = row === 0 ? this.header[col] : this.rows[row - 1]?.[col] ?? '';
-    cell.innerHTML = cellHtmlCached(cellInlineText(source), this.references);
+    // REQ-014 P6：滚动挂载热路径——先纯文本占位（零成本），静态 HTML 进共享帧队列惰性交付；
+    // 密集语料（dense-2m）单元格内容逐块唯一，缓存无效，同步 markdown-it 逐格渲染实测
+    // 拖垮滚轮响应（p95>50ms）与键入预算（max 92ms）。交付时按表位×行列重查活格。
+    cell.textContent = cellInlineText(source);
+    const tableFrom = String(this.from);
+    const plain = cellInlineText(source);
+    queueCellRender(
+      () => {
+        if (!view) return null;
+        // 首选同表位活格；装饰换代中表位坐标可能瞬移（增量重解析的过渡树），回退按
+        // 「同行列 + 仍为该源纯文本」识别唯一未渲染活格（纯文本即未渲染标记）。
+        const primary = view.dom.querySelector<HTMLTableCellElement>(`.mdir-tablebox[data-md-table-from="${tableFrom}"] [data-md-row="${row}"][data-md-col="${col}"]`);
+        if (primary) return primary;
+        for (const candidate of view.dom.querySelectorAll<HTMLTableCellElement>(`[data-md-row="${row}"][data-md-col="${col}"]`)) {
+          if (candidate.closest('.mdir-tablebox') && candidate.textContent === plain) return candidate;
+        }
+        return null;
+      },
+      source, this.references,
+      live => onRendered?.(live));
   }
   toDOM(view: EditorView): HTMLElement {
     const box = document.createElement('div');
@@ -240,7 +317,12 @@ export class TableEditWidget extends WidgetType {
         // 阻断 cm-content 的可编辑继承：空闲格不可键入，激活格显式置 true。
         cell.setAttribute('contenteditable', 'false');
         if (this.align[col]) cell.style.textAlign = this.align[col]!;
-        this.renderCell(cell, row, col);
+        this.renderCell(cell, row, col, live => {
+          const box = live.closest<HTMLElement>('.mdir-tablebox');
+          if (!box) return;
+          hydrateCellImages(box, view, this.baseDir, view.state.facet(imageContext).remoteResolve);
+          hydrateCellNotes(box, view);
+        }, view);
         tr.append(cell);
       }
       return tr;

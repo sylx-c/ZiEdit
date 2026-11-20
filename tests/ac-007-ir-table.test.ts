@@ -24,6 +24,7 @@ if (!(Range.prototype as { getClientRects?: unknown }).getClientRects) {
 }
 
 const { LivePreviewView } = await import('../src/markdown-view/livepreview');
+const { cellRenderSettled } = await import('../src/markdown-view/table-widget');
 const { t } = await import('../src/common/i18n');
 type LiveView = InstanceType<typeof LivePreviewView>;
 type Item = [string, (() => void) | null, Item[]?];
@@ -85,10 +86,12 @@ describe('AC-27 表格导航与加行加列（规则 23 M2，通行表格语义�
     const { v, host } = await mount();
     try {
       await until(() => !!host.querySelector('.mdir-table'));
+      await until(() => cellRenderSettled()); // P6：单元格 HTML 惰性交付
       const table = host.querySelector('.mdir-table')!;
       for (let i = 0; i < 3; i++) {
         v.view.dispatch({ changes: { from: 0, insert: 'prefix\n\n' }, selection: { anchor: 0 } });
         await until(() => !!host.querySelector('.mdir-table'));
+      await until(() => cellRenderSettled()); // P6：单元格 HTML 惰性交付
         expect(host.querySelector('.mdir-table')).toBe(table);
       }
       (table.querySelectorAll('tbody td')[2] as HTMLElement).dispatchEvent(
@@ -219,6 +222,7 @@ describe('AC-27 右键「表格 ▸」行列增删（单步撤销）', () => {
     const { v, host, menus } = await mount();
     try {
       await until(() => !!host.querySelector('th'));
+  await until(() => cellRenderSettled()); // P6：单元格 HTML 惰性交付
       const header = host.querySelectorAll('th')[2]!;
       header.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
       const sub = menuOf(menus, t('ctx.table'))[2]!;

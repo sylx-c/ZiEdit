@@ -98,7 +98,7 @@ describe('AC-29 所见即所得操作不变量', () => {
     const remote = vi.fn(async (_url: string) => 'data:image/png;base64,AA==');
     const { v, host } = await mount('首\n\n| 图片 | 链接 |\n|---|---|\n| ![图][img] | [链接][doc] |\n\n[img]: https://images.test/table.png\n[doc]: /test.md "标题"\n\n尾', remote);
     v.view.dispatch({ selection: { anchor: 0 } });
-    await until(() => !!host.querySelector('.mdir-table img[src^="data:"]'));
+    await until(() => !!host.querySelector('.mdir-table img[src^="data:"]') && !!host.querySelector('.mdir-table a[title]')); // P6：惰性交付逐格落地
     expect(host.querySelector('.mdir-table a')?.getAttribute('title')).toBe('标题');
     expect(remote).toHaveBeenCalledWith('https://images.test/table.png');
   });
@@ -107,6 +107,7 @@ describe('AC-29 所见即所得操作不变量', () => {
     const doc = '首\n\n| A | B |\n|---|---|\n| <img src=x onerror=alert(1)> | [点](javascript:alert(1)) |\n| **粗体** & <标签> | `代码` |\n\n尾';
     const { v, host } = await mount(doc);
     await until(() => !!host.querySelector('.mdir-table'));
+    await until(() => !!host.querySelector('.mdir-table strong') && !!host.querySelector('.mdir-table code')); // P6：单元格 HTML 惰性交付
     const table = host.querySelector('.mdir-table')!;
     expect(table.querySelector('img,script,[onerror],a[href^="javascript:"]')).toBeNull();
     expect(table.querySelector('tbody td')?.textContent).toBe('<img src=x onerror=alert(1)>');
@@ -136,7 +137,7 @@ describe('AC-29 所见即所得操作不变量', () => {
     const remote = () => new Promise<string | null>(r => { finish = r; });
     const doc = '首\n\n| A |\n|---|\n| ![图](https://images.test/table-late.png) |\n\n尾';
     const { v, host } = await mount(doc, remote);
-    await until(() => !!host.querySelector('.mdir-table'));
+    await until(() => !!host.querySelector('.mdir-table img')); // P6：单元格 HTML 惰性交付后图片在场
     const table = host.querySelector('.mdir-table')!;
     v.view.dispatch({ selection: { anchor: doc.length } });
     expect(host.querySelector('.mdir-table')).toBe(table);
