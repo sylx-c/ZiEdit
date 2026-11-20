@@ -92,9 +92,9 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T014 [US2] `src/styles.css`：为 `.mdir-h1`…`.mdir-h6`、`.mdir-quote`、`.mdir-list-line` 增加 `padding-left` + `::before` 伪元素留白栏（IR 与预览共用令牌口径）
-- [ ] T015 [US2] `src/markdown-view/projector.ts`：删除「活动时插回 `#` 文本」逻辑，所有情况只加 CSS class；光标在标题内时经 `data-heading-level` 等属性让 `::before` 显示级别符号（不推正文）
-- [ ] T016 [US2] `src/markdown-view/md-view-plugin.ts` + `src/markdown-view/projector.ts`：行内标记（`**` `*` `~~` `` ` `` `[]()`）显隐改为 ActiveBlocks 集合内重建（同块内移动只更新该块行内装饰）
+- [x] T014 [US2] `src/styles.css`：为 `.mdir-h1`…`.mdir-h6`、`.mdir-quote`、`.mdir-list-line` 增加 `padding-left` + `::before` 伪元素留白栏（IR 与预览共用令牌口径）
+- [x] T015 [US2] `src/markdown-view/projector.ts`：删除「活动时插回 `#` 文本」逻辑，所有情况只加 CSS class；光标在标题内时经 `data-heading-level` 等属性让 `::before` 显示级别符号（不推正文）
+- [x] T016 [US2] `src/markdown-view/md-view-plugin.ts` + `src/markdown-view/projector.ts`：行内标记（`**` `*` `~~` `` ` `` `[]()`）显隐改为 ActiveBlocks 集合内重建（同块内移动只更新该块行内装饰）
 - [ ] T017 [US2] P2 检查点：标准提交前门禁 + P1 原生门禁 + gate-md-structure + gate-md-consistency 全绿；cursorWidthChange = 0；五语料三面对比 P0 基准一致
 
 **Checkpoint**: US2 交付——光标移动零行宽变化。

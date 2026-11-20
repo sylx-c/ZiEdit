@@ -231,10 +231,10 @@ export function projectViewport(
   const renderContext = renderContextOf(index);
   const from = viewport.from;
   const to = viewport.to;
-  const decorateLines = (node: SyntaxNode, cls: string): void => {
+  const decorateLines = (node: SyntaxNode, cls: string, attributes?: Record<string, string>): void => {
     const start = doc.lineAt(Math.max(node.from, from)).number;
     const end = doc.lineAt(Math.min(Math.max(node.from, node.to - 1), to)).number;
-    for (let n = start; n <= end; n++) out.push(Decoration.line({ class: cls }).range(doc.line(n).from));
+    for (let n = start; n <= end; n++) out.push(Decoration.line({ class: cls, ...(attributes ? { attributes } : {}) }).range(doc.line(n).from));
   };
   const inline = (node: SyntaxNode): void => inlineDecos(node, doc, baseDir, out, remoteResolve, from, to, refs, active);
   const decorate = (node: SyntaxNode): void => {
@@ -245,11 +245,15 @@ export function projectViewport(
     const heading = /^ATXHeading([1-6])$/.exec(node.name);
     if (heading) {
       // Setext 标题已全局不解析（noSetextHeading）：此处只需处理单行 ATX。
-      decorateLines(node, 'mdir-h' + heading[1]);
+      // REQ-014 P2 留白栏：井号常隐（正文行文本范围恒定），级别色条常驻；光标进入/选区相交时
+      // 行加 mdir-marks-on + data-marks，由 CSS ::before 在留白栏显示井号——不再向正文行插回标记文本。
+      const marks = '#'.repeat(Number(heading[1]));
+      const marksOn = selected(node.from, node.to) || headingCaretInside(node);
+      decorateLines(node, 'mdir-h' + heading[1] + (marksOn ? ' mdir-marks-on' : ''), { 'data-marks': marks });
       const oldOffset = index.mapping?.invertedDesc.mapPos(doc.lineAt(node.from).from, -1) ?? doc.lineAt(node.from).from;
       const item = index.headings.get(oldOffset);
       if (item) out.push(Decoration.line({ attributes: { id: item.id, 'data-line': String(doc.lineAt(node.from).number - 1) } }).range(doc.lineAt(node.from).from));
-      if (!selected(node.from, node.to) && !headingCaretInside(node)) headingDecos(node, doc, out);
+      headingDecos(node, doc, out);
       inline(node);
       return;
     }
