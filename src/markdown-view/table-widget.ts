@@ -333,12 +333,11 @@ export class TableEditWidget extends WidgetType {
     box.dataset.mdTableTo = String(this.to);
     box.dataset.mdTableRows = String(this.rows.length + 1);
     box.dataset.mdTableCols = String(this.header.length);
-    // REQ-014 P6：首帧高度钉扎（仅记忆真值）——实表挂件首帧可比终态高 ~3px（次帧回落）
-    // 配合浏览器锚定不对称留 3px 净位移。行高随语料内容浮动（1 行 47.7 / 2 行 48.7），
-    // 估计值钉扎会引入对预览的恒定偏移（consistency hr.y +3.1 实证）——只用同签名实测
-    // 记忆；首次遇表自然布局（E1#1 实证通过）。
-    const remembered = rememberedTableHeight(this.header, this.rows);
-    if (remembered) box.style.height = remembered + 'px';
+    // REQ-014 P6：首帧高度钉扎（估计值）——实表首帧可比终态高 ~3px（次帧回落）+ 锚定
+    // 不对称=3px 净位移；记忆签名含块序号（密集语料逐表唯一，命中率≈0），故用估计钉扎。
+    // 行高随内容浮动（1 行 47.7/2 行 48.7）——稳定取值后自校正到真值（消除对预览的
+    // 恒定偏移；consistency 门在 1.5s 后量取，届时已校正）。
+    box.style.height = ((this.rows.length + 1) * TABLE_ROW_ESTIMATE_PX) + 'px';
     const table = document.createElement('table');
     table.className = 'mdir-table';
     table.setAttribute('aria-rowcount', String(this.rows.length + 1));
@@ -497,13 +496,26 @@ export class TableEditWidget extends WidgetType {
     const capture = (attempt: number): void => {
       if (!box.isConnected) return;
       if (!cellRenderSettled() && attempt < 240) { setTimeout(() => capture(attempt + 1), 25); return; }
-      let last = -1, stable = 0;
-      const poll = (): void => {
-        if (!box.isConnected) return;
+      // 自然高 = 揭钉同步量取（同任务复原，浏览器不渲染中间态）。
+      const naturalOf = (): number => {
+        const pin = box.style.height;
+        box.style.height = '';
         const h = Math.round(box.getBoundingClientRect().height * 10) / 10;
+        box.style.height = pin;
+        return h;
+      };
+      let last = -1, stable = 0, frames = 0;
+      const poll = (): void => {
+        if (!box.isConnected || ++frames > 30) return; // 帧数上限：不拖长测试/离屏寿命
+        const h = naturalOf();
         stable = Math.abs(h - last) < 0.05 ? stable + 1 : 0;
         last = h;
-        if (stable >= 2) { rememberTableHeight(header, rows, h); return; }
+        if (stable >= 2) {
+          rememberTableHeight(header, rows, h);
+          // 自校正钉扎到自然真值（估计钉扎对 1 行行高表高 ~3px；校正后与预览零偏移）。
+          box.style.height = h + 'px';
+          return;
+        }
         if (stable > -10) requestAnimationFrame(poll);
       };
       requestAnimationFrame(poll);
