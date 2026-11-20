@@ -27,7 +27,7 @@ import { RenderWidget, CodeLabelWidget, TocWidget, HrWidget, codeContainer, edit
 import { renderBlockAt } from './render-model';
 import { requestIrFrame, cancelIrFrame, measureAfterRender } from './frame-work';
 import { activeBlocks } from './active-block';
-import { closeAllTableEdits, TableStubWidget } from './table-widget';
+import { closeAllTableEdits, tableStubFor } from './table-widget';
 
 // ── 窗口数学（自 deco-window.ts 内联；原文件随 T012 删除） ──
 
@@ -139,7 +139,7 @@ function buildBlockDecosInner(state: EditorState, from: number, to: number, tabl
           const from = /^[\t >]*$/.test(doc.sliceString(line.from, node.from)) ? line.from : node.from;
           out.push(Decoration.replace({
             block: true, blockAtomic: true,
-            widget: new TableStubWidget(lines.length - 2),
+            widget: tableStubFor(lines),
           }).range(from, node.to));
         }
       }

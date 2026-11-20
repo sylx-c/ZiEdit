@@ -44,10 +44,25 @@ export function cellRange(main: EditorView, box: HTMLElement, row: number, col: 
   return { from, to };
 }
 
-/** 表格行高初值（迁自 table-viewport，随其退役）：单元格 20px 行高 + 13px×2 内边距 + 1px 边框。
- *  改表格 padding/行高时同步此值（契约注释随文件迁移迁此）。 */
-export const TABLE_ROW_ESTIMATE_PX = 48;
+/** 表格行高初值（迁自 table-viewport，随其退役）：实测 ≈ 47.3px/行（padding 13×2 + 行高 20 + 边框 1，
+ *  非整数取整差累积即停稳跳变——停稳门禁 E1 残差 2.1px 实证）。改表格 padding/行高时同步此值。 */
+export const TABLE_ROW_ESTIMATE_PX = 47.3;
 const ROW_ESTIMATE_PX = TABLE_ROW_ESTIMATE_PX;
+
+/** 实表实测高度记忆（按行数+首行单元格签名）：同签名表格的占位件用实测值，停稳换实表零位移。 */
+const tableHeights = new Map<string, number>();
+function tableSignature(header: string[], rows: string[][]): string {
+  return header.join('\u0001') + '\u0002' + (rows[0]?.join('\u0001') ?? '') + '\u0003' + rows.length;
+}
+export function rememberedTableHeight(header: string[], rows: string[][]): number | undefined {
+  return tableHeights.get(tableSignature(header, rows));
+}
+function rememberTableHeight(header: string[], rows: string[][], height: number): void {
+  if (!(height > 0)) return;
+  const key = tableSignature(header, rows);
+  tableHeights.delete(key); tableHeights.set(key, height);
+  if (tableHeights.size > 256) tableHeights.delete(tableHeights.keys().next().value!);
+}
 
 function applyOperation(main: EditorView, box: HTMLElement, operation: TableOperation): void {
   if (main.state.readOnly) return;
@@ -454,6 +469,12 @@ export class TableEditWidget extends WidgetType {
     liveBoxes.add(box);
     hydrateCellImages(box, view, this.baseDir, view.state.facet(imageContext).remoteResolve);
     hydrateCellNotes(box, view);
+    // 实测高度记忆：同签名表格的滚动占位件用实测值（停稳换实表零位移）。
+    view.requestMeasure({
+      key: box,
+      read: () => (box.isConnected ? box.getBoundingClientRect().height : 0),
+      write: height => rememberTableHeight(this.header, this.rows, height),
+    });
     return box;
   }
   destroy(dom: HTMLElement): void {
@@ -465,20 +486,32 @@ export class TableEditWidget extends WidgetType {
   }
 }
 
-/** 滚动占位表格件（REQ-014 P6）：deferred 滚动期替代实表——高度与实表估计一致（±1.2px），
- *  停稳补齐（complete 重建）换实表无位移；实表 DOM 构建（~15 元素/表）移出滚轮热路径
- *  （dense-2m 2104 表实测同步挂载致滚动长任务 >100ms）。 */
+/** 滚动占位表格件（REQ-014 P6）：deferred 滚动期替代实表——高度优先取同签名实表实测记忆
+ *  （首次遇表用行数估计），停稳补齐换实表近零位移；实表 DOM 构建移出滚轮热路径。 */
 export class TableStubWidget extends WidgetType {
-  constructor(private rows: number) { super(); }
-  eq(other: TableStubWidget): boolean { return other.rows === this.rows; }
-  get estimatedHeight(): number { return (this.rows + 1) * ROW_ESTIMATE_PX; }
+  constructor(private rows: number, private height: number) { super(); }
+  eq(other: TableStubWidget): boolean { return other.rows === this.rows && other.height === this.height; }
+  get estimatedHeight(): number { return this.height; }
   toDOM(): HTMLElement {
     const el = document.createElement('div');
     el.className = 'mdir-tablestub';
-    el.style.height = this.estimatedHeight + 'px'; // 挂载实测高度须与高度图估计一致（否则停稳换实表跳变）
+    el.style.height = this.height + 'px'; // 挂载实测高度须与高度图估计一致（否则停稳换实表跳变）
     el.setAttribute('aria-hidden', 'true');
     return el;
   }
+}
+
+/** 轻量解析行内单元格（占位高度计算用；与 projector.splitTableRow 同口径的粗分）。 */
+function stubCells(line: string): string[] {
+  return line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(c => c.trim());
+}
+
+/** 由表格源行构造占位件：优先同签名实测高度，缺省 (行数+1)×行高初值。 */
+export function tableStubFor(lines: string[]): TableStubWidget {
+  const header = stubCells(lines[0]!);
+  const rows = lines.slice(2).map(stubCells);
+  const rows_ = rows.length;
+  return new TableStubWidget(rows_, rememberedTableHeight(header, rows) ?? (rows_ + 1) * ROW_ESTIMATE_PX);
 }
 
 /** box 级运行态（活动格提交/关闭），供销毁与只读切换使用。 */
