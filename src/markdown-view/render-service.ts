@@ -370,7 +370,7 @@ function applyRenderHtml(target: HTMLElement, block: RenderBlock, html: string):
 
 /** 只替换独立派生节点，调用方负责版本/位置/生命周期与组合输入守卫。 */
 export function mountRender(target: HTMLElement, block: RenderBlock, context: RenderContext, dark: boolean,
-  current: () => boolean = () => true, updated?: () => void, hold: () => boolean = () => false,
+  current: () => boolean = () => true, updated?: (heightDelta?: number) => void, hold: () => boolean = () => false,
   busy: () => boolean = () => false): () => void {
   observeTheme();
   let tone = dark, cancel = mountAtTheme(target, block, context, tone, current, updated, hold, busy);
@@ -383,7 +383,7 @@ export function mountRender(target: HTMLElement, block: RenderBlock, context: Re
 }
 
 function mountAtTheme(target: HTMLElement, block: RenderBlock, context: RenderContext, dark: boolean,
-  current: () => boolean, updated: (() => void) | undefined, hold: () => boolean, busy: () => boolean): () => void {
+  current: () => boolean, updated: ((heightDelta?: number) => void) | undefined, hold: () => boolean, busy: () => boolean): () => void {
   const version = {}; mounted.set(target, version);
   const signature = renderMountKey(block, context) + (dark ? '|dark' : '|light');
   renderSources.set(target, block.source);
@@ -426,13 +426,17 @@ function mountAtTheme(target: HTMLElement, block: RenderBlock, context: RenderCo
     if (hold()) { timer = setTimeout(() => scheduleDelivery(result), 30); return; }
     settled = true;
     clearTimeout(timeout);
+    // REQ-014 P6：同步捕获出图前后高度差并传宿主——宿主在同任务内补偿滚动，
+    // 不产生中间渲染帧（停稳门禁逐帧采样，经 requestMeasure 延后会录到瞬态漂移）。
+    const before = target.getBoundingClientRect().height;
     if (result.error !== undefined) {
       showError(result.error);
     } else {
       applyRenderHtml(target, block, result.html);
     }
+    const delta = target.getBoundingClientRect().height - before;
     target.dataset.renderDone = '1'; // 成功/失败均视为水合完成（平台判据只看完成，不看成败）
-    updated?.();
+    updated?.(delta);
   };
   const scheduleDelivery = (result: RenderResult): void => {
     if (!live()) return;
