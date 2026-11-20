@@ -1,7 +1,7 @@
 import { EditorState, Transaction } from '@codemirror/state';
 import { EditorView, keymap, drawSelection, runScopeHandlers } from '@codemirror/view';
 import { undo, redo, defaultKeymap } from '@codemirror/commands';
-import { renderMarkdownInline } from './preview';
+import { renderCellHtml } from './static-html';
 import { compositionChanged, compositionGuard, isComposing } from '../common/composition';
 import { safeCell, limitTablePaste, tableModel, tableRowPrefix, runTableOperation, resizeTable, parseTablePaste, pasteTable, deleteTable, cellInlineText, type TableOperation } from './table-model';
 import { icon, flash } from '../shell/chrome';
@@ -166,7 +166,7 @@ export function destroyCellEditor(box: HTMLElement, render = true): void {
     clearTimeout(pendingEnds.get(s)); pendingEnds.delete(s);
     s.editor.destroy();
     if (render) {
-      s.cell.innerHTML = renderMarkdownInline(cellInlineText(range ? s.main.state.doc.sliceString(range.from, range.to) : ''));
+      s.cell.innerHTML = renderCellHtml(cellInlineText(range ? s.main.state.doc.sliceString(range.from, range.to) : ''));
       s.cell.dispatchEvent(new CustomEvent('mdir-cell-render', { bubbles: true, detail: { row: s.row, col: s.col } }));
     }
   }

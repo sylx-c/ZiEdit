@@ -154,11 +154,11 @@ export function renderStaticHtml(text: string, tree: Tree, metadata: MarkdownMet
       case 'FootnoteReference': {
         const note = metadata.footnotes.find(item => item.label === normalizeReference(raw(node).slice(2, -1)));
         if (!note) return esc(raw(node));
-        // 后处理沿用 旧引擎定义序→首次引用序映射。
-        const number = [...metadata.footnotes].sort((a, b) => a.from - b.from).indexOf(note) + 1;
+        // 编号取元数据的规范值（首次引用序，note.number）；不再按定义位置重算——
+        // 定义序 ≠ 引用序的文档（格内脚注重排场景）两面必须同号。
         const occurrence = note.references.findIndex(range => range.from === node.from);
         const suffix = occurrence > 0 ? ':' + (occurrence + 1) : '';
-        return '<sup class="footnotes-ref" id="footnotes-ref-' + number + suffix + '"><a href="#footnotes-def-' + number + '">' + number + '</a></sup>';
+        return '<sup class="footnotes-ref" id="footnotes-ref-' + note.number + suffix + '"><a href="#footnotes-def-' + note.number + '">' + note.number + '</a></sup>';
       }
       case 'FootnoteDefinition': case 'LinkReference': return '';
       case 'TableOfContents': return '<p>[toc]</p>';
@@ -191,11 +191,38 @@ export function renderStaticHtml(text: string, tree: Tree, metadata: MarkdownMet
 export function renderFootnotesHtml(metadata: MarkdownMetadata): string {
   if (!metadata.footnotes.length) return '';
   const notes = [...metadata.footnotes].sort((a, b) => a.from - b.from);
-  return '<ol class="footnotes-defs-ol">' + notes.map((note, i) => {
+  // 展示按定义位置序；锚点 id/链接用规范编号（首次引用序 note.number），与引用上标同号。
+  return '<ol class="footnotes-defs-ol">' + notes.map(note => {
       const bodyTree = staticMarkdownParser.parse(note.body);
       // 定义正文只递归块/行内序列化，绝不递归追加定义集合。
       const bodyMetadata = { ...extractMarkdownMetadata(note.body, bodyTree), references: metadata.references, footnotes: [] };
       const body = renderStaticHtml(note.body, bodyTree, bodyMetadata);
-      return '<li id="footnotes-def-' + (i + 1) + '">' + body + '<a class="md-footnotes-goto" href="#footnotes-ref-' + (i + 1) + '">↩</a></li>';
+      return '<li id="footnotes-def-' + note.number + '">' + body + '<a class="md-footnotes-goto" href="#footnotes-ref-' + note.number + '">↩</a></li>';
     }).join('') + '</ol>';
+}
+
+/** REQ-014 P4（T024）：表格单元格行内渲染接缝——单元格文本按静态解析器成片段树统一序列化，
+ *  取段落内层 HTML（单元格是行内容器）。引用/脚注沿用文档级定义；公式产出 md-render-target
+ *  占位（由 hydrateTableRenders 水合，与整面同构）。脚注引用改写为表格交互形态
+ *  （data-md-note/data-md-offset，供表格点击监听定位源码）。过渡期接缝，P5 随新表格挂件收口。 */
+export function renderCellHtml(text: string,
+  references: Record<string, { href: string; title?: string }> = {},
+  footnotes: ReadonlyMap<string, import('./headings').FootnoteItem> = new Map()): string {
+  const tree = staticMarkdownParser.parse(text);
+  const metadata: MarkdownMetadata = { ...extractMarkdownMetadata(text, tree), references: references as MarkdownMetadata['references'], footnotes: [...footnotes.values()] };
+  const whole = renderStaticHtml(text, tree, metadata, 0, text.length, false);
+  const html = whole.startsWith('<p>') && whole.endsWith('</p>') ? whole.slice(3, -4) : whole;
+  if (!footnotes.size || typeof document === 'undefined') return html;
+  // 片段树无文档坐标：按源序 zip 静态 sup 引用与 `[^label]` 出现位，恢复表格交互属性。
+  const host = document.createElement('div'); host.innerHTML = html;
+  const matches = [...text.matchAll(/\[\^([^\]]+)\]/g)];
+  const sups = [...host.querySelectorAll<HTMLElement>('sup.footnotes-ref')];
+  sups.forEach((sup, i) => {
+    const match = matches[i], anchor = sup.querySelector<HTMLAnchorElement>('a');
+    if (!match || !anchor) return;
+    anchor.dataset.mdNote = normalizeReference(match[1]!);
+    anchor.dataset.mdOffset = String(match.index);
+    anchor.classList.add('mdir-footnote-ref'); // 表格内交互形态（点击监听与样式选择器依赖）
+  });
+  return host.innerHTML;
 }

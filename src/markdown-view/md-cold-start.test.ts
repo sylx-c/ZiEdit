@@ -54,14 +54,15 @@ describe('FC 收口：冷启动就绪屏障', () => {
     expect(host.innerHTML).toContain('https://e.x'); // Autolink（automaticLinkTarget）
   });
 
-  it('静态预览回退：冷启动 + 资产异常走 markdown-it 回退，不冒泡', async () => {
+  it('静态预览回退：冷启动 + 资产异常走源码+提示降级，不冒泡（REQ-014 P4 口径）', async () => {
     gate.fail = true;
     __coldStartForTest();
     const host = document.createElement('div');
     const result = await renderPreviewInto(host, DOC, { dark: false });
     expect(result.engine).toBe('fallback');
     expect(host.querySelector('.md-fallback')).toBeTruthy();
-    expect(host.innerHTML).toContain('href="/t.md"'); // 回退路径同样完成引用式链接解析
+    expect(host.querySelector('.md-col')?.getAttribute('data-fallback-note')).toBeTruthy(); // 明确提示
+    expect([...host.querySelectorAll('pre.md-fallback-src')].some(pre => pre.textContent?.includes('[link][ref]'))).toBe(true); // 源码可见（引用定义块按设计不显示）
   });
 
   it('分屏块渲染：createBlockRenderer 冷启动不抛错并正常提交', async () => {

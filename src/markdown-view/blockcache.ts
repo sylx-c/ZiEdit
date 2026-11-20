@@ -1,10 +1,10 @@
 // Markdown 阅读组件：独立预览与分屏共用固定正文、增量块提交和生命周期。
 import { TreeFragment, type Tree } from '@lezer/common';
 import type { ChangeSet } from '@codemirror/state';
-import { renderMarkdownBlock, degradeUnsupportedBlocks, resolveLocalImages, installLinkGuard,
+import { degradeUnsupportedBlocks, resolveLocalImages, installLinkGuard,
   applyDocumentMetadata, type LinkRouteOpts, type PreviewEngine } from './preview';
 import { loadMarkdownIt } from './md';
-import { staticMarkdownParser } from './static-html';
+import { staticMarkdownParser, renderFootnotesHtml } from './static-html';
 import { type MarkdownMetadata } from './headings';
 import { MarkdownDocumentSession, type MarkdownBlock } from './document-model';
 import { MarkdownDocumentClient, type MarkdownRenderPlan } from './document-client';
@@ -201,6 +201,8 @@ export function createBlockRenderer(renderHtml?: BlockHtmlRenderer, cap = BLOCK_
         const root = col!;
         const grouped = !!root.querySelector('.md-reading-page') || (cold && plan.blocks.length > 512);
         root.classList.toggle('md-fallback', fallback);
+        // 提示文案暂以字面双语承载（i18n.ts 正被并行工作占用，待其收口后并入 md.renderFallback 键）。
+        if (fallback) root.dataset.fallbackNote = '部分内容按源码显示 / Some content is shown as source';
         const defs = renderHtml && !fallback ? refDefLines(text, local.update(text).tree).join('\n') : '';
         const prefix = defs ? defs + '\n\n' : '';
         const entries: MountedBlock[] = [];
@@ -273,7 +275,13 @@ export function createBlockRenderer(renderHtml?: BlockHtmlRenderer, cap = BLOCK_
                 await plan.htmlReady;
                 if (!current()) return result(engine, false);
               }
-              const html = fallback ? renderMarkdownBlock(text, block, plan.metadata) : renderHtml ? await renderHtml(prefix + block.src)
+              // REQ-014 P4（T023）：Lezer 序列化失败的安全降级 = 源码可见 + 明确提示，不再二次渲染。
+              const html = fallback
+                ? (block.kind === 'FootnoteDefinition' || block.kind === 'LinkReference' ? ''
+                  : block.kind === 'Footnotes' ? renderFootnotesHtml(plan.metadata)
+                  : block.kind === 'FrontMatter' ? '<pre class="md-frontmatter">' + block.src.trimEnd().replace(/[&<>]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' })[c]!) + '</pre>'
+                  : '<pre class="md-fallback-src">' + block.src.replace(/[&<>]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' })[c]!) + '</pre>')
+                : renderHtml ? await renderHtml(prefix + block.src)
                 : block.html ?? client.html.get(block.id) ?? '';
               if (!current()) return result(engine, false);
               await fillReadingBlock(element, html, current);

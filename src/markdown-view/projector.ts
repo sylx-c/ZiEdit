@@ -331,23 +331,8 @@ export function projectViewport(
     }
     inline(node);
   };
-  // 只标记正文内多余的空格，不 replace，不改查找/复制/选区的源范围。
-  // 按行判活动态；语法排除代码/URL/数学等字面值区域与块级件。
-  for (let n = doc.lineAt(from).number; n <= doc.lineAt(to).number; n++) {
-    const line = doc.line(n);
-    if (blockActive(line.from, line.to)) continue;
-    for (const match of line.text.matchAll(/ {2,}/g)) {
-      const start = line.from + match.index!, end = start + match[0].length;
-      if (start < from || end > to || start === line.from || end === line.to) continue;
-      let node: SyntaxNode | null = tree.resolveInner(start, 1);
-      let prose = false, literal = false;
-      for (; node; node = node.parent) {
-        if (/^(?:Paragraph|ATXHeading[1-6]|SetextHeading[1-6])$/.test(node.name)) prose = true;
-        if (['InlineCode', 'FencedCode', 'CodeBlock', 'InlineMath', 'MathBlock', 'Table', 'URL', 'LinkTitle', 'HTMLBlock'].includes(node.name)) literal = true;
-      }
-      if (prose && !literal) out.push(Decoration.mark({ class: 'md-space-fold' }).range(start + 1, end));
-    }
-  }
+  // REQ-014 P4（T025）：md-space-fold IR 独有折行差删除——正文多余空格不再标记折叠，
+  // 三面（IR/分屏/独立预览）空格口径一致（源文本原样呈现）。
   visitVisible(tree.topNode, from, to, node => {
     if (index.metadata.frontMatter && node.from < currentPosition(index, index.metadata.frontMatter.to) && node.name !== 'Document') return false;
     if (node.name === 'InlineMath') {
