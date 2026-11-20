@@ -74,6 +74,15 @@ describe('001-AC-3 会话序列化往返一致', () => {
     expect(s.active()).toMatchObject({ path: 'E:\\new\\a.txt', scroll: 12, bookmarks: [3] });
     expect(s.tabs[1].path).toBe('E:\\old2\\b.txt');
   });
+  it('单文件改名只替换完全相等的路径，不迁子路径', () => {
+    const s = new TabStore();
+    s.open({ ...tab('E:\\notes'), scroll: 4, bookmarks: [1], routeLocked: true });
+    s.open(tab('E:\\notes\\child.txt'));
+    s.activate(0);
+    s.renamePath('E:\\notes', 'E:\\notes-old', true);
+    expect(s.active()).toMatchObject({ path: 'E:\\notes-old', scroll: 4, bookmarks: [1], routeLocked: true });
+    expect(s.tabs[1].path).toBe('E:\\notes\\child.txt');
+  });
   it('session → restore → session 完全一致', () => {
     const s1 = new TabStore();
     s1.open(tab('a.rs')); s1.open(tab('b.bin', 'image'));

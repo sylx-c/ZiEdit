@@ -121,6 +121,11 @@ export class CsvView {
     this.delimOverride = delimiter ?? null;
   }
 
+  /** 同类型改名后只换路径，已渲染的表格不重读。 */
+  adoptPath(path: string): void {
+    this.path = path;
+  }
+
   async mount(): Promise<void> {
     const generation = ++this.generation;
     this.host.innerHTML = '';

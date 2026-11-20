@@ -27,6 +27,7 @@ import {
   fileCreate,
   dirCreate,
   fileRename,
+  pathsRenameRecords,
   fileStat,
   imageWrite,
   loadSession,
@@ -3332,6 +3333,7 @@ export async function boot(): Promise<void> {
     ];
     if (real && tab) {
       items.push(
+        [$t('ctx.rename'), () => promptRename(path, false)],
         // 比较文件…（001 规则 26）：以本标签为一端，选另一端（AC-33）
         // （原「复制标签页」已移除：TabStore 按路径去重，同路径无法成二标签，此前为无效操作）
         [$t('ctx.compareWith'), () => {
@@ -3398,61 +3400,146 @@ export async function boot(): Promise<void> {
       );
   }
 
-  function promptRename(path: string): void {
+  /** 文件树可改目录（prefix=true，迁移其下已打开文件）。标签只改这一个文件。 */
+  function promptRename(path: string, prefix: boolean): void {
     const old = path.split(/[\\/]/).pop() ?? '';
     void dlgPrompt($t('prompt.rename'), old).then(name => {
-      if (!name || name === old || name.includes('/') || name.includes('\\')) return;
+      const nextName = name?.trim() ?? '';
+      if (!nextName || nextName === old || nextName.includes('/') || nextName.includes('\\')) return;
       const dir = path.slice(0, path.length - old.length);
-      const target = dir + name;
-      const viewPath = currentView instanceof EditView ? currentView.filePath : currentView instanceof LivePreviewView ? currentView.path : null;
-      const follows = viewPath && (viewPath === path || viewPath.startsWith(path + '\\') || viewPath.startsWith(path + '/'));
+      const target = dir + nextName;
+      const under = (candidate: string): boolean =>
+        candidate === path || (prefix && (candidate.startsWith(path + '\\') || candidate.startsWith(path + '/')));
+      const editor = currentView instanceof EditView ? currentView : null;
+      const preview = currentView instanceof LivePreviewView ? currentView : null;
+      const viewPath = editor?.filePath ?? preview?.path ?? null;
+      const follows = !!viewPath && under(viewPath);
       const rename = () => fileRename(path, target);
-      const move = follows && (currentView instanceof EditView || currentView instanceof LivePreviewView)
-        ? currentView.relocate(target + viewPath.slice(path.length), rename) : rename();
+      const movedLiveView = follows && (!!editor || !!preview);
+      const move = follows && editor
+        ? editor.relocate(target + viewPath.slice(path.length), rename)
+        : follows && preview
+          ? preview.relocate(target + viewPath.slice(path.length), rename)
+          : rename();
       void move
-        .then(() => {
-          const affected = store.tabs.filter(t => t.path === path || t.path.startsWith(path + '\\') || t.path.startsWith(path + '/'));
-          if (affected.some(t => t.path === activeTab()?.path)) {
-            const active = activeTab()!;
-            if (currentView instanceof EditView && editStatus?.dirty) {
-              recoveryPending.set(active.path, { content: currentView.getContent(), diskChanged: false });
-            } else if (currentView instanceof LivePreviewView && currentView.isDirty) {
-              recoveryPending.set(active.path, { content: currentView.getMarkdown(), diskChanged: false });
-            }
-            destroyView();
-            currentViewKey = '\u0000';
-            mountEpoch.next();
-          }
-          const migrate = <T,>(map: Map<string, T>, oldPath: string, newPath: string): void => {
-            if (!map.has(oldPath)) return;
-            map.set(newPath, map.get(oldPath)!);
-            map.delete(oldPath);
-          };
-          for (const tab of affected) {
-            const next = target + tab.path.slice(path.length);
-            documents.rename(tab.path, next);
-            migrate(modeMap, tab.path, next);
-            migrate(wrapMap, tab.path, next);
-            migrate(csvDelimiters, tab.path, next);
-            migrate(hlOverride, tab.path, next);
-            migrate(wysiwygHeadings, tab.path, next);
-            migrate(switchAnchor, tab.path, next);
-            if (tabLock.delete(tab.path)) tabLock.add(next); // F6（审计）：只读锁随改名迁移，防锁定标签改名后意外可编辑
-            textOpenMemoInvalidate(tab.path); // F14（审计）：旧路径的前端 text_open 备忘作废，新路径按需重取（后端探测缓存按 len+mtime 自失效）
-            const pending = recoveryPending.get(next);
-            if (pending) writeSnapshot(next, pending.content, false);
-            void recoveryDiscard([tab.path]).catch(err => console.warn('Discard renamed recovery failed', err));
-            mruOrder = mruOrder.map(p => p === tab.path ? next : p);
-          }
-          store.renamePath(path, target);
-          syncTreeRootToActive();
-          void rebuildTree();
-          flash($t('msg.renamed'));
-        })
-        .catch(err =>
-          dlgAlert(String(err).includes('EXISTS') ? $t('msg.nameExists') : $tf('err.renameFail', String(err)))
-        );
+        .then(() => finishRename(path, target, prefix, movedLiveView))
+        .catch((err: unknown) => {
+          const text = String(err);
+          dlgAlert(text.includes('EXISTS') ? $t('msg.nameExists')
+            : text.includes('NOT_FOUND') ? $t('err.renameMissing')
+            : $tf('err.renameFail', text));
+        });
     });
+  }
+
+  /** 磁盘改名已经成功后才迁移。单文件不碰子路径；扩展名变化且未锁路由时才重挂。 */
+  function finishRename(path: string, target: string, prefix: boolean, movedLiveView = false): void {
+    const under = (candidate: string): boolean =>
+      candidate === path || (prefix && (candidate.startsWith(path + '\\') || candidate.startsWith(path + '/')));
+    const affected = store.tabs.filter(t => under(t.path));
+    const active = activeTab();
+    const remountActive = !prefix && !!active && under(active.path) && affected.some(t => {
+      if (t.routeLocked) return false;
+      const next = target + t.path.slice(path.length);
+      return routeForRenamedPath(next).route !== t.route;
+    });
+    let preserveView = movedLiveView && !remountActive && !!active && under(active.path);
+    if (remountActive && active) {
+      if (currentView instanceof EditView && editStatus?.dirty) {
+        recoveryPending.set(active.path, { content: currentView.getContent(), diskChanged: false });
+      } else if (currentView instanceof LivePreviewView && currentView.isDirty) {
+        recoveryPending.set(active.path, { content: currentView.getMarkdown(), diskChanged: false });
+      }
+      destroyView();
+      currentViewKey = '\u0000';
+      mountEpoch.next();
+    } else if (active && under(active.path) && currentView && 'adoptPath' in currentView) {
+      currentView.adoptPath(target + active.path.slice(path.length));
+    }
+    const migrate = <T,>(map: Map<string, T>, oldPath: string, newPath: string): void => {
+      if (!map.has(oldPath)) return;
+      map.set(newPath, map.get(oldPath)!);
+      map.delete(oldPath);
+    };
+    for (const tab of affected) {
+      const next = target + tab.path.slice(path.length);
+      const previousRoute = tab.route;
+      const previousLanguage = tab.language;
+      documents.rename(tab.path, next);
+      documents.deleted.delete(next);
+      const moved = documents.get(next);
+      if (moved) moved.fields.saveEpoch = (moved.fields.saveEpoch ?? 0) + 1;
+      if (!prefix && !tab.routeLocked) {
+        const kind = routeForRenamedPath(next);
+        if (kind.route !== tab.route || kind.language !== tab.language) {
+          for (const [parkedKey, parked] of parkedViews.entriesArray()) {
+            if (parked.path === next || parked.path === tab.path) parkedViews.delete(parkedKey);
+          }
+        }
+        tab.route = kind.route;
+        tab.language = kind.language;
+        if (tab === active && (kind.route !== previousRoute || kind.language !== previousLanguage)) preserveView = false;
+      }
+      migrate(modeMap, tab.path, next);
+      migrate(wrapMap, tab.path, next);
+      migrate(csvDelimiters, tab.path, next);
+      migrate(hlOverride, tab.path, next);
+      migrate(wysiwygHeadings, tab.path, next);
+      migrate(switchAnchor, tab.path, next);
+      if (tabLock.delete(tab.path)) tabLock.add(next);
+      textOpenMemoInvalidate(tab.path);
+      if (['Docx', 'Pptx', 'Xlsx', 'Pdf'].includes(previousLanguage ?? '')) {
+        void ooxmlClose(tab.path).catch(err => console.warn('ooxml_close', String(err)));
+      }
+      const pending = recoveryPending.get(next);
+      if (pending) writeSnapshot(next, pending.content, false);
+      void recoveryDiscard([tab.path]).catch(err => console.warn('Discard renamed recovery failed', err));
+      mruOrder = mruOrder.map(p => p === tab.path ? next : p);
+      for (const closed of closedTabs) if (closed.path === tab.path) closed.path = next;
+    }
+    for (const [parkedKey, parked] of parkedViews.entriesArray()) {
+      if (under(parked.path)) parkedViews.delete(parkedKey);
+    }
+    if (preserveView && active && currentViewKey.startsWith(`${active.path}#`)) {
+      currentViewKey = (target + active.path.slice(path.length)) + currentViewKey.slice(active.path.length);
+    } else if (prefix && active && under(active.path) && currentViewKey.startsWith(`${active.path}#`)) {
+      const nextPath = target + active.path.slice(path.length);
+      const rest = currentViewKey.slice(active.path.length);
+      const nextTab = affected.find(tab => tab.path === nextPath);
+      currentViewKey = nextTab && rest.split('#')[2] === modeOf(nextTab) ? nextPath + rest : '\u0000';
+    }
+    store.renamePath(path, target, !prefix);
+    syncTreeRootToActive();
+    void rebuildTree();
+    void pathsRenameRecords(path, target).then(() => void refreshRecents())
+      .catch(err => console.warn('Rename path records failed', err));
+    flash($t('msg.renamed'));
+  }
+
+  /** 与打开文件同一套扩展名规则，只看文件名，不读内容。 */
+  function routeForRenamedPath(next: string): { route: TabState['route']; language: string | null } {
+    const name = next.split(/[\\/]/).pop()?.toLowerCase() ?? '';
+    const ext = name.includes('.') ? name.split('.').pop()! : '';
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) {
+      return { route: 'image', language: ext === 'svg' ? 'XML' : null };
+    }
+    if (ext === 'pdf') return { route: 'pdf', language: 'Pdf' };
+    if (['docx', 'docm', 'dotx', 'dotm'].includes(ext)) return { route: 'rich', language: 'Docx' };
+    const language: Record<string, string> = {
+      odt: 'Docx', wps: 'Docx', doc: 'Docx', pptx: 'Pptx', dps: 'Pptx',
+      xlsx: 'Xlsx', xlsm: 'Xlsx', xltx: 'Xlsx', xltm: 'Xlsx', xlam: 'Xlsx', xls: 'Xlsx', xlsb: 'Xlsx', ods: 'Xlsx', et: 'Xlsx',
+      js: 'JavaScript', mjs: 'JavaScript', cjs: 'JavaScript', jsx: 'JavaScript',
+      ts: 'TypeScript', tsx: 'TypeScript', md: 'Markdown', markdown: 'Markdown',
+      yml: 'YAML', yaml: 'YAML', xml: 'XML', xsl: 'XML', xslt: 'XML', svg: 'XML', plist: 'XML',
+      html: 'HTML', htm: 'HTML', css: 'CSS', csv: 'CSV', tsv: 'TSV', json: 'JSON', jsonc: 'JSON',
+      c: 'C', h: 'C', cpp: 'C++', cc: 'C++', cxx: 'C++', hpp: 'C++', hh: 'C++', hxx: 'C++',
+      py: 'Python', pyw: 'Python', rs: 'Rust', go: 'Go', java: 'Java', sql: 'SQL',
+      sh: 'Shell', bash: 'Shell', zsh: 'Shell', bat: 'Batch', cmd: 'Batch',
+      ps1: 'PowerShell', psm1: 'PowerShell',
+      ini: 'Config', toml: 'Config', cfg: 'Config', conf: 'Config', properties: 'Config',
+      txt: 'Text', text: 'Text', log: 'Log',
+    };
+    return { route: 'text', language: language[ext] ?? null };
   }
 
   /** 删除路径（文件或目录）后处置对应标签（001 规则 11，F001-06）：净标签同步关闭；
@@ -3489,7 +3576,7 @@ export async function boot(): Promise<void> {
   function treeMenu(path: string, x: number, y: number, sel?: string[]): void {
     const items: Array<[string, () => void] | 'sep'> = [
         [$t('ctx.open'), () => void openPath(path)],
-        [$t('ctx.rename'), () => promptRename(path)],
+        [$t('ctx.rename'), () => promptRename(path, true)],
         'sep',
         [$t('ctx.copyFullPath'), () => void writeClipboardText(path)],
         [$t('ctx.revealInExplorer'), () => void revealInDir(path).catch(err => flash($tf('err.openSysFail', String(err))))],
@@ -3515,7 +3602,7 @@ export async function boot(): Promise<void> {
       [
         [$t('ctx.newFile'), () => promptCreate(path, false)],
         [$t('ctx.newFolder'), () => promptCreate(path, true)],
-        [$t('ctx.rename'), () => promptRename(path)],
+        [$t('ctx.rename'), () => promptRename(path, true)],
         [$t('ctx.deleteTrash'), () => trashTreePath(path)],
         'sep',
         [$t('ctx.copyFullPath'), () => void writeClipboardText(path)],
@@ -4249,23 +4336,23 @@ export async function boot(): Promise<void> {
     const tab = activeTab();
     if (!tab || !isRealFilePath(tab.path) || extModified.has(tab.path) || deletedPaths.has(tab.path)) return;
     if (viewStatus?.follow) return; // TailMode 自己管重载
-    const session = documents.ensure(tab.path);
+    const path = tab.path;
+    const session = documents.ensure(path);
     const saveEpoch = session.fields.saveEpoch;
-    void fileStat(tab.path)
+    void fileStat(path)
       .then(st => {
-        // 请求期间可能已切标签；reloadActiveTab 只能作用于当前标签。
-        // 此时不消费旧标签基线，切回后由下一轮重新检测。
-        if (activeTab()?.path !== tab.path || !documents.isCurrent(session) || session.fields.saveEpoch !== saveEpoch) return;
-        const known = fileMtimes.get(tab.path);
+        // 请求期间可能已切标签或改名。标签对象会被原地改路径，必须用发出请求时的路径判断。
+        if (activeTab()?.path !== path || session.path !== path || !documents.isCurrent(session) || session.fields.saveEpoch !== saveEpoch) return;
+        const known = fileMtimes.get(path);
         if (!known) return; // 元信息未就绪：交给 ensureFileMeta，勿在此抢先
         // 变更判定同时看大小：mtime 粒度粗的盘（FAT/exFAT、网络盘、部分按秒取整）会把同一刻度内的
         // 两次写入报成同一 mtime，只看 mtime 会永久漏掉这次外部修改（内容与大小格都停在旧值）。
-        const knownSize = fileSizes.get(tab.path);
+        const knownSize = fileSizes.get(path);
         if (st.modifiedMs <= known && (knownSize === undefined || st.len === knownSize)) return;
-        fileMtimes.set(tab.path, st.modifiedMs);
-        fileSizes.set(tab.path, st.len);
-        if (dirtyPaths.get(tab.path) === true) {
-          extModified.add(tab.path);
+        fileMtimes.set(path, st.modifiedMs);
+        fileSizes.set(path, st.len);
+        if (dirtyPaths.get(path) === true) {
+          extModified.add(path);
           renderStatus();
           renderTabs(); // 悬停里的修改时间/大小同上（干净分支走 reloadActiveTab → render 已覆盖）
         } else {
@@ -4277,9 +4364,9 @@ export async function boot(): Promise<void> {
         // F001-03（审计 db528fd，规则 7/29）：fileStat 失败 = 文件已不在（外部删除/移走）。
         // 修前注释称"走既有提示机制"实则不存在——外部删除零提示零标记，catch 整段吞掉。
         // 标记一次 + 提示一次；F5/重新打开/保存成功都会清标记重探。
-        if (!documents.isCurrent(session) || session.fields.saveEpoch !== saveEpoch) return;
-        if (!deletedPaths.has(tab.path)) {
-          deletedPaths.add(tab.path);
+        if (session.path !== path || activeTab()?.path !== path || !documents.isCurrent(session) || session.fields.saveEpoch !== saveEpoch) return;
+        if (!deletedPaths.has(path)) {
+          deletedPaths.add(path);
           renderStatus();
           renderTabs();
           flash($t('msg.fileDeleted'));

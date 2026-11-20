@@ -493,6 +493,76 @@ fn normalize_recent_path(path: &str) -> String {
     }
 }
 
+/// 改名后原位替换最近与收藏中的完全相等路径。新路径已存在则只删除旧路径。
+/// 不按目录前缀改写，配置写失败由调用方决定是否警告。
+/// `case_only` 只在 Windows 使用：分隔符相同、仅大小写不同时仍要写回新拼写。
+fn replace_record(items: &mut Vec<String>, from: &str, to: &str, case_only: bool) -> bool {
+    let mut changed = false;
+    let same = |left: &str, right: &str| {
+        if case_only {
+            left.eq_ignore_ascii_case(right)
+        } else {
+            left == right
+        }
+    };
+    let mut seen_to = items.iter().any(|p| {
+        let normalized = normalize_recent_path(p);
+        same(&normalized, to) && !same(&normalized, from)
+    });
+    items.retain(|p| {
+        if !same(&normalize_recent_path(p), from) {
+            return true;
+        }
+        changed = true;
+        if seen_to {
+            return false;
+        }
+        seen_to = true;
+        true
+    });
+    for item in items.iter_mut() {
+        if same(&normalize_recent_path(item), from) {
+            *item = to.to_string();
+        }
+    }
+    changed
+}
+
+fn paths_rename_records_tx(dir: &std::path::Path, from: &str, to: &str) -> Result<(), ZiEditError> {
+    let _tx = persistence_lock();
+    let from = normalize_recent_path(from);
+    let to = normalize_recent_path(to);
+    if from == to {
+        return Ok(());
+    }
+    let case_only = cfg!(windows) && from.eq_ignore_ascii_case(&to);
+    let recent_file = store::config_file(dir, "recent.json");
+    let mut recent: RecentState = store::load_or_default(&recent_file);
+    if replace_record(&mut recent.items, &from, &to, case_only) {
+        store::save(&recent_file, &recent)?;
+    }
+    let fav_file = store::config_file(dir, "favorites.json");
+    let mut fav: FavoritesState = store::load_or_default(&fav_file);
+    let mut changed = replace_record(&mut fav.items, &from, &to, case_only);
+    for group in &mut fav.groups {
+        changed |= replace_record(&mut group.items, &from, &to, case_only);
+    }
+    if changed {
+        store::save(&fav_file, &fav)?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn paths_rename_records(app: AppHandle, from: String, to: String) -> Result<(), ZiEditError> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let dir = config_dir(&app)?;
+        paths_rename_records_tx(&dir, &from, &to)
+    })
+    .await
+    .map_err(|e| ZiEditError::Msg(e.to_string()))?
+}
+
 /// 最近：移除指定条目（单条/批量共用）
 #[tauri::command]
 pub async fn recent_remove(app: AppHandle, paths: Vec<String>) -> Result<(), ZiEditError> {
@@ -737,6 +807,47 @@ mod tests {
             store::load_or_default(&store::config_file(&dir, "favorites.json"));
         assert_eq!(fav.items.len(), n, "并发 favorites_toggle 不得丢更新");
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn rename_records_replaces_exact_path_without_duplicates() {
+        let dir = temp_dir("rename-records");
+        recent_add_tx(&dir, "E:/keep/other.txt").unwrap();
+        recent_add_tx(&dir, "E:/notes/child.txt").unwrap();
+        recent_add_tx(&dir, "E:/notes").unwrap();
+        favorites_toggle_tx(&dir, "E:/notes").unwrap();
+        favorites_toggle_tx(&dir, "E:/notes-old").unwrap();
+        {
+            let _tx = persistence_lock();
+            let file = store::config_file(&dir, "favorites.json");
+            let mut fav: FavoritesState = store::load_or_default(&file);
+            fav.groups.push(FavGroup {
+                name: "work".into(),
+                items: vec!["E:/notes".into(), "E:/notes-old".into(), "E:/notes/child.txt".into()],
+            });
+            store::save(&file, &fav).unwrap();
+        }
+        paths_rename_records_tx(&dir, "E:/notes", "E:/notes-old").unwrap();
+        let recent: RecentState = store::load_or_default(&store::config_file(&dir, "recent.json"));
+        let norm = |p: &String| normalize_recent_path(p);
+        assert!(!recent.items.iter().any(|p| norm(p) == norm(&"E:/notes".to_string())));
+        assert!(recent.items.iter().any(|p| norm(p) == norm(&"E:/notes-old".to_string())));
+        assert!(recent.items.iter().any(|p| norm(p) == norm(&"E:/notes/child.txt".to_string())));
+        let fav: FavoritesState = store::load_or_default(&store::config_file(&dir, "favorites.json"));
+        let norm = |p: &String| normalize_recent_path(p);
+        assert_eq!(fav.items.iter().filter(|p| norm(p) == norm(&"E:/notes-old".to_string())).count(), 1);
+        assert!(!fav.items.iter().any(|p| norm(p) == norm(&"E:/notes".to_string())));
+        assert_eq!(fav.groups[0].items.iter().filter(|p| norm(p) == norm(&"E:/notes-old".to_string())).count(), 1);
+        assert!(fav.groups[0].items.iter().any(|p| norm(p) == norm(&"E:/notes/child.txt".to_string())));
+        paths_rename_records_tx(&dir, "E:/notes-old", "E:/Notes-Old").unwrap();
+        let recent: RecentState = store::load_or_default(&store::config_file(&dir, "recent.json"));
+        let stored = recent.items.iter().find(|p| norm(p).eq_ignore_ascii_case("E:\\Notes-Old")).cloned();
+        if cfg!(windows) {
+            assert_eq!(stored.as_deref(), Some("E:\\Notes-Old"));
+        } else {
+            assert_eq!(stored.as_deref(), Some("E:\\notes-old"));
+        }
+        std::fs::remove_dir_all(dir).unwrap();
     }
 
     /// 批 6 审查 H1：用户显式锁定的路由（routeLocked）必须随会话落盘。

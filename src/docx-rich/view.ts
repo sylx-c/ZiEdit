@@ -36,6 +36,11 @@ export class RichDocxView {
     private onNotice?: (msg: string) => void,
   ) {}
 
+  /** 同类型改名后只换路径，已渲染的文档不重载。 */
+  adoptPath(path: string): void {
+    this.path = path;
+  }
+
   async mount(): Promise<void> {
     if (this.destroyed) return;
     this.release();

@@ -383,6 +383,11 @@ export class TextView {
     this.showLn = opts.showLineNumbers !== false;
   }
 
+  /** 同类型改名后只换路径，不重读文件。 */
+  adoptPath(path: string): void {
+    this.path = path;
+  }
+
   private minimap: import('./minimap').Minimap | null = null;
   private minimapEnabled = true;
   private invisibleOn = false;

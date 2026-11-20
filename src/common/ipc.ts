@@ -89,6 +89,8 @@ export const fileStat = (path: string) => invoke<FileStatResult>('file_stat', { 
 export const fileCreate = (path: string) => invoke<void>('file_create', { path });
 export const dirCreate = (path: string) => invoke<void>('dir_create', { path });
 export const fileRename = (from: string, to: string) => invoke<void>('file_rename', { from, to });
+/** 改名成功后原位更新最近与收藏。配置写失败不表示磁盘改名失败。 */
+export const pathsRenameRecords = (from: string, to: string) => invoke<void>('paths_rename_records', { from, to });
 export const loadSession = () => invoke<SessionState>('session_load');
 export const saveSession = (session: SessionState) => invoke<void>('session_save', { session });
 /** text_open 结果按路径备忘（性能 Pass 1：打开链上 app 与 edit 视图对同一文件重复 text_open 去重，

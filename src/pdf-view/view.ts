@@ -20,6 +20,11 @@ export class PdfView {
   private dprChanged = () => { this.pager?.refreshDpr(); this.watchDpr(); };
   constructor(private host: HTMLElement, private path: string, private onFallbackToText?: (path: string) => void) {}
 
+  /** 同类型改名后只换路径，已打开的页面不重载。 */
+  adoptPath(path: string): void {
+    this.path = path;
+  }
+
   async mount(): Promise<void> {
     if (this.destroyed) return;
     this.release();

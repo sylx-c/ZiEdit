@@ -37,6 +37,7 @@ vi.mock('../src/text-view/edit', () => ({ EDIT_LIMIT: 10 * 1024 * 1024,
     openFindBar = vi.fn(); openReplace = vi.fn(); captureScrollAnchor = vi.fn(() => undefined);
     detachMinimap() {} reattachMinimap() {} restoreScrollAnchor = vi.fn(); destroyed = false;
     getContent() { return 'edited'; }
+    relocate(path: string, move: () => Promise<void>) { this.filePath = path; return move(); }
     async save() {
       if (!this.filePath) { this.opts.onSaveAsNeeded('edited'); return true; }
       const { textSave } = await import('../src/common/ipc');
