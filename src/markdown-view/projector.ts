@@ -394,11 +394,11 @@ export function projectViewport(
   });
   decorate(tree.topNode);
   // ── REQ-014 P3/P6：块间距 CSS 承载（原 layout.ts/spacing.ts 的 JS px 模型删除）──
-  // 空行区间折叠为令牌间距：首空行 padding-top = calc(前块 after + 后块 before)，其余空行高 0；
-  // 紧邻块对（无空行，如列表项）改为独立块挂件承载（元素 rect 顶 = 文本顶，与预览 margin 语义
-  // 对齐——padding 落在后块行内会把间隙算进该块 rect，真机一致性门按元素顶比对会系统性偏小）；
-  // 文档尾部预留末块 after + block-gap；列表项对用 --md-list-gap（旧 layout.ts 父容器口径）。
-  // 令牌求和全部发生在 CSS calc，JS 只选令牌名（与渲染预览 .md-col 同一套令牌）。
+  // 视觉总量 = 令牌间距（与渲染预览 .md-col 同一套令牌），但分配方式保证「挂载区高度 ==
+  // CM 卸载区行数估计」：空行保持全高（21.6px/行，CM 可按行数估计），间距差额由独立
+  // 块挂件 BlockGapWidget 承载（高度 = max(0, after+before−空行高×行数)）——修前空行折叠
+  // 使挂载区短于 CM 估计，停稳/跨形态滚动两门禁分别以 3px/372 行漂移实证此失配。
+  // 紧邻块对（无空行）与文档尾部预留同挂件承载；列表项对 --md-list-gap（旧口径）。
   const gapEdgeToken = (nodeName: string | null, edge: 'before' | 'after'): string => {
     if (!nodeName) return '';
     const heading = /^(?:ATX|Setext)Heading([1-6])$/.exec(nodeName);
@@ -408,6 +408,7 @@ export function projectViewport(
   };
   const GAP_MARKERS2 = new Set(['QuoteMark', 'ListMark']);
   const GAP_CONTAINERS2 = new Set(['Document', 'Blockquote', 'BulletList', 'OrderedList', 'ListItem']);
+  const LINE_H = 'var(--md-fs-base) * 1.6'; // 空行全高（与 CM 行高估计同基）
   const gapLines = (start: number, end: number, prev: SyntaxNode | null, next: SyntaxNode | null, tail: boolean, parentName = 'Document'): void => {
     const adjacent = end < start;
     const listPair = adjacent && !tail && (parentName === 'BulletList' || parentName === 'OrderedList');
@@ -422,18 +423,24 @@ export function projectViewport(
       out.push(Decoration.widget({ block: true, side: -1, widget: new BlockGapWidget(height) }).range(doc.lineAt(next.from).from));
       return;
     }
-    const style = `--mdir-gap-after:${afterVar ? `var(${afterVar})` : '0px'};--mdir-gap-before:var(${beforeVar})`;
+    // 空行区间：数出真空行数 N；空行保持全高（仅活动态样式类），差额 = after+before−N×行高
+    // 由一个 BlockGapWidget 承载（置于区间首空行前，side -1）。空行多于令牌间隙时差额为 0
+    // （多空行不再额外折叠——与预览的多空行观感差异可接受，换取高度全链路可估计）。
     const lo = doc.lineAt(from).number, hi = doc.lineAt(to).number;
-    let allocated = false;
+    let blanks = 0, firstBlank = -1;
     for (let n = Math.max(start, lo); n <= Math.min(end, hi); n++) {
       const line = doc.line(n);
       if (!/^[\t >]*$/.test(line.text)) continue;
+      if (firstBlank < 0) firstBlank = line.from;
+      blanks++;
       out.push(Decoration.line({
         class: 'mdir-gap' + (blockActive(line.from, line.to) ? ' mdir-gap-active' : ''),
-        ...(allocated ? {} : { attributes: { style } }),
       }).range(line.from));
-      allocated = true; // 间距只分配一次，避免多个空行各自取整后累积亚像素偏差。
     }
+    if (!blanks) return;
+    const total = `calc(${afterVar ? `var(${afterVar}) + ` : ''}var(${beforeVar}))`;
+    out.push(Decoration.widget({ block: true, side: -1,
+      widget: new BlockGapWidget(`max(0px, calc(${total} - ${LINE_H} * ${blanks}))`) }).range(firstBlank));
   };
   const walkGaps = (parent: SyntaxNode): void => {
     if (!GAP_CONTAINERS2.has(parent.name) || parent.from > to || parent.to < from) return;
@@ -461,7 +468,8 @@ export function projectViewport(
   return Decoration.set(out, true);
 }
 
-/** 紧邻块对间隙挂件：独立块元素承载高度（元素 rect 顶 = 文本顶，与预览 margin 语义对齐）。 */
+/** 紧邻块对/空行差额间隙挂件：独立块元素承载高度（元素 rect 顶 = 文本顶，与预览 margin 语义对齐）。
+ *  估计：令牌和 − 空行高×行数（max 0）——从 height 串解析行数与令牌。 */
 class BlockGapWidget extends WidgetType {
   constructor(private height: string) { super(); }
   eq(other: BlockGapWidget): boolean { return other.height === this.height; }
@@ -470,9 +478,10 @@ class BlockGapWidget extends WidgetType {
       '--md-h1-before': 2.475, '--md-h1-after': 1.2375, '--md-h2-before': 1.925, '--md-h2-after': 0.9625,
       '--md-h3-before': 1.65, '--md-h3-after': 0.825, '--md-h4-before': 0.8, '--md-h4-after': 0.55,
       '--md-h5-before': 0.8, '--md-h5-after': 0.55, '--md-h6-before': 0.8, '--md-h6-after': 0.55 };
-    let total = 0;
-    for (const token of this.height.match(/--md-[\w-]+/g) ?? []) total += mults[token] ?? 0;
-    return total * 13.5;
+    let ems = 0;
+    for (const token of this.height.match(/--md-[\w-]+/g) ?? []) ems += mults[token] ?? 0;
+    const blanks = Number(/\* (\d+)/.exec(this.height)?.[1] ?? 0); // 「×空行数」出现在差额式中
+    return Math.max(0, (ems - 1.6 * blanks) * 13.5);
   }
   toDOM(): HTMLElement {
     const el = document.createElement('div');
