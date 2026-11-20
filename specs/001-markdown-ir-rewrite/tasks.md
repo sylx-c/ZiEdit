@@ -160,7 +160,7 @@ description: "Task list for feature implementation"
 - [x] T031 删除 live-deco 适配壳与 blockLayout 旧计数器（AC-36 门禁与 REQ-014 探针所依赖的 ir-perf 核心保留——原生门禁读 __ZIEDIT_IR_PERF_DATA__，全删会破坏验收仪器，此为有据偏离），清理无调用者引用；geometry-refresh/ir-cache/ir-layout 测试已于 P1/P3 在册删除
 - [x] T032 行数核验：IR 簇（`live-*` / `writing` / `table*` / `layout` / `spacing` 分类生产代码，口径见 research.md §3）实测 **2,605 行 ≤ 3,000**（基线 4,665，净减 44%）
 - [ ] T032 行数核验：IR 簇（`live-*` / `writing` / `table*` / `layout` / `spacing` 分类生产代码，口径见 research.md §3）≤3,000 行（基线 4,665）
-- [ ] T033 全量门禁：标准提交前门禁全绿；独立 `ZIEDIT_GATE_RUN_DIR` 下执行 `node tests/gates/prepare-gate-build.mjs --build`、`node tests/gates/run-all.mjs` 默认完整集，并重跑未纳入默认集的本 Feature 阶段门禁（gate-ir-settle / gate-md-consistency / gate-scroll-position / gate-md-editing）
+- [ ] T033 全量门禁：标准提交前门禁全绿 ✅；gate-md-structure ✅ / gate-md-consistency ✅（修复三项后 4/4）/ gate-md-editing ✅（7/7，量具迁移至 contenteditable 模型）；计时类门禁（ir-settle/scroll-position/ac36/run-all/md-surfaces wheel 项）因远程 32Hz 虚拟屏活跃判**环境无效**（md-surfaces 三模式齐挂含未改动预览面、帧节律 31.6ms 特征），待 60Hz 物理控制台复验
 - [ ] T034 按 `specs/001-markdown-ir-rewrite/quickstart.md` 全部手动验证场景执行并记录结果
 - [x] T035 更新 `docs/CHANGELOG.md` 未发布节（面向使用者口径，不写内部术语）；收尾汇报 MUST 提醒所有者同步其本地维护的需求与架构资料，但不自动修改这些资料
 
