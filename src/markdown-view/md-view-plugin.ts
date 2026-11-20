@@ -283,8 +283,14 @@ function updateProjection(prev: ProjectionState, tr: Transaction): ProjectionSta
       };
       if (deferred) {
         const edge = edges[0];
-        return { ...mapped, inline: keptInline, block: block.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo }), pending: edge
-          ? { next: edge.from, end: edge.to, token: {}, remaining: edges.slice(1), budgeted: true } : undefined };
+        // 核心区（视口±2 行）行内同步交付：空行折叠/标题沟槽等行内装饰若走预算分片晚到，
+        // 停稳跟踪窗内逐片落地会推移参考点（E1 残差 3.0px 实证）；核心构建 ~30 行成本有界。
+        const coreFrom = tr.newDoc.lineAt(Math.max(0, Math.min(tr.newDoc.length, from - 2))).from;
+        const coreTo = tr.newDoc.lineAt(Math.min(tr.newDoc.length, to + 2)).to;
+        return { ...mapped,
+          inline: mergeInlineWindow(keptInline, buildInline(tr.state, coreFrom, coreTo), coreFrom, coreTo, tr.newDoc.length),
+          block: block.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo }), pending: edge
+            ? { next: edge.from, end: edge.to, token: {}, remaining: edges.slice(1), budgeted: true } : undefined };
       }
       let nextBlock = block.update({ filter: (f, t) => t >= sliceFrom && f <= sliceTo });
       for (const edge of edges) {
