@@ -13,7 +13,7 @@
 //   纯滚动 → 对新进视口区间增量投影，不动已挂载装饰（scrollReplaceCount=0 的机制基础）。
 import { EditorView, ViewPlugin, Decoration, WidgetType, type DecorationSet, type ViewUpdate } from '@codemirror/view';
 import { StateEffect, StateField, type EditorState, type Extension, type Range, type Transaction, type Text } from '@codemirror/state';
-import { syntaxTree, syntaxTreeAvailable } from '@codemirror/language';
+import { syntaxTree, syntaxTreeAvailable, ensureSyntaxTree } from '@codemirror/language';
 import { compositionActive } from '../common/composition';
 import { notifyCmRestoreLayout } from '../common/scroll-anchor';
 import { trackUserScroll, userScrolledRecently, clearUserScroll } from '../common/user-scroll';
@@ -554,6 +554,11 @@ export const mdViewOrchestrator = ViewPlugin.fromClass(
         this.geometryDirty = false;
         this.settleDirty = false;
         if (complete || previous.from !== from || previous.to !== to || !!previous.deferred !== this.scrolling) {
+          // REQ-014 P6：程序跳转/停稳补齐前预算内预解析——跳到未解析区时装饰重建等树推进，
+          // 物化迟到落在参考窗内（E3 跳尾部 45px 实证）；此处同步推树（≤120ms 预算），
+          // 重建与物化随同帧落地。
+          if (complete && !syntaxTreeAvailable(view.state, Math.min(view.state.doc.length, to + VIEWPORT_MARGIN)))
+            ensureSyntaxTree(view.state, Math.min(view.state.doc.length, to + VIEWPORT_MARGIN), 120);
           view.dispatch({ effects: complete
             ? [liveViewport.of({ from, to, scrolling: false }), liveGeometryChanged.of(null)]
             : liveViewport.of({ from, to, scrolling: this.scrolling }) });
