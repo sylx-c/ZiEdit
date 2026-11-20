@@ -554,10 +554,12 @@ export const mdViewOrchestrator = ViewPlugin.fromClass(
         this.geometryDirty = false;
         this.settleDirty = false;
         if (complete || previous.from !== from || previous.to !== to || !!previous.deferred !== this.scrolling) {
-          // REQ-014 P6：程序跳转/停稳补齐前预算内预解析——跳到未解析区时装饰重建等树推进，
-          // 物化迟到落在参考窗内（E3 跳尾部 45px 实证）；此处同步推树（≤120ms 预算），
-          // 重建与物化随同帧落地。
-          if (complete && !syntaxTreeAvailable(view.state, Math.min(view.state.doc.length, to + VIEWPORT_MARGIN)))
+          // REQ-014 P6：程序跳转前预算内预解析——跳到未解析区时装饰重建等树推进，
+          // 物化迟到落在参考窗内（E3 跳尾部 45px 实证）；仅 geometryChanged（程序跳转/
+          // 尺寸变更）触发——停稳补齐（settleDirty）不预解析，否则滚动扫掠的每次间歇
+          // 都推树 120ms（dense-2m 实测 76 个 >100ms 长任务）。
+          if (complete && geometryChanged
+            && !syntaxTreeAvailable(view.state, Math.min(view.state.doc.length, to + VIEWPORT_MARGIN)))
             ensureSyntaxTree(view.state, Math.min(view.state.doc.length, to + VIEWPORT_MARGIN), 120);
           view.dispatch({ effects: complete
             ? [liveViewport.of({ from, to, scrolling: false }), liveGeometryChanged.of(null)]
