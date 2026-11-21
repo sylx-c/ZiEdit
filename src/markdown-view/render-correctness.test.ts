@@ -55,6 +55,12 @@ const CORPUS: ReadonlyArray<{ name: string; src: string }> = [
   { name: '转义与实体', src: '\\*不是斜体\\* &amp; <https://example.com>\n' },
   { name: 'Tab 缩进代码块', src: '\t缩进代码行\n\n正文段落\n' },
   { name: '货币符号不误判公式', src: '$5 and $10\n\nprice $5.99\n' },
+  // —— REQ-014 P0 行为基准五语料（与 docs/tmp/ir-rewrite-baselines/corpus/ 截图语料同口径）——
+  { name: 'REQ-014①：GFM 表格含粗体与行内码（含转义竖线）', src: '| 功能 | 键 | 说明 |\n| --- | :-- | --- |\n| **加粗** | `Ctrl+B` | 切换 |\n| *斜体* | ~~删除~~ | 转义 ``a\\|b`` |\n\n表后正文段落。\n' },
+  { name: 'REQ-014②：真 ATX 标题 1–6 级', src: '# 一\n\n## 二\n\n### 三\n\n#### 四\n\n##### 五\n\n###### 六\n\n标题后正文。\n' },
+  { name: 'REQ-014③：围栏内的假标题不解析为标题', src: '# 真标题\n\n```\n# 假一\n## 假二\n```\n\n围栏后正文。\n' },
+  { name: 'REQ-014④：下划线行 === 与 --- 均为段落加分隔线', src: '正文甲\n==========\n\n正文乙\n----------\n\n结尾段落。\n' },
+  { name: 'REQ-014⑤：嵌套列表与引用', src: '- 一\n  - 二\n    - 三\n\n1. 甲\n2. 乙\n   1. 嵌套\n\n> 引用一\n> > 引用二\n' },
 ];
 
 const EOL_VARIANTS: ReadonlyArray<{ name: string; text: (src: string) => string }> = [

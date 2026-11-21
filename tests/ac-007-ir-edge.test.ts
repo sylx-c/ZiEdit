@@ -154,11 +154,13 @@ describe('M3 边角回归走查', () => {
 });
 
 describe('AC-26 规则 22 结构代理（装饰仅构建可视区间；毫秒门禁留真机）', () => {
-  it('源契约：装饰窗按 view.viewport ± VIEWPORT_MARGIN 截取', () => {
-    const lp = readFileSync(resolve(__dirname, '../src/markdown-view/livepreview.ts'), 'utf8');
-    expect(lp).toContain('VIEWPORT_MARGIN');
-    expect(lp).toMatch(/view\.viewport\.from - VIEWPORT_MARGIN/);
-    expect(lp).toMatch(/view\.viewport\.to \+ VIEWPORT_MARGIN/);
+  it('源契约：装饰窗按视口 ± VIEWPORT_MARGIN 截取（REQ-014 P1 起窗口数学位于统一编排引擎）', () => {
+    const engine = readFileSync(resolve(__dirname, '../src/markdown-view/md-view-plugin.ts'), 'utf8');
+    expect(engine).toContain('VIEWPORT_MARGIN');
+    expect(engine).toMatch(/from - VIEWPORT_MARGIN/);
+    expect(engine).toMatch(/to \+ VIEWPORT_MARGIN/);
+    // 编排插件仍以真实 view.viewport 为界报告（不缓存过期视口）。
+    expect(engine).toMatch(/view\.viewport/);
   });
 
   it('大文档（1500 块）：挂载后 DOM 行数有界（视口承载，非整篇入 DOM）', async () => {

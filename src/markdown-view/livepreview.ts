@@ -17,22 +17,15 @@ import type { MarkdownDocumentClient } from './document-client';
 // live-block-field.ts；表格交互与查找替换纯函数在 live-table-actions.ts；统计/大纲上报机构在
 // live-reporter.ts。本文件保留补全源、LiveStatus/Opts 与 LivePreviewView 类；对外 export 面
 // 完全不变（app.ts 等调用方 import 路径零变化）。
-import { BlockHeightCache, blockHeightCache } from './block-height-cache';
 import {
   EditorView,
   keymap,
   drawSelection,
-  ViewPlugin,
-  Decoration,
-  type DecorationSet,
-  type ViewUpdate,
-  type WidgetType,
 } from '@codemirror/view';
 import { bufferHistory, ReadOnlyControl, restoreBufferScroll, type EditorBuffer } from '../common/editor-buffer';
-import { cancelCmRestore, cmCaptureAnchor, cmRestoreAnchor, cmScrollToLine, cmVisibleLines, type ScrollAnchor } from '../common/scroll-anchor';
-import { userScrolledRecently } from '../common/user-scroll';
-import { compositionActive, compositionGuard, isComposing } from '../common/composition';
-import { EditorState, StateEffect, type Range } from '@codemirror/state';
+import { cancelCmRestore, cmCaptureAnchor, cmRestoreAnchor, cmScrollToLine, cmTopLine, cmVisibleLines, type ScrollAnchor } from '../common/scroll-anchor';
+import { compositionGuard, isComposing } from '../common/composition';
+import { EditorState } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap, undo, redo, selectAll } from '@codemirror/commands';
 import { syntaxTree, syntaxHighlighting } from '@codemirror/language';
 import { classHighlighter } from '@lezer/highlight';
@@ -45,8 +38,6 @@ import { readClipboardText, writeClipboardText } from '../common/clipboard';
 import { t, tf } from '../common/i18n';
 import { FindBar } from '../text-view/findbar';
 import { runMdFormat, editMarkdownLink, MD_INLINE_COMMANDS, MD_BLOCK_COMMANDS, type MdFormatCmd } from './mdformat';
-import { destroyCellEditor } from './table-editor';
-import { tableRowNumber } from './table-viewport';
 import { markdownWriting, markdownIndent, codeIndent, inlineFormatChanged, inlineFormatField, inlineFormatMarks, inlineFormatOpen, inlineFormatClose, type InlineFormat } from './writing';
 import { trackImageTarget } from './imagehost';
 import { snapshotDocument } from '../common/snapshot';
@@ -54,21 +45,15 @@ import { startParseWarmup } from '../common/parse-warmup';
 import { loadUnicodeEmojis, CODE_HINT_LANGS, decodeLocalRef, isExternalHref, routeLinkHref, type HeadingItem } from './preview';
 import { loadMarkdownIt } from './md';
 import { codeHighlight } from './code-highlight';
-import { irPerfEnabled, irPerfProbe, recordLiveDeco } from './ir-perf';
-import { VIEWPORT_MARGIN, imageContext, emojiField, emojisReady, mdTouchedField, referenceField, referenceUrls, referenceLabel, linkUrlOfNode, currentPosition } from './live-state';
-import { buildLiveDeco } from './live-deco';
-import { liveBlockField, liveAnchorReady, liveGeometryChanged, viewportReporter, findHighlighter, findQueryChanged, type LiveFindQuery } from './live-block-field';
+import { irPerfProbe } from './ir-perf';
+import { imageContext, emojiField, emojisReady, mdTouchedField, referenceField, referenceUrls, referenceLabel, linkUrlOfNode, currentPosition } from './live-state';
+import { mdViewEngine, liveAnchorReady, findHighlighter, findQueryChanged, type LiveFindQuery } from './md-view-plugin';
 import { tableTabNav, tableMenuItems, fbRun, fbReplaceNext, fbReplaceAll } from './live-table-actions';
 import { LiveDocTracker } from './live-reporter';
-import { clipWindows, missingWindows, decorationSliceEnd, type DecoWindow } from './deco-window';
-import { paragraphTypingWindow } from './typing-window';
-import { TextWidget } from './live-widgets';
-import { requestIrFrame, cancelIrFrame, measureAfterRender } from './frame-work';
+import { requestIrFrame, cancelIrFrame } from './frame-work';
 import { blockInteractions } from './block-interactions';
-import { dispatchIrLayout } from './ir-layout';
 
-// 对外面零变化：buildLiveDeco/referenceField 原由本文件导出，拆分后经转发保持 import 路径不变。
-export { buildLiveDeco } from './live-deco';
+// 对外面零变化：referenceField 原由本文件导出，拆分后经转发保持 import 路径不变。
 export { referenceField } from './live-state';
 
 // ── 常量 ──
@@ -203,7 +188,7 @@ export class LivePreviewView {
   get isReadOnly(): boolean { return this.readOnlyControl.enabled; }
   setReadOnly(on: boolean): void {
     this.readOnlyControl.set(this.view, on);
-    if (on) for (const box of this.host.querySelectorAll<HTMLElement>('.mdir-tablebox')) destroyCellEditor(box);
+    // P5：活动格由编排插件在只读事务后统一关闭（closeAllTableEdits），此处无需逐 box 处理。
   }
   private dirty = false;
   private saveQueue: Promise<void> = Promise.resolve();
@@ -264,6 +249,18 @@ export class LivePreviewView {
     this.tracker.prime(this.view);
     void loadUnicodeEmojis().then(map => { if (!this.destroyed) this.view.dispatch({ effects: emojisReady.of(map) }); });
     restoreBufferScroll(this.view, this.opts.buffer, 'ir', { ready: liveAnchorReady });
+    // REQ-014 P6：挂载期装饰分片交付使高度图/DOM 短暂失同步，跨形态首次恢复可落错且
+    // cmRestoreAnchor 内循环在真机停摆（jsdom 复现不了；基线对照实测漂移 372 行）。
+    // 挂载后按稳定布局复核一次：漂移超一行即整体重恢复（二次恢复作用于已稳定高度图）。
+    const mountAnchor = this.opts.buffer?.anchor;
+    if (mountAnchor) setTimeout(() => {
+      if (this.destroyed || !this.view) return;
+      try {
+        if (Math.abs(cmTopLine(this.view) - mountAnchor.line) > 1) {
+          restoreBufferScroll(this.view, this.opts.buffer, 'ir', { ready: liveAnchorReady });
+        }
+      } catch { /* 布局暂不可读：放弃复核，保持首次恢复位置 */ }
+    }, 600);
     this.stopParseWarmup = startParseWarmup(this.view, () => !this.destroyed);
     this.revealWhenReady();
     this.opts.onReady?.({
@@ -318,125 +315,6 @@ export class LivePreviewView {
     const remoteResolve = this.opts.remoteImages
       ? (url: string) => this.opts.remoteImages!(url)
       : undefined;
-    const decoSlice = StateEffect.define<null>();
-    const liveDeco = ViewPlugin.fromClass(
-      class {
-        decorations: DecorationSet;
-        private frame = 0;
-        private next = 0;
-        private end = 0;
-        private covered: DecoWindow[] = [];
-        private pending: DecoWindow[] = [];
-        private budgeted = false;
-        private complete = false;
-        constructor(v: EditorView) { this.decorations = Decoration.none; this.rebuild(v); }
-        private cancelFrame(): void {
-          cancelIrFrame(this.frame);
-          this.frame = 0;
-        }
-        destroy(): void { this.cancelFrame(); }
-        private rebuild(view: EditorView, scrolling = false, deferred = scrolling, complete = false): void {
-          this.cancelFrame();
-          this.budgeted = deferred;
-          this.complete = complete;
-          const from = view.state.doc.lineAt(Math.max(0, view.viewport.from - VIEWPORT_MARGIN)).from;
-          this.end = view.state.doc.lineAt(Math.min(view.state.doc.length, view.viewport.to + VIEWPORT_MARGIN)).to;
-          const target = { from, to: this.end };
-          this.covered = scrolling ? clipWindows(target, this.covered) : [];
-          this.decorations = (scrolling || deferred) ? this.decorations.update({ filter: f => f >= from && (f < this.end || this.end === view.state.doc.length) }) : Decoration.none;
-          this.pending = missingWindows(target, this.covered);
-          if (this.pending.length) {
-            this.next = this.pending[0]!.from;
-            if (deferred) {
-              this.frame = requestIrFrame(() => { this.frame = 0; if (!isComposing(view)) { dispatchIrLayout(view, decoSlice.of(null)); measureAfterRender(view, () => view.lineBlockAtHeight(0)); } }, false, view);
-            }
-            else this.appendSlice(view);
-          }
-        }
-        private appendSlice(v: EditorView): void {
-          if (!this.pending.length) return;
-          const from = this.next;
-          const end = this.pending[0]!.to;
-          // 小文档不改既有同步行为；大文档每帧最多构建一小片。
-          const to = this.complete || (!this.budgeted && v.state.doc.length < 256 * 1024) ? end
-            : decorationSliceEnd(v.state.doc, from, end, this.budgeted ? 256 : 2048);
-          if (irPerfEnabled()) recordLiveDeco(from, to);
-          const built = buildLiveDeco(v, baseDir, remoteResolve, { from, to });
-          const add: Range<Decoration>[] = [];
-          for (let c = built.iter(); c.value; c.next()) {
-            if (c.from >= from && (c.from < to || (to === v.state.doc.length && c.from === to))) add.push(c.value.range(c.from, c.to));
-          }
-          // 未完成窗口保留旧装饰；当前片提交时替换该窗口，不能把新装饰叠加在旧装饰上。
-          this.decorations = this.decorations.update({
-            filter: f => f < from || (f >= to && !(to === v.state.doc.length && f === to)), add, sort: true,
-          });
-          this.next = to;
-          this.covered = clipWindows({ from: 0, to: v.state.doc.length }, [...this.covered, { from, to }]);
-          if (to === end) { this.pending.shift(); if (this.pending.length) this.next = this.pending[0]!.from; }
-          if (this.pending.length) {
-            const next = () => {
-              this.frame = 0;
-              if (!isComposing(v)) { dispatchIrLayout(v, decoSlice.of(null)); measureAfterRender(v, () => v.lineBlockAtHeight(0)); }
-            };
-            this.frame = requestIrFrame(next, false, v);
-          }
-        }
-        update(u: ViewUpdate): void {
-          if (u.docChanged || u.geometryChanged) u.view.scrollDOM.dispatchEvent(new Event('md-layout'));
-          if (isComposing(u.view)) { this.decorations = this.decorations.map(u.changes); return; }
-          if (u.transactions.some(tr => tr.effects.some(effect => effect.is(liveGeometryChanged)))) {
-            this.rebuild(u.view, false, true);
-            return;
-          }
-          const typing = u.docChanged && !this.pending.length
-            && u.startState.field(referenceField).inlineKey === u.state.field(referenceField).inlineKey
-            && u.startState.field(inlineFormatField) === u.state.field(inlineFormatField)
-            && u.startState.field(emojiField) === u.state.field(emojiField)
-            && u.startState.field(compositionActive) === u.state.field(compositionActive)
-            ? paragraphTypingWindow(u.startState, u.state, u.changes) : null;
-          if (typing) {
-            // 带源码坐标/文档快照的 widget 不能仅靠 RangeSet.map 更新内部位置。
-            // 此类视口保留原重建路径；纯标记与无坐标 TextWidget 可安全复用。
-            let reusable = true;
-            for (let c = this.decorations.iter(); c.value; c.next()) {
-              const widget = c.value.spec.widget;
-              if (widget && !(widget instanceof TextWidget)) { reusable = false; break; }
-            }
-            if (reusable) {
-              const mapped = this.decorations.map(u.changes);
-              this.decorations = mapped.update({ filter: (f, t) => t < typing.from || f > typing.to });
-              this.covered = this.covered.map(range => ({ from: u.changes.mapPos(range.from, -1), to: u.changes.mapPos(range.to, 1) }));
-              this.covered = this.covered.flatMap(range => [
-                { from: range.from, to: Math.min(range.to, typing.from) },
-                { from: Math.max(range.from, typing.to), to: range.to },
-              ].filter(part => part.from < part.to));
-              this.rebuild(u.view, true, false);
-              return;
-            }
-          }
-          if (u.docChanged || u.viewportChanged || u.selectionSet
-            || u.startState.field(compositionActive) !== u.state.field(compositionActive)
-            || syntaxTree(u.startState) !== syntaxTree(u.state)
-            || u.startState.field(referenceField) !== u.state.field(referenceField)
-            || u.startState.field(inlineFormatField) !== u.state.field(inlineFormatField)
-            || u.startState.field(emojiField) !== u.state.field(emojiField)
-            || u.startState.field(mdTouchedField, false) !== u.state.field(mdTouchedField, false)) {
-            // 视口变化只有在用户滚动时才走滚动分片（程序跳转/滚动锚补偿直接完整重建，不闪源码）
-            const scrolling = u.viewportChanged && !u.docChanged && !u.selectionSet && userScrolledRecently(u.view.scrollDOM)
-              && u.startState.field(compositionActive) === u.state.field(compositionActive)
-              && syntaxTree(u.startState) === syntaxTree(u.state)
-              && u.startState.field(referenceField) === u.state.field(referenceField)
-              && u.startState.field(inlineFormatField) === u.state.field(inlineFormatField)
-              && u.startState.field(emojiField) === u.state.field(emojiField)
-              && u.startState.field(mdTouchedField, false) === u.state.field(mdTouchedField, false);
-            this.rebuild(u.view, scrolling, scrolling || (!u.docChanged && !u.selectionSet));
-          } else if (u.transactions.some(tr => tr.effects.some(e => e.is(decoSlice)))) {
-            this.appendSlice(u.view);
-          }
-        }
-      },
-      { decorations: v => v.decorations }
-    );
 
     this.view = new EditorView({
       parent: this.host,
@@ -445,7 +323,6 @@ export class LivePreviewView {
         selection: this.opts.buffer?.state.selection,
         extensions: [
           irPerfProbe(),
-          blockHeightCache.of(new BlockHeightCache()),
           drawSelection(),
           // CM6 baseTheme 聚焦选区为 6 类选择器 #d7d4f0，应用侧单类 var(--selection) 在顺序与特异性
           // 双重必输——用户主题挂载序在 baseTheme 后，配合 !important 定向夺回（007 v0.39 选区可见性）
@@ -470,10 +347,7 @@ export class LivePreviewView {
           syntaxHighlighting(classHighlighter),
           codeHighlight([]),
           autocompletion({ override: [codeLangCompletion, emojiCompletion] }),
-          liveBlockField, // 块级件（表格/分隔线）：StateField 承载（CM6 约束）
-          EditorView.atomicRanges.of(view => view.state.field(liveBlockField).set.update({ filter: (_from, _to, value) => !!(value.spec.fence || value.spec.blockAtomic || (value as unknown as { widget?: WidgetType & { fence?: boolean } }).widget?.fence) })),
-          viewportReporter, // 视口界报给 liveBlockField（构造即报，滚动随报）
-          liveDeco,
+          mdViewEngine(), // 统一编排引擎：行内/块级/间距装饰 + 原子域 + 视口报告（REQ-014 P1）
           findHighlighter(() => this.findQuery),
           keymap.of([
             // 块边界命令优先于默认方向键与全文选择。
@@ -612,7 +486,7 @@ export class LivePreviewView {
         const tr = cell.closest('tr');
         const table = cell.closest('table');
         if (tr && table) {
-          const domRow = tableRowNumber(cell);
+          const domRow = Number(cell.dataset.mdRow ?? (cell.parentElement as HTMLTableRowElement | null)?.rowIndex ?? 0);
           if (domRow >= 0) items.unshift(tableMenuItems(this.view, this.host, this.isReadOnly, domRow, cell.cellIndex, Number(cell.closest<HTMLElement>('.mdir-tablebox')!.dataset.mdTableFrom))[0]!);
         }
       } else {

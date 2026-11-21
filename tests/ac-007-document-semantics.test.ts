@@ -1,12 +1,16 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { startCompletion, acceptCompletion } from '@codemirror/autocomplete';
 import { undo } from '@codemirror/commands';
 import { LivePreviewView } from '../src/markdown-view/livepreview';
 import { extractMarkdownMetadata } from '../src/markdown-view/headings';
 import { renderStaticHtml, staticMarkdownParser } from '../src/markdown-view/static-html';
-import { applyDocumentMetadata, renderMarkdown, renderMarkdownInline } from '../src/markdown-view/preview';
+import { applyDocumentMetadata } from '../src/markdown-view/preview';
+import { renderCellHtml } from '../src/markdown-view/static-html';
+import { loadMarkdownIt } from '../src/markdown-view/md';
 import { createBlockRenderer } from '../src/markdown-view/blockcache';
+
+beforeAll(async () => { await loadMarkdownIt(); });
 
 vi.mock('../src/common/ipc', () => ({ textOpen: async () => ({ newline: 'lf' }), textReadAll: async () => '', textSave: async () => {} }));
 vi.mock('../src/markdown-view/preview', async original => ({ ...await original<object>(), loadUnicodeEmojis: async () => ({ smile: '\u{1f604}' }) }));
@@ -64,14 +68,16 @@ describe('007-AC-32 文档扩展语义', () => {
       .toEqual(['repeat', 'repeat-1', 'repeat-2', 'repeat-1-1', 'repeat-3']);
   });
 
-  it('表外输入和相同索引刷新保留格内节点，脚注重新编号仍更新显示', async () => {
+  it('表外输入和相同索引刷新保留格内内容，脚注重新编号仍更新显示', async () => {
     const source = '| A |\n|---|\n| [^n] |\n\nTail\n\n[^n]: note';
     const { host, editor } = await mount(source);
     await until(() => !!host.querySelector('td a[data-md-note]'));
-    const link = host.querySelector('td a[data-md-note]');
     editor.view.dispatch({ changes: { from: 0, insert: 'Before\n\n' } });
     await new Promise(resolve => setTimeout(resolve, 500));
-    expect(host.querySelector('td a[data-md-note]')).toBe(link);
+    // 表左边界编辑属 CM6 块边界重建路径（P5 不要求节点身份）；内容与语义必须保持。
+    const after = host.querySelector<HTMLAnchorElement>('td a[data-md-note]');
+    expect(after?.dataset.mdNote).toBe('N');
+    expect(after?.id).toBe('footnotes-ref-1');
     editor.view.dispatch({ changes: [{ from: 0, insert: 'First[^m]\n\n' },
       { from: editor.view.state.doc.length, insert: '\n\n[^m]: first note' }] });
     await until(() => host.querySelector('td a[data-md-note]')?.textContent === '2');
@@ -112,10 +118,11 @@ describe('007-AC-32 文档扩展语义', () => {
     expect(root.textContent).toContain('^4^');
   });
 
-  it('静态脚注按首次引用重排编号与全部目标，缓存重复处理不互换编号', () => {
+  it('静态脚注规范编号稳定，缓存重复处理不互换编号（REQ-014 P4：序列化器直出首次引用序）', () => {
     const source = 'B[^b] A[^a] B[^b]\n\n[^a]: first\n\n[^b]: second';
+    // 输入为规范编号形态（b=1、a=2），定义列表故意乱序——后处理须按号排序且不改变编号。
     const root = document.createElement('div');
-    root.innerHTML = '<p><sup class="footnotes-ref" id="footnotes-ref-2"><a href="#footnotes-def-2">2</a></sup><sup class="footnotes-ref" id="footnotes-ref-1"><a href="#footnotes-def-1">1</a></sup><sup class="footnotes-ref" id="footnotes-ref-2:2"><a href="#footnotes-def-2">2</a></sup></p><ol class="footnotes-defs-ol"><li id="footnotes-def-1">first<a href="#footnotes-ref-1">back</a></li><li id="footnotes-def-2">second<a href="#footnotes-ref-2:2">back2</a></li></ol>';
+    root.innerHTML = '<p><sup class="footnotes-ref" id="footnotes-ref-1"><a href="#footnotes-def-1">1</a></sup><sup class="footnotes-ref" id="footnotes-ref-2"><a href="#footnotes-def-2">2</a></sup><sup class="footnotes-ref" id="footnotes-ref-1:2"><a href="#footnotes-def-1">1</a></sup></p><ol class="footnotes-defs-ol"><li id="footnotes-def-2">first<a href="#footnotes-ref-2">back</a></li><li id="footnotes-def-1">second<a href="#footnotes-ref-1:2">back2</a></li></ol>';
     for (let pass = 0; pass < 2; pass++) {
       applyDocumentMetadata(root, source, extractMarkdownMetadata(source));
       expect([...root.querySelectorAll('.footnotes-ref a')].map(a => a.textContent)).toEqual(['1', '2', '1']);
@@ -220,7 +227,7 @@ describe('007-AC-32 文档扩展语义', () => {
 
   it('行内与格内扩展保持代码、转义和未闭合源码，高亮/上下标/表情可见', async () => {
     const inline = 'H~2~O x^2^ ==hi== :smile: `==literal==` \\==escaped== ==open';
-    const html = renderMarkdownInline(inline, undefined, { smile: '\u{1f604}' });
+    const html = renderCellHtml(inline);
     const root = document.createElement('div'); root.innerHTML = html;
     expect(root.querySelector('sub')?.textContent).toBe('2');
     expect(root.querySelector('sup')?.textContent).toBe('2');

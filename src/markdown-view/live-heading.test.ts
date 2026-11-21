@@ -23,11 +23,11 @@ async function mount(doc: string): Promise<Mounted> {
   return { host, preview, dispose: () => { preview.destroy(); host.remove(); } };
 }
 
-/** 井号是否出现在可见 DOM（隐藏由 replace 装饰实现，隐藏时源码 # 不进 DOM）。 */
-const hashesVisible = (host: HTMLElement): boolean => /#{1,6}/.test(host.textContent ?? '');
+/** 标题留白栏是否显示井号（REQ-014 P2：井号常隐正文，活动态经 .mdir-marks-on 在留白栏显示）。 */
+const gutterMarksOn = (host: HTMLElement): boolean => !!host.querySelector('.cm-line.mdir-marks-on');
 
 async function settle(host: HTMLElement, expectVisible: boolean): Promise<void> {
-  await vi.waitFor(() => expect(hashesVisible(host)).toBe(expectVisible), { timeout: 2500 });
+  await vi.waitFor(() => expect(gutterMarksOn(host)).toBe(expectVisible), { timeout: 2500 });
 }
 
 it('光标放标题旁边（行尾贴边/行首/邻行/未交互）不展开井号', async () => {
@@ -51,7 +51,7 @@ it('光标放标题旁边（行尾贴边/行首/邻行/未交互）不展开井�
   } finally { dispose(); }
 });
 
-it('光标进入标题正文内部或选区相交时展开井号，离开后收起', async () => {
+it('光标进入标题正文内部或选区相交时留白栏显示井号，离开后收起（REQ-014 P2：正文范围恒定）', async () => {
   const { host, preview, dispose } = await mount(DOC);
   try {
     const doc = preview.view.state.doc;
@@ -80,5 +80,21 @@ it('正文 + 下划长划线渲染为段落 + 分隔线（不再升级标题）'
     expect(host.textContent).not.toContain('----');
     // 行内加粗仍正常投影：定界符不进 DOM。
     expect(host.textContent).not.toContain('**');
+  } finally { dispose(); }
+});
+
+// REQ-014 P0 覆盖审计补缺 + P2 机制迁移：仅含单一标题的文档挂载与投影正常，留白栏显隐切换。
+it('仅含单一标题的文档：挂载不抛、投影正常、留白栏标记切换', async () => {
+  const { host, preview, dispose } = await mount('# 仅标题\n');
+  try {
+    await vi.waitFor(() => expect(host.textContent).toContain('仅标题'), { timeout: 2500 });
+    const doc = preview.view.state.doc;
+    const heading = doc.line(1);
+    // 空光标置于标题正文内部：井号展开。
+    preview.view.dispatch({ selection: { anchor: heading.from + 2 }, userEvent: 'select.pointer' });
+    await settle(host, true);
+    // 离开到文末：井号收起。
+    preview.view.dispatch({ selection: { anchor: doc.length }, userEvent: 'select.pointer' });
+    await settle(host, false);
   } finally { dispose(); }
 });

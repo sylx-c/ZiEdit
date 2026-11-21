@@ -8,7 +8,8 @@ import { markUserScroll, trackUserScroll, userScrolledRecently } from '../src/co
 import { RenderWidget } from '../src/markdown-view/live-widgets';
 import { createRenderContext, rememberRenderHeight } from '../src/markdown-view/render-service';
 import { Minimap } from '../src/text-view/minimap';
-import { TABLE_ROW_ESTIMATE_PX } from '../src/markdown-view/layout';
+// P5：TABLE_ROW_ESTIMATE_PX 随 table-viewport 退役，行高初值契约由 table-widget 承载。
+import { TABLE_ROW_ESTIMATE_PX } from '../src/markdown-view/table-widget';
 
 afterEach(() => document.body.replaceChildren());
 

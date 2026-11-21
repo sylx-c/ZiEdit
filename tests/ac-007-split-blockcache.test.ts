@@ -292,7 +292,7 @@ describe('AC-28 块级缓存渲染（注入假渲染器）', () => {
     expect(h?.getAttribute('data-line')).toBe('2');
   });
 
-  it('主路径异常（注入渲染器抛错）→ 回退 markdown-it 整篇渲染', async () => {
+  it('主路径异常（注入渲染器抛错）→ 回退为源码可见 + 提示（REQ-014 P4：不再二次渲染）', async () => {
     const r = createBlockRenderer(async () => {
       throw new Error('boom');
     });
@@ -301,7 +301,8 @@ describe('AC-28 块级缓存渲染（注入假渲染器）', () => {
     await r.render(host, DOC, { dark: false }); // 仍 fallback（口径同 renderPreviewInto）
     const col = host.firstElementChild as HTMLElement;
     expect(col.className).toContain('md-fallback');
-    expect(col.querySelector('h1')?.textContent).toBe('题'); // markdown-it 输出
+    expect(col.dataset.fallbackNote).toBeTruthy(); // 明确提示（不静默）
+    expect(col.querySelector('pre.md-fallback-src')?.textContent).toContain('# 题'); // 源码可见
     expect(host.children.length).toBe(1); // 每轮旧 col 撤净
   });
 

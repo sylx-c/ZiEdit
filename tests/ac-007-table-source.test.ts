@@ -6,7 +6,7 @@ import { history, undo } from '@codemirror/commands';
 import { markdown } from '@codemirror/lang-markdown';
 import { GFM } from '@lezer/markdown';
 import { pasteTable, safeCell, tableModel, limitTablePaste, parseTablePaste, TABLE_PASTE_LIMIT } from '../src/markdown-view/table-model';
-import { cellRange } from '../src/markdown-view/table-editor';
+import { cellRange } from '../src/markdown-view/table-widget';
 
 it('同形状单行粘贴不改写其他行的原始空白', () => {
   const source = '|a| b  |\n|---|:---:|\n|c|d|\n| e  |f|';

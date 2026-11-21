@@ -12,8 +12,7 @@ import type { CtxMenuItem } from '../shell/chrome';
 import { buildNeedleRe, type FindRunResult } from '../text-view/findbar';
 import type { FindOptions } from '../common/ipc';
 import { runTableOperation, type TableOperation } from './table-model';
-import { destroyCellEditor } from './table-editor';
-import { resumeTableCaret, pipePositions, cellsBetween, type TableRowInfo } from './live-widgets';
+import { pipePositions, cellsBetween, type TableRowInfo } from './live-widgets';
 
 // ---- 表格交互与任务勾选（规则 23 M2 / AC-27） ----
 
@@ -126,11 +125,9 @@ function tableOp(
   tablePos: number
 ): void {
   if (readOnly || isComposing(view)) return;
-  const box = [...host.querySelectorAll<HTMLElement>('.mdir-tablebox')].find(el => Number(el.dataset.mdTableFrom) === tablePos);
-  if (box) destroyCellEditor(box);
+  void host; // P5：contenteditable 格由挂件自管理，无需外置编辑器销毁/光标恢复
   if (runTableOperation(view, tablePos, domRow, col, kind)) {
     view.focus();
-    if (box) resumeTableCaret(view, box);
   }
 }
 

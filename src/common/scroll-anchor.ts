@@ -92,7 +92,7 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
   cancelCmRestore(view);
   view.dispatch({ effects: cmRestoreEffect(view, anchor, surface) });
   if (anchor.surface === surface && anchor.snapshot) return;
-  const scroller = view.scrollDOM, doc = view.state.doc, selection = view.state.selection;
+  const scroller = view.scrollDOM, doc = view.state.doc;
   const inputVersion = userScrollVersion(scroller);
   let active = true, frame = 0, layoutVersion = 0;
   let quietTimer: ReturnType<typeof setTimeout> | undefined;
@@ -102,8 +102,25 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
     for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) scroller.removeEventListener(event, cancel);
     if (pendingRestores.get(view)?.cancel === cancel) pendingRestores.delete(view);
   };
+  // REQ-014 P6：selection 不参与存活判定——装饰交付期拉长了恢复存活期，切形态后的光标
+  // 恢复事务会改 selection 而不改行几何，旧守卫会把仍在等待的恢复静默取消（死锁在钳制位）。
+  // 文档变更/用户滚动/断连仍即时取消。
   const current = (): boolean => active && view.dom.isConnected && scroller.clientHeight > 0 && view.state.doc === doc
-    && view.state.selection === selection && userScrollVersion(scroller) === inputVersion;
+    && userScrollVersion(scroller) === inputVersion;
+  // REQ-014 P6：挂载态装饰（空行折叠/表格件）与 CM6 卸载区缺省行高估计不一致——视口裁剪后的
+  // 再估计可能晚于首次写入到达。写入后保留注册：晚到的布局通知（notifyCmRestoreLayout）触发
+  // 一次安静复核，无漂移即取消（安静期零工作），有漂移写回并继续（≤5 轮 + 3s 无通知终止）。
+  let rechecks = 0;
+  let nullStreak = 0;
+  const rekick = (): void => {
+    // REQ-014 P6：初始滚动被 DOM 高度钳制或切片窗未达目标时 ready 永假。null 连续即重派
+    // 行级 scrollIntoView（CM 原生按高度图解析，切片落位后可落准），最多补踢 3 次。
+    if (nullStreak >= 1 && rechecks < 6) {
+      rechecks += 2;
+      nullStreak = 0;
+      view.dispatch({ effects: cmRestoreEffect(view, anchor, surface) });
+    }
+  };
   const measure = (): void => {
     const version = layoutVersion;
     frame = requestAnimationFrame(() => { frame = requestAnimationFrame(() => {
@@ -120,9 +137,29 @@ export function cmRestoreAnchor(view: EditorView, anchor: ScrollAnchor, surface:
         write: top => {
           // 新布局或新输入使这次测量过期；下次有效布局通知会重新调度。
           if (!current()) { cancel(); return; }
-          if (top === null || version !== layoutVersion) return;
-          if (Math.abs(scroller.scrollTop - top) > .5) scroller.scrollTop = top;
-          cancel();
+          if (top === null || version !== layoutVersion) {
+            // REQ-014 P6：null（ready 未就绪）路径同样自排程重测——切片窗未达目标时无布局
+            // 通知可等，不排程即死锁在初始钳制位（实测漂移 372 行）。有界：≤6 轮。
+            if (top === null) {
+              nullStreak++; rekick();
+              if (++rechecks < 6) {
+                clearTimeout(quietTimer);
+                quietTimer = setTimeout(() => { quietTimer = undefined; if (active) measure(); }, 400);
+              } else cancel();
+            }
+            return;
+          }
+          nullStreak = 0;
+          const drifted = Math.abs(scroller.scrollTop - top) > .5;
+          if (drifted) scroller.scrollTop = top;
+          // REQ-014 P6：写入后追加分阶段终检——装饰交付期的 map/DOM 短暂失同步会让早期
+          // 写入落在错位（漂移 372 行实测）；静定后按稳定高度图再校，无漂移即终止。
+          if (!drifted) cancel();
+          else if (++rechecks >= 6) cancel();
+          else {
+            clearTimeout(quietTimer);
+            quietTimer = setTimeout(() => { quietTimer = undefined; if (active) measure(); }, 400);
+          }
         },
       });
     }); });

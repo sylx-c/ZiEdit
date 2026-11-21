@@ -1,18 +1,35 @@
-// markdown-view/live-deco —— live preview 行内/行级装饰构建（批次 4 自 livepreview.ts 拆分，行为不变；代码逐段原样搬移）。
-import { EditorView, Decoration, type DecorationSet } from '@codemirror/view';
+// markdown-view/projector —— REQ-014 P1：统一投影器纯函数核心（自 live-deco.ts 原样提取，行为不变）。
+// 契约（specs/001-markdown-ir-rewrite/contracts/rendering-seams.md §2）：
+//   只读语法树 + 文本 + 光标集合（经 ProjectionLens 注入），不读 DOM、不异步、不保存状态；
+//   一次调用覆盖一个视口区间（viewport ±300 余量由调用方计算后传入）。
+// P1 过渡说明：本文件先承载行内/行类/行内部件投影（原 buildLiveDecoInner 语义）；
+// 块级件投影（表格/分隔线/显示公式/围栏标签）在 T010–T011 编排插件合并后并入同一函数输出。
+import { Decoration, WidgetType, type DecorationSet } from '@codemirror/view';
 import { type Range, type Text } from '@codemirror/state';
-import { syntaxTree } from '@codemirror/language';
-import type { SyntaxNode } from '@lezer/common';
+import type { SyntaxNode, Tree } from '@lezer/common';
 import { decodeMarkdownEntity } from './preview';
 import { markdownIt } from './md';
 import { splitTableRow } from './table-model';
-import { inlineFormatField } from './writing';
 import { renderBlockAt } from './render-model';
-import { currentPosition, normalizeLabel, linkUrlOfNode, referenceIndex, referenceField, referenceUrls, emojiField, mdTouchedField, VIEWPORT_MARGIN, type ReferenceIndex } from './live-state';
-import { TextWidget, ImgWidget, TaskWidget, FootnoteWidget, RenderWidget, TableWidget, codeContainer, editingFence, renderContextOf, cellAlign } from './live-widgets';
-import { irWorkStart, recordIrWork } from './ir-perf';
+import { currentPosition, normalizeLabel, linkUrlOfNode, type ReferenceIndex } from './live-state';
+import { TextWidget, ImgWidget, TaskWidget, FootnoteWidget, RenderWidget, codeContainer, renderContextOf, cellAlign } from './live-widgets';
+import { TableEditWidget } from './table-widget';
 
-// ── 装饰构建 ──
+/** 投影透镜：调用方从视图状态收集的全部只读输入（纯函数不接触 EditorView/EditorState）。 */
+export interface ProjectionLens {
+  /** 光标集合（原始 ranges）：行内标记显隐的细粒度判定输入。 */
+  readonly ranges: readonly { from: number; to: number }[];
+  /** 首个用户交互事务后为真（mdTouchedField）：标题井号贴边不展开的门。 */
+  readonly touched: boolean;
+  /** 行内格式化进行中区间（inlineFormatField 值；无则 null）。 */
+  readonly formatted: { from: number; to: number; pending: boolean } | null;
+  /** Emoji 别名表（emojiField 值）。 */
+  readonly emojis: Readonly<Record<string, string>>;
+  /** 引用链接地址（惰性读取，避免无链接正文白付一次 Map 拷贝）。 */
+  readonly refs: () => ReadonlyMap<string, string>;
+  /** 围栏是否处于编辑态（writing 围栏状态经适配器注入，保持本函数不读 state）。 */
+  readonly fenceEditing: (pos: number) => boolean;
+}
 
 /** 空光标沿用闭区间；非空选区按半开区间相交，包含被选区完整覆盖的中间块。 */
 export function makeActiveProbe(ranges: readonly { from: number; to: number }[]): (from: number, to: number) => boolean {
@@ -161,9 +178,9 @@ export function fenceLines(node: SyntaxNode, doc: Text) {
     last: close ? close.number - 1 : doc.lineAt(Math.max(node.from, node.to - 1)).number };
 }
 
-/** GFM 表格：整块网格渲染（块级替换件；调用方为 liveBlockField） */
+/** GFM 表格：整块网格渲染（块级替换件；调用方为块级投影/块装饰承载） */
 export interface TableData { header: string[]; align: ('left' | 'center' | 'right')[]; rows: string[][]; to?: number }
-export function tableDecos(node: SyntaxNode, doc: Text, out: Range<Decoration>[], references: ReferenceIndex | null, tables: Map<number, TableData>, emojis: Readonly<Record<string, string>>, heightIdentity?: import('./block-height-cache').HeightIdentity, heightHint?: number, provideIdentity?: () => import('./block-height-cache').HeightIdentity | undefined): void {
+export function tableDecos(node: SyntaxNode, doc: Text, out: Range<Decoration>[], references: ReferenceIndex | null, tables: Map<number, TableData>, _emojis: Readonly<Record<string, string>>, baseDir: string | null = null): void {
   let data = tables.get(node.from);
   if (!data || data.to !== node.to) {
     const lines = doc.sliceString(node.from, node.to).split('\n').map(l => l.replace(/^\s*(?:>\s*)+/, '')).filter(l => l.trim());
@@ -172,61 +189,54 @@ export function tableDecos(node: SyntaxNode, doc: Text, out: Range<Decoration>[]
     tables.set(node.from, data);
     if (tables.size > 32) tables.delete(tables.keys().next().value!);
   }
+  // REQ-014 P5（REQ-014.8 / data-model.md §4）：数据行 >500 整表退化为源码显示（不产挂件，Typora 行为）；500 行仍渲染。
+  if (data.rows.length > 500) return;
   // 引用前缀连同表格投影，否则会在网格前留下一个空的CM正文行。
   const line = doc.lineAt(node.from);
   const from = /^[\t >]*$/.test(doc.sliceString(line.from, node.from)) ? line.from : node.from;
   const { inset, quoted } = codeContainer(node);
   out.push(Decoration.replace({
     block: true, blockAtomic: true,
-    widget: new TableWidget(data.header, data.align, data.rows, node.from, node.to,
-      doc.lineAt(Math.max(node.from, node.to - 1)).number - doc.lineAt(node.from).number + 1,
-      references, emojis, inset, quoted, heightIdentity, heightHint, provideIdentity),
+    widget: new TableEditWidget(data.header, data.align, data.rows, node.from, node.to,
+      references, inset, quoted, baseDir),
   }).range(from, node.to));
 }
 
 /**
- * live preview 装饰集：视口 ±VIEWPORT_MARGIN 内递归处理块排版，按行内元素判断源码展开。
- * 表格由直接状态装饰与单元格编辑器承载。
+ * 统一投影：视口区间内递归处理块排版，按行内元素判断源码展开。
+ * 纯函数——只读 doc/tree/index/lens，不读 DOM、不异步、不保存状态；相同输入产出相同装饰集。
  */
-export function buildLiveDeco(
-  view: EditorView,
+export function projectViewport(
+  doc: Text,
+  tree: Tree,
+  viewport: { from: number; to: number },
+  index: ReferenceIndex,
+  lens: ProjectionLens,
   baseDir: string | null,
   remoteResolve?: (url: string) => Promise<string | null>,
-  bounds?: { from: number; to: number }
 ): DecorationSet {
-  const started = irWorkStart();
-  try { return buildLiveDecoInner(view, baseDir, remoteResolve, bounds); }
-  finally { recordIrWork('liveDeco', started); }
-}
-function buildLiveDecoInner(
-  view: EditorView,
-  baseDir: string | null,
-  remoteResolve?: (url: string) => Promise<string | null>,
-  bounds?: { from: number; to: number }
-): DecorationSet {
-  const doc = view.state.doc;
-  const index = view.state.field(referenceField, false) ?? referenceIndex(doc);
   const out: Range<Decoration>[] = [];
-  const ranges = view.state.selection.ranges;
-  const formatted = view.state.field(inlineFormatField, false);
-  const active = (from: number, to: number): boolean => !(formatted && !formatted.pending && from >= formatted.from && to <= formatted.to) && ranges.some(r => r.empty
-    ? r.head > from && r.head < to : r.from < to && r.to > from);
+  const ranges = lens.ranges;
+  const formatted = lens.formatted;
+  // 空区间（from===to）时光标位即 from；与 SelectionRange.empty/head 语义等价（纯 {from,to} 输入）。
+  const active = (from: number, to: number): boolean => !(formatted && !formatted.pending && from >= formatted.from && to <= formatted.to) && ranges.some(r => r.from === r.to
+    ? r.from > from && r.from < to : r.from < to && r.to > from);
   const blockActive = makeActiveProbe(ranges);
-  const selected = (from: number, to: number): boolean => ranges.some(r => !r.empty && r.from < to && r.to > from);
-  const touched = view.state.field(mdTouchedField, false) === true;
+  const selected = (from: number, to: number): boolean => ranges.some(r => r.from !== r.to && r.from < to && r.to > from);
+  const touched = lens.touched;
   // 标题井号活动探针（2026-11-19 收紧）：空光标须严格落在标题行内部——行首/行尾两端的
   // 贴边位（点在标题旁边的空白处即落于此）不展开井号；非空选区相交仍展开，编辑操作可见。
-  const headingCaretInside = (node: SyntaxNode): boolean => ranges.some(r => r.empty
-    ? touched && r.head > node.from && r.head < node.to
+  const headingCaretInside = (node: SyntaxNode): boolean => ranges.some(r => r.from === r.to
+    ? touched && r.from > node.from && r.from < node.to
     : r.from < node.to && r.to > node.from);
-  const refs = (): ReadonlyMap<string, string> => referenceUrls(view.state);
+  const refs = lens.refs;
   const renderContext = renderContextOf(index);
-  const from = bounds?.from ?? Math.max(0, view.viewport.from - VIEWPORT_MARGIN);
-  const to = bounds?.to ?? Math.min(doc.length, view.viewport.to + VIEWPORT_MARGIN);
-  const decorateLines = (node: SyntaxNode, cls: string): void => {
+  const from = viewport.from;
+  const to = viewport.to;
+  const decorateLines = (node: SyntaxNode, cls: string, attributes?: Record<string, string>): void => {
     const start = doc.lineAt(Math.max(node.from, from)).number;
     const end = doc.lineAt(Math.min(Math.max(node.from, node.to - 1), to)).number;
-    for (let n = start; n <= end; n++) out.push(Decoration.line({ class: cls }).range(doc.line(n).from));
+    for (let n = start; n <= end; n++) out.push(Decoration.line({ class: cls, ...(attributes ? { attributes } : {}) }).range(doc.line(n).from));
   };
   const inline = (node: SyntaxNode): void => inlineDecos(node, doc, baseDir, out, remoteResolve, from, to, refs, active);
   const decorate = (node: SyntaxNode): void => {
@@ -237,11 +247,15 @@ function buildLiveDecoInner(
     const heading = /^ATXHeading([1-6])$/.exec(node.name);
     if (heading) {
       // Setext 标题已全局不解析（noSetextHeading）：此处只需处理单行 ATX。
-      decorateLines(node, 'mdir-h' + heading[1]);
+      // REQ-014 P2 留白栏：井号常隐（正文行文本范围恒定），级别色条常驻；光标进入/选区相交时
+      // 行加 mdir-marks-on + data-marks，由 CSS ::before 在留白栏显示井号——不再向正文行插回标记文本。
+      const marks = '#'.repeat(Number(heading[1]));
+      const marksOn = selected(node.from, node.to) || headingCaretInside(node);
+      decorateLines(node, 'mdir-h' + heading[1] + (marksOn ? ' mdir-marks-on' : ''), { 'data-marks': marks });
       const oldOffset = index.mapping?.invertedDesc.mapPos(doc.lineAt(node.from).from, -1) ?? doc.lineAt(node.from).from;
       const item = index.headings.get(oldOffset);
       if (item) out.push(Decoration.line({ attributes: { id: item.id, 'data-line': String(doc.lineAt(node.from).number - 1) } }).range(doc.lineAt(node.from).from));
-      if (!selected(node.from, node.to) && !headingCaretInside(node)) headingDecos(node, doc, out);
+      headingDecos(node, doc, out);
       inline(node);
       return;
     }
@@ -259,8 +273,8 @@ function buildLiveDecoInner(
           out.push(Decoration.line({ class: cls + (quoted ? ' mdir-code-quoted' : ''),
             attributes: { style: `--mdir-code-inset:${inset}px;--mdir-quote-depth:${quoted}` } }).range(doc.line(line).from));
         };
-        const editing = editingFence(view.state, open.from);
-        const editingClose = close !== null && editingFence(view.state, close.from);
+        const editing = lens.fenceEditing(open.from);
+        const editingClose = close !== null && lens.fenceEditing(close.from);
         if (editing || first > last) {
           codeLine(open.number, 'mdir-code mdir-code-open');
         }
@@ -319,24 +333,8 @@ function buildLiveDecoInner(
     }
     inline(node);
   };
-  const tree = syntaxTree(view.state);
-  // 只标记正文内多余的空格，不 replace，不改查找/复制/选区的源范围。
-  // 按行判活动态；语法排除代码/URL/数学等字面值区域与块级件。
-  for (let n = doc.lineAt(from).number; n <= doc.lineAt(to).number; n++) {
-    const line = doc.line(n);
-    if (blockActive(line.from, line.to)) continue;
-    for (const match of line.text.matchAll(/ {2,}/g)) {
-      const start = line.from + match.index!, end = start + match[0].length;
-      if (start < from || end > to || start === line.from || end === line.to) continue;
-      let node: SyntaxNode | null = tree.resolveInner(start, 1);
-      let prose = false, literal = false;
-      for (; node; node = node.parent) {
-        if (/^(?:Paragraph|ATXHeading[1-6]|SetextHeading[1-6])$/.test(node.name)) prose = true;
-        if (['InlineCode', 'FencedCode', 'CodeBlock', 'InlineMath', 'MathBlock', 'Table', 'URL', 'LinkTitle', 'HTMLBlock'].includes(node.name)) literal = true;
-      }
-      if (prose && !literal) out.push(Decoration.mark({ class: 'md-space-fold' }).range(start + 1, end));
-    }
-  }
+  // REQ-014 P4（T025）：md-space-fold IR 独有折行差删除——正文多余空格不再标记折叠，
+  // 三面（IR/分屏/独立预览）空格口径一致（源文本原样呈现）。
   visitVisible(tree.topNode, from, to, node => {
     if (index.metadata.frontMatter && node.from < currentPosition(index, index.metadata.frontMatter.to) && node.name !== 'Document') return false;
     if (node.name === 'InlineMath') {
@@ -349,7 +347,7 @@ function buildLiveDecoInner(
     if (node.name === 'MathBlock' || node.name === 'MathUnclosed' || node.name === 'FencedCode' || node.name === 'CodeBlock' || node.name === 'InlineCode') return false;
     if (node.name === 'QuoteMark' && !selected(node.from, node.to)) {
       // 表格整行已由块装饰接管，不能用跨越其边界的行内替换覆盖块件。
-      let owner: SyntaxNode | null = syntaxTree(view.state).resolveInner(doc.lineAt(node.from).to, -1);
+      let owner: SyntaxNode | null = tree.resolveInner(doc.lineAt(node.from).to, -1);
       while (owner && !['Table', 'FencedCode', 'Paragraph'].includes(owner.name) && !/Heading[1-6]$/.test(owner.name)) owner = owner.parent;
       const textLine = owner?.name === 'Paragraph' || /Heading[1-6]$/.test(owner?.name ?? '');
       const space = textLine && doc.sliceString(node.to, node.to + 1) === ' ' ? 1 : 0;
@@ -357,7 +355,7 @@ function buildLiveDecoInner(
     }
     if (node.name === 'Emoji' && !active(node.from, node.to)) {
       const key = doc.sliceString(node.from + 1, node.to - 1);
-      const value = view.state.field(emojiField)[key];
+      const value = lens.emojis[key];
       if (value) out.push(Decoration.replace({ widget: new TextWidget(value, 'mdir-emoji') }).range(node.from, node.to));
     }
     if (node.name === 'FootnoteReference' && !active(node.from, node.to)) {
@@ -395,5 +393,92 @@ function buildLiveDecoInner(
     }
   });
   decorate(tree.topNode);
+  // ── REQ-014 P3/P6：块间距 CSS 承载（原 layout.ts/spacing.ts 的 JS px 模型删除）──
+  // 空行区间折叠为令牌间距：首空行 padding-top = calc(前块 after + 后块 before)，其余空行高 0；
+  // 紧邻块对（无空行，如列表项）改为独立块挂件承载（元素 rect 顶 = 文本顶，与预览 margin 语义
+  // 对齐——padding 落在后块行内会把间隙算进该块 rect，真机一致性门按元素顶比对会系统性偏小）；
+  // 文档尾部预留末块 after + block-gap；列表项对用 --md-list-gap（旧 layout.ts 父容器口径）。
+  // 令牌求和全部发生在 CSS calc，JS 只选令牌名（与渲染预览 .md-col 同一套令牌）。
+  const gapEdgeToken = (nodeName: string | null, edge: 'before' | 'after'): string => {
+    if (!nodeName) return '';
+    const heading = /^(?:ATX|Setext)Heading([1-6])$/.exec(nodeName);
+    if (heading) return `--md-h${heading[1]}-${edge}`;
+    if (nodeName === 'HorizontalRule') return '--md-rule-gap';
+    return edge === 'before' ? '--md-block-gap' : '';
+  };
+  const GAP_MARKERS2 = new Set(['QuoteMark', 'ListMark']);
+  const GAP_CONTAINERS2 = new Set(['Document', 'Blockquote', 'BulletList', 'OrderedList', 'ListItem']);
+  const gapLines = (start: number, end: number, prev: SyntaxNode | null, next: SyntaxNode | null, tail: boolean, parentName = 'Document'): void => {
+    const adjacent = end < start;
+    const listPair = adjacent && !tail && (parentName === 'BulletList' || parentName === 'OrderedList');
+    const afterVar = gapEdgeToken(prev?.name ?? null, 'after');
+    const beforeVar = tail || !next ? '--md-block-gap' : gapEdgeToken(next.name, 'before');
+    if (adjacent) {
+      if (tail || !next || !prev) return;
+      // 列表项对（同容器相邻）用紧凑列表间隙；其余块对 = 前块 after + 后块 before。
+      const height = listPair
+        ? (afterVar ? `calc(var(${afterVar}) + var(--md-list-gap))` : 'var(--md-list-gap)')
+        : `calc(${afterVar ? `var(${afterVar}) + ` : ''}var(${beforeVar}))`;
+      out.push(Decoration.widget({ block: true, side: -1, widget: new BlockGapWidget(height) }).range(doc.lineAt(next.from).from));
+      return;
+    }
+    const style = `--mdir-gap-after:${afterVar ? `var(${afterVar})` : '0px'};--mdir-gap-before:var(${beforeVar})`;
+    const lo = doc.lineAt(from).number, hi = doc.lineAt(to).number;
+    let allocated = false;
+    for (let n = Math.max(start, lo); n <= Math.min(end, hi); n++) {
+      const line = doc.line(n);
+      if (!/^[\t >]*$/.test(line.text)) continue;
+      out.push(Decoration.line({
+        class: 'mdir-gap' + (blockActive(line.from, line.to) ? ' mdir-gap-active' : ''),
+        ...(allocated ? {} : { attributes: { style } }),
+      }).range(line.from));
+      allocated = true; // 间距只分配一次，避免多个空行各自取整后累积亚像素偏差。
+    }
+  };
+  const walkGaps = (parent: SyntaxNode): void => {
+    if (!GAP_CONTAINERS2.has(parent.name) || parent.from > to || parent.to < from) return;
+    let child = parent.childAfter(Math.max(parent.from, from));
+    while (child && GAP_MARKERS2.has(child.name)) child = child.nextSibling;
+    if (!child) {
+      if (parent.name === 'Document' && !parent.firstChild && tree.length === doc.length) gapLines(1, doc.lines, null, null, false);
+      return;
+    }
+    let previous: SyntaxNode | null = child.prevSibling;
+    while (previous && GAP_MARKERS2.has(previous.name)) previous = previous.prevSibling;
+    for (; child && child.from <= to; child = child.nextSibling) {
+      if (GAP_MARKERS2.has(child.name)) continue;
+      const start = previous ? doc.lineAt(Math.max(previous.from, previous.to - 1)).number + 1 : doc.lineAt(parent.from).number;
+      const end = doc.lineAt(child.from).number - 1;
+      gapLines(start, end, previous, child, false, parent.name);
+      walkGaps(child);
+      previous = child;
+    }
+    // 尾部可写段落预留正文块间距，首字输入时不再突然补出间距。
+    if (!child && previous && parent.name === 'Document' && tree.length === doc.length)
+      gapLines(doc.lineAt(Math.max(previous.from, previous.to - 1)).number + 1, doc.lines, previous, null, true);
+  };
+  walkGaps(tree.topNode);
   return Decoration.set(out, true);
+}
+
+/** 紧邻块对间隙挂件：独立块元素承载高度（元素 rect 顶 = 文本顶，与预览 margin 语义对齐）。 */
+class BlockGapWidget extends WidgetType {
+  constructor(private height: string) { super(); }
+  eq(other: BlockGapWidget): boolean { return other.height === this.height; }
+  get estimatedHeight(): number {
+    const mults: Record<string, number> = { '--md-block-gap': 0.8, '--md-list-gap': 0.25, '--md-rule-gap': 1.4,
+      '--md-h1-before': 2.475, '--md-h1-after': 1.2375, '--md-h2-before': 1.925, '--md-h2-after': 0.9625,
+      '--md-h3-before': 1.65, '--md-h3-after': 0.825, '--md-h4-before': 0.8, '--md-h4-after': 0.55,
+      '--md-h5-before': 0.8, '--md-h5-after': 0.55, '--md-h6-before': 0.8, '--md-h6-after': 0.55 };
+    let total = 0;
+    for (const token of this.height.match(/--md-[\w-]+/g) ?? []) total += mults[token] ?? 0;
+    return total * 13.5;
+  }
+  toDOM(): HTMLElement {
+    const el = document.createElement('div');
+    el.className = 'mdir-block-gap';
+    el.style.height = this.height;
+    el.setAttribute('aria-hidden', 'true');
+    return el;
+  }
 }

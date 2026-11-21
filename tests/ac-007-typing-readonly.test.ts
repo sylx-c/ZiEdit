@@ -62,15 +62,17 @@ describe('007 即时输入和只读实际状态回归', () => {
     expect(host.innerHTML).toBe(original);
   });
 
-  it('引用中的无外缘竖线表格格内输入不改引用前缀', async () => {
+  it('引用中的无外缘竖线表格格内输入不改引用前缀（P5：Escape 提交）', async () => {
     const source = '> A | B\n> ---|---\n> 甲 | 乙\n\n尾';
     const { v, host } = await mount(source);
     await until(() => !!host.querySelector('td'));
     expect(host.querySelector('td')?.textContent).toBe('甲');
-    host.querySelector('td')!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    const cell = EditorView.findFromDOM(host.querySelector('td .cm-editor')!)!;
-    cell.dispatch({ ...cell.state.replaceSelection('新'), userEvent: 'input.type' });
-    expect(v.getMarkdown()).toBe(source.replace('> 甲 |', '> 甲新 |'));
+    const cell = host.querySelector('td') as HTMLTableCellElement;
+    cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    await until(() => cell.getAttribute('contenteditable') === 'true');
+    cell.textContent = '甲新';
+    cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    await until(() => v.getMarkdown() === source.replace('> 甲 |', '> 甲新 |'));
     expect(undo(v.view)).toBe(true);
     expect(v.getMarkdown()).toBe(source);
   });
@@ -141,14 +143,16 @@ describe('007 即时输入和只读实际状态回归', () => {
     expect(v.getMarkdown()).toBe(source);
   });
 
-  it('网格格内修改只更新目标范围、转义竖线，单步撤销，历史可跨形态搬运', async () => {
+  it('网格格内修改只更新目标范围、转义竖线，单步撤销，历史可跨形态搬运（P5：Escape 提交）', async () => {
     const source = '| 甲 | 乙 |\n|---|---|\n| a | b |\n\n尾';
     const { v, host } = await mount(source);
     await until(() => !!host.querySelector('td'));
-    host.querySelector('td')!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    const cell = EditorView.findFromDOM(host.querySelector('td .cm-editor')!)!;
-    cell.dispatch({ ...cell.state.replaceSelection(' | 中文'), userEvent: 'input.type' });
-    expect(v.getMarkdown()).toBe(source.replace('| a |', '| a \\| 中文 |'));
+    const cell = host.querySelector('td') as HTMLTableCellElement;
+    cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    await until(() => cell.getAttribute('contenteditable') === 'true');
+    cell.textContent = 'a | 中文';
+    cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    await until(() => v.getMarkdown() === source.replace('| a |', '| a \\| 中文 |'));
     expect(host.querySelectorAll('table').length).toBe(1);
     expect(undo(v.view)).toBe(true);
     expect(v.getMarkdown()).toBe(source);
@@ -163,15 +167,18 @@ describe('007 即时输入和只读实际状态回归', () => {
     expect(edit.getContent()).toBe(source);
   });
 
-  it('格内保存/查找转交主编辑器，任务点击同步源文档', async () => {
+  it('格内保存/查找冒泡主编辑器，任务点击同步源文档（P5：格键不拦截 Mod-s/f）', async () => {
     const { v, host } = await mount('| A |\n|---|\n| B |\n\n- [ ] 任务\n');
     await until(() => !!host.querySelector('td'));
-    host.querySelector('td')!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    const cell = EditorView.findFromDOM(host.querySelector('td .cm-editor')!)!;
-    cell.dispatch({ ...cell.state.replaceSelection('修改'), userEvent: 'input.type' });
-    cell.contentDOM.dispatchEvent(new KeyboardEvent('keydown', { key: 's', ctrlKey: true, bubbles: true, cancelable: true }));
+    const cell = host.querySelector('td') as HTMLTableCellElement;
+    cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    await until(() => cell.getAttribute('contenteditable') === 'true');
+    cell.textContent = '修改';
+    cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })); // 提交 → 焦点回主编辑器
+    await until(() => v.getMarkdown().includes('| 修改 |'));
+    v.view.contentDOM.dispatchEvent(new KeyboardEvent('keydown', { key: 's', ctrlKey: true, bubbles: true, cancelable: true }));
     await until(() => saved.mock.calls.length === 1);
-    cell.contentDOM.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true, cancelable: true }));
+    v.view.contentDOM.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true, cancelable: true }));
     await until(() => !!host.querySelector('input'));
     const task = host.querySelector<HTMLInputElement>('.mdir-task')!;
     task.click();
@@ -197,7 +204,7 @@ describe('007 即时输入和只读实际状态回归', () => {
     await v.save();
     expect(saved).not.toHaveBeenCalled();
     expect(v.getMarkdown()).toBe(before);
-    expect(host.querySelector('td .cm-editor')).toBeNull();
+    expect(host.querySelector('td')?.getAttribute('contenteditable')).not.toBe('true');
     expect(v.isDirty).toBe(true);
     v.setReadOnly(false);
     expect(undo(v.view)).toBe(true);

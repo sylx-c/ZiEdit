@@ -160,15 +160,16 @@ describe('007 AC-38 分割线插入命令', () => {
 });
 
 describe('007 AC-38 表格活动格行内格式', () => {
-  it('格内输入 **粗** 渲染为粗体，主文档保留行内源码', async () => {
+  it('格内输入 **粗** 渲染为粗体，主文档保留行内源码（P5 contenteditable：Escape 提交）', async () => {
     const { view, main, host } = await mount('| A | B |\n|---|---|\n|  |  |');
     await until(() => !!host.querySelector('table'));
-    const cell = host.querySelectorAll('tbody tr')[0]!.querySelectorAll('td')[0]!;
+    const cell = host.querySelectorAll('tbody tr')[0]!.querySelectorAll('td')[0]! as HTMLTableCellElement;
     cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    const editor = EditorView.findFromDOM(host.querySelector('td .cm-editor')!)!;
-    type(editor, '**粗**');
-    key(editor, 'Escape');
-    expect(cell.querySelector('strong')?.textContent).toBe('粗');
+    await until(() => cell.getAttribute('contenteditable') === 'true');
+    cell.textContent = '**粗**';
+    cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    await until(() => !!host.querySelector('tbody td strong'));
+    expect(host.querySelector('tbody td strong')?.textContent).toBe('粗');
     expect(view.getMarkdown()).toBe('| A | B |\n|---|---|\n|  **粗**|  |');
   });
 });
