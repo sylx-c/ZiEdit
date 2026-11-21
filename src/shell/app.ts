@@ -72,7 +72,7 @@ import {
 } from '../common/ipc';
 import { TabStore } from '../common/state';
 import { convertEol, nlSaveName, NL_PRESETS, type NlId } from '../common/text';
-import { writeClipboardText } from '../common/clipboard';
+import { writeClipboardText, writeClipboardTextChecked } from '../common/clipboard';
 import { PreviewFind } from '../markdown-view/preview-find';
 import type { TextView as TextViewT, TextViewStatus } from '../text-view/view';
 import { Minimap } from '../text-view/minimap';
@@ -2300,6 +2300,8 @@ export async function boot(): Promise<void> {
         if (stale()) { reading.destroy(); return; }
         previewHostEl = result.col;
         mdPreviewScroller = preview;
+        // 004：已提交渲染对应的源文本（data-md-code-from 偏移以此为准；防抖窗口内 DOM 滞后于隐藏源缓冲）
+        let mdRenderedText = text;
         if (buffer?.anchor && reading.surface?.inputVersion === initialPreviewInput) restorePreviewAnchor(preview, buffer.anchor);
         // 渲染预览无光标：大纲当前标题跟随视口顶行（帧合并）
         preview.addEventListener('scroll', () => {
@@ -2316,6 +2318,7 @@ export async function boot(): Promise<void> {
           const next = await reading.render(preview, newText, mdPreviewOpts);
           if (!next.committed || stale()) return false;
           previewHostEl = next.col;
+          mdRenderedText = newText;
           return true;
         };
         // ▸ 展开替换（统一查找栏口径）：渲染预览无编辑面——带当前查找词切源码并展开替换行
@@ -2324,6 +2327,19 @@ export async function boot(): Promise<void> {
           const items: CtxMenuItem[] = [];
           const selected = document.getSelection()?.toString();
           if (selected) items.push([$t('ctx.copySel'), () => void writeClipboardText(selected)]);
+          // 004：代码块右键整块复制——pre[data-md-code-from] 源偏移定位，取值绝不依赖 DOM textContent
+          const cpre = (e.target as HTMLElement | null)?.closest?.('pre[data-md-code-from]') as HTMLElement | null;
+          if (cpre?.dataset.mdCodeFrom !== undefined) {
+            const from = Number(cpre.dataset.mdCodeFrom);
+            const src = mdRenderedText;
+            items.push([$t('ctx.copyCode'), () => {
+              void import('../markdown-view/code-copy').then(({ copyCodeBlockText }) => {
+                const code = copyCodeBlockText(src, from);
+                if (code === null) { flash($t('md.copyFail')); return; }
+                void writeClipboardTextChecked(code).then(ok => { if (!ok) flash($t('md.copyFail')); });
+              });
+            }]);
+          }
           items.push([$t('ctx.mdModes'), () => void 0, mdModeMenuItems(tab)]);
           menu(items, e.clientX, e.clientY);
         });
@@ -2414,6 +2430,8 @@ export async function boot(): Promise<void> {
             void renderRight();
           }, sinceRender >= 1000 - delay ? 0 : delay);
         };
+        // 004：分屏已提交渲染对应的源文本（右键复制代码块的偏移基准）
+        let mdSplitRenderedText = text;
         const renderRight = async (source?: string): Promise<void> => {
           if (previewDead || stale()) return;
           if (previewBusy) {
@@ -2422,12 +2440,14 @@ export async function boot(): Promise<void> {
           }
           previewBusy = true;
           previewLastRender = Date.now(); // Pass 1：防抖最长等待的计时基准
+          // 004：本轮实际渲染输入（右键复制代码块的 data-md-code-from 偏移以此为准）
+          const renderInput = source ?? ev.getContent();
           try {
             // 共享阅读组件在固定正文根内更新块，并独自管理高度变化下的阅读锚。
             // 初渲染（source=text）不依赖左侧编辑器异步初始化完成；防抖跟随取编辑器当前内容
             const renderDoc = ev.view?.state.doc;
             const target = writingTarget;
-            const res = await blockRenderer.render(prevHost, source ?? ev.getContent(), {
+            const res = await blockRenderer.render(prevHost, renderInput, {
               dark: document.documentElement.getAttribute('data-tone') === 'dark',
               route: mdLinkRoute(tab),
               remoteImages: remoteImagesOf, // 图床远程图回填（009 规则 10；未配置时函数内零请求）
@@ -2440,6 +2460,7 @@ export async function boot(): Promise<void> {
             });
             if (previewDead || stale() || !res.committed) return;
             previewHostEl = res.col; // 大纲点击锚点作用域跟随最新容器
+            mdSplitRenderedText = renderInput;
             if (target && target === writingTarget && ev.view?.hasFocus) {
               const surface = blockRenderer.surface;
               if (target.end) surface?.scrollTo(surface.snapshot().height);
@@ -2558,6 +2579,19 @@ export async function boot(): Promise<void> {
           const sel = document.getSelection()?.toString() ?? '';
           const items: CtxMenuItem[] = [];
           if (sel) items.push([$t('ctx.copySel'), () => void writeClipboardText(sel)]);
+          // 004：代码块右键整块复制——pre[data-md-code-from] 源偏移定位（与阅读模式同构）
+          const cpre = (e.target as HTMLElement | null)?.closest?.('pre[data-md-code-from]') as HTMLElement | null;
+          if (cpre?.dataset.mdCodeFrom !== undefined) {
+            const from = Number(cpre.dataset.mdCodeFrom);
+            const src = mdSplitRenderedText;
+            items.push([$t('ctx.copyCode'), () => {
+              void import('../markdown-view/code-copy').then(({ copyCodeBlockText }) => {
+                const code = copyCodeBlockText(src, from);
+                if (code === null) { flash($t('md.copyFail')); return; }
+                void writeClipboardTextChecked(code).then(ok => { if (!ok) flash($t('md.copyFail')); });
+              });
+            }]);
+          }
           const ext = externalHrefAt(e.target);
           if (ext) items.push([$t('md.openExternal'), () => openExternalUrl(ext)]);
           // 渲染图右键「上传图片到图床」（009 规则 4 触发③）：data-md-src 为原始本地引用

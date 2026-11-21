@@ -33,19 +33,27 @@ export async function readClipboardText(): Promise<string> {
 
 /** 写剪贴板文本；失败静默（复制失败不打断主流程，状态栏无提示为既有口径） */
 export async function writeClipboardText(text: string): Promise<void> {
+  await writeClipboardTextChecked(text);
+}
+
+/** 写剪贴板文本并回报结果（004 Markdown parity：FR-004 复制失败需可见反馈）。
+ *  与 writeClipboardText 同通道同回退，仅把静默 catch 转成布尔结果——需要向用户
+ *  反馈失败/成功的调用方（Markdown 代码块复制等）使用本变体；既有调用方行为不变。 */
+export async function writeClipboardTextChecked(text: string): Promise<boolean> {
   if (inTauri()) {
     try {
       const { writeText } = await import('@tauri-apps/plugin-clipboard-manager');
       await writeText(text);
+      return true;
     } catch {
-      /* 静默 */
+      return false;
     }
-    return;
   }
   try {
     await navigator.clipboard.writeText(text);
+    return true;
   } catch {
-    /* 静默 */
+    return false;
   }
 }
 

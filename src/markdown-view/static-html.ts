@@ -8,6 +8,7 @@ import emojis from './unicode-emojis.json';
 import { staticHighlighter, staticCodeLanguage } from './static-code';
 import { codeLanguage } from './code-tokens';
 import { mdLinkTools } from './md-link';
+import { fencedCodeText } from './code-copy';
 
 /** 与 IR 同一语法配置；不经过 Markdown→Markdown 投影或第二次语义解析。
  *  输入契约：text 必须为 LF（上层入口经 `common/text.toLf` 归一）。`@lezer/markdown` 的 GFM 表格
@@ -69,13 +70,9 @@ export function renderStaticHtml(text: string, tree: Tree, metadata: MarkdownMet
   const code = (node: SyntaxNode): string => {
     const info = node.getChild('CodeInfo');
     const language = info ? raw(info).trim().split(/\s/)[0]!.toLowerCase() : '';
-    const parts = node.getChildren('CodeText');
-    let source = '';
-    for (let i = 0; i < parts.length; i++) {
-      if (i && !source.endsWith('\n')) source += '\n';
-      source += raw(parts[i]!);
-    }
-    if (source && !source.endsWith('\n')) source += '\n';
+    // 004：正文取值与复制契约同源（code-copy.fencedCodeText）——CommonMark 终止块补语义
+    // 尾换行、未闭合尾块不追加、引用前缀剥离；渲染 textContent 与复制结果一致。
+    const source = fencedCodeText({ sliceString: (from: number, to?: number) => text.slice(from, to), length: text.length }, node);
     let html = esc(source);
     const lang = staticCodeLanguage(language);
     const highlighter = staticHighlighter(), offlineLanguage = codeLanguage(language);
@@ -92,8 +89,10 @@ export function renderStaticHtml(text: string, tree: Tree, metadata: MarkdownMet
         return out + esc(line.slice(offset));
       }).join('\n');
     }
-    // 语言 class 用归一化名（sh/shell/zsh→bash，与 code-worker/写作候选同口径）
-    return '<pre><code class="hljs' + (language ? ' language-' + esc(offlineLanguage) : '') + '">' + html + '</code></pre>';
+    // 语言 class 用归一化名（sh/shell/zsh→bash，与 code-worker/写作候选同口径）。
+    // data-md-code-from：源偏移主键（004）——预览右键「复制代码块」据此在源文本中定位该块
+    // （code-copy.copyCodeBlockText），复制取值绝不依赖渲染 DOM textContent。
+    return '<pre data-md-code-from="' + node.from + '"><code class="hljs' + (language ? ' language-' + esc(offlineLanguage) : '') + '">' + html + '</code></pre>';
   };
   const render = (node: SyntaxNode): string => {
     if (metadata.frontMatter && node.from < metadata.frontMatter.to) return '';

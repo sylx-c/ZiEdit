@@ -27,14 +27,15 @@ import { cancelCmRestore, cmCaptureAnchor, cmRestoreAnchor, cmScrollToLine, cmTo
 import { compositionGuard, isComposing } from '../common/composition';
 import { EditorState } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap, undo, redo, selectAll } from '@codemirror/commands';
-import { syntaxTree, syntaxHighlighting } from '@codemirror/language';
+import { syntaxTree, syntaxHighlighting, ensureSyntaxTree } from '@codemirror/language';
 import { classHighlighter } from '@lezer/highlight';
 import { autocompletion, type CompletionContext } from '@codemirror/autocomplete';
 import { editorMarkdown } from './editor-language';
 import type { SyntaxNode } from '@lezer/common';
 import { textOpen, textReadAll, textSave } from '../common/ipc';
 import { type CtxMenuItem, type CtxMenuLeaf } from '../shell/chrome';
-import { readClipboardText, writeClipboardText } from '../common/clipboard';
+import { readClipboardText, writeClipboardText, writeClipboardTextChecked } from '../common/clipboard';
+import { codeBlockNodeAt, fencedCodeText } from './code-copy';
 import { t, tf } from '../common/i18n';
 import { FindBar } from '../text-view/findbar';
 import { runMdFormat, editMarkdownLink, MD_INLINE_COMMANDS, MD_BLOCK_COMMANDS, type MdFormatCmd } from './mdformat';
@@ -468,11 +469,11 @@ export class LivePreviewView {
     this.view.contentDOM.addEventListener('contextmenu', e => {
       if (!this.opts.showMenu) return;
       e.preventDefault();
-      const items = this.contextMenuItems();
       const target = e.target as HTMLElement | null;
       const pos = target?.closest('.mdir-link')
         ? this.view.posAtDOM(target.closest('.mdir-link')!) + 1
         : this.view.posAtCoords({ x: e.clientX, y: e.clientY });
+      const items = this.contextMenuItems(pos);
       if (pos !== null && pos !== undefined) {
         let link: SyntaxNode | null = syntaxTree(this.view.state).resolveInner(Math.min(this.view.state.doc.length, pos), 1);
         while (link && !['Link', 'Autolink', 'URL', 'Image'].includes(link.name)) link = link.parent;
@@ -548,16 +549,22 @@ export class LivePreviewView {
     });
   }
 
-  /** 编辑组 / 格式 ▸ / 段落 ▸ / Markdown 模式 ▸（app 注入） */
-  private contextMenuItems(): CtxMenuItem[] {
+  /** 编辑组 / 格式 ▸ / 段落 ▸ / Markdown 模式 ▸（app 注入）。
+   *  pos：右键命中的文档位置（缺省用光标）——「复制代码块」按该位置定位围栏块（004 FR-001）。 */
+  private contextMenuItems(pos?: number | null): CtxMenuItem[] {
     const fmt: CtxMenuLeaf[] = MD_INLINE_COMMANDS.map(([cmd, key]) => [t(key), this.isReadOnly ? null : () => this.runFormat(cmd), cmd]);
     const para: CtxMenuLeaf[] = MD_BLOCK_COMMANDS.map(([cmd, key]) => [t(key), this.isReadOnly ? null : () => this.runFormat(cmd),
       cmd === 'table' || cmd === 'codeBlock' ? cmd : cmd.startsWith('h') && cmd !== 'hr' ? 'heading' : undefined]);
+    const codeNode = this.view && !this.destroyed
+      ? codeBlockNodeAt(ensureSyntaxTree(this.view.state, Math.min(this.view.state.doc.length, Math.max(0, pos ?? this.view.state.selection.main.head)) + 1, 500) ?? syntaxTree(this.view.state), Math.min(this.view.state.doc.length, Math.max(0, pos ?? this.view.state.selection.main.head)))
+      : null;
     const items: CtxMenuItem[] = [
       [t('act.undo'), this.isReadOnly ? null : () => this.cmUndo()],
       [t('act.redo'), this.isReadOnly ? null : () => this.cmRedo()],
       [t('act.cut'), this.isReadOnly ? null : () => this.cmCut()],
-      [t('act.copy'), () => { this.view.focus(); document.execCommand('copy'); }],
+      [t('act.copy'), () => this.cmCopy()],
+      // 004：光标/右键在代码块内 → 整块复制 CodeText 源文本（Typora parity P1；只读可复制）
+      ...(codeNode ? [[t('ctx.copyCode'), () => this.copyCodeNode(codeNode)] as CtxMenuItem] : []),
       [t('act.paste'), this.isReadOnly ? null : () => this.cmPaste()],
       [t('act.selectAll'), () => { this.view.focus(); selectAll(this.view); }],
       [t('act.find'), () => this.openFindBar()],
@@ -685,6 +692,28 @@ export class LivePreviewView {
     void readClipboardText().then(text => {
       if (!text || this.destroyed || this.isReadOnly || view.state !== state || isComposing(view)) return;
       view.dispatch({ ...view.state.replaceSelection(text), userEvent: 'input.paste' }); view.focus();
+    });
+  }
+
+  /** 通用复制（004：execCommand 退场，改走统一剪贴板通道；空选区不写；失败可见反馈）。 */
+  cmCopy(): void {
+    if (!this.view || this.destroyed) return;
+    const { doc } = this.view.state;
+    const text = this.view.state.selection.ranges.map(r => doc.sliceString(r.from, r.to)).join('\n');
+    if (!text) return;
+    void this.clipWrite(text);
+  }
+
+  /** 代码块整块复制（004 FR-001/FR-002）：只写 CodeText 源文本，不含围栏/语言/装饰。 */
+  private copyCodeNode(node: SyntaxNode): void {
+    if (!this.view || this.destroyed) return;
+    void this.clipWrite(fencedCodeText(this.view.state.doc, node));
+  }
+
+  /** 写剪贴板并回报失败（004 FR-004）：失败经 onFlash 闪示，不静默。 */
+  private clipWrite(text: string): void {
+    void writeClipboardTextChecked(text).then(ok => {
+      if (!ok && !this.destroyed) this.opts.onFlash?.(t('md.copyFail'));
     });
   }
 
