@@ -3,8 +3,8 @@
   "generator": "scripts/generate-third-party-licenses.mjs",
   "inputSHA256": {
     "package-lock.json": "b6e50129a03f2f6e8e258ee5ea5507341a39125e8fc701ded4ae088779b5603c",
-    "src-tauri/Cargo.lock": "5df931d5ba6f39e2d7c6abf6fe17d9383e56090419b17ea3f80ceed9b450d5eb",
-    "src-tauri/Cargo.toml": "c5f77cf123d7e70e991f9392c1b1a80b116fa15daefe697400e3b75740a514c3"
+    "src-tauri/Cargo.lock": "a7e40b830bc9237736b399fe7cf596962b98df1ec573a19d8c580680bee642b3",
+    "src-tauri/Cargo.toml": "18daec428139972f25e7337c4832f6892377c151fe868a4be269aa0d607bdb84"
   },
   "cargoCommand": [
     "cargo",
@@ -6818,8 +6818,8 @@
         "license": "EPL-2.0",
         "exactVersion": "0.9.3-ziedit-source.1",
         "repositoryPath": "compliance/third-party-sources/elkjs/",
-        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/elkjs/",
-        "archiveURL": "https://github.com/sylx-c/ZiEdit/blob/master/compliance/third-party-sources/elkjs/elkjs-0.9.3-ziedit-source.1.source.tar.gz",
+        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/main/compliance/third-party-sources/elkjs/",
+        "archiveURL": "https://github.com/sylx-c/ZiEdit/blob/main/compliance/third-party-sources/elkjs/elkjs-0.9.3-ziedit-source.1.source.tar.gz",
         "statement": "The original unpinned generated ELK input is not distributed. ZiEdit uses the fixed-source 0.9.3-ziedit-source.1 rebuild with complete source, original component licenses, generated Java, exact locks, modifications and reproducibility proof published in the ZiEdit source repository at compliance/third-party-sources/elkjs/ (see repository and source archive URLs below). The npm elkjs entry is an upstream dependency identity, not the redistributed engine binary."
       },
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
@@ -12681,7 +12681,7 @@
         "exactVersion": "0.7.1",
         "archiveURL": "https://static.crates.io/crates/cssparser-macros/cssparser-macros-0.7.1.crate",
         "repositoryPath": "compliance/third-party-sources/mpl-crates/",
-        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/mpl-crates/",
+        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/main/compliance/third-party-sources/mpl-crates/",
         "statement": "The exact Source Code Form of cssparser-macros 0.7.1, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/mpl-crates/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence."
       },
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
@@ -12714,7 +12714,7 @@
         "exactVersion": "0.37.0",
         "archiveURL": "https://static.crates.io/crates/cssparser/cssparser-0.37.0.crate",
         "repositoryPath": "compliance/third-party-sources/mpl-crates/",
-        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/mpl-crates/",
+        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/main/compliance/third-party-sources/mpl-crates/",
         "statement": "The exact Source Code Form of cssparser 0.37.0, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/mpl-crates/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence."
       },
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
@@ -13460,7 +13460,7 @@
         "exactVersion": "0.3.5",
         "archiveURL": "https://static.crates.io/crates/dtoa-short/dtoa-short-0.3.5.crate",
         "repositoryPath": "compliance/third-party-sources/mpl-crates/",
-        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/mpl-crates/",
+        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/main/compliance/third-party-sources/mpl-crates/",
         "statement": "The exact Source Code Form of dtoa-short 0.3.5, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/mpl-crates/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence."
       },
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
@@ -19023,7 +19023,7 @@
         "exactVersion": "0.2.0",
         "archiveURL": "https://static.crates.io/crates/option-ext/option-ext-0.2.0.crate",
         "repositoryPath": "compliance/third-party-sources/option-ext/",
-        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/option-ext/",
+        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/main/compliance/third-party-sources/option-ext/",
         "statement": "The exact Source Code Form of option-ext 0.2.0, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/option-ext/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence."
       },
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"
@@ -21534,7 +21534,7 @@
         "exactVersion": "0.38.0",
         "archiveURL": "https://static.crates.io/crates/selectors/selectors-0.38.0.crate",
         "repositoryPath": "compliance/third-party-sources/mpl-crates/",
-        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/mpl-crates/",
+        "repositoryURL": "https://github.com/sylx-c/ZiEdit/tree/main/compliance/third-party-sources/mpl-crates/",
         "statement": "The exact Source Code Form of selectors 0.38.0, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/mpl-crates/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence."
       },
       "evidenceStatus": "LOCAL_TEXT_COLLECTED_NOT_LEGAL_CLEARANCE"

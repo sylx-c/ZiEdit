@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "capturedAt": "2026-11-17T13:20:13.986Z",
+  "capturedAt": "2026-11-21T14:27:35.392Z",
   "origin": "New real website first-viewport capture in this remediation session. No DOM/CSS injection, composition or image resampling.",
   "script": {
     "path": "scripts/capture-website-assets.mjs",
@@ -9,15 +9,15 @@
   },
   "browser": {
     "path": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-    "bytes": 5072712,
-    "sha256": "2497874639116d8edc3de34b3fd83f72fa099112a5d2a426e1f08fcf39a99612"
+    "bytes": 5316936,
+    "sha256": "5b07e50eaba5ca60fe6b900cc418a2081cdb8de6c621bfaf85b58865ede378ee"
   },
   "browserVersion": {
     "protocolVersion": "1.3",
-    "product": "Edg/157.0.4341.60",
-    "revision": "@fbcb2989a6c61b72a4919fe1028e58e70131cd46",
-    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
-    "jsVersion": "15.7.11.7"
+    "product": "Edg/158.0.4370.33",
+    "revision": "@56b8f691820060b6e15f702165117f203442943f",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36 Edg/158.0.0.0",
+    "jsVersion": "15.8.13.3"
   },
   "viewport": {
     "width": 1262,
@@ -28,8 +28,8 @@
   "inputs": [
     {
       "path": "website/README.md",
-      "bytes": 2583,
-      "sha256": "f5012ace2553cb1df0e7b70c13528d87e0da66d39c191f05812cdd8eb1d9f41d"
+      "bytes": 2577,
+      "sha256": "77c5da09c08ca4265ff4bb19b16db0f8ce4ca0cfd381aa50d27d81755deed1bb"
     },
     {
       "path": "website/favicon.svg",
@@ -38,8 +38,8 @@
     },
     {
       "path": "website/index.html",
-      "bytes": 15467,
-      "sha256": "c5226e5f073e8e042f43ef6ccdd33925cc78dcacc7aa8a81e0fb27f300261302"
+      "bytes": 15465,
+      "sha256": "07e6cad64a83884bc2009be539d66d3ef496a1929e112ab989423d1a5c23cd72"
     },
     {
       "path": "website/shots/en/code.png",
@@ -89,14 +89,14 @@
   ],
   "raw": {
     "path": "compliance/asset-provenance/website/raw/og.png",
-    "bytes": 66481,
-    "sha256": "d2639aca58d944f6acade8f603e9a66bd60e2d9f884215df5a85904eca4a39a2",
+    "bytes": 66407,
+    "sha256": "dc084db3f936afb01128675424f50adfded5b99bdccf09b87f2f3fe1a6a590d7",
     "width": 1262,
     "height": 624
   },
   "published": {
     "path": "website/og.png",
-    "bytes": 66481,
-    "sha256": "d2639aca58d944f6acade8f603e9a66bd60e2d9f884215df5a85904eca4a39a2"
+    "bytes": 66407,
+    "sha256": "dc084db3f936afb01128675424f50adfded5b99bdccf09b87f2f3fe1a6a590d7"
   }
 }

@@ -22,7 +22,7 @@ npx serve .
 
 ## 部署到 GitHub Pages
 
-**自动部署**：master 分支上 `website/**` 的任何变更会由 [website-deploy 工作流](../.github/workflows/website-deploy.yml) 自动发布到 `gh-pages`；也可在 Actions 页面手动触发（workflow_dispatch）。
+**自动部署**：main 分支上 `website/**` 的任何变更会由 [website-deploy 工作流](../.github/workflows/website-deploy.yml) 自动发布到 `gh-pages`；也可在 Actions 页面手动触发（workflow_dispatch）。
 
 手动部署（应急）：
 
@@ -43,4 +43,4 @@ npx serve .
 
 - 全站下载链接统一指向 `https://github.com/sylx-c/ZiEdit/releases/latest`——永远解析到最新正式 Release，发版后无需改链接，也不会出现指向不存在标签的死链。
 - 页内版本号（`.version` 元素）由 `site.js` 调用 GitHub Releases API 自动对齐最新标签；`index.html` 里写死的 `v1.0.0` 只是接口失败时的静态兜底。发新版本时**可选**同步更新静态兜底值，但漏改也不会展示错误版本。
-- 官网由 [website-deploy 工作流](../.github/workflows/website-deploy.yml) 在 master 的 `website/**` 变更时自动部署。若线上内容与 master 不一致（例如历史被重写后工作流未触发），可在 Actions 页手动触发一次 website-deploy，或推送任意 `website/**` 变更。
+- 官网由 [website-deploy 工作流](../.github/workflows/website-deploy.yml) 在 main 的 `website/**` 变更时自动部署。若线上内容与 main 不一致（例如历史被重写后工作流未触发），可在 Actions 页手动触发一次 website-deploy，或推送任意 `website/**` 变更。

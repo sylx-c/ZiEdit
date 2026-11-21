@@ -1,10 +1,10 @@
 # CI（H-4 正式感外壳）：三平台前端 + Rust 全量门禁。
-# master push 与全部 PR 均执行检查及三平台安装包构建。
+# main push 与全部 PR 均执行检查及三平台安装包构建。
 name: ci
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     tags: ['v*']
   pull_request:
 

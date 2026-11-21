@@ -19,7 +19,7 @@ npm run tauri dev
 
 ## 提交前自查（与 CI 门禁一致）
 
-CI（`.github/workflows/ci.yml`）在每次 PR 与 `master` push 上运行，请在本地先跑：
+CI（`.github/workflows/ci.yml`）在每次 PR 与 `main` push 上运行，请在本地先跑：
 
 ```bash
 npx tsc --noEmit                                                        # 类型检查

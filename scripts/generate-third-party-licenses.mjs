@@ -251,7 +251,7 @@ for (const record of records) {
       license: 'MPL-2.0', exactVersion: record.version,
       archiveURL: record.source.archiveURL,
       repositoryPath: `compliance/third-party-sources/${local}/`,
-      repositoryURL: `https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/${local}/`,
+      repositoryURL: `https://github.com/sylx-c/ZiEdit/tree/main/compliance/third-party-sources/${local}/`,
       statement: `The exact Source Code Form of ${record.name} ${record.version}, its original notices, source checksum and unmodified-source inventory are published in the ZiEdit source repository at compliance/third-party-sources/${local}/ (see repository URL below). The source archive is also available from the exact upstream URL below. Local registry source bytes were compared to the archive; project modifications would require updated source and notice evidence.`,
     };
   }
@@ -260,8 +260,8 @@ for (const record of records) {
     record.correspondingSource = fixedSource.status === 'SOURCE_BUILD_VERIFIED' && sourceVerification.releaseAllowed ? {
       license: 'EPL-2.0', exactVersion: fixedSource.version,
       repositoryPath: 'compliance/third-party-sources/elkjs/',
-      repositoryURL: 'https://github.com/sylx-c/ZiEdit/tree/master/compliance/third-party-sources/elkjs/',
-      archiveURL: 'https://github.com/sylx-c/ZiEdit/blob/master/compliance/third-party-sources/elkjs/' + fixedSource.sourceArchive,
+      repositoryURL: 'https://github.com/sylx-c/ZiEdit/tree/main/compliance/third-party-sources/elkjs/',
+      archiveURL: 'https://github.com/sylx-c/ZiEdit/blob/main/compliance/third-party-sources/elkjs/' + fixedSource.sourceArchive,
       statement: 'The original unpinned generated ELK input is not distributed. ZiEdit uses the fixed-source 0.9.3-ziedit-source.1 rebuild with complete source, original component licenses, generated Java, exact locks, modifications and reproducibility proof published in the ZiEdit source repository at compliance/third-party-sources/elkjs/ (see repository and source archive URLs below). The npm elkjs entry is an upstream dependency identity, not the redistributed engine binary.',
     } : {
       license: 'EPL-2.0', exactVersion: record.version,
