@@ -11,7 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { RUN_DIR, EXE, PORT, GATE_ENV, GATE_BUDGET, INIT_OBSERVERS, RAF_SAMPLER, connectCDP, waitTargets, waitMounted, clickFocus, killTree, percentile } from './gate-lib.mjs';
+import { RUN_DIR, EXE, PORT, GATE_ENV, GATE_BUDGET, INIT_OBSERVERS, RAF_SAMPLER, connectCDP, waitTargets, waitMounted, clickFocus, dismissOverlay, switchMdMode, killTree, percentile } from './gate-lib.mjs';
 
 const corpusArg = process.argv[2];
 const outFileArg = process.argv[3];
@@ -54,26 +54,27 @@ async function runRound(roundIdx) {
     await new Promise(r => setTimeout(r, 3000)); // 挂载期异步跑完
 
     // 冷 profile 首启有「欢迎」模态（localStorage 标记随 webview profile 走）——mask 会拦截全部键盘。
-    // 驱散循环：Esc（焦点在 body 时有效）与遮罩角落点击（mask mousedown 直接关）交替，最多 5 轮。
-    let welcomeGone = false;
-    for (let i = 0; i < 5 && !welcomeGone; i++) {
-      if (!(await cdp.evaluate("!!document.querySelector('.ov-mask')"))) { welcomeGone = true; break; }
-      await cdp.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
-      await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
-      await new Promise(r => setTimeout(r, 300));
-      if (!(await cdp.evaluate("!!document.querySelector('.ov-mask')"))) { welcomeGone = true; break; }
-      await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: 6, y: 6, button: 'left', clickCount: 1 });
-      await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: 6, y: 6, button: 'left', clickCount: 1 });
-      await new Promise(r => setTimeout(r, 300));
-      welcomeGone = !(await cdp.evaluate("!!document.querySelector('.ov-mask')"));
-    }
+    // 驱散复用 gate-lib dismissOverlay：Esc 优先，兜底点击打遮罩自身——原内联循环的角落 (6,6) 点击
+    // 会命中菜单栏打开下拉菜单，方向键从此走菜单导航（2026-11-21 活体探针实证，6/7 钉死的量具真凶）。
+    const welcomeGone = await dismissOverlay(cdp);
     rec.welcome = { dismissed: welcomeGone }; save();
     if (!welcomeGone) throw new Error('welcome/overlay modal not dismissible — keyboard cannot land (fail-closed)');
 
+    // 语料按出厂默认开进「渲染预览」（md 形态，非 CM 面；其内部源编辑器隐藏 rect 0×0——对其
+    // +40/+40 点击会命中标题栏/菜单栏打开菜单，方向键从此走菜单导航；2026-11-21 探针实证，
+    // 历史上锚点「全程纹丝不动」的量具根源）。arrow 门禁对象是 IR 编辑面：先走真实菜单切
+    // 「即时渲染」，此后一律以 .md-ir .cm-content 定位编辑器（避开残留隐藏缓冲实例）。
+    await switchMdMode(cdp, '即时渲染');
+
     // 光标置文档中部附近的首个普通段落/列表行（避开原子块：表格/公式/围栏内部——blockAtomic 生效后
     // 原子域内的垂直移动会被 CM6 拒绝，起始点落在件内会让锚点全程不动，假 FAIL）
-    const base = await clickFocus(cdp, null); // 先点文档末拿焦点
-    const mid = await cdp.evaluate(`(() => { const v = document.querySelector('.cm-content').cmTile.view; const doc = v.state.doc; let line = doc.lineAt(Math.floor(doc.length / 2)); const plain = l => /^(这是第|- )/.test(l.text); for (let i = 0; i < 400 && !plain(line) && line.number < doc.lines; i++) line = doc.line(line.number + 1); v.dispatch({ selection: { anchor: line.from } }); v.focus(); return { pos: line.from, line: line.number, text: line.text.slice(0, 24), len: doc.length }; })()`);
+    const base = await clickFocus(cdp, null, '.md-ir .cm-content'); // 先点文档末拿焦点
+    const mid = await cdp.evaluate(`(() => { const v = document.querySelector('.md-ir .cm-content').cmTile.view; const doc = v.state.doc; let line = doc.lineAt(Math.floor(doc.length / 2)); const plain = l => /^(这是第|- )/.test(l.text); for (let i = 0; i < 400 && !plain(line) && line.number < doc.lines; i++) line = doc.line(line.number + 1); v.dispatch({ selection: { anchor: line.from } }); v.focus(); return { pos: line.from, line: line.number, text: line.text.slice(0, 24), len: doc.length }; })()`);
+    // 焦点哨兵（fail-closed）：按键开始前 activeElement 必须是编辑器 contentDOM——菜单/模态/单元格
+    // 劫持焦点时按键全部落空，锚点全程不动会被误记成产品钉死（量具自证，非产品判据）。
+    const focus = await cdp.evaluate(`(() => { const v = document.querySelector('.md-ir .cm-content').cmTile.view; v.focus(); const ae = document.activeElement; return { ok: ae === v.contentDOM, active: ((ae?.className || '') + ' ' + (ae?.tagName || '')).trim().slice(0, 60) }; })()`);
+    rec.focus = { inEditor: focus.ok, activeElement: focus.active }; save();
+    if (!focus.ok) throw new Error('editor focus not acquired (activeElement=' + focus.active + ') — keyboard cannot land (fail-closed)');
     const probePresent = await cdp.evaluate('globalThis.__ZIEDIT_IR_PERF__ === true');
     const pageStart = await cdp.evaluate('Math.round(performance.now())');
     rec.base = { len: base.len, mid }; rec.pageStart = pageStart; rec.probePresent = !!probePresent; save();
@@ -82,26 +83,42 @@ async function runRound(roundIdx) {
     const obsOk = await cdp.evaluate(`!!(window.__gate && Array.isArray(window.__gate.longtasks) && Array.isArray(window.__gate.loaf))`);
     if (!obsOk) throw new Error('observer not registered (window.__gate missing)');
 
-    const readGate = async () => {
+    const readGate = async since => {
       const g = await cdp.evaluate('window.__gate');
-      const lts = (g?.longtasks || []).filter(x => x.start > pageStart);
-      const loaf = (g?.loaf || []).filter(x => x.start > pageStart);
+      const lts = (g?.longtasks || []).filter(x => x.start > since);
+      const loaf = (g?.loaf || []).filter(x => x.start > since);
       const snap = await cdp.evaluate(`(globalThis.__ZIEDIT_IR_PERF_DATA__ ?? null)`).catch(() => null);
       return { lts, loaf, snap };
+    };
+
+    // 稳态安置：中部选区是程序跳转，其首建（120ms 预算内 ensureSyntaxTree 预解析 + 新视口块装饰/
+    // 挂表）属跳转/停稳口径，不属长按稳态测量窗——每轮开测前等长任务流静默，且各轮以自身
+    // holdStart 界定测量窗（判据不删、观察者不拆。2026-11-21 r4 实证：单点 154ms 落于安置后
+    // 386ms，此后 120s / 5340 键零 >50ms；Up 轮曾以共用 pageStart 把该 Down 期事件重复计数）。
+    const quiet = async () => {
+      await new Promise(r => setTimeout(r, 1200));
+      for (let i = 0; i < 10; i++) {
+        const a = await cdp.evaluate('window.__gate.longtasks.length');
+        await new Promise(r => setTimeout(r, 800));
+        const b = await cdp.evaluate('window.__gate.longtasks.length');
+        if (b === a) return;
+      }
     };
 
     // —— 长按模拟：~30ms 间隔 rawKeyDown/keyUp（键盘重复），先 ArrowDown 后 ArrowUp ——
     const holds = [];
     for (const keyName of ['ArrowDown', 'ArrowUp']) {
+      await quiet(); // 开测前等安置（首轮）/上轮尾工（次轮）静默
       const t0 = Date.now();
       let keys = 0, lastAnchor = -1, lastHead = -1, lastAnchorChangeKey = -1, anchorChecks = 0, anchorStuck = 0, anchorRests = 0;
       const spots = []; // { key, anchor, line }
       await cdp.evaluate('window.__rafStart()');
+      const holdStart = await cdp.evaluate('Math.round(performance.now())');
       while (Date.now() - t0 < HOLD_MS) {
         await arrowKey(cdp, keyName);
         keys++;
         if (keys % 500 === 0) { // 每 500 键抽查 selection 主锚
-          const s = await cdp.evaluate(`(() => { const v = document.querySelector('.cm-content').cmTile.view; const r = v.state.selection.ranges[0]; const lc = v.state.doc.lines; const atStart = r.head <= v.state.doc.line(1).from, atEnd = r.head >= v.state.doc.line(lc).to; return { anchor: r.anchor, head: r.head, line: v.state.doc.lineAt(r.head).number, atStart, atEnd }; })()`);
+          const s = await cdp.evaluate(`(() => { const v = document.querySelector('.md-ir .cm-content').cmTile.view; const r = v.state.selection.ranges[0]; const lc = v.state.doc.lines; const atStart = r.head <= v.state.doc.line(1).from, atEnd = r.head >= v.state.doc.line(lc).to; return { anchor: r.anchor, head: r.head, line: v.state.doc.lineAt(r.head).number, atStart, atEnd }; })()`);
           anchorChecks++;
           // 文档首尾的合法停滞（Down 到末行/Up 到首行）记 rests 不记 stuck
           const resting = keyName === 'ArrowDown' ? s.atEnd : s.atStart;
@@ -113,11 +130,11 @@ async function runRound(roundIdx) {
         await new Promise(r => setTimeout(r, 6)); // dispatch 一对 ~24ms，+6ms ≈ 30ms 节奏（CDP 合成 28-30ms/键地板）
       }
       const frameTimes = await cdp.evaluate('window.__rafStop()');
-      const { lts, loaf, snap } = await readGate();
-      const segs = snap?.segments?.filter(s => s.t0 > pageStart) || [];
+      const { lts, loaf, snap } = await readGate(holdStart);
+      const segs = snap?.segments?.filter(s => s.t0 > holdStart) || [];
       const segDur = segs.filter(s => s.docChanged).map(s => s.t3 - s.t0).sort((a, b) => a - b);
       holds.push({
-        keyName, keys, durationMs: Date.now() - t0,
+        keyName, keys, durationMs: Date.now() - t0, holdStart,
         anchors: { checks: anchorChecks, stuck: anchorStuck, rests: anchorRests, lastChangeKey: lastAnchorChangeKey, spots: spots.slice(-3) },
         frameTimes: { n: frameTimes.length, p50: percentile([...frameTimes].sort((a, b) => a - b), 0.5), p95: percentile([...frameTimes].sort((a, b) => a - b), 0.95), max: frameTimes.length ? Math.max(...frameTimes) : 0 },
         longtasks: { count: lts.length, over50: lts.filter(l => l.dur > 50).length, over100: lts.filter(l => l.dur > 100).length, maxDur: lts.length ? Math.max(...lts.map(l => l.dur)) : 0, worst: lts.filter(l => l.dur > 50).slice(-5) },
@@ -128,7 +145,7 @@ async function runRound(roundIdx) {
       save();
     }
 
-    const finalPos = await cdp.evaluate(`(() => { const v = document.querySelector('.cm-content').cmTile.view; return { len: v.state.doc.length, anchor: v.state.selection.ranges[0].anchor }; })()`);
+    const finalPos = await cdp.evaluate(`(() => { const v = document.querySelector('.md-ir .cm-content').cmTile.view; return { len: v.state.doc.length, anchor: v.state.selection.ranges[0].anchor }; })()`);
     rec.result = { holds, finalPos, bars: { longtaskMs: GATE_BUDGET.arrowLongtaskMs, anchorCheckEveryKeys: 500 } };
 
     const reasons = [];

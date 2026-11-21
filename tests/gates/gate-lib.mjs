@@ -99,12 +99,14 @@ export async function waitMounted(cdp, timeoutMs = 180000) {
   }
 }
 
-// 真实鼠标点击 + DOM 聚焦 + 光标置 pos（native-writing-20min 已验证口径；pos 默认文档末）
-export async function clickFocus(cdp, pos = null) {
-  const rect = await cdp.evaluate(`(() => { const r = document.querySelector('.cm-content').getBoundingClientRect(); return { x: r.left + 40, y: r.top + 40 }; })()`);
+// 真实鼠标点击 + DOM 聚焦 + 光标置 pos（native-writing-20min 已验证口径；pos 默认文档末）。
+// selector 用于多 CM 实例页面定位目标编辑器（如 IR 面 '.md-ir .cm-content'——渲染预览形态下
+// 页面还挂着隐藏的缓冲源编辑器，盲取首个 .cm-content 会点到 rect 0×0 的隐藏实例）。
+export async function clickFocus(cdp, pos = null, selector = '.cm-content') {
+  const rect = await cdp.evaluate(`(() => { const r = document.querySelector('${selector}').getBoundingClientRect(); return { x: r.left + 40, y: r.top + 40 }; })()`);
   await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: rect.x, y: rect.y, button: 'left', clickCount: 1 });
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: rect.x, y: rect.y, button: 'left', clickCount: 1 });
-  return cdp.evaluate(`(() => { const v = document.querySelector('.cm-content').cmTile.view; v.dispatch({ selection: { anchor: ${pos === null ? 'v.state.doc.length' : pos} } }); v.focus(); return { len: v.state.doc.length }; })()`);
+  return cdp.evaluate(`(() => { const v = document.querySelector('${selector}').cmTile.view; v.dispatch({ selection: { anchor: ${pos === null ? 'v.state.doc.length' : pos} } }); v.focus(); return { len: v.state.doc.length }; })()`);
 }
 
 // taskkill /F /T 树杀（漏 WebView2 子进程会占住 profile 与端口，下轮调试失效）
@@ -163,15 +165,24 @@ export async function waitFor(cdp, expr, ms = 15000) {
   while (Date.now() - t0 < ms) { if (await cdp.evaluate(expr).catch(() => false)) return true; await sleep(100); }
   throw new Error('waitFor timeout: ' + expr);
 }
-/** 冷 profile 首启欢迎模态拦截输入：Esc 与角落点击交替驱散（同 gate-walk-f 口径），返回是否已驱散 */
+/** 冷 profile 首启欢迎模态拦截输入：Esc 优先；遮罩兜底点击打遮罩自身下缘中部——原角落 (6,6)
+ *  会命中菜单栏，把键盘焦点劫持进下拉菜单（menu-dropdown 常驻 activeElement，ArrowUp/Down 从此
+ *  走菜单导航而不入编辑器；2026-11-21 arrow 门禁活体探针实证，锚点全程纹丝不动的量具真凶）。
+ *  返回前补 Esc 收掉可能被悬停打开的菜单，「无打开菜单」并入返回值——注意 .menu-dropdown 元素
+ *  随菜单项常驻挂载（隐藏不等于不存在），开合谓词必须用 .menu-item.open。 */
 export async function dismissOverlay(cdp) {
   for (let i = 0; i < 5; i++) {
-    if (!(await cdp.evaluate("!!document.querySelector('.ov-mask')"))) return true;
+    if (!(await cdp.evaluate("!!document.querySelector('.ov-mask')"))) break;
     await pressKey(cdp, 'Escape', 'Escape', 27); await sleep(300);
-    if (!(await cdp.evaluate("!!document.querySelector('.ov-mask')"))) return true;
-    await clickXY(cdp, 6, 6); await sleep(300);
+    if (!(await cdp.evaluate("!!document.querySelector('.ov-mask')"))) break;
+    const spot = await cdp.evaluate(`(() => { const r = document.querySelector('.ov-mask').getBoundingClientRect(); return { x: r.left + r.width / 2, y: Math.max(r.top + 20, r.top + r.height - 24) }; })()`);
+    await clickXY(cdp, spot.x, spot.y); await sleep(300);
   }
-  return !(await cdp.evaluate("!!document.querySelector('.ov-mask')"));
+  for (let i = 0; i < 2 && (await cdp.evaluate("!!document.querySelector('.menu-item.open')")); i++) {
+    await pressKey(cdp, 'Escape', 'Escape', 27); await sleep(200);
+  }
+  return !(await cdp.evaluate("!!document.querySelector('.ov-mask')"))
+    && !(await cdp.evaluate("!!document.querySelector('.menu-item.open')"));
 }
 /** Markdown 形态切换走真实菜单：Alt → 视图 → Markdown ▸ → 目标项（源码视图/分屏预览/即时渲染/渲染预览）。
  *  菜单交互存在悬停时序竞态（子菜单未及时展开/菜单被重绘/异步装配窗口内项缺失）——整段重试，
