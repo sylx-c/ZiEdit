@@ -38,17 +38,17 @@ describe('静态预览标题无错误装饰（004 FR-005/FR-006）', () => {
     expect(css).not.toMatch(/\.md-preview \.md-col h[1-6]\{[^}]*padding-left:calc\(var\(--mdir-head-gutter/);
   });
 
-  it('styles.css：IR 标题留白栏保留几何但无常驻背景/边框（cursorWidthChange=0 不变量）', () => {
-    // 留白栏宽度与 padding-left 必须保留（正文 x 不变）
-    expect(css).toMatch(/\.md-ir \.cm-line:is\(\.mdir-h1[^)]*\)\{[^}]*padding-left:calc\(var\(--mdir-head-gutter/);
-    // 常驻灰块（background + border-left 的组合）必须退场
+  it('styles.css：IR 标题与正文同一左缘（无留白栏缩进），井号仅编辑态 inline 显示（004 修订 2026-11-22）', () => {
+    // 标题行不得携带留白栏 padding（Typora 对齐：标题正文左对齐）
+    expect(css).not.toMatch(/\.md-ir \.cm-line:is\(\.mdir-h1[^)]*\)\{[^}]*padding-left:calc\(var\(--mdir-head-gutter/);
+    // 默认（阅读态）无任何 ::before 内容
     const irBefore = css.match(/\.md-ir \.cm-line:is\(\.mdir-h1[^)]*\)::before\{[^}]*\}/g)?.join('\n') ?? '';
-    expect(irBefore).not.toMatch(/border-left:\s*3px/);
-    expect(irBefore).not.toMatch(/background:\s*color-mix/);
-    expect(irBefore).toMatch(/content:attr\(data-marks\)/); // 编辑态井号机制保留
+    expect(irBefore).toContain('content:none');
+    // 编辑态井号：行首 inline 显示（正文右移，Typora 行为），小号 muted
+    expect(css).toMatch(/mdir-marks-on::before\{[^}]*content:attr\(data-marks\)/);
   });
 
-  it('styles.css：marks-on 编辑态仍可辨（无背景栏时的显式反馈）', () => {
+  it('styles.css：marks-on 编辑态井号样式可辨（muted 色小号）', () => {
     expect(css).toMatch(/mdir-marks-on::before\{[^}]*color:var\(--muted\)/);
   });
 

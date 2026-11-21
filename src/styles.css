@@ -1564,17 +1564,15 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .md-ir .cm-scroller{font-family:var(--md-font-stack);font-size:var(--md-fs-base);line-height:1.6}
 .md-ir .cm-content{max-width:var(--md-col);margin-inline:auto;padding:20px 24px 48px}
 .md-ir .cm-line{padding-inline:0}
-/* 标题定级（REQ-014 P2 留白栏：井号常隐，正文行文本范围恒定——cursorWidthChange=0 的机制基础）。
-   004（Typora parity）：留白栏几何（宽度/padding-left）保留，常驻级别色条（背景+竖线）退场；
-   留白区默认全透明，仅 mdir-marks-on 编辑态显示井号（spec FR-005，data-model §3 decorations）。 */
-.md-ir .cm-line:is(.mdir-h1,.mdir-h2,.mdir-h3,.mdir-h4,.mdir-h5,.mdir-h6){padding-block:0;font-weight:600;line-height:1.35;
-  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
-.md-ir .cm-line:is(.mdir-h1,.mdir-h2,.mdir-h3,.mdir-h4,.mdir-h5,.mdir-h6)::before{position:absolute;left:0;top:0;bottom:0;
-  width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);display:flex;align-items:center;
-  content:attr(data-marks);font-size:calc(var(--md-fs-base) * 0.72);font-family:var(--code-font,monospace);
-  color:transparent;justify-content:flex-start;overflow:hidden;white-space:pre}
-/* 光标进入标题正文/选区相交（projector 加 mdir-marks-on）：留白栏显示井号，宽度不变 */
-.md-ir .cm-line.mdir-marks-on::before{color:var(--muted)}
+/* 标题定级（004 修订 2026-11-22：Typora 对齐）——标题与正文同一左缘，无留白栏缩进；
+   井号不在阅读态出现，仅光标进入标题正文/选区相交的编辑行在行首 inline 显示井号
+   （正文随之右移，Typora 同款行为），离开即收起。原 REQ-014 P2 留白栏几何
+   （cursorWidthChange=0）随之退役，变更依据：所有者指认标题前缩进与 Typora 不一致。 */
+.md-ir .cm-line:is(.mdir-h1,.mdir-h2,.mdir-h3,.mdir-h4,.mdir-h5,.mdir-h6){padding-block:0;font-weight:600;line-height:1.35}
+.md-ir .cm-line:is(.mdir-h1,.mdir-h2,.mdir-h3,.mdir-h4,.mdir-h5,.mdir-h6)::before{content:none}
+/* 光标进入标题正文/选区相交（projector 加 mdir-marks-on）：行首显示井号，正文右移 */
+.md-ir .cm-line.mdir-marks-on::before{content:attr(data-marks) " ";font-size:calc(var(--md-fs-base) * 0.72);font-family:var(--code-font,monospace);
+  color:var(--muted);white-space:pre}
 .md-ir .cm-line.mdir-h1{font-size:calc(var(--md-fs-base) * 2.25)}
 .md-ir .cm-line.mdir-h2{font-size:calc(var(--md-fs-base) * 1.75)}
 .md-ir .cm-line.mdir-h3{font-size:calc(var(--md-fs-base) * 1.5)}
