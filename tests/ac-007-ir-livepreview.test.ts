@@ -128,7 +128,7 @@ describe('AC-1a 活动块显源码 / 非活动块装饰（规则 2 v0.16）', ()
     expect((ths[0] as HTMLElement).style.textAlign).toBe('center');
     expect((ths[1] as HTMLElement).style.textAlign).toBe('right');
     host.querySelector('td')!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    await until(() => !!host.querySelector('td .cm-editor'));
+    await until(() => host.querySelector('td')!.getAttribute('contenteditable') === 'true');
     expect(host.querySelector('table.mdir-table')).toBe(table);
     expect(v.getMarkdown()).toBe(fileText);
     v.destroy();

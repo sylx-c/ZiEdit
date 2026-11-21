@@ -15,7 +15,7 @@ vi.mock('../src/common/ipc', () => ({
 }));
 
 if (!Range.prototype.getClientRects) Range.prototype.getClientRects = () => [] as unknown as DOMRectList;
-const { LivePreviewView, buildLiveDeco } = await import('../src/markdown-view/livepreview');
+const { LivePreviewView } = await import('../src/markdown-view/livepreview');
 const views: InstanceType<typeof LivePreviewView>[] = [];
 afterEach(() => { for (const v of views.splice(0)) v.destroy(); });
 
@@ -98,7 +98,7 @@ describe('AC-29 所见即所得操作不变量', () => {
     const remote = vi.fn(async (_url: string) => 'data:image/png;base64,AA==');
     const { v, host } = await mount('首\n\n| 图片 | 链接 |\n|---|---|\n| ![图][img] | [链接][doc] |\n\n[img]: https://images.test/table.png\n[doc]: /test.md "标题"\n\n尾', remote);
     v.view.dispatch({ selection: { anchor: 0 } });
-    await until(() => !!host.querySelector('.mdir-table img[src^="data:"]'));
+    await until(() => !!host.querySelector('.mdir-table img[src^="data:"]') && !!host.querySelector('.mdir-table a[title]')); // P6：惰性交付逐格落地
     expect(host.querySelector('.mdir-table a')?.getAttribute('title')).toBe('标题');
     expect(remote).toHaveBeenCalledWith('https://images.test/table.png');
   });
@@ -107,6 +107,7 @@ describe('AC-29 所见即所得操作不变量', () => {
     const doc = '首\n\n| A | B |\n|---|---|\n| <img src=x onerror=alert(1)> | [点](javascript:alert(1)) |\n| **粗体** & <标签> | `代码` |\n\n尾';
     const { v, host } = await mount(doc);
     await until(() => !!host.querySelector('.mdir-table'));
+    await until(() => !!host.querySelector('.mdir-table strong') && !!host.querySelector('.mdir-table code')); // P6：单元格 HTML 惰性交付
     const table = host.querySelector('.mdir-table')!;
     expect(table.querySelector('img,script,[onerror],a[href^="javascript:"]')).toBeNull();
     expect(table.querySelector('tbody td')?.textContent).toBe('<img src=x onerror=alert(1)>');
@@ -136,7 +137,7 @@ describe('AC-29 所见即所得操作不变量', () => {
     const remote = () => new Promise<string | null>(r => { finish = r; });
     const doc = '首\n\n| A |\n|---|\n| ![图](https://images.test/table-late.png) |\n\n尾';
     const { v, host } = await mount(doc, remote);
-    await until(() => !!host.querySelector('.mdir-table'));
+    await until(() => !!host.querySelector('.mdir-table img')); // P6：单元格 HTML 惰性交付后图片在场
     const table = host.querySelector('.mdir-table')!;
     v.view.dispatch({ selection: { anchor: doc.length } });
     expect(host.querySelector('.mdir-table')).toBe(table);
@@ -148,7 +149,7 @@ describe('AC-29 所见即所得操作不变量', () => {
     expect(old.getAttribute('src')).toBeNull();
   });
 
-  it.each(['code', 'quote', 'list'])('长 %s 块只在视口附近构建装饰', kind => {
+  it.each(['code', 'quote', 'list'])('长 %s 块只在视口附近构建装饰', async kind => {
     const body = kind === 'code' ? '```\n' + 'let value = 1;\n'.repeat(5000) + '```'
       : kind === 'quote' ? '> **value**\n'.repeat(5000) : '- [ ] **value**\n'.repeat(5000);
     const doc = '首\n\n' + body + '\n\n尾';
@@ -157,7 +158,12 @@ describe('AC-29 所见即所得操作不变量', () => {
     const state = editor.state;
     const from = Math.floor(doc.length / 2);
     const to = from + 200;
-    const set = buildLiveDeco({ state, viewport: { from, to } } as EditorView, null);
+    // REQ-014 P6：live-deco 壳退役，视口裁剪口径改锁统一投影器纯函数。
+    const { projectViewport } = await import('../src/markdown-view/projector');
+    const { referenceIndex } = await import('../src/markdown-view/live-state');
+    const { syntaxTree } = await import('@codemirror/language');
+    const set = projectViewport(state.doc, syntaxTree(state), { from: Math.max(0, from - 300), to: Math.min(doc.length, to + 300) },
+      referenceIndex(state.doc), { ranges: [], touched: false, formatted: null, emojis: {}, refs: () => new Map(), fenceEditing: () => false }, null);
     let count = 0;
     set.between(0, doc.length, (a, _b, d) => {
       count++;

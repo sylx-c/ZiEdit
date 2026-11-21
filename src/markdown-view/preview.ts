@@ -9,13 +9,10 @@
 import { zassetUrl } from '../common/ipc';
 import { t } from '../common/i18n';
 import { zassetAllow } from '../common/ipc';
-import { extractMarkdownMetadata, previewSource, type MarkdownMetadata, type FootnoteItem } from './headings';
+import { type MarkdownMetadata } from './headings';
 import emojiTable from './unicode-emojis.json';
-import { renderPlaceholder } from './render-model';
 import { markdownIt } from './md';
 import { readingSurface } from './reading-surface';
-import type { MarkdownBlock } from './document-model';
-import { renderFootnotesHtml } from './static-html';
 export { extractHeadings, extractHeadingsReady, type HeadingItem } from './headings';
 
 /** Unicode 表情别名表（随包 JSON，v0.42 起不再经旧引擎自举）；md 行内规则与 IR 共用默认值。 */
@@ -24,81 +21,19 @@ export function loadUnicodeEmojis(): Promise<Readonly<Record<string, string>>> {
   return Promise.resolve(unicodeEmojiValues);
 }
 
-// markdown-it 实例与行内规则/标题锚点/代码高亮配置已收编为共享惰性单例（./md，
-// perf-silk Pass 1 FC①）：preview（回退渲染/行内投影）与 static-html（链接校验/实体
-// 解码）共用同一实例，规则只注册一次。
-
-/** 渲染 Markdown 文本为预览 HTML（markdown-it 回退路径用） */
-export function renderMarkdown(text: string): string {
-  const metadata = extractMarkdownMetadata(text);
-  let source = previewSource(text, metadata), prefix = 'ZiEditRENDERTOKEN';
-  while (source.includes(prefix)) prefix += 'X';
-  for (let i = metadata.renderBlocks.length - 1; i >= 0; i--) {
-    const block = metadata.renderBlocks[i]!;
-    source = source.slice(0, block.from) + prefix + i + 'END' + '\n'.repeat((source.slice(block.from, block.to).match(/\n/g) ?? []).length)
-      + source.slice(block.to);
-  }
-  let html = markdownIt().render(source);
-  metadata.renderBlocks.forEach((block, index) => {
-    const token = prefix + index + 'END', placeholder = renderPlaceholder(block);
-    html = block.display ? html.replace('<p>' + token + '</p>', placeholder) : html;
-    html = html.replace(token, placeholder);
-  });
-  if (typeof document === 'undefined') return html;
-  const host = document.createElement('div'); host.innerHTML = html;
-  applyDocumentMetadata(host, text, metadata); return host.innerHTML;
-}
-
-/** 安全降级也按原文块更新，文档级引用与脚注编号继续使用同一份元数据。 */
-export function renderMarkdownBlock(text: string, block: MarkdownBlock, metadata: MarkdownMetadata): string {
-  if (block.kind === 'FootnoteDefinition' || block.kind === 'LinkReference') return '';
-  if (block.kind === 'Footnotes') return renderFootnotesHtml(metadata);
-  if (block.kind === 'FrontMatter') return '<pre class="md-frontmatter">' + block.src.trimEnd().replace(/[&<>]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' })[c]!) + '</pre>';
-  let source = block.src, prefix = 'ZiEditRENDERTOKEN';
-  while (source.includes(prefix)) prefix += 'X';
-  const renders = metadata.renderBlocks.filter(item => item.from >= block.from && item.to <= block.to);
-  for (let i = renders.length - 1; i >= 0; i--) {
-    const item = renders[i]!, from = item.from - block.from, to = item.to - block.from;
-    source = source.slice(0, from) + prefix + i + 'END' + '\n'.repeat((text.slice(item.from, item.to).match(/\n/g) ?? []).length) + source.slice(to);
-  }
-  let html = markdownIt().render(source, { references: metadata.references, footnotes: new Map(metadata.footnotes.map(note => [note.label, note])) });
-  renders.forEach((item, i) => {
-    const token = prefix + i + 'END', placeholder = renderPlaceholder(item);
-    if (item.display) html = html.replace('<p>' + token + '</p>', placeholder);
-    html = html.replace(token, placeholder);
-  });
-  return html;
-}
-
-// ── 标题提取（自 wysiwyg.ts 迁入，v0.8 补 line 字段：预览路径 data-line 注入与大纲共用一源） ──
-
-/** 行内语法沿用静态回退解析器，HTML 禁用与链接校验保持同一策略。 */
-export function renderMarkdownInline(text: string, references?: Record<string, { href: string; title: string }>, emojis = unicodeEmojiValues,
-  footnotes?: ReadonlyMap<string, FootnoteItem>): string {
-  return markdownIt().renderInline(text, { references, emojis, footnotes });
-}
+// REQ-014 P4（T022）：markdown-it 渲染路径（renderMarkdown / renderMarkdownBlock /
+// renderMarkdownInline）已删除——三面静态 HTML 统一由 static-html.ts 的 renderStaticHtml 承载；
+// 单元格行内接缝为 renderCellHtml。共享单例（./md）保留纯工具用途：链接校验/实体解码/元数据提取。
 
 /** 复用解析器的实体规则；调用方只能把解码结果作为文字投影。 */
 export function decodeMarkdownEntity(source: string): string {
   return markdownIt().utils.unescapeAll(source);
 }
 
-const originalFootnoteAttributes = new WeakMap<Element, Map<string, string>>();
-
-/** 旧引擎按定义顺序编号，三面统一到索引的首次引用顺序；缓存节点重用时仍从原ID映射。 */
-function alignFootnotes(root: HTMLElement, metadata: MarkdownMetadata): void {
-  const numbers = new Map([...metadata.footnotes].sort((a, b) => a.from - b.from).map((note, i) => [i + 1, note.number]));
+/** REQ-014 P4：静态序列化器已直接输出规范编号（首次引用序 note.number），本函数不再做
+ *  定义序→引用序的数字改写（否则双重映射）；保留缓存节点重用时的一致性与定义列表按号排序。 */
+function alignFootnotes(root: HTMLElement, _metadata: MarkdownMetadata): void {
   for (const element of root.querySelectorAll('[id^="footnotes-"],a[href^="#footnotes-"]')) {
-    let original = originalFootnoteAttributes.get(element);
-    if (!original) { original = new Map(); originalFootnoteAttributes.set(element, original); }
-    for (const attribute of ['id', 'href']) {
-      const value = original.get(attribute) ?? element.getAttribute(attribute);
-      if (!value) continue;
-      original.set(attribute, value);
-      element.setAttribute(attribute, value.replace(/^(#?footnotes-(?:ref|def)-)(\d+)/, (all, prefix: string, number: string) => {
-        const mapped = numbers.get(Number(number)); return mapped ? prefix + mapped : all;
-      }));
-    }
     if (element.matches('.footnotes-ref a')) element.textContent = element.getAttribute('href')?.match(/-(\d+)$/)?.[1] ?? element.textContent;
   }
   for (const list of root.querySelectorAll('.footnotes-defs-ol')) {

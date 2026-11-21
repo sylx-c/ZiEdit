@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { expect, it, vi } from 'vitest';
-import { EditorView } from '@codemirror/view';
 import { forceParsing } from '@codemirror/language';
+import { undo } from '@codemirror/commands';
 import { LivePreviewView } from './livepreview';
-import { liveViewport } from './live-block-field';
-import { cellRange } from './table-editor';
+import { liveViewport } from './md-view-plugin';
+import { cellRange } from './table-widget';
 import { safeCell } from './table-model';
 import { referenceField, referencesReady } from './live-state';
 
@@ -47,32 +47,31 @@ it.each([
   } finally { preview.destroy(); host.remove(); }
 });
 
-// A5 保留文档正确性，撤销 A4 专属的“超宽分片视口也必须始终保挂载”契约。
-// 常规视口仍覆盖真实格编辑器；上面的 table source 用例覆盖大文档/宽视口源事务。
-it.each([false, true])('100 cell-editor transactions preserve exact text in a normal viewport (metadata effect=%s)', async interleave => {
+// REQ-014 P5：单元格为 contenteditable 直接编辑，blur/切格时单事务写回。
+// 键序保持改为「写入期间文档不被污染 + 提交后精确写回 + 单步撤销恢复原表」。
+it.each([false, true])('100 cell-edit characters commit exactly once on leave (metadata effect=%s)', async interleave => {
   const { host, preview } = await mount('| head | b |\n| --- | --- |\n| target | other |\n\n', 600);
   try {
     await vi.waitFor(() => expect(host.querySelector('.mdir-table tbody td')).not.toBeNull(), { timeout: 3000 });
     const cell = host.querySelector<HTMLTableCellElement>('.mdir-table tbody td')!;
+    const initial = preview.getMarkdown(), range = cellRange(preview.view, cell.closest<HTMLElement>('.mdir-tablebox')!, 1, 0)!;
     cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    const editor = EditorView.findFromDOM(cell.querySelector<HTMLElement>('.cm-editor')!)!;
-    const box = cell.closest<HTMLElement>('.mdir-tablebox')!;
-    const initial = preview.getMarkdown(), range = cellRange(preview.view, box, 1, 0)!;
-    // 单元格入口保留其既有选区；显式置尾后每字符一个事务，无 await。
-    editor.dispatch({ selection: { anchor: editor.state.doc.length } });
-    let count = 0;
-    let written = '';
+    await vi.waitFor(() => expect(cell.getAttribute('contenteditable')).toBe('true'));
+    let typed = '';
     for (const ch of input) {
-      editor.dispatch({ ...editor.state.replaceSelection(ch), userEvent: 'input.type' });
-      written += ch;
-      expect(editor.state.selection.main.head).toBe('target'.length + written.length);
-      expect(preview.getMarkdown()).toBe(initial.slice(0, range.from) + safeCell('target' + written) + initial.slice(range.to));
-      if (interleave && ++count === 50) preview.view.dispatch({ effects: referencesReady.of(preview.view.state.field(referenceField)) });
+      cell.textContent += ch; // contenteditable 键入（jsdom 等价）
+      typed += ch;
+      // 编辑期间主文档保持原文（无逐笔事务——P5 blur 提交口径）。
+      expect(preview.getMarkdown()).toBe(initial);
+      if (interleave && typed.length === 50) preview.view.dispatch({ effects: referencesReady.of(preview.view.state.field(referenceField)) });
     }
-    const expected = initial.slice(0, range.from) + safeCell('target' + input) + initial.slice(range.to);
-    expect(preview.getMarkdown()).toBe(expected);
-    await new Promise(resolve => setTimeout(resolve, 150));
-    expect(preview.getMarkdown()).toBe(expected);
-    expect(editor.state.doc.toString()).toBe('target' + input);
+    // 提交（点表外另一格触发 blur 路径）。
+    const other = host.querySelector<HTMLTableCellElement>('.mdir-table tbody td:nth-child(2)')!;
+    other.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    await vi.waitFor(() => expect(preview.getMarkdown()).toBe(initial.slice(0, range.from) + safeCell('target' + input) + initial.slice(range.to)), { timeout: 3000 });
+    // 单步撤销恢复原表（REQ-014.8）。
+    preview.view.focus();
+    undo(preview.view);
+    expect(preview.getMarkdown()).toBe(initial);
   } finally { preview.destroy(); host.remove(); }
 });

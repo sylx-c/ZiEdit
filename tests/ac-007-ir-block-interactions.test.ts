@@ -45,16 +45,16 @@ it.each(['Backspace', 'Delete'])('content → whole block → document selection
 it('table cell Tab/Shift+Tab wraps, Mod+Enter inserts a row, toolbar deletes the entire table', async () => {
   const source = 'before\n\n| a | b |\n| --- | --- |\n| c | d |\n\nafter', view = await editor(source);
   await vi.waitFor(() => expect(document.querySelector('.mdir-table')).not.toBeNull());
-  const { openCellEditor } = await import('../src/markdown-view/table-editor');
   const box = document.querySelector<HTMLElement>('.mdir-tablebox')!;
   const cells = box.querySelectorAll<HTMLTableCellElement>('th,td');
-  openCellEditor(view, box, cells[1]!);
-  const local = () => { const dom = box.querySelector('.cm-content')!; return (dom as HTMLElement); };
-  local().dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+  cells[1]!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+  await vi.waitFor(() => expect(cells[1]!.getAttribute('contenteditable')).toBe('true'));
+  cells[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
   expect(box.dataset.mdTableRow).toBe('1'); expect(box.dataset.mdTableCol).toBe('0');
-  local().dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true }));
+  const active0 = box.querySelector<HTMLElement>('[data-md-row="0"][data-md-col="1"]')!;
+  active0.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true }));
   expect(box.dataset.mdTableRow).toBe('0'); expect(box.dataset.mdTableCol).toBe('1');
-  local().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true, cancelable: true }));
+  active0.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true, cancelable: true }));
   expect(view.state.doc.lines).toBe(8);
   await Promise.resolve();
   const remove = [...document.querySelectorAll<HTMLButtonElement>('.mdir-tabletools button')].find(button => button.title === '删除表格' || button.title === 'Delete table')!;

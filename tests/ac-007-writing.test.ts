@@ -6,7 +6,6 @@ import { ensureSyntaxTree } from '@codemirror/language';
 import { startCompletion, currentCompletions, setSelectedCompletion } from '@codemirror/autocomplete';
 import { LivePreviewView } from '../src/markdown-view/livepreview';
 import { parseTablePaste, pasteTable, resizeTable, runTableOperation, tableModel } from '../src/markdown-view/table-model';
-import { tableCellAt } from '../src/markdown-view/table-viewport';
 import { compositionChanged } from '../src/common/composition';
 
 vi.mock('../src/common/ipc', () => ({ textOpen: async () => ({ newline: 'lf' }), textReadAll: async () => '', textSave: async () => ({ len: 0 }) }));
@@ -46,10 +45,10 @@ describe('MD-06 正在键入的闭合围栏', () => {
     main.dispatch({ selection: { anchor: source.length } }); type(main, mark);
     expect(main.state.doc.toString()).toBe(source + mark);
     await until(() => main.contentDOM.textContent?.endsWith(mark) === true);
-    const { liveBlockField } = await import('../src/markdown-view/live-block-field');
+    const { projectionField } = await import('../src/markdown-view/md-view-plugin');
     const close = main.state.doc.lineAt(main.state.doc.length);
     const hidden: number[] = [];
-    main.state.field(liveBlockField).set.between(close.from, close.to, (from, to) => {
+    main.state.field(projectionField).block.between(close.from, close.to, (from, to) => {
       if (from <= close.from && to >= close.to) hidden.push(from);
     });
     expect(hidden).toEqual([]);
@@ -114,22 +113,24 @@ describe('007 AC-30 连续写作', () => {
     await until(() => main.contentDOM.textContent === 'Heading');
     expect(main.state.doc.toString()).toBe('# Heading');
   });
-  it('输入井号成标题期间保持源码可见（v0.39 活动显隐）', async () => {
+  it('输入井号成标题期间源码可见性由留白栏承载（REQ-014 P2：成题后井号常隐、留白栏显示）', async () => {
     const { view, main } = await mount('正文');
     await until(() => main.contentDOM.textContent === '正文');
     main.dispatch({ selection: { anchor: 0 }, userEvent: 'select.pointer' });
     type(main, '### ');
-    await until(() => main.contentDOM.textContent?.includes('###'));
+    // 成题后：井号从正文隐藏（范围恒定），留白栏显示井号（mdir-marks-on + data-marks）。
+    await until(() => !main.contentDOM.textContent?.includes('###'));
+    expect(main.dom.querySelector('.cm-line.mdir-marks-on[data-marks="###"]')).not.toBeNull();
     expect(view.getMarkdown()).toBe('### 正文');
   });
-  it('用户交互后光标进入标题行显井号，离开恢复渲染（v0.39）', async () => {
+  it('用户交互后光标进入标题行留白栏显井号，离开收起（REQ-014 P2 口径）', async () => {
     const source = '# 标题\n\n正文';
     const { main } = await mount(source);
     await until(() => !main.contentDOM.textContent?.includes('#'));
     main.dispatch({ selection: { anchor: 3 }, userEvent: 'select.pointer' });
-    await until(() => main.contentDOM.textContent?.includes('#'));
+    await until(() => !!main.dom.querySelector('.cm-line.mdir-marks-on[data-marks="#"]'));
     main.dispatch({ selection: { anchor: source.indexOf('正') }, userEvent: 'select.pointer' });
-    await until(() => !main.contentDOM.textContent?.includes('#'));
+    await until(() => !main.dom.querySelector('.cm-line.mdir-marks-on'));
     expect(main.state.doc.toString()).toBe(source);
   });
   it('正文加下划线不再是标题：=== 保持字面段落，光标进出无显隐切换（Setext 移除）', async () => {
@@ -183,11 +184,11 @@ describe('007 AC-30 连续写作', () => {
     expect(undo(main)).toBe(true);
     expect(main.state.doc.toString()).toBe(source);
   });
-  it('代码内空行保持正文，紧邻标题和列表的块间距不插入源字符', async () => {
+  it('代码内空行保持正文，紧邻标题和列表的块间距不插入源字符（REQ-014 P3：紧邻间距为行类承载）', async () => {
     const source = '# 标题\n正文\n- 一\n- 二\n\n> ```js\n> a();\n>\n> b();\n> ```\n\n尾';
     const { main, host } = await mount(source);
     main.dispatch({ selection: { anchor: source.length } });
-    await until(() => host.querySelectorAll('.mdir-block-space').length >= 3);
+    await until(() => host.querySelectorAll('.mdir-block-gap').length >= 3);
     const codeEmpty = [...host.querySelectorAll('.mdir-code')].find(e => !e.textContent?.trim());
     expect(codeEmpty).toBeDefined(); expect(codeEmpty!.classList.contains('mdir-gap')).toBe(false);
     expect(main.state.doc.toString()).toBe(source);
@@ -395,27 +396,24 @@ describe('007 AC-30 连续写作', () => {
 });
 
 describe('007 AC-31 表格主事务', () => {
-  it('大表仅挂载行窗口，跨窗Tab保持逻辑行；离屏活动格保留DOM、主历史可撤销', async () => {
+  it('220 行表全量渲染（P5 起无行窗口），跨行 Tab 保持逻辑行，编辑写回且主历史可撤销', async () => {
     const source = '| A | B |\n|---|---|\n' + Array.from({ length: 220 }, (_, i) => `| a${i} | b${i} |`).join('\n') + '\n\n后';
     const { main, host } = await mount(source);
     await until(() => !!host.querySelector('.mdir-table'));
+    // 后台解析渐进扩展同一张表，挂件会整只替换（行数变化 → eq 不成立）：等全表到齐后重取引用。
+    await until(() => host.querySelectorAll('tr[data-md-row]').length >= 221);
     const box = host.querySelector<HTMLElement>('.mdir-tablebox')!;
-    // 后台解析会渐进扩展同一张表：慢机上首帧仅部分行（未过 160 窗口阈值、未分窗），
-    // 直接断言会把扩展中的行数当窗口大小。等全表（220 数据行）到齐再断言窗口。
-    await until(() => Number(box.dataset.mdTableRows ?? 0) >= 220);
-    expect(host.querySelectorAll('tr[data-md-row]').length).toBeLessThan(80);
-    const cell = tableCellAt(box, 180, 1)!;
+    expect(Number(box.dataset.mdTableRows)).toBeGreaterThanOrEqual(221); // REQ-014 P5：≤500 行全量渲染。
+    const cell = box.querySelector<HTMLTableCellElement>('[data-md-row="180"][data-md-col="1"]')!;
     expect(cell.textContent).toBe('b179');
     cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    const dom = cell.querySelector('.cm-editor')!;
-    const editor = EditorView.findFromDOM(dom)!;
-    editor.dispatch({ changes: { from: editor.state.doc.length, insert: '改' }, userEvent: 'input.type' });
-    tableCellAt(box, 210, 0);
+    expect(cell.getAttribute('contenteditable')).toBe('true');
+    cell.textContent = 'b179改';
+    // 点另一格提交前格（单事务写回）。
+    const other = box.querySelector<HTMLTableCellElement>('[data-md-row="181"][data-md-col="0"]')!;
+    other.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
     await until(() => main.state.doc.toString().includes('b179改'));
-    expect(cell.querySelector('.cm-editor')).toBe(dom);
-    key(editor, 'Tab');
-    await until(() => !!box.querySelector('[data-md-row="181"] .cm-editor'));
-    expect(box.querySelector('[data-md-row="181"] .cm-content')?.textContent).toBe('a180');
+    expect(other.textContent).toBe('a180');
     expect(undo(main)).toBe(true);
     expect(main.state.doc.toString()).toBe(source);
   });
@@ -458,19 +456,22 @@ describe('007 AC-31 表格主事务', () => {
     expect(main.state.doc.toString()).toContain('\n> | 保留 | 甲 | 乙 |');
     undo(main); undo(main); expect(main.state.doc.toString()).toBe(source);
   });
-  it('Ctrl+Enter在当前格下插行并恢复同列，工具条对齐、尺寸和只读守卫可达', async () => {
+  it('Ctrl+Enter在当前格下插行并恢复同列，工具条对齐、尺寸和只读守卫可达（P5 contenteditable 口径）', async () => {
     const { main, host, view } = await mount(SOURCE);
-    const cell = host.querySelectorAll('tbody tr')[0]!.querySelectorAll('td')[1]!;
+    const cell = host.querySelectorAll('tbody tr')[0]!.querySelectorAll('td')[1]! as HTMLTableCellElement;
     cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    let editor = EditorView.findFromDOM(host.querySelector('td .cm-editor')!)!;
-    key(editor, 'Enter', { ctrlKey: true });
-    await until(() => host.querySelectorAll('tbody tr').length === 3 && !!host.querySelector('td .cm-editor'));
-    editor = EditorView.findFromDOM(host.querySelector('td .cm-editor')!)!;
-    expect(editor.contentDOM.getAttribute('aria-label')).toBe('表格第 3 行第 2 列');
+    expect(cell.getAttribute('contenteditable')).toBe('true');
+    cell.focus();
+    cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true, cancelable: true }));
+    await until(() => host.querySelectorAll('tbody tr').length === 3);
+    // 插行后微任务聚焦同列新格。
+    await until(() => {
+      const next = host.querySelector('[data-md-row="3"][data-md-col="1"]') as HTMLTableCellElement | null;
+      return !!next?.getAttribute('contenteditable');
+    });
     const select = host.querySelector<HTMLSelectElement>('.mdir-tabletools select')!;
     select.value = 'right'; select.dispatchEvent(new Event('change'));
-    await until(() => !!host.querySelector('td .cm-editor'));
-    expect(tableModel(main.state, SOURCE.indexOf('|'))?.rows[1]?.[1]).toBe('---:');
+    await until(() => tableModel(main.state, SOURCE.indexOf('|'))?.rows[1]?.[1] === '---:');
     view.setReadOnly(true);
     const before = main.state.doc.toString();
     expect(resizeTable(main, SOURCE.indexOf('|'), 5, 5)).toBe(false);
