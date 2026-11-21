@@ -963,32 +963,15 @@ button{font:inherit}
 .md-preview .md-col :is(p,ul,ol,blockquote,pre,table,dl):not(.md-block){margin-block:var(--md-block-gap) 0}
 .md-preview .md-col .md-render-target[data-render-display="1"]{margin-block:var(--md-block-gap) 0}
 .md-preview .md-col :is(h1,h2,h3,h4,h5,h6){line-height:1.35;font-weight:600}
-/* 标题与正文同源（007 规则 16）：嵌套容器不再逐级放大字号，边距复用 IR 令牌。 */
-.md-preview .md-col h1{font-size:calc(var(--md-fs-base) * 2.25);margin-block:var(--md-h1-before) var(--md-h1-after);
-  /* REQ-014 P6：预览标题与 IR 同款左侧留白栏（级别色条）——三面 textX/观感一致 */
-  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
-.md-preview .md-col h1::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
-  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
-.md-preview .md-col h2{font-size:calc(var(--md-fs-base) * 1.75);margin-block:var(--md-h2-before) var(--md-h2-after);
-  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
-.md-preview .md-col h2::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
-  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
-.md-preview .md-col h3{font-size:calc(var(--md-fs-base) * 1.5);margin-block:var(--md-h3-before) var(--md-h3-after);
-  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
-.md-preview .md-col h3::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
-  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
-.md-preview .md-col h4{font-size:calc(var(--md-fs-base) * 1.25);margin-block:var(--md-h4-before) var(--md-h4-after);
-  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
-.md-preview .md-col h4::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
-  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
-.md-preview .md-col h5{font-size:calc(var(--md-fs-base) * 0.875);margin-block:var(--md-h5-before) var(--md-h5-after);
-  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
-.md-preview .md-col h5::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
-  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
-.md-preview .md-col h6{font-size:calc(var(--md-fs-base) * 0.85);margin-block:var(--md-h6-before) var(--md-h6-after);color:var(--muted);
-  padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
-.md-preview .md-col h6::before{position:absolute;left:0;top:0;bottom:0;width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);
-  content:"";border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
+/* 标题与正文同源（007 规则 16）：嵌套容器不再逐级放大字号，边距复用 IR 令牌。
+   004（Typora parity）：标题前常驻灰块/竖线（::before 留白栏）整体退场——正文起点
+   与 Typora 对齐，层级仅由字号/字重/间距表达（spec FR-005/FR-006）。 */
+.md-preview .md-col h1{font-size:calc(var(--md-fs-base) * 2.25);margin-block:var(--md-h1-before) var(--md-h1-after)}
+.md-preview .md-col h2{font-size:calc(var(--md-fs-base) * 1.75);margin-block:var(--md-h2-before) var(--md-h2-after)}
+.md-preview .md-col h3{font-size:calc(var(--md-fs-base) * 1.5);margin-block:var(--md-h3-before) var(--md-h3-after)}
+.md-preview .md-col h4{font-size:calc(var(--md-fs-base) * 1.25);margin-block:var(--md-h4-before) var(--md-h4-after)}
+.md-preview .md-col h5{font-size:calc(var(--md-fs-base) * 0.875);margin-block:var(--md-h5-before) var(--md-h5-after)}
+.md-preview .md-col h6{font-size:calc(var(--md-fs-base) * 0.85);margin-block:var(--md-h6-before) var(--md-h6-after);color:var(--muted)}
 /* 列表嵌套（007 规则 16）：每级容器累加 1.6em，与 IR 深度投影一致。 */
 .md-preview .md-col :is(ul,ol){padding-inline-start:1.6em}
 .md-preview .md-col li{margin-block:var(--md-list-gap)}
@@ -1581,17 +1564,17 @@ html .cm-editor .cm-tooltip-autocomplete ul li[aria-selected]{background:var(--a
 .md-ir .cm-scroller{font-family:var(--md-font-stack);font-size:var(--md-fs-base);line-height:1.6}
 .md-ir .cm-content{max-width:var(--md-col);margin-inline:auto;padding:20px 24px 48px}
 .md-ir .cm-line{padding-inline:0}
-/* 标题定级（REQ-014 P2 留白栏：井号常隐，级别色条常驻左侧留白；光标进入时留白栏显示井号，
-   正文行文本范围与起始位置恒定——cursorWidthChange=0 的机制基础） */
+/* 标题定级（REQ-014 P2 留白栏：井号常隐，正文行文本范围恒定——cursorWidthChange=0 的机制基础）。
+   004（Typora parity）：留白栏几何（宽度/padding-left）保留，常驻级别色条（背景+竖线）退场；
+   留白区默认全透明，仅 mdir-marks-on 编辑态显示井号（spec FR-005，data-model §3 decorations）。 */
 .md-ir .cm-line:is(.mdir-h1,.mdir-h2,.mdir-h3,.mdir-h4,.mdir-h5,.mdir-h6){padding-block:0;font-weight:600;line-height:1.35;
   padding-left:calc(var(--mdir-head-gutter,3.5ch));position:relative}
 .md-ir .cm-line:is(.mdir-h1,.mdir-h2,.mdir-h3,.mdir-h4,.mdir-h5,.mdir-h6)::before{position:absolute;left:0;top:0;bottom:0;
   width:calc(var(--mdir-head-gutter,3.5ch) - 0.5ch);display:flex;align-items:center;
   content:attr(data-marks);font-size:calc(var(--md-fs-base) * 0.72);font-family:var(--code-font,monospace);
-  color:transparent;justify-content:flex-start;overflow:hidden;white-space:pre;
-  border-left:3px solid var(--border-strong);background:color-mix(in srgb,var(--border-strong) 30%,transparent)}
+  color:transparent;justify-content:flex-start;overflow:hidden;white-space:pre}
 /* 光标进入标题正文/选区相交（projector 加 mdir-marks-on）：留白栏显示井号，宽度不变 */
-.md-ir .cm-line.mdir-marks-on::before{color:var(--muted);border-left-color:var(--accent)}
+.md-ir .cm-line.mdir-marks-on::before{color:var(--muted)}
 .md-ir .cm-line.mdir-h1{font-size:calc(var(--md-fs-base) * 2.25)}
 .md-ir .cm-line.mdir-h2{font-size:calc(var(--md-fs-base) * 1.75)}
 .md-ir .cm-line.mdir-h3{font-size:calc(var(--md-fs-base) * 1.5)}
