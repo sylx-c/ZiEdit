@@ -7,16 +7,16 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { staticMarkdownParser, renderStaticHtml } from './static-html';
-import { extractMarkdownMetadata } from './headings';
-import { loadMarkdownIt } from './md';
-import { HEADING_CASES } from './typora-baseline';
+import { staticMarkdownParser, renderStaticHtml } from '../src/markdown-view/static-html';
+import { extractMarkdownMetadata } from '../src/markdown-view/headings';
+import { loadMarkdownIt } from '../src/markdown-view/md';
+import { HEADING_CASES } from '../src/markdown-view/typora-baseline';
 
-const css = readFileSync(resolve(__dirname, '../styles.css'), 'utf8');
+const css = readFileSync(resolve(__dirname, '../src/styles.css'), 'utf8');
 
 beforeAll(async () => {
   // 标题含链接案例走 markdown-it 链接工具（主线程共享单例预取，见 md.ts）
-  await import('./md-link').then(() => loadMarkdownIt());
+  await import('../src/markdown-view/md-link').then(() => loadMarkdownIt());
 });
 
 function renderHeadings(doc: string): string {
