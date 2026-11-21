@@ -397,10 +397,6 @@ export function liveAnchorReady(view: EditorView, line: number): boolean {
   const pos = doc.line(Math.min(doc.lines, Math.max(1, Math.floor(line)))).from;
   const okWindow = pos >= blocks.from - VIEWPORT_MARGIN && pos <= blocks.to + VIEWPORT_MARGIN && !blocks.pending && !blocks.deferred
     && syntaxTreeAvailable(state, Math.min(doc.length, blocks.to + VIEWPORT_MARGIN));
-  if ((globalThis as { __ANC__?: boolean }).__ANC__ && !okWindow) {
-    // eslint-disable-next-line no-console
-    console.log('[ready-window]', 'line=', Math.floor(line), 'slice=', blocks.from, blocks.to, 'pending=', !!blocks.pending, 'deferred=', blocks.deferred);
-  }
   if (!okWindow) return false;
   let expected = false;
   for (let node = syntaxTree(state).resolveInner(pos, 1); node; node = node.parent!) {
@@ -505,7 +501,6 @@ export const mdViewOrchestrator = ViewPlugin.fromClass(
       this.ignoreScrollUntil = performance.now() + 100;
       this.settleDirty = true;
       this.report(this.view);
-      this.view.scrollDOM.dispatchEvent(new Event('mdir-scroll-settle'));
     }
     update(u: ViewUpdate): void {
       notifyCmRestoreLayout(u.view);
@@ -566,10 +561,7 @@ export const mdViewOrchestrator = ViewPlugin.fromClass(
             : liveViewport.of({ from, to, scrolling: this.scrolling }) });
           measureAfterRender(view, () => { if (!this.dead) { view.lineBlockAtHeight(0); notifyCmRestoreLayout(view); } });
         }
-        if (complete) {
-          if (geometryChanged) view.scrollDOM.dispatchEvent(new Event('mdir-layout-refresh'));
-          view.requestMeasure();
-        }
+        if (complete) view.requestMeasure();
       }, false, view);
     }
   }

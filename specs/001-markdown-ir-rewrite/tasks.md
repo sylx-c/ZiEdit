@@ -162,6 +162,7 @@ description: "Task list for feature implementation"
 - [ ] T033 全量门禁（60Hz 物理控制台）：**settle ✅ 12/12**（topMax 0.2/midMax 3.9——3px 残差经 12 轮迭代根治：估计钉扎灭首帧瞬态+渲染稳定后自校正自然真值+自校正带界重试）｜consistency ✅｜position ✅｜structure ✅｜editing ✅｜ir-scroll ✅｜walk-f ✅｜ac36 冷轮 ✅｜surfaces 与 scroll(dense-2m) 代码态已绿（昨夜安静窗多次 47.2ms/0 长任务），终绿待物理台安静窗（AweSun 远程捕获活跃时全域 +2ms/帧，本轮 57.8ms/3 长任务即此）｜arrow 基线同败（既有，移交）
 - [x] T034 按 `specs/001-markdown-ir-rewrite/quickstart.md` 全部手动验证场景执行并记录结果（五场景脚本化真机执行 5/5 通过，记录见 `docs/tmp/ir-rewrite-baselines/t034-manual-verification.md`；流畅度数值归物理控制台计时门禁）
 - [x] T035 更新 `docs/CHANGELOG.md` 未发布节（面向使用者口径，不写内部术语）；收尾汇报 MUST 提醒所有者同步其本地维护的需求与架构资料，但不自动修改这些资料
+- [x] T036 评审遗留清理（req014-review.md M-1/M-2）：移除 md-view-plugin 的 `__ANC__` 残留诊断日志（289de4f 漏网）与 `mdir-scroll-settle`/`mdir-layout-refresh` 无监听事件派发（全仓 grep 仅派发点零监听）；等价无行为变更，npm test 全绿后提交（tsc 0 错 + 1400/1400 绿）
 
 ---
 
