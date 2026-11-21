@@ -554,7 +554,11 @@ fn paths_rename_records_tx(dir: &std::path::Path, from: &str, to: &str) -> Resul
 }
 
 #[tauri::command]
-pub async fn paths_rename_records(app: AppHandle, from: String, to: String) -> Result<(), ZiEditError> {
+pub async fn paths_rename_records(
+    app: AppHandle,
+    from: String,
+    to: String,
+) -> Result<(), ZiEditError> {
     tauri::async_runtime::spawn_blocking(move || {
         let dir = config_dir(&app)?;
         paths_rename_records_tx(&dir, &from, &to)
@@ -823,30 +827,79 @@ mod tests {
             let mut fav: FavoritesState = store::load_or_default(&file);
             fav.groups.push(FavGroup {
                 name: "work".into(),
-                items: vec!["E:/notes".into(), "E:/notes-old".into(), "E:/notes/child.txt".into()],
+                items: vec![
+                    "E:/notes".into(),
+                    "E:/notes-old".into(),
+                    "E:/notes/child.txt".into(),
+                ],
             });
             store::save(&file, &fav).unwrap();
         }
         paths_rename_records_tx(&dir, "E:/notes", "E:/notes-old").unwrap();
         let recent: RecentState = store::load_or_default(&store::config_file(&dir, "recent.json"));
         let norm = |p: &String| normalize_recent_path(p);
-        assert!(!recent.items.iter().any(|p| norm(p) == norm(&"E:/notes".to_string())));
-        assert!(recent.items.iter().any(|p| norm(p) == norm(&"E:/notes-old".to_string())));
-        assert!(recent.items.iter().any(|p| norm(p) == norm(&"E:/notes/child.txt".to_string())));
-        let fav: FavoritesState = store::load_or_default(&store::config_file(&dir, "favorites.json"));
+        assert!(
+            !recent
+                .items
+                .iter()
+                .any(|p| norm(p) == norm(&"E:/notes".to_string()))
+        );
+        assert!(
+            recent
+                .items
+                .iter()
+                .any(|p| norm(p) == norm(&"E:/notes-old".to_string()))
+        );
+        assert!(
+            recent
+                .items
+                .iter()
+                .any(|p| norm(p) == norm(&"E:/notes/child.txt".to_string()))
+        );
+        let fav: FavoritesState =
+            store::load_or_default(&store::config_file(&dir, "favorites.json"));
         let norm = |p: &String| normalize_recent_path(p);
-        assert_eq!(fav.items.iter().filter(|p| norm(p) == norm(&"E:/notes-old".to_string())).count(), 1);
-        assert!(!fav.items.iter().any(|p| norm(p) == norm(&"E:/notes".to_string())));
-        assert_eq!(fav.groups[0].items.iter().filter(|p| norm(p) == norm(&"E:/notes-old".to_string())).count(), 1);
-        assert!(fav.groups[0].items.iter().any(|p| norm(p) == norm(&"E:/notes/child.txt".to_string())));
+        assert_eq!(
+            fav.items
+                .iter()
+                .filter(|p| norm(p) == norm(&"E:/notes-old".to_string()))
+                .count(),
+            1
+        );
+        assert!(
+            !fav.items
+                .iter()
+                .any(|p| norm(p) == norm(&"E:/notes".to_string()))
+        );
+        assert_eq!(
+            fav.groups[0]
+                .items
+                .iter()
+                .filter(|p| norm(p) == norm(&"E:/notes-old".to_string()))
+                .count(),
+            1
+        );
+        assert!(
+            fav.groups[0]
+                .items
+                .iter()
+                .any(|p| norm(p) == norm(&"E:/notes/child.txt".to_string()))
+        );
         paths_rename_records_tx(&dir, "E:/notes-old", "E:/Notes-Old").unwrap();
         let recent: RecentState = store::load_or_default(&store::config_file(&dir, "recent.json"));
-        let stored = recent.items.iter().find(|p| norm(p).eq_ignore_ascii_case("E:\\Notes-Old")).cloned();
-        if cfg!(windows) {
-            assert_eq!(stored.as_deref(), Some("E:\\Notes-Old"));
+        // Unix 分隔符不归一（normalize_recent_path 仅 Windows 替换为反斜杠）——查找针线与期望值
+        // 须按平台取 to 的规范化拼写；两平台替换后的条目都恰为该值。
+        let renamed = if cfg!(windows) {
+            "E:\\Notes-Old"
         } else {
-            assert_eq!(stored.as_deref(), Some("E:\\notes-old"));
-        }
+            "E:/Notes-Old"
+        };
+        let stored = recent
+            .items
+            .iter()
+            .find(|p| norm(p).eq_ignore_ascii_case(renamed))
+            .cloned();
+        assert_eq!(stored.as_deref(), Some(renamed));
         std::fs::remove_dir_all(dir).unwrap();
     }
 
