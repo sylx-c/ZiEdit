@@ -41,11 +41,11 @@
 //  3) 每形态首个主题组合截屏存在且 >10KiB（PNG 字节数粗判非空白/非纯色，纯色 960×600 PNG 通常 <5KiB；
 //     仅粗判，最终观感以人看 RUN_DIR/shots/f-matrix/*.png 为准）。
 //  跨形态一致性只出数据（三组签名序列入 JSON）不下 pass/fail——三面语义差异由人判读（AC-38 口径）。
-// 结束 taskkill /F /T 清理；欢迎模态驱散循环复制自 gate-batch1-arrow.mjs（Esc 与遮罩角落点击交替，最多 5 轮）。
+// 结束 taskkill /F /T 清理；欢迎模态驱散复用 gate-lib dismissOverlay（2026-11-21 统一整备，原内联角落点击会命中菜单栏劫持键盘）。
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { RUN_DIR, EXE, PORT, GATE_ENV, GATE_BUDGET, INIT_OBSERVERS, connectCDP, waitTargets, waitMounted, killTree } from './gate-lib.mjs';
+import { RUN_DIR, EXE, PORT, GATE_ENV, GATE_BUDGET, INIT_OBSERVERS, connectCDP, waitTargets, waitMounted, dismissOverlay, killTree } from './gate-lib.mjs';
 
 const corpusArg = process.argv[2];
 const outFileArg = process.argv[3];
@@ -217,19 +217,9 @@ async function clickEl(cdp, selector) {
     await cdp.evaluate(INIT_OBSERVERS);
     await new Promise(r => setTimeout(r, 3000)); // 挂载期异步跑完
 
-    // 欢迎模态驱散循环（复制自 gate-batch1-arrow.mjs，T1 判决：冷 profile 首启模态拦截键盘）
-    let welcomeGone = false;
-    for (let i = 0; i < 5 && !welcomeGone; i++) {
-      if (!(await cdp.evaluate("!!document.querySelector('.ov-mask')"))) { welcomeGone = true; break; }
-      await cdp.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
-      await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
-      await new Promise(r => setTimeout(r, 300));
-      if (!(await cdp.evaluate("!!document.querySelector('.ov-mask')"))) { welcomeGone = true; break; }
-      await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: 6, y: 6, button: 'left', clickCount: 1 });
-      await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: 6, y: 6, button: 'left', clickCount: 1 });
-      await new Promise(r => setTimeout(r, 300));
-      welcomeGone = !(await cdp.evaluate("!!document.querySelector('.ov-mask')"));
-    }
+    // 欢迎模态驱散：统一 gate-lib dismissOverlay（原复制自 gate-batch1-arrow 的内联循环用角落 (6,6)
+    // 点击兜底，会命中菜单栏劫持键盘——2026-11-21 量具整备，冷 profile 首启模态拦截键盘同判）。
+    const welcomeGone = await dismissOverlay(cdp);
     out.welcome = { dismissed: welcomeGone }; save();
     if (!welcomeGone) throw new Error('welcome/overlay modal not dismissible (fail-closed)');
 
