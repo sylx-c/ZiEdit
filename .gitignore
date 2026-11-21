@@ -55,6 +55,8 @@ docs/changes/
 # Pivotal 归线资料（本地工作资料，不入公开仓库；2026-11-19）
 PIVOTAL.md
 docs/pivotal/
+docs/PRD.md
+docs/design/
 
 # Spec Kit 规格工件（本地工作资料，不入公开仓库；2026-11-21）
 .specify/
