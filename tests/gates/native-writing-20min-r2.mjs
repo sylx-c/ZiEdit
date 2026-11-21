@@ -36,20 +36,8 @@ await dismissOverlay(cdp);
 await switchMdMode(cdp, '源码视图');
 await setNativeWindowSize(child.pid, 1296, 841);
 
-// 冷 profile 首启「欢迎」模态驱散（T1 判决的测量工件：mask 拦截全部键盘；Esc 与遮罩角落点击交替）
-const dismissWelcome = async () => {
-  for (let i = 0; i < 5; i++) {
-    if (!(await evaluate("!!document.querySelector('.ov-mask')").catch(() => false))) return true;
-    await send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }).catch(() => {});
-    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }).catch(() => {});
-    await new Promise(r => setTimeout(r, 300));
-    if (!(await evaluate("!!document.querySelector('.ov-mask')").catch(() => false))) return true;
-    await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: 6, y: 6, button: 'left', clickCount: 1 }).catch(() => {});
-    await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: 6, y: 6, button: 'left', clickCount: 1 }).catch(() => {});
-    await new Promise(r => setTimeout(r, 300));
-  }
-  return !(await evaluate("!!document.querySelector('.ov-mask')").catch(() => true));
-};
+// 冷 profile 首启「欢迎」模态驱散：统一 gate-lib dismissOverlay（原本地副本的角落 (6,6) 点击
+// 会命中菜单栏劫持键盘——2026-11-21 量具整备；上方 switchMdMode 前已调用过共享版，挂载后此处复验幂等）。
 
 await (async () => { const t0 = Date.now(); for (;;) { if (await evaluate("!!document.querySelector('.cm-content')").catch(() => false)) return; if (Date.now() - t0 > 45000) {
       out.checks.bootDiag = await evaluate(`JSON.stringify({title:document.title, ready:document.readyState, viewarea:!!document.getElementById('viewarea'), tabs:document.getElementById('tabbar')?.children.length??-1, cm:!!document.querySelector('.cm-content'), body:(document.body?.innerText||'').slice(0,150), scripts:document.querySelectorAll('script').length, ls:localStorage.length})`).catch(e => 'diagfail '+e);
@@ -57,7 +45,7 @@ await (async () => { const t0 = Date.now(); for (;;) { if (await evaluate("!!doc
       throw new Error('editor timeout');
     } await new Promise(r => setTimeout(r, 200)); } })();
 await new Promise(r => setTimeout(r, 1000));
-out.checks.welcomeDismissed = await dismissWelcome();
+out.checks.welcomeDismissed = await dismissOverlay(cdp);
 if (!out.checks.welcomeDismissed) { out.finished = new Date().toISOString(); save(); throw new Error('welcome modal not dismissible — keyboard cannot land (fail-closed)'); }
 // 焦点定案插桩：记录窗口/DOM 焦点事件与活动元素漂移。
 // 活动元素落在 .ov-box（模态框）时一并记录对话框标题（aria-label）——

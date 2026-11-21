@@ -1,7 +1,8 @@
 // gate-ir-scroll.mjs — IR 面滚动帧时间门禁（补 F 门禁盲区：F 只测分屏几何，不测 IR 滚轮帧）
 // 用法: node tests/gates/gate-ir-scroll.mjs <corpus.md> <out.json>
-// 口径：CDP 滚轮下扫+上扫（与取证探针同构）。欢迎模态按 gate-batch1-arrow 长按门禁同口径驱散
-//   （Esc 与遮罩角落点击交替，最多 5 轮），未驱散即 fail-closed。
+// 口径：CDP 滚轮下扫+上扫（与取证探针同构）。欢迎模态驱散复用 gate-lib dismissOverlay
+//   （Esc 优先、兜底点击打遮罩自身；原内联角落 (6,6) 点击会命中菜单栏劫持键盘，2026-11-21 整备），
+//   未驱散即 fail-closed。
 // 判据（同场对比，刷新率无关）：
 //   全文档滚动期 >34ms 帧数 ≤ 去表格基线（.mdir-tablebox{display:none}）+ 2；
 //   全文档 rAF p95 ≤ 去表格基线 p95 + 2ms；
@@ -12,7 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
-import { RUN_DIR, EXE, PORT, GATE_ENV, GATE_BUDGET, RAF_SAMPLER, connectCDP, waitTargets, waitMounted, killTree, percentile, switchMdMode, setNativeWindowSize } from './gate-lib.mjs';
+import { RUN_DIR, EXE, PORT, GATE_ENV, GATE_BUDGET, RAF_SAMPLER, connectCDP, waitTargets, waitMounted, dismissOverlay, killTree, percentile, switchMdMode, setNativeWindowSize } from './gate-lib.mjs';
 
 const corpusArg = process.argv[2];
 const outFileArg = process.argv[3];
@@ -43,20 +44,8 @@ const save = () => fs.writeFileSync(outFile, JSON.stringify(out, null, 2));
 Object.assign(out.build, { environment: GATE_ENV, budgets: GATE_BUDGET });
 
 async function dismissWelcome(cdp) {
-  // 与 gate-batch1-arrow（方向键长按）同口径：冷 profile 欢迎模态吞键盘，Esc / 遮罩角落点击交替。
-  let welcomeGone = false;
-  for (let i = 0; i < 5 && !welcomeGone; i++) {
-    if (!(await cdp.evaluate("!!document.querySelector('.ov-mask')"))) { welcomeGone = true; break; }
-    await cdp.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
-    await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
-    await new Promise(r => setTimeout(r, 300));
-    if (!(await cdp.evaluate("!!document.querySelector('.ov-mask')"))) { welcomeGone = true; break; }
-    await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: 6, y: 6, button: 'left', clickCount: 1 });
-    await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: 6, y: 6, button: 'left', clickCount: 1 });
-    await new Promise(r => setTimeout(r, 300));
-    welcomeGone = !(await cdp.evaluate("!!document.querySelector('.ov-mask')"));
-  }
-  return welcomeGone;
+  // 统一口径：gate-lib dismissOverlay（遮罩自身点击 + 菜单收口，原角落点击命中菜单栏劫持键盘）。
+  return dismissOverlay(cdp);
 }
 
 async function sweep(cdp) {
