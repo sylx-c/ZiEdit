@@ -153,11 +153,14 @@ function hydrateCellImages(box: HTMLElement, view: EditorView, baseDir: string |
       img.dataset.mdRemoteSrc = src;
       // 远程图异步回填：按 data-md-remote-src 在当前视图查活节点（换件/迟到自然失效）；
       // 块件 DOM 插入可能晚于已决 promise（CM6 度量相位），带界重试等插入。
+      // 属性值选择器只转义引号与反斜杠即可——不依赖 CSS 全局（慢机上重试定时器泄漏到
+      // 测试环境拆除后触发 ReferenceError: CSS is not defined，把全绿套件拖挂）。
+      const attrNeedle = src.replace(/[\\"]/g, '\\$&');
       void remoteResolve(src).then(url => {
         if (!url) return;
         let attempts = 0;
         const fill = (): void => {
-          const live = view.dom.querySelector<HTMLImageElement>(`img[data-md-remote-src="${CSS.escape(src)}"]`);
+          const live = view.dom.querySelector<HTMLImageElement>(`img[data-md-remote-src="${attrNeedle}"]`);
           if (live) { live.src = url; return; }
           if (attempts++ < 20) setTimeout(fill, 0);
         };
